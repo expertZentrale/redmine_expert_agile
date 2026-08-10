@@ -20,7 +20,7 @@
         <tr>
           <% if @swimlanes.any? %><th class="ea-swimlane-header" rowspan="1"></th><% end %>
           <% row.each do |cell| %>
-            <th class="ea-column-header <%= cell[:column] && cell[:column].wip_css_class %>"
+            <th class="ea-column-header <%= cell[:column] && cell[:column].wip_css_class %> <%= expert_agile_status_color_class(cell[:column]) %>"
                 colspan="<%= cell[:colspan] %>"
                 rowspan="<%= cell[:rowspan] %>"
                 <% if cell[:column] %>data-column-id="<%= cell[:column].id %>"<% end %>>

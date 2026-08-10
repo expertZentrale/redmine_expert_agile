@@ -1,5 +1,5 @@
 <%# A backlog card. Same contract as a board card: markup only. %>
-<div class="ea-card ea-backlog-card"
+<div class="<%= expert_agile_card_classes(issue, @query) %> ea-backlog-card"
      id="ea-card-<%= issue.id %>"
      data-issue-id="<%= issue.id %>">
   <div class="ea-card-header">

@@ -181,18 +181,40 @@ class ExpertAgileQuery < IssueQuery
 
   # Statuses shown as columns, in Redmine's own status order.
   #
-  # Derived from the trackers actually in scope. RedmineUP computes the same set
-  # with `Tracker.eager_load(issues: [{project: :versions}]).pluck(:id)` — a
-  # four-table join, including versions, purely to obtain tracker ids.
+  # Scoped to the statuses this project's trackers can actually reach, via
+  # Redmine's own Project#rolled_up_statuses. Falling back to every open status
+  # in the instance produces a board of dozens of permanently empty columns —
+  # on a real installation that is 37 columns of which 3 are used, squeezed to
+  # 27px each.
+  #
+  # Closed statuses are excluded unless explicitly selected: a board is about
+  # work in flight. The "done" column is whichever closed status the project
+  # picks in the board settings.
   def board_statuses
     @board_statuses ||= begin
       selected = board_status_ids
-      scope = selected.any? ? IssueStatus.where(:id => selected) : IssueStatus.where(:is_closed => false)
-      scope.sorted.to_a
+      if selected.any?
+        IssueStatus.where(:id => selected).sorted.to_a
+      else
+        default_board_statuses
+      end
     end
   end
 
   private
+
+  def default_board_statuses
+    scope = project ? project.rolled_up_statuses : IssueStatus.sorted
+    statuses = scope.reject(&:is_closed?)
+
+    # A project whose workflows define no transitions would otherwise render a
+    # board with no columns at all; fall back to the statuses actually in use.
+    if statuses.empty?
+      used_ids = base_scope.reorder(nil).distinct.pluck(:status_id)
+      statuses = IssueStatus.where(:id => used_ids).sorted.to_a
+    end
+    statuses
+  end
 
   # base_scope already joins :status and :project, so grouping needs no extra
   # join — status_id is a column on issues itself.

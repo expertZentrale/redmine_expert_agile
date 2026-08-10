@@ -109,6 +109,8 @@ en:
   label_expert_agile_board_truncated: Only the first %{count} issues are shown
 
   error_expert_agile_container_not_available: This sprint or version is not available for this project
+  text_expert_agile_no_sprints: No sprints yet. Create one to start planning.
+  text_expert_agile_no_versions: This project has no open versions to plan into.
 
   # --- Charts ---------------------------------------------------------
   label_expert_agile_chart_burndown: Burndown
@@ -131,6 +133,8 @@ en:
   label_expert_agile_chart_interval_day: Day
   label_expert_agile_chart_interval_week: Week
   label_expert_agile_chart_interval_month: Month
+  label_expert_agile_chart_date_from: From
+  label_expert_agile_chart_date_to: To
 
   # --- Colors ---------------------------------------------------------
   label_expert_agile_colors: Agile card colors

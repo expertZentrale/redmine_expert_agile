@@ -12,6 +12,15 @@
 
 <div id="ea-backlog" class="ea-backlog">
   <%= render :partial => 'expert_agile_backlogs/lane', :locals => { :container => nil } %>
+  <% if @query.containers.empty? %>
+    <div class="ea-backlog-empty nodata">
+      <%= @query.sprints? ? l(:text_expert_agile_no_sprints) : l(:text_expert_agile_no_versions) %>
+      <% if @query.sprints? && User.current.allowed_to?(:manage_expert_agile_sprints, @project) %>
+        <%= link_to l(:label_expert_agile_sprint_new),
+                    new_project_expert_agile_sprint_path(@project), :class => 'icon icon-add' %>
+      <% end %>
+    </div>
+  <% end %>
   <% @query.containers.each do |container| %>
     <%= render :partial => 'expert_agile_backlogs/lane', :locals => { :container => container } %>
   <% end %>

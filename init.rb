@@ -40,7 +40,7 @@ Redmine::Plugin.register :redmine_expert_agile do
   name 'Redmine expert Agile'
   author 'Dennis Buehring'
   description 'Agile boards, story points, sprints and charts for Redmine'
-  version '0.1.0'
+  version '0.1.1'
   requires_redmine :version_or_higher => '5.0'
   url 'https://github.com/expertZentrale/redmine_expert_agile'
 
@@ -64,8 +64,10 @@ Redmine::Plugin.register :redmine_expert_agile do
 
              # --- Colors ------------------------------------------------
              # none | tracker | priority | status | assignee | project | issue | spent_time
-             'color_base'              => 'none',
-             'status_colors'           => '0',
+             # Defaults to tracker so a fresh board is colour-coded without
+             # anyone having to assign colours first.
+             'color_base'              => 'tracker',
+             'status_colors'           => '1',
 
              # --- Estimates ---------------------------------------------
              # hours | story_points — the unit shown on cards and totals.
@@ -152,6 +154,13 @@ Redmine::Plugin.register :redmine_expert_agile do
                { :expert_agile_backlogs => [:update] },
                :require => :member
   end
+
+  backlog_menu_options = { :caption => :label_expert_agile_backlog,
+                           :after => :expert_agile_charts, :param => :project_id }
+  backlog_menu_options[:plugin] = :redmine_expert_agile if Redmine::VERSION::MAJOR >= 6
+  menu :project_menu, :expert_agile_backlog,
+       { :controller => 'expert_agile_backlogs', :action => 'index' },
+       backlog_menu_options
 end
 
 # Patches are applied here, at the bottom of init.rb, rather than from a

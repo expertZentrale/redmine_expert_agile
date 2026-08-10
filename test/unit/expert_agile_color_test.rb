@@ -127,10 +127,37 @@ class ExpertAgileColorTest < ActiveSupport::TestCase
     assert_equal 'blue', @issue.reload.color
   end
 
-  def test_card_color_none_and_unset
+  def test_card_color_none_and_missing_issue
     assert_nil RedmineExpertAgile::CardColor.for(@issue, 'none')
-    assert_nil RedmineExpertAgile::CardColor.for(@issue, 'tracker'), 'no colour assigned yet'
     assert_nil RedmineExpertAgile::CardColor.for(nil, 'tracker')
+  end
+
+  def test_uncoloured_container_falls_back_to_a_stable_palette_entry
+    # An unconfigured board still has to be readable. Without a fallback,
+    # switching "colour by" to Tracker does nothing until an admin has coloured
+    # every tracker by hand, which reads as a broken feature.
+    first = RedmineExpertAgile::CardColor.for(@issue, 'tracker')
+
+    assert_includes ExpertAgileColor::COLORS, first
+    assert_equal first, RedmineExpertAgile::CardColor.for(@issue, 'tracker'),
+                 'the fallback must be stable, not random'
+  end
+
+  def test_explicit_colour_wins_over_the_fallback
+    fallback = RedmineExpertAgile::CardColor.for(@issue, 'tracker')
+    explicit = (ExpertAgileColor::COLORS - [fallback]).first
+    @issue.tracker.color = explicit
+
+    assert_equal explicit, RedmineExpertAgile::CardColor.for(@issue, 'tracker')
+  end
+
+  def test_per_issue_colouring_has_no_fallback
+    # Colouring by issue means "only the ones I marked stand out"; a fallback
+    # would colour every card and defeat the point.
+    assert_nil RedmineExpertAgile::CardColor.for(@issue, 'issue')
+
+    @issue.color = 'red'
+    assert_equal 'red', RedmineExpertAgile::CardColor.for(@issue, 'issue')
   end
 
   def test_assignee_color_is_deterministic_and_from_the_palette

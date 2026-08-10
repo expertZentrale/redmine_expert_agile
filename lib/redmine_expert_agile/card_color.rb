@@ -11,13 +11,19 @@ module RedmineExpertAgile
 
         case base.to_s
         when 'tracker'    then colour_of(issue.tracker)
-        when 'priority'   then colour_of(issue.priority)
+        when 'priority'   then colour_of(issue.priority, :fallback_for => :priority)
         when 'status'     then colour_of(issue.status)
         when 'project'    then colour_of(issue.project)
-        when 'issue'      then colour_of(issue)
+        when 'issue'      then colour_of(issue, :fallback => false)
         when 'assignee'   then ExpertAgileColor.for_principal(issue.assigned_to)
         when 'spent_time' then ExpertAgileColor.for_spent_time(issue.estimated_hours, issue.spent_hours)
         end
+      end
+
+      # Colour of a status itself, used for column headers independently of
+      # whatever the cards are coloured by.
+      def for_status(status)
+        colour_of(status)
       end
 
       # Preloads the colours for a whole board in one query per container type,
@@ -44,12 +50,28 @@ module RedmineExpertAgile
 
       private
 
-      def colour_of(container)
+      # An unconfigured board should still be readable, so a container with no
+      # explicit colour gets a stable one derived from its id. Without this,
+      # switching "colour by" to Tracker does nothing at all until an admin has
+      # visited the colour screen and assigned every tracker by hand — which
+      # looks like the feature is broken.
+      #
+      # Per-issue colouring opts out (`:fallback => false`): there the whole
+      # point is that only the issues you marked stand out.
+      def colour_of(container, fallback: true, fallback_for: nil)
         return nil if container.nil?
         return nil unless container.respond_to?(:expert_agile_color)
 
         record = container.expert_agile_color
-        record && record.color.presence
+        explicit = record && record.color.presence
+        return explicit if explicit
+        return nil unless fallback
+
+        if fallback_for == :priority
+          ExpertAgileColor.for_priority(container)
+        else
+          ExpertAgileColor.for_principal(container)
+        end
       end
     end
   end

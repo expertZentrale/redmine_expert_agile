@@ -39,6 +39,15 @@ module ExpertAgileBoardsHelper
     classes.compact.join(' ')
   end
 
+  # Palette class for a column header, so the board reads as a set of stages at
+  # a glance. Only applied when the setting is on and the cell is a leaf.
+  def expert_agile_status_color_class(column)
+    return nil unless column && RedmineExpertAgile.status_colors?
+
+    color = RedmineExpertAgile::CardColor.for_status(column.status)
+    color.present? ? "ea-status-#{color}" : nil
+  end
+
   # Palette class for one card, or nil when the board is not coloured.
   def expert_agile_color_class(issue, query)
     base = query && query.color_base

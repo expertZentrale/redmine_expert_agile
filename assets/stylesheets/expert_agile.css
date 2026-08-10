@@ -5,107 +5,197 @@
  * whether or not the agile module is enabled anywhere.
  */
 
-.ea-board { overflow-x: auto; }
+.ea-board {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
 
-.ea-board-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+/* Not table-layout:fixed, and not width:100%. Fixed layout divides the
+ * available width by the number of columns, so a board with many statuses
+ * squeezes each to a few dozen pixels and the card text wraps one character
+ * per line. Auto layout alone is no better: cells size to their content, so
+ * the column holding the longest subject becomes twice as wide as its
+ * neighbours. Every column is therefore pinned to the same explicit width and
+ * the board scrolls sideways. */
+.ea-board-table {
+  border-collapse: separate;
+  border-spacing: 6px 0;
+  width: auto;
+}
 
 .ea-column-header {
-  background: #f5f5f5;
-  border: 1px solid #d0d0d0;
-  padding: 4px 6px;
-  font-weight: bold;
+  background: #eef1f5;
+  border: 1px solid #d3d9e0;
+  border-bottom-width: 3px;
+  border-radius: 4px 4px 0 0;
+  padding: 6px 8px;
+  font-weight: 600;
   text-align: left;
   vertical-align: middle;
+  white-space: nowrap;
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
 }
+
+.ea-column-name { margin-right: 6px; }
 
 .ea-column-count {
   display: inline-block;
-  margin-left: 4px;
-  padding: 0 5px;
-  border-radius: 8px;
-  background: #e0e0e0;
-  font-weight: normal;
-  font-size: 0.85em;
+  min-width: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: #ffffff;
+  border: 1px solid #cdd4dc;
+  color: #444;
+  font-weight: 600;
+  font-size: 0.8em;
+  text-align: center;
 }
 
 .ea-column-wip {
   float: right;
   font-weight: normal;
-  font-size: 0.85em;
-  color: #666;
+  font-size: 0.8em;
+  color: #7a828c;
 }
 
 /* WIP limits are advisory: they colour the header, they never block a move. */
-.ea-column-header.ea-wip-over { background: #ffe5e5; border-color: #e0a0a0; }
-.ea-column-header.ea-wip-over .ea-column-count { background: #f5aaaa; }
-.ea-column-header.ea-wip-under { background: #fffbe5; }
+.ea-column-header.ea-wip-over { background: #fdecec; border-color: #e2a6a6; }
+.ea-column-header.ea-wip-over .ea-column-count { background: #f6c9c9; border-color: #e2a6a6; }
+.ea-column-header.ea-wip-under { background: #fffaea; border-color: #e3d59b; }
 
 .ea-swimlane-header, .ea-swimlane-label {
-  width: 120px;
-  background: #fafafa;
-  border: 1px solid #d0d0d0;
-  padding: 4px 6px;
+  width: 130px;
+  min-width: 130px;
+  background: #fafbfc;
+  border: 1px solid #d3d9e0;
+  border-radius: 4px;
+  padding: 6px 8px;
   text-align: left;
   vertical-align: top;
-  font-weight: bold;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .ea-cell {
-  border: 1px solid #d0d0d0;
+  border: 1px solid #dfe3e8;
+  border-top: none;
   vertical-align: top;
-  padding: 4px;
-  min-width: 160px;
-  background: #fcfcfc;
+  padding: 6px;
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
+  background: #f7f8fa;
+  border-radius: 0 0 4px 4px;
 }
 
-.ea-cell.ea-cell-hover { background: #eef5ff; }
+.ea-cell.ea-cell-hover { background: #e8f0fb; box-shadow: inset 0 0 0 2px #9dbde8; }
 
-.ea-cell-issues { min-height: 40px; }
+.ea-cell-issues { min-height: 60px; }
+
+/* --- Cards --------------------------------------------------------------- */
 
 .ea-card {
   background: #fff;
-  border: 1px solid #ccc;
-  border-left: 4px solid #bbb;
-  border-radius: 3px;
-  padding: 4px 6px;
-  margin-bottom: 4px;
+  border: 1px solid #dcdfe4;
+  border-left: 4px solid #b9bec6;
+  border-radius: 4px;
+  padding: 7px 9px;
+  margin-bottom: 6px;
   cursor: grab;
-  font-size: 0.9em;
+  font-size: 12px;
+  line-height: 1.45;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  /* Long tokens — URLs, stack traces, German compounds — must break rather
+   * than force the column wider or spill out of the card. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
-.ea-card.ea-dragging { opacity: 0.5; }
-.ea-card.ea-card-closed { opacity: 0.65; }
-.ea-card.ea-card-overdue { border-left-color: #c33; }
+.ea-card:hover { box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12); border-color: #c6cbd2; }
+.ea-card.ea-dragging { opacity: 0.45; }
+.ea-card.ea-card-closed { opacity: 0.6; }
+.ea-card.ea-card-overdue { border-left-color: #cc3b3b; }
 .ea-card.ea-card-private { border-style: dashed; }
 
 .ea-card-header {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.85em;
-  color: #666;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+  font-size: 11px;
+  color: #6b727c;
 }
 
-.ea-card-subject { margin: 2px 0; }
+.ea-card-id a { color: #6b727c; font-weight: 600; text-decoration: none; }
+.ea-card-id a:hover { text-decoration: underline; }
+
+.ea-card-tracker {
+  margin-left: auto;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: #eef1f5;
+  color: #5a616b;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.ea-card-subject { margin: 2px 0 5px; }
+
+.ea-card-subject a {
+  color: #1f2328;
+  text-decoration: none;
+  font-weight: 500;
+  /* Three lines is enough to identify an issue; the tooltip has the rest. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ea-card-subject a:hover { text-decoration: underline; }
 
 .ea-card-footer {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  font-size: 0.85em;
-  color: #555;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #5a616b;
 }
 
-.ea-card-story-points {
-  background: #eef;
-  border-radius: 8px;
+.ea-card-assignee {
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ea-card-story-points,
+.ea-card-hours,
+.ea-card-done,
+.ea-card-status {
+  margin-left: auto;
   padding: 0 6px;
-  font-weight: bold;
+  border-radius: 9px;
+  background: #eef1f5;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.ea-card-fields { margin: 4px 0 0; font-size: 0.85em; }
-.ea-card-fields dt { float: left; clear: left; margin-right: 4px; color: #666; }
+.ea-card-story-points { background: #e5ecfb; color: #2f5aa8; }
+.ea-card-done { background: #e8f5e8; color: #2f7a2f; }
+.ea-card-story-points ~ .ea-card-done,
+.ea-card-hours ~ .ea-card-done { margin-left: 0; }
+
+.ea-card-fields { margin: 5px 0 0; padding-top: 4px; border-top: 1px solid #f0f1f3; font-size: 11px; }
+.ea-card-fields dt { float: left; clear: left; margin-right: 4px; color: #858c95; }
 .ea-card-fields dt:after { content: ':'; }
-.ea-card-fields dd { margin: 0; }
+.ea-card-fields dd { margin: 0 0 1px; }
 
 .ea-tooltip { max-width: 400px; }
 .ea-tooltip-attributes { list-style: none; padding-left: 0; }
@@ -148,7 +238,7 @@
 
 /* --- Backlog planner ---------------------------------------------------- */
 .ea-backlog { display: flex; gap: 10px; overflow-x: auto; align-items: flex-start; }
-.ea-backlog-lane { min-width: 240px; flex: 0 0 240px; }
+.ea-backlog-lane { min-width: 280px; flex: 0 0 280px; }
 .ea-backlog-lane-header {
   margin: 0 0 4px;
   padding: 4px 6px;
@@ -169,3 +259,24 @@
 
 /* --- Charts ------------------------------------------------------------- */
 .ea-chart-container { position: relative; height: 360px; margin-top: 10px; }
+
+/* Column headers tinted by status, so the stages of the workflow read at a
+ * glance. Only the bottom border is coloured — a fully tinted header competes
+ * with the cards for attention. */
+.ea-column-header.ea-status-green       { border-bottom-color: #3c9c3c; }
+.ea-column-header.ea-status-light_green { border-bottom-color: #8dc63f; }
+.ea-column-header.ea-status-turquoise   { border-bottom-color: #29a8a0; }
+.ea-column-header.ea-status-blue        { border-bottom-color: #3d7ec4; }
+.ea-column-header.ea-status-purple      { border-bottom-color: #8a5fbf; }
+.ea-column-header.ea-status-yellow      { border-bottom-color: #dcb800; }
+.ea-column-header.ea-status-orange      { border-bottom-color: #e08a1e; }
+.ea-column-header.ea-status-red         { border-bottom-color: #cc3b3b; }
+.ea-column-header.ea-status-gray        { border-bottom-color: #8c8c8c; }
+
+.ea-backlog-empty {
+  flex: 0 0 260px;
+  padding: 12px;
+  border: 1px dashed #cdd4dc;
+  border-radius: 4px;
+  color: #6b727c;
+}

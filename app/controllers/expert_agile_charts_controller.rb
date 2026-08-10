@@ -1,6 +1,6 @@
 # Agile charts: the page, and the JSON the chart canvas is drawn from.
 class ExpertAgileChartsController < ApplicationController
-  menu_item :expert_agile
+  menu_item :expert_agile_charts
 
   before_action :find_optional_project
   before_action :authorize_chart_access

@@ -8,6 +8,7 @@ class ExpertAgileBacklogsController < ApplicationController
   before_action :find_issue_for_planning, :only => [:update]
 
   helper :queries
+  helper :expert_agile_boards
   helper :issues
   include QueriesHelper
 

@@ -109,6 +109,8 @@ de:
   label_expert_agile_board_truncated: Es werden nur die ersten %{count} Tickets angezeigt
 
   error_expert_agile_container_not_available: Dieser Sprint bzw. diese Version steht fuer dieses Projekt nicht zur Verfuegung
+  text_expert_agile_no_sprints: Noch keine Sprints vorhanden. Legen Sie einen an, um zu planen.
+  text_expert_agile_no_versions: Dieses Projekt hat keine offenen Versionen zum Planen.
 
   # --- Diagramme ------------------------------------------------------
   label_expert_agile_chart_burndown: Burndown
@@ -131,6 +133,8 @@ de:
   label_expert_agile_chart_interval_day: Tag
   label_expert_agile_chart_interval_week: Woche
   label_expert_agile_chart_interval_month: Monat
+  label_expert_agile_chart_date_from: Von
+  label_expert_agile_chart_date_to: Bis
 
   # --- Farben ---------------------------------------------------------
   label_expert_agile_colors: Farben der Agile-Karten

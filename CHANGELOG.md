@@ -9,6 +9,37 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [0.1.1] - 2026-08-10
+
+### Fixed
+
+- **The board showed every open status in the instance, not the project's own.** On a real
+  installation that meant 37 columns of which 3 were used, each squeezed to about 27 pixels wide,
+  with card text wrapping one character per line. Columns now come from Redmine's
+  `Project#rolled_up_statuses` — the statuses the project's trackers can actually reach.
+- **Cards were never coloured unless an administrator had assigned every colour by hand.**
+  Choosing a colour basis appeared to do nothing. A container with no explicit colour now falls
+  back to a stable palette entry derived from its id, so a board is colour-coded immediately;
+  an explicit colour still wins. Colouring *by issue* deliberately keeps no fallback, since there
+  the point is that only marked issues stand out.
+- **Priorities are coloured on a semantic ramp** (calm to red) derived from their position in the
+  enumeration, rather than an arbitrary palette entry, so "urgent" actually looks urgent.
+- **Card text overflowed and columns were uneven.** Long subjects, URLs and compound words now
+  break inside the card, subjects clamp to three lines, and every column is pinned to the same
+  width with the board scrolling sideways instead of squeezing.
+- **The backlog planner had no menu entry**, its cards were not coloured like the board's, and a
+  project with no sprints showed an empty page with no explanation. It now appears in the project
+  menu, colours cards consistently, and offers to create the first sprint.
+- **Column headers are tinted by status** when status colours are enabled.
+- **Two chart labels rendered as "Translation missing"** — the date range used Redmine core keys
+  that do not exist in the German locale. The charts page also highlighted the board's menu item
+  instead of its own.
+
+### Changed
+
+- Card and column styling reworked: larger columns, clearer card hierarchy, status and story
+  point chips, hover states.
+
 ## [0.1.0] - 2026-08-10
 
 ### Added

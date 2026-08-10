@@ -1,0 +1,23 @@
+h3. redmine_expert_agile 0.1.1 — 2026-08-10
+
+A presentation fix release. Everything in 0.1.0 worked, but the board did not look like a usable board on a real installation.
+
+h4. Fixed
+
+* *Board columns come from the project's own workflow.* Previously every open status in the whole instance became a column — on a real installation, 37 columns of which 3 were used, each squeezed to roughly 27 pixels with card text wrapping one character per line. Columns are now taken from Redmine's own @Project#rolled_up_statuses@.
+* *Cards are coloured out of the box.* Choosing a colour basis previously did nothing until an administrator had assigned a colour to every tracker, priority or status by hand. A container with no explicit colour now falls back to a stable palette entry derived from its id; an explicit colour still wins. Colouring by issue keeps no fallback, because there only marked issues should stand out.
+* *Priorities use a semantic colour ramp* — calm through to red, derived from position in the enumeration, so "urgent" looks urgent.
+* *Card text no longer overflows and columns are uniform.* Long subjects, URLs and compound words break inside the card, subjects clamp to three lines, and all columns share one width with the board scrolling sideways.
+* *The backlog planner appears in the project menu*, colours its cards like the board, and explains itself when a project has no sprints yet.
+* *Column headers are tinted by status* when status colours are enabled.
+* *Two chart labels rendered as "Translation missing"* because the date range reused Redmine core keys absent from the German locale. The charts page also highlighted the board's menu item instead of its own.
+
+h4. Changed
+
+Card and column styling reworked throughout: larger columns, clearer hierarchy on the card, status and story point chips, hover states.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+Two plugin settings change their default for *new* installations: cards are coloured by tracker, and status colours are on. Existing installations keep whatever is already saved.

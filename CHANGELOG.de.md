@@ -9,6 +9,40 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [0.1.1] - 2026-08-10
+
+### Behoben
+
+- **Das Board zeigte alle offenen Status der Instanz statt der des Projekts.** In einer echten
+  Installation waren das 37 Spalten, von denen 3 genutzt wurden, jede auf etwa 27 Pixel
+  zusammengedrueckt, mit Kartentext im Umbruch von einem Zeichen pro Zeile. Die Spalten stammen
+  jetzt aus Redmines `Project#rolled_up_statuses` — den Status, die die Tracker des Projekts
+  tatsaechlich erreichen koennen.
+- **Karten wurden nie eingefaerbt, solange nicht ein Administrator jede Farbe von Hand vergeben
+  hatte.** Die Auswahl einer Farbgrundlage schien wirkungslos. Ein Objekt ohne ausdrueckliche
+  Farbe erhaelt nun eine stabile, aus seiner ID abgeleitete Palettenfarbe, so dass ein Board
+  sofort farbcodiert ist; eine ausdrueckliche Farbe hat weiterhin Vorrang. Die Einfaerbung *nach
+  Ticket* verzichtet bewusst auf diesen Rueckfall, denn dort sollen nur markierte Tickets
+  hervorstechen.
+- **Prioritaeten werden auf einer semantischen Skala eingefaerbt** (ruhig bis rot), abgeleitet aus
+  ihrer Position in der Aufzaehlung statt aus einer beliebigen Palettenfarbe — "dringend" sieht
+  damit auch dringend aus.
+- **Kartentext lief ueber und Spalten waren unterschiedlich breit.** Lange Betreffs, URLs und
+  Komposita brechen jetzt innerhalb der Karte um, Betreffs werden auf drei Zeilen begrenzt, und
+  alle Spalten haben dieselbe feste Breite; das Board scrollt seitlich, statt zu quetschen.
+- **Der Backlog-Planer hatte keinen Menueeintrag**, seine Karten waren nicht wie die des Boards
+  eingefaerbt, und ein Projekt ohne Sprints zeigte eine leere Seite ohne Erklaerung. Er erscheint
+  nun im Projektmenue, faerbt Karten einheitlich und bietet an, den ersten Sprint anzulegen.
+- **Spaltenkoepfe werden nach Status eingefaerbt**, wenn Statusfarben aktiviert sind.
+- **Zwei Diagrammbeschriftungen erschienen als "Translation missing"** — der Datumsbereich nutzte
+  Redmine-Kernschluessel, die es im deutschen Locale nicht gibt. Ausserdem hob die
+  Diagrammseite den Menueeintrag des Boards statt ihren eigenen hervor.
+
+### Geaendert
+
+- Karten- und Spaltengestaltung ueberarbeitet: groessere Spalten, klarere Kartenhierarchie,
+  Status- und Story-Point-Chips, Hover-Zustaende.
+
 ## [0.1.0] - 2026-08-10
 
 ### Hinzugefuegt

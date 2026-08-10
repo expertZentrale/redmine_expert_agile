@@ -47,15 +47,32 @@ class ExpertAgileColor < ExpertAgileApplicationRecord
     klass.base_class.name
   end
 
-  # A deterministic palette entry for a principal, used when colouring by
-  # assignee. Picking from the fixed palette rather than deriving a hex value
-  # from the login (what RedmineUP does) guarantees the result is readable —
-  # a hash-derived colour can land on near-white or near-black.
-  def self.for_principal(principal)
-    return nil if principal.nil?
+  # A deterministic palette entry for any record with an id — used for
+  # assignees, and as the fallback for containers nobody has coloured by hand.
+  # Picking from the fixed palette rather than deriving a hex value from the
+  # login (what RedmineUP does) guarantees the result is readable: a
+  # hash-derived colour can land on near-white or near-black.
+  def self.for_principal(record)
+    return nil if record.nil? || !record.respond_to?(:id) || record.id.nil?
 
-    key = principal.id.to_i
-    COLORS[key % COLORS.size]
+    COLORS[record.id.to_i % COLORS.size]
+  end
+
+  # Priorities get a semantic ramp rather than an arbitrary palette entry:
+  # low is calm, urgent is red. Derived from the priority's position in the
+  # enumeration, so it adapts to however many levels an instance defines
+  # instead of hard-coding Redmine's default five.
+  PRIORITY_RAMP = %w(gray blue green yellow orange red).freeze
+
+  def self.for_priority(priority)
+    return nil if priority.nil?
+
+    all = IssuePriority.active.to_a
+    index = all.index { |candidate| candidate.id == priority.id }
+    return for_principal(priority) if index.nil? || all.size < 2
+
+    position = (index.to_f / (all.size - 1) * (PRIORITY_RAMP.size - 1)).round
+    PRIORITY_RAMP[position]
   end
 
   # Colour by how much of the estimate has been spent.
