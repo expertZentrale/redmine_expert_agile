@@ -166,3 +166,6 @@
 .ea-backlog-drop { display: block; min-height: 80px; }
 .ea-backlog-switch { margin-bottom: 8px; }
 .ea-backlog-switch a.selected { font-weight: bold; text-decoration: none; }
+
+/* --- Charts ------------------------------------------------------------- */
+.ea-chart-container { position: relative; height: 360px; margin-top: 10px; }

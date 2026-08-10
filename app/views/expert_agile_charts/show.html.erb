@@ -1,0 +1,60 @@
+<%# Agile charts. Markup only — the canvas is drawn by expert_agile_charts.js
+    from the JSON island below plus one fetch of the series. %>
+
+<h2><%= l(:label_expert_agile_charts) %></h2>
+
+<%= form_tag(@project ? project_expert_agile_charts_path(@project) : expert_agile_charts_path,
+             :method => :get, :id => 'ea-chart-form') do %>
+  <div class="box">
+    <p>
+      <label for="chart"><%= l(:label_expert_agile_default_chart) %></label>
+      <%= select_tag 'chart',
+                     options_for_select(
+                       RedmineExpertAgile::Charts::Registry::CHARTS.map { |name, entry| [l(entry[:label]), name] },
+                       @query.chart) %>
+
+      <% if RedmineExpertAgile::Charts::Registry.units?(@query.chart) %>
+        <label for="chart_unit"><%= l(:label_expert_agile_estimate_units) %></label>
+        <%= select_tag 'chart_unit',
+                       options_for_select(
+                         RedmineExpertAgile::Charts::Base::UNITS.map { |u| [l("label_expert_agile_chart_unit_#{u}"), u] },
+                         @query.chart_unit) %>
+      <% end %>
+
+      <label for="interval"><%= l(:label_expert_agile_chart_interval) %></label>
+      <%= select_tag 'interval',
+                     options_for_select(
+                       RedmineExpertAgile::Charts::Base::INTERVALS.map { |i| [l("label_expert_agile_chart_interval_#{i}"), i] },
+                       @query.interval) %>
+    </p>
+    <p>
+      <label for="date_from"><%= l(:label_date_from) %></label>
+      <%= date_field_tag 'date_from', @query.date_from %>
+      <label for="date_to"><%= l(:label_date_to) %></label>
+      <%= date_field_tag 'date_to', @query.date_to %>
+      <%= submit_tag l(:button_apply), :name => nil %>
+    </p>
+  </div>
+<% end %>
+
+<div class="ea-chart-container">
+  <canvas id="ea-chart" height="320"></canvas>
+  <p id="ea-chart-message" class="nodata" style="display:none;"></p>
+</div>
+
+<script type="application/json" id="ea-chart-data"><%= {
+     :url => render_expert_agile_chart_path(
+                :project_id => @project, :chart => @query.chart,
+                :chart_unit => @query.chart_unit, :interval => @query.interval,
+                :date_from => @query.date_from, :date_to => @query.date_to,
+                :query_id => @query.id),
+     :type => RedmineExpertAgile::Charts::Registry.chart_class(@query.chart).chart_type
+   }.to_json.html_safe %></script>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'expert_agile', :plugin => 'redmine_expert_agile' %>
+  <%= javascript_include_tag 'chart.umd.min', :plugin => 'redmine_expert_agile' %>
+  <%= javascript_include_tag 'expert_agile_charts', :plugin => 'redmine_expert_agile' %>
+<% end %>
+
+<% html_title(l(:label_expert_agile_charts)) %>

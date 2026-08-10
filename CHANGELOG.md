@@ -81,6 +81,16 @@ notes from the section matching the pushed tag.
   the same implementation as the board's. A container id that the project may not plan into is
   rejected, so a crafted request cannot move an issue into an unrelated project's sprint.
 
+- **Charts.** Burndown, burnup, cumulative flow, velocity and cycle time, in issues, hours or
+  story points, over a day, week or month interval. Historical state is reconstructed from one
+  query over the journals, projected in a single pass into a per-issue timeline and answered by
+  binary search, so the cost is proportional to the number of journal entries rather than to
+  dates x issues x journals. Computed series are cached on a fingerprint of everything that could
+  change them. The item cap applies only to the charts that actually replay history; the counting
+  charts are unbounded because they are cheap. Chart.js is vendored with the plugin rather than
+  borrowed from another plugin's asset directory, and dates are converted to the reader's own
+  timezone so a chart is not off by one for anyone east of UTC.
+
 ### Fixed
 
 - **Core method wrapping no longer recurses infinitely** when RedmineUP plugins are installed.

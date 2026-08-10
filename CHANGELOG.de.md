@@ -90,6 +90,17 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Eine Container-ID, in die das Projekt nicht planen darf, wird abgelehnt — ein manipulierter
   Aufruf kann ein Ticket also nicht in den Sprint eines fremden Projekts verschieben.
 
+- **Diagramme.** Burndown, Burnup, kumulierter Fluss, Velocity und Durchlaufzeit, wahlweise in
+  Tickets, Stunden oder Story Points, ueber Tages-, Wochen- oder Monatsintervalle. Der historische
+  Zustand wird aus einer einzigen Journalabfrage rekonstruiert, in einem Durchlauf zu einer
+  Zeitleiste je Ticket verdichtet und per binaerer Suche abgefragt — der Aufwand haengt damit an
+  der Zahl der Journaleintraege statt an Datum x Tickets x Journale. Berechnete Reihen werden
+  anhand eines Fingerabdrucks aller ergebnisrelevanten Groessen zwischengespeichert. Die
+  Mengenbegrenzung gilt nur fuer Diagramme, die tatsaechlich Historie auswerten; die zaehlenden
+  Diagramme sind unbegrenzt, weil sie guenstig sind. Chart.js liegt dem Plugin bei, statt aus dem
+  Asset-Verzeichnis eines anderen Plugins zu stammen, und Datumswerte werden in die Zeitzone des
+  Betrachters umgerechnet, damit ein Diagramm oestlich von UTC nicht um einen Tag verschoben ist.
+
 ### Behoben
 
 - **Das Umhuellen von Kernmethoden fuehrt nicht mehr zu Endlosrekursion**, wenn RedmineUP-Plugins

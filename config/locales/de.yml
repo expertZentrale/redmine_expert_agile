@@ -120,6 +120,17 @@ de:
   label_expert_agile_chart_unit_hours: Stunden
   label_expert_agile_chart_unit_story_points: Story Points
   text_expert_agile_chart_too_many_items: Zu viele Tickets fuer dieses Diagramm; bitte Filter einschraenken
+  label_expert_agile_chart_remaining: Verbleibend
+  label_expert_agile_chart_ideal: Ideal
+  label_expert_agile_chart_completed: Erledigt
+  label_expert_agile_chart_scope: Umfang
+  label_expert_agile_chart_closed: Geschlossen
+  label_expert_agile_chart_days: Tage
+  label_expert_agile_chart_moving_average: Gleitender Durchschnitt
+  label_expert_agile_chart_interval: Intervall
+  label_expert_agile_chart_interval_day: Tag
+  label_expert_agile_chart_interval_week: Woche
+  label_expert_agile_chart_interval_month: Monat
 
   # --- Farben ---------------------------------------------------------
   label_expert_agile_colors: Farben der Agile-Karten

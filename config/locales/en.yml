@@ -120,6 +120,17 @@ en:
   label_expert_agile_chart_unit_hours: Hours
   label_expert_agile_chart_unit_story_points: Story points
   text_expert_agile_chart_too_many_items: Too many issues to compute this chart; narrow the filters
+  label_expert_agile_chart_remaining: Remaining
+  label_expert_agile_chart_ideal: Ideal
+  label_expert_agile_chart_completed: Completed
+  label_expert_agile_chart_scope: Scope
+  label_expert_agile_chart_closed: Closed
+  label_expert_agile_chart_days: Days
+  label_expert_agile_chart_moving_average: Moving average
+  label_expert_agile_chart_interval: Interval
+  label_expert_agile_chart_interval_day: Day
+  label_expert_agile_chart_interval_week: Week
+  label_expert_agile_chart_interval_month: Month
 
   # --- Colors ---------------------------------------------------------
   label_expert_agile_colors: Agile card colors

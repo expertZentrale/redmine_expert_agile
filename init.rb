@@ -20,6 +20,14 @@ require File.expand_path('../lib/redmine_expert_agile/board_grid', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/board_positions', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/colorable', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/card_color', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/journal_projection', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/charts/base', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/charts/burndown', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/charts/burnup', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/charts/cumulative_flow', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/charts/velocity', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/charts/cycle_time', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/charts/registry', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/hooks', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issue_patch', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/project_patch', __FILE__)
@@ -126,6 +134,13 @@ Redmine::Plugin.register :redmine_expert_agile do
   menu :project_menu, :expert_agile,
        { :controller => 'expert_agile_boards', :action => 'index' },
        agile_menu_options
+
+  charts_menu_options = { :caption => :label_expert_agile_charts, :after => :expert_agile,
+                          :param => :project_id }
+  charts_menu_options[:plugin] = :redmine_expert_agile if Redmine::VERSION::MAJOR >= 6
+  menu :project_menu, :expert_agile_charts,
+       { :controller => 'expert_agile_charts', :action => 'show' },
+       charts_menu_options
 
   # Backlog planner. Separate module so a project can run a plain Kanban board
   # without the backlog UI, mirroring how RedmineUP splits :agile/:agile_backlog.
