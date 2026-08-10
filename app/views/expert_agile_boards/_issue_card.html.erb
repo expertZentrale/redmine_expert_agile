@@ -18,7 +18,10 @@
 
   <div class="ea-card-footer">
     <% if issue.assigned_to %>
-      <span class="ea-card-assignee"><%= issue.assigned_to.name %></span>
+      <span class="ea-card-assignee" title="<%= h issue.assigned_to.name %>">
+        <%= avatar(issue.assigned_to, :size => 16, :class => 'ea-avatar') if @query.show_avatar? %>
+        <span class="ea-card-assignee-name"><%= h issue.assigned_to.name %></span>
+      </span>
     <% end %>
     <% if issue.story_points.present? %>
       <span class="ea-card-story-points" title="<%= l(:label_expert_agile_story_points) %>">
@@ -32,11 +35,13 @@
     <% end %>
   </div>
 
+  <%# Everything else the board was configured to show, including custom
+      fields — they come from the query's own column selection. %>
   <% extra = @query.extra_card_columns %>
   <% if extra.any? %>
     <dl class="ea-card-fields">
       <% extra.each do |column| %>
-        <% value = column_value(column, issue, column.value_object(issue)) rescue nil %>
+        <% value = expert_agile_card_value(column, issue) %>
         <% next if value.blank? %>
         <dt><%= column.caption %></dt>
         <dd><%= value %></dd>

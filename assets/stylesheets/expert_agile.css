@@ -280,3 +280,17 @@
   border-radius: 4px;
   color: #6b727c;
 }
+
+/* --- Board options panel ------------------------------------------------- */
+.ea-hint { color: #6b727c; margin: 0 0 8px; }
+.ea-status-options td, .ea-status-options th { padding: 2px 10px 2px 0; text-align: left; }
+.ea-status-options { margin-bottom: 4px; }
+.ea-status-closed { color: #8a919b; font-size: 0.9em; }
+
+.ea-avatar {
+  vertical-align: middle;
+  border-radius: 50%;
+  margin-right: 3px;
+}
+.ea-card-assignee { display: inline-flex; align-items: center; min-width: 0; }
+.ea-card-assignee-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

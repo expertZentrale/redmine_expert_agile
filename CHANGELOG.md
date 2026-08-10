@@ -9,6 +9,30 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [0.1.2] - 2026-08-10
+
+### Added
+
+- **Board options panel.** The board now carries the same collapsible filter and options panel as
+  every other Redmine list, so a board is configured where it is used rather than only in the
+  global settings. It offers Redmine's own filter widget, and lets you choose which statuses
+  become columns (closed ones included, for the "done" column), per-column WIP limits, the
+  swimlane field, the colour basis, whether to show the assignee's avatar, and which fields appear
+  on the cards.
+- **Card fields are the query's own columns**, so anything Redmine can show in the issue list —
+  including custom fields — can be put on a card, rendered by Redmine's own column formatting.
+- **Saved boards.** `ExpertAgileQueriesController` was declared in the routes and permissions from
+  the start but had never been written, so saving a board 404'd. Boards can now be saved, edited
+  and deleted, private or public according to the agile permissions.
+- **Assignee avatars on cards**, on by default and switchable per board.
+
+### Fixed
+
+- **Setting a WIP limit crashed the board with a 500.** `ActionController::Parameters` is not a
+  Hash and does not implement `each_with_object`; the model tests passed plain hashes and never
+  exercised a real request. The setters now accept both, and the options panel is covered by
+  controller tests that go through actual request parameters.
+
 ## [0.1.1] - 2026-08-10
 
 ### Fixed

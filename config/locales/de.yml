@@ -21,6 +21,7 @@ de:
   # --- Allgemeine Labels ----------------------------------------------
   label_expert_agile: expert Agile
   label_expert_agile_board: Agile-Board
+  label_expert_agile_board_new: Neues Board
   label_expert_agile_backlog: Backlog
   label_expert_agile_charts: Agile-Diagramme
 
@@ -107,6 +108,14 @@ de:
   error_expert_agile_issue_not_editable: Sie duerfen dieses Ticket nicht bearbeiten
   label_expert_agile_swimlane_none: Keine Swimlanes
   label_expert_agile_board_truncated: Es werden nur die ersten %{count} Tickets angezeigt
+  label_expert_agile_card_fields: Kartenfelder
+  label_expert_agile_swimlanes: Swimlanes
+  label_expert_agile_show_avatar: Avatar des Bearbeiters anzeigen
+  label_expert_agile_columns_and_limits: Spalten und WIP-Limits
+  label_expert_agile_wip_min: Min
+  label_expert_agile_wip_max: Max
+  text_expert_agile_board_statuses_hint: Die Status ankreuzen, die als Boardspalten erscheinen sollen. Ohne Auswahl zeigt das Board alle offenen Status der Workflows dieses Projekts.
+  error_expert_agile_board_not_saveable: Sie duerfen kein Board mit dieser Sichtbarkeit speichern
 
   error_expert_agile_container_not_available: Dieser Sprint bzw. diese Version steht fuer dieses Projekt nicht zur Verfuegung
   text_expert_agile_no_sprints: Noch keine Sprints vorhanden. Legen Sie einen an, um zu planen.

@@ -9,6 +9,33 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [0.1.2] - 2026-08-10
+
+### Hinzugefuegt
+
+- **Optionsbereich am Board.** Das Board hat nun denselben ein- und ausklappbaren Filter- und
+  Optionsbereich wie jede andere Redmine-Liste; ein Board wird also dort konfiguriert, wo es
+  benutzt wird, und nicht nur in den globalen Einstellungen. Er bietet Redmines eigenes
+  Filter-Widget und erlaubt die Auswahl, welche Status zu Spalten werden (geschlossene
+  eingeschlossen, fuer die "Erledigt"-Spalte), WIP-Limits je Spalte, das Swimlane-Feld, die
+  Farbgrundlage, ob der Avatar des Bearbeiters erscheint und welche Felder auf den Karten stehen.
+- **Kartenfelder sind die Spalten der Abfrage selbst**, sodass alles, was Redmine in der
+  Ticketliste anzeigen kann — auch benutzerdefinierte Felder — auf eine Karte passt, formatiert
+  von Redmines eigener Spaltenausgabe.
+- **Gespeicherte Boards.** `ExpertAgileQueriesController` war von Anfang an in Routen und
+  Berechtigungen deklariert, aber nie geschrieben worden; das Speichern eines Boards lief daher
+  in einen 404. Boards lassen sich jetzt speichern, bearbeiten und loeschen, privat oder
+  oeffentlich gemaess den Agile-Berechtigungen.
+- **Avatare der Bearbeiter auf den Karten**, standardmaessig aktiv und je Board abschaltbar.
+
+### Behoben
+
+- **Das Setzen eines WIP-Limits liess das Board mit einem 500er abstuerzen.**
+  `ActionController::Parameters` ist kein Hash und kennt kein `each_with_object`; die
+  Modelltests uebergaben einfache Hashes und haben eine echte Anfrage nie nachgestellt. Die
+  Setter akzeptieren jetzt beides, und der Optionsbereich ist durch Controller-Tests mit echten
+  Request-Parametern abgedeckt.
+
 ## [0.1.1] - 2026-08-10
 
 ### Behoben

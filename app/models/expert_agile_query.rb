@@ -59,14 +59,20 @@ class ExpertAgileQuery < IssueQuery
   # Stored as a real hash of integer pairs, not RedmineUP's "2-7" string that
   # has to be re-parsed with a regex on every render.
   def wip_limits
-    (options[:wip_limits] || {}).each_with_object({}) do |(status_id, bounds), acc|
+    stored = options[:wip_limits] || {}
+    stored = stored.to_unsafe_h if stored.respond_to?(:to_unsafe_h)
+    stored.each_with_object({}) do |(status_id, bounds), acc|
       min, max = Array(bounds)
       acc[status_id.to_i] = [min.presence && min.to_i, max.presence && max.to_i]
     end
   end
 
   def wip_limits=(limits)
-    normalized = (limits || {}).each_with_object({}) do |(status_id, bounds), acc|
+    # Accepts both a plain hash and ActionController::Parameters, which is not
+    # a Hash and does not implement each_with_object — the options panel posts
+    # the latter.
+    source = limits.respond_to?(:to_unsafe_h) ? limits.to_unsafe_h : (limits || {})
+    normalized = source.each_with_object({}) do |(status_id, bounds), acc|
       min, max = Array(bounds)
       min = min.presence && min.to_i
       max = max.presence && max.to_i
@@ -94,20 +100,46 @@ class ExpertAgileQuery < IssueQuery
     self.group_by = value
   end
 
+  # Card fields are the query's own selected columns, so the standard Redmine
+  # column picker in the options panel configures them — including custom
+  # fields — with no parallel mechanism to keep in sync.
   def card_columns
-    names = Array(options[:card_column_names]).map(&:to_sym)
-    names = RedmineExpertAgile.default_card_columns if names.empty?
-    available_columns.select { |column| names.include?(column.name) }
+    columns
   end
 
-  def card_column_names=(names)
-    options[:card_column_names] = Array(names).reject(&:blank?).map(&:to_sym)
+  # The board's default card fields come from the plugin setting rather than
+  # from Setting.issue_list_default_columns, which is tuned for a table.
+  def default_columns_names
+    @default_columns_names ||= RedmineExpertAgile.default_card_columns
+  end
+
+  # Show the assignee's avatar on the card.
+  def show_avatar?
+    value = options[:show_avatar]
+    value.nil? ? true : value.to_s == '1'
+  end
+
+  def show_avatar=(value)
+    options[:show_avatar] = value.to_s == '1' ? '1' : '0'
   end
 
   # Extra card fields, i.e. everything not already drawn as a dedicated part of
   # the card.
   def extra_card_columns
     card_columns.reject { |column| SPECIAL_CARD_COLUMNS.include?(column.name) }
+  end
+
+  # Applies the board-specific parts of the options panel. Redmine's own
+  # build_from_params covers filters, columns, grouping and sorting; these are
+  # the settings core knows nothing about.
+  def apply_board_params(params)
+    self.board_status_ids = params[:board_status_ids] if params.key?(:board_status_ids)
+    self.wip_limits = params[:wip_limits] if params.key?(:wip_limits)
+    self.color_base = params[:color_base] if params[:color_base].present?
+    self.board_type = params[:board_type] if params[:board_type].present?
+    self.show_avatar = params[:show_avatar] if params.key?(:show_avatar)
+    self.sprint_id = params[:sprint_id] if params.key?(:sprint_id)
+    self
   end
 
   def sprint_id

@@ -1,0 +1,16 @@
+h3. redmine_expert_agile 0.1.2 — 2026-08-10
+
+h4. Added
+
+* *Board options panel.* The board carries the same collapsible filter and options panel as every other Redmine list, so a board is configured where it is used. It offers Redmine's own filter widget plus: which statuses become columns (closed ones included, for the "done" column), per-column WIP limits, the swimlane field, the colour basis, the assignee avatar toggle, and the card fields.
+* *Card fields are the query's own columns*, so anything Redmine shows in the issue list — custom fields included — can go on a card, formatted by Redmine's own column rendering.
+* *Saved boards.* Boards can be saved, edited and deleted, private or public according to the agile permissions.
+* *Assignee avatars on cards*, on by default, switchable per board.
+
+h4. Fixed
+
+* Setting a WIP limit crashed the board with a 500: @ActionController::Parameters@ is not a Hash and has no @each_with_object@. The setters accept both shapes now, and the options panel is covered by controller tests driven with real request parameters.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.

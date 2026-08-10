@@ -1,0 +1,37 @@
+<%# Name and visibility of a saved board. The board's own configuration —
+    filters, columns, swimlanes, WIP limits — travels as hidden fields from the
+    options panel the user just used, so saving keeps exactly what they see. %>
+<%= error_messages_for @query %>
+
+<div class="box tabular">
+  <p><%= f.text_field :name, :size => 60, :required => true %></p>
+
+  <% if User.current.allowed_to?(:manage_public_expert_agile_queries, @project, :global => true) %>
+    <p>
+      <label><%= l(:field_visible) %></label>
+      <label class="block">
+        <%= f.radio_button :visibility, Query::VISIBILITY_PRIVATE %>
+        <%= l(:label_visibility_private) %>
+      </label>
+      <label class="block">
+        <%= f.radio_button :visibility, Query::VISIBILITY_PUBLIC %>
+        <%= l(:label_visibility_public) %>
+      </label>
+    </p>
+  <% else %>
+    <%= f.hidden_field :visibility, :value => Query::VISIBILITY_PRIVATE %>
+  <% end %>
+</div>
+
+<%# Carry the configuration through unchanged. %>
+<%= query_as_hidden_field_tags(@query) %>
+<%= hidden_field_tag 'color_base', @query.color_base %>
+<%= hidden_field_tag 'board_type', @query.board_type %>
+<%= hidden_field_tag 'show_avatar', @query.show_avatar? ? '1' : '0' %>
+<% @query.board_status_ids.each do |status_id| %>
+  <%= hidden_field_tag 'board_status_ids[]', status_id, :id => nil %>
+<% end %>
+<% @query.wip_limits.each do |status_id, bounds| %>
+  <%= hidden_field_tag "wip_limits[#{status_id}][]", bounds[0], :id => nil %>
+  <%= hidden_field_tag "wip_limits[#{status_id}][]", bounds[1], :id => nil %>
+<% end %>

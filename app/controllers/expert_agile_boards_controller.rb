@@ -154,7 +154,15 @@ class ExpertAgileBoardsController < ApplicationController
                ExpertAgileQuery.new(:name => '_', :project => @project)
              end
     @query.project = @project
-    @query.build_from_params(params) if params[:query_id].blank?
+    if params[:query_id].blank?
+      @query.build_from_params(params)
+      @query.apply_board_params(params)
+    elsif params[:set_filter].present?
+      # An explicitly saved board can still be tweaked for this request without
+      # the change being written back to it.
+      @query.build_from_params(params)
+      @query.apply_board_params(params)
+    end
     @query
   end
 

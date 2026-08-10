@@ -39,6 +39,36 @@ module ExpertAgileBoardsHelper
     classes.compact.join(' ')
   end
 
+  # Statuses offerable as board columns: everything the project's workflows can
+  # reach, closed ones included — a board usually wants exactly one "done"
+  # column, and which status that is, only the project knows.
+  def expert_agile_selectable_statuses(query)
+    scope = query.project ? query.project.rolled_up_statuses : IssueStatus.sorted
+    statuses = scope.to_a
+    # Anything already configured as a column stays selectable even if the
+    # workflow changed underneath it, so the panel never silently drops a column.
+    (statuses + query.board_statuses).uniq.sort_by { |s| [s.position.to_i, s.id] }
+  end
+
+  # Renders one card field through Redmine's own column_content, so custom
+  # fields, list values, users and dates all format exactly as they do in the
+  # issue list. Falls back to the raw value if a column raises — one awkward
+  # custom field must not take the whole board down.
+  def expert_agile_card_value(column, issue)
+    column_content(column, issue)
+  rescue StandardError
+    value = column.value_object(issue) rescue nil
+    value.is_a?(Array) ? value.join(', ') : value.to_s
+  end
+
+  def board_path_for(project)
+    project ? project_expert_agile_board_path(project) : expert_agile_board_path
+  end
+
+  def new_board_path_for(project)
+    project ? project_expert_agile_queries_path(project) : expert_agile_queries_path
+  end
+
   # Palette class for a column header, so the board reads as a set of stages at
   # a glance. Only applied when the setting is on and the cell is a leaf.
   def expert_agile_status_color_class(column)

@@ -3,7 +3,11 @@
     renders. Everything the board script needs is in the JSON island below,
     which keeps the page working under a `script-src 'self'` policy. %>
 
-<h2><%= l(:label_expert_agile_board) %></h2>
+<h2><%= @query.new_record? ? l(:label_expert_agile_board) : h(@query.name) %></h2>
+
+<%= form_tag(board_path_for(@project), :method => :get, :id => 'ea_query_form') do %>
+  <%= render :partial => 'expert_agile_boards/board_form' %>
+<% end %>
 
 <% if @query.truncated? %>
   <p class="warning ea-truncated">

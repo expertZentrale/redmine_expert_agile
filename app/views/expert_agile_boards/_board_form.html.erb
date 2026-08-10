@@ -1,0 +1,123 @@
+<%# Board options panel.
+    Modelled on Redmine's queries/_query_form so it behaves the way every other
+    Redmine filter panel does — collapsible fieldsets, the same filter widget,
+    the same column picker. Filters, card fields, grouping and sorting are core
+    partials; the board-specific settings sit in their own fieldset below.
+
+    Note: Redmine's own filters partial emits an inline <script> block. The
+    board *content* — columns and cards, which are also re-injected after a
+    move — stays free of inline script; this panel inherits whatever core
+    does, because it is core's markup. %>
+
+<%= hidden_field_tag 'set_filter', '1' %>
+<%= hidden_field_tag 'type', @query.type, :disabled => true, :id => 'query_type' %>
+
+<div id="query_form_with_buttons" class="hide-when-print">
+  <div id="query_form_content">
+
+    <fieldset id="filters" class="collapsible <%= @query.new_record? ? '' : 'collapsed' %>">
+      <legend onclick="toggleFieldset(this);" class="icon icon-<%= @query.new_record? ? 'expanded' : 'collapsed' %>">
+        <%= l(:label_filter_plural) %>
+      </legend>
+      <div style="<%= @query.new_record? ? '' : 'display: none;' %>">
+        <%= render :partial => 'queries/filters', :locals => { :query => @query } %>
+      </div>
+    </fieldset>
+
+    <fieldset id="options" class="collapsible collapsed">
+      <legend onclick="toggleFieldset(this);" class="icon icon-collapsed"><%= l(:label_options) %></legend>
+      <div class="hidden">
+        <table>
+          <tr>
+            <td class="field"><%= l(:label_expert_agile_card_fields) %></td>
+            <td><%= render_query_columns_selection(@query) %></td>
+          </tr>
+          <tr>
+            <td class="field"><label for="group_by"><%= l(:label_expert_agile_swimlanes) %></label></td>
+            <td><%= group_by_column_select_tag(@query) %></td>
+          </tr>
+          <tr>
+            <td class="field"><label for="color_base"><%= l(:label_expert_agile_color_base) %></label></td>
+            <td>
+              <%= select_tag 'color_base',
+                             options_for_select(
+                               RedmineExpertAgile::COLOR_BASES.map { |b| [l("label_expert_agile_color_base_#{b}"), b] },
+                               @query.color_base) %>
+            </td>
+          </tr>
+          <tr>
+            <td class="field"><label for="show_avatar"><%= l(:label_expert_agile_show_avatar) %></label></td>
+            <td>
+              <%= hidden_field_tag 'show_avatar', '0' %>
+              <%= check_box_tag 'show_avatar', '1', @query.show_avatar? %>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </fieldset>
+
+    <fieldset id="ea-columns-options" class="collapsible collapsed">
+      <legend onclick="toggleFieldset(this);" class="icon icon-collapsed">
+        <%= l(:label_expert_agile_columns_and_limits) %>
+      </legend>
+      <div class="hidden">
+        <p class="ea-hint"><%= l(:text_expert_agile_board_statuses_hint) %></p>
+        <table class="ea-status-options">
+          <thead>
+            <tr>
+              <th><%= l(:field_status) %></th>
+              <th><%= l(:label_expert_agile_wip_min) %></th>
+              <th><%= l(:label_expert_agile_wip_max) %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <%# Every status the project's workflows can reach, pre-ticked with
+                the board's current columns. %>
+            <% selected = @query.board_statuses.map(&:id) %>
+            <% limits = @query.wip_limits %>
+            <%= hidden_field_tag 'board_status_ids[]', '' %>
+            <% expert_agile_selectable_statuses(@query).each do |status| %>
+              <tr>
+                <td>
+                  <label>
+                    <%= check_box_tag 'board_status_ids[]', status.id,
+                                      selected.include?(status.id), :id => "ea_status_#{status.id}" %>
+                    <%= h status.name %>
+                    <% if status.is_closed? %>
+                      <span class="ea-status-closed">(<%= l(:label_closed_issues) %>)</span>
+                    <% end %>
+                  </label>
+                </td>
+                <td>
+                  <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][0],
+                                     :size => 3, :id => nil %>
+                </td>
+                <td>
+                  <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][1],
+                                     :size => 3, :id => nil %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+  </div>
+
+  <p class="buttons hide-when-print">
+    <%= submit_tag l(:button_apply), :class => 'icon icon-checked', :name => nil %>
+    <%= link_to l(:button_clear), board_path_for(@project),
+                :class => 'icon icon-reload' %>
+    <% if @query.new_record? && User.current.allowed_to?(:add_expert_agile_queries, @project, :global => true) %>
+      <%= link_to l(:button_save), '#',
+                  :onclick => "$('#query_type').prop('disabled', false); " \
+                              "$('#ea_query_form').attr('action', '#{escape_javascript(new_board_path_for(@project))}').submit(); return false;",
+                  :class => 'icon icon-save' %>
+    <% elsif @query.persisted? && @query.editable_by?(User.current) %>
+      <%= link_to l(:button_edit), edit_expert_agile_query_path(@query), :class => 'icon icon-edit' %>
+      <%= link_to l(:button_delete), expert_agile_query_path(@query),
+                  :data => { :confirm => l(:text_are_you_sure) }, :method => :delete,
+                  :class => 'icon icon-del' %>
+    <% end %>
+  </p>
+</div>

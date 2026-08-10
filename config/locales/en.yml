@@ -21,6 +21,7 @@ en:
   # --- General labels -------------------------------------------------
   label_expert_agile: expert Agile
   label_expert_agile_board: Agile board
+  label_expert_agile_board_new: New board
   label_expert_agile_backlog: Backlog
   label_expert_agile_charts: Agile charts
 
@@ -107,6 +108,14 @@ en:
   error_expert_agile_issue_not_editable: You are not allowed to edit this issue
   label_expert_agile_swimlane_none: No swimlanes
   label_expert_agile_board_truncated: Only the first %{count} issues are shown
+  label_expert_agile_card_fields: Card fields
+  label_expert_agile_swimlanes: Swimlanes
+  label_expert_agile_show_avatar: Show assignee avatar
+  label_expert_agile_columns_and_limits: Columns and WIP limits
+  label_expert_agile_wip_min: Min
+  label_expert_agile_wip_max: Max
+  text_expert_agile_board_statuses_hint: Tick the statuses to show as board columns. With none ticked the board shows every open status of this project's workflows.
+  error_expert_agile_board_not_saveable: You are not allowed to save a board of this visibility
 
   error_expert_agile_container_not_available: This sprint or version is not available for this project
   text_expert_agile_no_sprints: No sprints yet. Create one to start planning.

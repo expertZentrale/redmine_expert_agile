@@ -48,6 +48,84 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'div#ea-board [onclick]', false, 'no inline event handlers'
   end
 
+  # --- Options panel ---------------------------------------------------
+  #
+  # These go through the controller with real request parameters on purpose.
+  # The model-level tests pass plain hashes, which hid that
+  # ActionController::Parameters does not implement each_with_object and the
+  # whole board 500'd the moment anyone touched a WIP limit.
+
+  def test_index_renders_the_options_panel
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'form#ea_query_form'
+    assert_select 'fieldset#filters'
+    assert_select 'fieldset#ea-columns-options input[name=?]', 'board_status_ids[]'
+    assert_select 'select#color_base'
+    assert_select 'input[name=?]', 'show_avatar'
+  end
+
+  def test_board_columns_follow_the_selected_statuses
+    chosen = IssueStatus.sorted.first(2)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :board_status_ids => chosen.map { |s| s.id.to_s } }
+
+    assert_response :success
+    assert_select 'th.ea-column-header[data-column-id]', :count => chosen.size
+    chosen.each do |status|
+      assert_select "th.ea-column-header[data-column-id=?] .ea-column-name", status.id.to_s,
+                    :text => status.name
+    end
+  end
+
+  def test_wip_limits_are_applied_from_request_parameters
+    status_id = @issue.status_id
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :board_status_ids => [status_id.to_s],
+                             :wip_limits => { status_id.to_s => %w(1 2) } }
+
+    assert_response :success
+    assert_select "th.ea-column-header[data-column-id=?] .ea-column-wip", status_id.to_s,
+                  :text => '1-2'
+    # The fixture project has more than two issues in this status, so the limit
+    # is breached — and the move must still not be blocked anywhere.
+    assert_select 'th.ea-column-header.ea-wip-over'
+  end
+
+  def test_swimlanes_are_applied
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :group_by => 'tracker' }
+
+    assert_response :success
+    assert_select 'th.ea-swimlane-label', :minimum => 1
+  end
+
+  def test_colour_basis_is_applied
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :color_base => 'priority' }
+
+    assert_response :success
+    assert_select 'div.ea-card[class*=?]', 'ea-color-'
+  end
+
+  def test_card_fields_come_from_the_query_columns
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :c => %w(status priority) }
+
+    assert_response :success
+    assert_select 'dl.ea-card-fields dt', :minimum => 1
+  end
+
+  def test_avatar_can_be_switched_off
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :show_avatar => '0' }
+
+    assert_response :success
+    assert_select 'img.ea-avatar', false
+  end
+
   def test_index_requires_the_view_permission
     @role.remove_permission!(:view_expert_agile_board)
 

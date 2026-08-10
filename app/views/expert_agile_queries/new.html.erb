@@ -1,0 +1,8 @@
+<h2><%= l(:label_expert_agile_board_new) %></h2>
+
+<%= form_tag(@project ? project_expert_agile_queries_path(@project) : expert_agile_queries_path) do %>
+  <%= fields_for :query, @query do |f| %>
+    <%= render :partial => 'form', :locals => { :f => f } %>
+  <% end %>
+  <%= submit_tag l(:button_save) %>
+<% end %>
