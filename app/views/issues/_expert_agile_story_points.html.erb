@@ -1,0 +1,15 @@
+<%# Story points in the issue attribute table.
+    Parent issues also show the subtree total, which is the number that matters
+    when a story is split into sub-tasks. %>
+<div class="attribute expert-agile-story-points">
+  <div class="label"><%= l(:label_expert_agile_story_points) %>:</div>
+  <div class="value">
+    <%= issue.story_points %>
+    <% total = issue.total_story_points %>
+    <% if total.present? && total.to_i != issue.story_points.to_i %>
+      <span class="expert-agile-total-story-points">
+        (<%= l(:label_expert_agile_total_story_points) %>: <%= total.to_i %>)
+      </span>
+    <% end %>
+  </div>
+</div>

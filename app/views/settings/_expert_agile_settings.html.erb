@@ -1,0 +1,149 @@
+<%# Plugin settings (Administration -> Plugins -> Redmine expert Agile).
+    Every key rendered here has a declared default in init.rb. %>
+
+<fieldset class="box tabular">
+  <legend><%= l(:label_expert_agile_settings_board) %></legend>
+
+  <p>
+    <label for="settings_default_card_columns"><%= l(:label_expert_agile_default_card_columns) %></label>
+    <%= text_field_tag 'settings[default_card_columns]', @settings['default_card_columns'], :size => 50 %>
+    <em class="info"><%= l(:text_expert_agile_default_card_columns) %></em>
+  </p>
+
+  <p>
+    <label for="settings_issues_per_column"><%= l(:label_expert_agile_issues_per_column) %></label>
+    <%= text_field_tag 'settings[issues_per_column]', @settings['issues_per_column'], :size => 6 %>
+  </p>
+
+  <p>
+    <label for="settings_board_items_limit"><%= l(:label_expert_agile_board_items_limit) %></label>
+    <%= text_field_tag 'settings[board_items_limit]', @settings['board_items_limit'], :size => 6 %>
+    <em class="info"><%= l(:text_expert_agile_board_items_limit) %></em>
+  </p>
+
+  <p>
+    <label for="settings_allow_create_card"><%= l(:label_expert_agile_allow_create_card) %></label>
+    <%= hidden_field_tag 'settings[allow_create_card]', '0' %>
+    <%= check_box_tag 'settings[allow_create_card]', '1', @settings['allow_create_card'].to_s == '1' %>
+  </p>
+
+  <p>
+    <label for="settings_auto_assign_on_move"><%= l(:label_expert_agile_auto_assign_on_move) %></label>
+    <%= hidden_field_tag 'settings[auto_assign_on_move]', '0' %>
+    <%= check_box_tag 'settings[auto_assign_on_move]', '1', @settings['auto_assign_on_move'].to_s == '1' %>
+    <em class="info"><%= l(:text_expert_agile_auto_assign_on_move) %></em>
+  </p>
+
+  <p>
+    <label for="settings_minimize_closed"><%= l(:label_expert_agile_minimize_closed) %></label>
+    <%= hidden_field_tag 'settings[minimize_closed]', '0' %>
+    <%= check_box_tag 'settings[minimize_closed]', '1', @settings['minimize_closed'].to_s == '1' %>
+  </p>
+</fieldset>
+
+<fieldset class="box tabular">
+  <legend><%= l(:label_expert_agile_settings_colors) %></legend>
+
+  <p>
+    <label for="settings_color_base"><%= l(:label_expert_agile_color_base) %></label>
+    <%= select_tag 'settings[color_base]',
+                   options_for_select(RedmineExpertAgile::COLOR_BASES.map { |b| [l("label_expert_agile_color_base_#{b}"), b] },
+                                      @settings['color_base']) %>
+  </p>
+
+  <p>
+    <label for="settings_status_colors"><%= l(:label_expert_agile_status_colors) %></label>
+    <%= hidden_field_tag 'settings[status_colors]', '0' %>
+    <%= check_box_tag 'settings[status_colors]', '1', @settings['status_colors'].to_s == '1' %>
+  </p>
+</fieldset>
+
+<fieldset class="box tabular">
+  <legend><%= l(:label_expert_agile_settings_estimates) %></legend>
+
+  <p>
+    <label for="settings_estimate_units"><%= l(:label_expert_agile_estimate_units) %></label>
+    <%= select_tag 'settings[estimate_units]',
+                   options_for_select(RedmineExpertAgile::ESTIMATE_UNITS.map { |u| [l("label_expert_agile_estimate_units_#{u}"), u] },
+                                      @settings['estimate_units']) %>
+  </p>
+
+  <p>
+    <label for="settings_story_points_on"><%= l(:label_expert_agile_story_points_on) %></label>
+    <%= hidden_field_tag 'settings[story_points_on]', '0' %>
+    <%= check_box_tag 'settings[story_points_on]', '1', @settings['story_points_on'].to_s == '1' %>
+  </p>
+
+  <p>
+    <label for="settings_trackers_for_sp"><%= l(:label_expert_agile_trackers_for_sp) %></label>
+    <%# Deselecting every tracker posts nothing at all, which would silently
+        keep the previous value — the empty entry makes "none selected" explicit. %>
+    <%= hidden_field_tag 'settings[trackers_for_sp][]', '' %>
+    <%= select_tag 'settings[trackers_for_sp]',
+                   options_for_select(Tracker.sorted.map { |t| [t.name, t.id.to_s] },
+                                      @settings['trackers_for_sp'].to_s.split(',')),
+                   :multiple => true %>
+    <em class="info"><%= l(:text_expert_agile_trackers_for_sp) %></em>
+  </p>
+
+  <p>
+    <label for="settings_sp_values"><%= l(:label_expert_agile_sp_values) %></label>
+    <%= text_field_tag 'settings[sp_values]', @settings['sp_values'], :size => 50 %>
+    <em class="info"><%= l(:text_expert_agile_sp_values) %></em>
+  </p>
+</fieldset>
+
+<fieldset class="box tabular">
+  <legend><%= l(:label_expert_agile_settings_sprints) %></legend>
+
+  <p>
+    <label for="settings_sprints_on"><%= l(:label_expert_agile_sprints_on) %></label>
+    <%= hidden_field_tag 'settings[sprints_on]', '0' %>
+    <%= check_box_tag 'settings[sprints_on]', '1', @settings['sprints_on'].to_s == '1' %>
+  </p>
+
+  <p>
+    <label for="settings_allow_overlapping_sprints"><%= l(:label_expert_agile_allow_overlapping_sprints) %></label>
+    <%= hidden_field_tag 'settings[allow_overlapping_sprints]', '0' %>
+    <%= check_box_tag 'settings[allow_overlapping_sprints]', '1', @settings['allow_overlapping_sprints'].to_s == '1' %>
+  </p>
+</fieldset>
+
+<fieldset class="box tabular">
+  <legend><%= l(:label_expert_agile_settings_charts) %></legend>
+
+  <p>
+    <label for="settings_default_chart"><%= l(:label_expert_agile_default_chart) %></label>
+    <%= text_field_tag 'settings[default_chart]', @settings['default_chart'], :size => 30 %>
+  </p>
+
+  <p>
+    <label for="settings_exclude_weekends"><%= l(:label_expert_agile_exclude_weekends) %></label>
+    <%= hidden_field_tag 'settings[exclude_weekends]', '0' %>
+    <%= check_box_tag 'settings[exclude_weekends]', '1', @settings['exclude_weekends'].to_s == '1' %>
+  </p>
+
+  <p>
+    <label for="settings_hide_closed_issues_data"><%= l(:label_expert_agile_hide_closed_issues_data) %></label>
+    <%= hidden_field_tag 'settings[hide_closed_issues_data]', '0' %>
+    <%= check_box_tag 'settings[hide_closed_issues_data]', '1', @settings['hide_closed_issues_data'].to_s == '1' %>
+  </p>
+
+  <p>
+    <label for="settings_chart_future_data"><%= l(:label_expert_agile_chart_future_data) %></label>
+    <%= hidden_field_tag 'settings[chart_future_data]', '0' %>
+    <%= check_box_tag 'settings[chart_future_data]', '1', @settings['chart_future_data'].to_s == '1' %>
+  </p>
+
+  <p>
+    <label for="settings_chart_items_limit"><%= l(:label_expert_agile_chart_items_limit) %></label>
+    <%= text_field_tag 'settings[chart_items_limit]', @settings['chart_items_limit'], :size => 6 %>
+    <em class="info"><%= l(:text_expert_agile_chart_items_limit) %></em>
+  </p>
+
+  <p>
+    <label for="settings_chart_cache_minutes"><%= l(:label_expert_agile_chart_cache_minutes) %></label>
+    <%= text_field_tag 'settings[chart_cache_minutes]', @settings['chart_cache_minutes'], :size => 6 %>
+    <em class="info"><%= l(:text_expert_agile_chart_cache_minutes) %></em>
+  </p>
+</fieldset>

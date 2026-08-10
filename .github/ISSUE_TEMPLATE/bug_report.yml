@@ -1,0 +1,72 @@
+name: Bug report
+description: Report a problem with the expert Agile plugin
+labels: ["bug"]
+body:
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight
+      options:
+        - label: I am running the latest release of the plugin
+          required: true
+        - label: The RedmineUP Agile module is not enabled on the same project
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the board of project X
+        2. Drag a card from "New" to "In progress"
+        3. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Board / drag & drop
+        - Story points
+        - Sprints
+        - Backlog planner
+        - Charts
+        - Colors
+        - REST API
+        - Installation / migration
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Plugin version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Redmine version, Ruby version, database, and other installed plugins.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      render: text

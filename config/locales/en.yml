@@ -1,0 +1,120 @@
+# English locale for redmine_expert_agile.
+#
+# Keep this file line-for-line in sync with de.yml — same keys, same order.
+# Note: "expert" is the company name and stays lowercase in every user-facing
+# value, including at the start of a label.
+en:
+  # --- Project modules ------------------------------------------------
+  project_module_expert_agile: expert Agile
+  project_module_expert_agile_backlog: expert Agile Backlog
+
+  # --- Permissions ----------------------------------------------------
+  permission_view_expert_agile_board: View agile board
+  permission_edit_expert_agile_board: Edit agile board
+  permission_add_expert_agile_queries: Save agile boards
+  permission_manage_public_expert_agile_queries: Manage public agile boards
+  permission_view_expert_agile_charts: View agile charts
+  permission_manage_expert_agile_sprints: Manage sprints
+  permission_view_expert_agile_backlog: View backlog
+  permission_manage_expert_agile_backlog: Manage backlog
+
+  # --- General labels -------------------------------------------------
+  label_expert_agile: expert Agile
+  label_expert_agile_board: Agile board
+  label_expert_agile_backlog: Backlog
+  label_expert_agile_charts: Agile charts
+
+  # --- Settings: sections ---------------------------------------------
+  label_expert_agile_settings_board: Board
+  label_expert_agile_settings_colors: Colors
+  label_expert_agile_settings_estimates: Estimates
+  label_expert_agile_settings_sprints: Sprints
+  label_expert_agile_settings_charts: Charts
+
+  # --- Settings: board ------------------------------------------------
+  label_expert_agile_default_card_columns: Default card fields
+  text_expert_agile_default_card_columns: Comma separated field names shown on new boards, e.g. tracker,assigned_to
+  label_expert_agile_issues_per_column: Issues per column
+  label_expert_agile_board_items_limit: Board item limit
+  text_expert_agile_board_items_limit: Maximum number of issues loaded into a single board render
+  label_expert_agile_allow_create_card: Allow creating issues on the board
+  label_expert_agile_auto_assign_on_move: Assign to me when moving a card
+  text_expert_agile_auto_assign_on_move: Only applies to unassigned issues whose status actually changes
+  label_expert_agile_minimize_closed: Collapse closed columns
+
+  # --- Settings: colors -----------------------------------------------
+  label_expert_agile_color_base: Color cards by
+  label_expert_agile_color_base_none: No color
+  label_expert_agile_color_base_tracker: Tracker
+  label_expert_agile_color_base_priority: Priority
+  label_expert_agile_color_base_status: Status
+  label_expert_agile_color_base_assignee: Assignee
+  label_expert_agile_color_base_project: Project
+  label_expert_agile_color_base_issue: Issue
+  label_expert_agile_color_base_spent_time: Spent time
+  label_expert_agile_status_colors: Color column headers by status
+
+  # --- Settings: estimates --------------------------------------------
+  label_expert_agile_estimate_units: Estimation unit
+  label_expert_agile_estimate_units_hours: Hours
+  label_expert_agile_estimate_units_story_points: Story points
+  label_expert_agile_story_points_on: Enable story points
+  label_expert_agile_trackers_for_sp: Trackers using story points
+  text_expert_agile_trackers_for_sp: Select none to enable story points for every tracker
+  label_expert_agile_sp_values: Story point values
+  text_expert_agile_sp_values: Comma separated values offered in the story point selector
+
+  # --- Settings: sprints ----------------------------------------------
+  label_expert_agile_sprints_on: Enable sprints
+  label_expert_agile_allow_overlapping_sprints: Allow overlapping sprints
+
+  # --- Settings: charts -----------------------------------------------
+  label_expert_agile_default_chart: Default chart
+  label_expert_agile_exclude_weekends: Exclude weekends from the ideal line
+  label_expert_agile_hide_closed_issues_data: Hide closed issues in chart data
+  label_expert_agile_chart_future_data: Show future data on charts
+  label_expert_agile_chart_items_limit: Chart item limit
+  text_expert_agile_chart_items_limit: Charts that replay issue history refuse to render above this many issues
+  label_expert_agile_chart_cache_minutes: Chart cache duration (minutes)
+  text_expert_agile_chart_cache_minutes: Computed chart series are cached for this long; 0 disables caching
+
+  # --- Story points ---------------------------------------------------
+  field_story_points: Story points
+  label_expert_agile_story_points: Story points
+  label_expert_agile_total_story_points: Total story points
+
+  # --- Sprints --------------------------------------------------------
+  field_sprint: Sprint
+  label_expert_agile_sprint: Sprint
+  label_expert_agile_sprint_plural: Sprints
+  label_expert_agile_sprint_new: New sprint
+  label_expert_agile_sprint_status_open: Open
+  label_expert_agile_sprint_status_active: Active
+  label_expert_agile_sprint_status_closed: Closed
+  label_expert_agile_sprint_sharing_none: Not shared
+  label_expert_agile_sprint_sharing_descendants: With subprojects
+  label_expert_agile_sprint_sharing_hierarchy: With project hierarchy
+  label_expert_agile_sprint_sharing_tree: With project tree
+  label_expert_agile_sprint_sharing_system: With all projects
+  error_expert_agile_sprint_dates_order: End date must not be before the start date
+  error_expert_agile_sprint_dates_overlap: Overlaps another sprint in this project
+  error_expert_agile_sprint_has_open_issues: Cannot be closed while it still has open issues
+
+  # --- Board ----------------------------------------------------------
+  label_expert_agile_wip_limit: WIP limit
+  text_expert_agile_wip_limit_exceeded: The WIP limit for this column is exceeded
+  error_expert_agile_status_transition_not_allowed: The workflow does not allow this status change
+  error_expert_agile_issue_not_editable: You are not allowed to edit this issue
+  label_expert_agile_swimlane_none: No swimlanes
+  label_expert_agile_board_truncated: Only the first %{count} issues are shown
+
+  # --- Charts ---------------------------------------------------------
+  label_expert_agile_chart_burndown: Burndown
+  label_expert_agile_chart_burnup: Burnup
+  label_expert_agile_chart_velocity: Velocity
+  label_expert_agile_chart_cumulative_flow: Cumulative flow
+  label_expert_agile_chart_cycle_time: Cycle time
+  label_expert_agile_chart_unit_issues: Issues
+  label_expert_agile_chart_unit_hours: Hours
+  label_expert_agile_chart_unit_story_points: Story points
+  text_expert_agile_chart_too_many_items: Too many issues to compute this chart; narrow the filters

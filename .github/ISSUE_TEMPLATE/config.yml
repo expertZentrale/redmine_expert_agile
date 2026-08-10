@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/expertZentrale/redmine_expert_agile/blob/main/README.md
+    about: Installation, configuration and permissions.
+  - name: Changelog
+    url: https://github.com/expertZentrale/redmine_expert_agile/blob/main/CHANGELOG.md
+    about: What changed in each release.

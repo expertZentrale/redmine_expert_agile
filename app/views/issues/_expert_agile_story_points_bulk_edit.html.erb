@@ -1,0 +1,19 @@
+<%# Story points in the bulk edit form.
+    Follows Redmine's bulk edit convention: blank leaves the value untouched,
+    "none" clears it. IssuesControllerPatch translates 'none' to a blank value. %>
+<% values = RedmineExpertAgile.sp_values %>
+<p>
+  <label for="issue_expert_agile_data_attributes_story_points">
+    <%= l(:label_expert_agile_story_points) %>
+  </label>
+  <% if values.any? %>
+    <%= select_tag 'issue[expert_agile_data_attributes][story_points]',
+                   options_for_select([[l(:label_no_change_option), ''],
+                                       [l(:label_none), 'none']] + values.map { |v| [v.to_s, v] }),
+                   :id => 'issue_expert_agile_data_attributes_story_points' %>
+  <% else %>
+    <%= text_field_tag 'issue[expert_agile_data_attributes][story_points]', '',
+                       :size => 6,
+                       :id => 'issue_expert_agile_data_attributes_story_points' %>
+  <% end %>
+</p>

@@ -1,0 +1,122 @@
+# Redmine expert Agile Plugin
+#
+# Copyright (C) 2026 Dennis Buehring
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version. See LICENSE for the full text.
+#
+# Agile boards for Redmine: a Kanban/Scrum board built on Redmine's own query
+# system, story points, sprints with a backlog planner, and burndown/burnup/
+# velocity/cumulative-flow/cycle-time charts.
+#
+# Naming note: "expert" is the company name and is always written with a
+# lowercase "e" in user-facing text. Code identifiers keep their normal casing.
+
+require File.expand_path('../lib/redmine_expert_agile', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/hooks', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/patches/issue_patch', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/patches/issue_query_patch', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/patches/issues_controller_patch', __FILE__)
+
+Redmine::Plugin.register :redmine_expert_agile do
+  name 'Redmine expert Agile'
+  author 'Dennis Buehring'
+  description 'Agile boards, story points, sprints and charts for Redmine'
+  version '0.1.0'
+  requires_redmine :version_or_higher => '5.0'
+  url 'https://github.com/expertZentrale/redmine_expert_agile'
+
+  # Every default is declared here on purpose. The RedmineUP plugin declares
+  # only one default and hides the rest in reader methods, so a fresh install
+  # has an almost empty settings hash and every `.to_i > 0` check silently
+  # reads as false. All values are strings ('0'/'1' for booleans), matching
+  # the convention used by redmine_expert_helpdesk.
+  settings :partial => 'settings/expert_agile_settings',
+           :default => {
+             # --- Board -------------------------------------------------
+             # Card fields shown by default on a new board (comma separated).
+             'default_card_columns'    => 'tracker,assigned_to',
+             # Cards rendered per column before "load more" kicks in.
+             'issues_per_column'       => '10',
+             # Hard cap on issues pulled into one board render.
+             'board_items_limit'       => '500',
+             'allow_create_card'       => '0',
+             'auto_assign_on_move'     => '0',
+             'minimize_closed'         => '0',
+
+             # --- Colors ------------------------------------------------
+             # none | tracker | priority | status | assignee | project | issue | spent_time
+             'color_base'              => 'none',
+             'status_colors'           => '0',
+
+             # --- Estimates ---------------------------------------------
+             # hours | story_points — the unit shown on cards and totals.
+             'estimate_units'          => 'hours',
+             'story_points_on'         => '0',
+             # Empty means "all trackers".
+             'trackers_for_sp'         => '',
+             # Suggested values in the story point selector (modified Fibonacci).
+             'sp_values'               => '0,1,2,3,5,8,13,20,40,100',
+
+             # --- Sprints -----------------------------------------------
+             'sprints_on'              => '0',
+             'allow_overlapping_sprints' => '0',
+
+             # --- Charts ------------------------------------------------
+             'default_chart'           => 'burndown',
+             'exclude_weekends'        => '0',
+             'hide_closed_issues_data' => '0',
+             'chart_future_data'       => '0',
+             # Cap for the journal-projection charts.
+             'chart_items_limit'       => '1000',
+             # Minutes to cache computed chart series (0 disables caching).
+             'chart_cache_minutes'     => '60'
+           }
+
+  # Board, charts and sprints.
+  project_module :expert_agile do
+    permission :view_expert_agile_board,
+               { :expert_agile_boards  => [:index, :issue_tooltip, :agile_data],
+                 :expert_agile_queries => [:index] },
+               :read => true
+    permission :edit_expert_agile_board,
+               { :expert_agile_boards => [:update, :create_issue, :edit_issue, :update_issue] },
+               :require => :member
+    permission :add_expert_agile_queries,
+               { :expert_agile_queries => [:new, :create, :edit, :update, :destroy] },
+               :require => :loggedin
+    permission :manage_public_expert_agile_queries,
+               { :expert_agile_queries => [:new, :create, :edit, :update, :destroy] },
+               :require => :member
+    permission :view_expert_agile_charts,
+               { :expert_agile_charts         => [:show, :render_chart],
+                 :expert_agile_charts_queries => [:index] },
+               :read => true
+    permission :manage_expert_agile_sprints,
+               { :expert_agile_sprints => [:index, :show, :new, :create, :edit, :update, :destroy] },
+               :require => :member
+  end
+
+  # Backlog planner. Separate module so a project can run a plain Kanban board
+  # without the backlog UI, mirroring how RedmineUP splits :agile/:agile_backlog.
+  project_module :expert_agile_backlog do
+    permission :view_expert_agile_backlog,
+               { :expert_agile_backlogs => [:index, :load_more, :autocomplete] },
+               :read => true
+    permission :manage_expert_agile_backlog,
+               { :expert_agile_backlogs => [:update] },
+               :require => :member
+  end
+end
+
+# Patches are applied here, at the bottom of init.rb, rather than from a
+# Rails.configuration.to_prepare block. Redmine already executes init.rb inside
+# a to_prepare callback (PluginLoader#run_initializer) and re-runs it on every
+# reload in development; a to_prepare registered from in here would never fire
+# in production, because the callbacks have already been copied into the
+# reloader by that point.
+RedmineExpertAgile::Patches::IssuePatch.apply!
+RedmineExpertAgile::Patches::IssueQueryPatch.apply!
+RedmineExpertAgile::Patches::IssuesControllerPatch.apply!

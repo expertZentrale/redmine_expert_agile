@@ -1,0 +1,120 @@
+# Deutsches Locale fuer redmine_expert_agile.
+#
+# Diese Datei zeilenweise mit en.yml synchron halten — gleiche Keys, gleiche
+# Reihenfolge. Hinweis: "expert" ist der Firmenname und bleibt in jedem
+# sichtbaren Text klein geschrieben, auch am Anfang eines Labels.
+de:
+  # --- Projektmodule --------------------------------------------------
+  project_module_expert_agile: expert Agile
+  project_module_expert_agile_backlog: expert Agile Backlog
+
+  # --- Berechtigungen -------------------------------------------------
+  permission_view_expert_agile_board: Agile-Board ansehen
+  permission_edit_expert_agile_board: Agile-Board bearbeiten
+  permission_add_expert_agile_queries: Agile-Boards speichern
+  permission_manage_public_expert_agile_queries: Oeffentliche Agile-Boards verwalten
+  permission_view_expert_agile_charts: Agile-Diagramme ansehen
+  permission_manage_expert_agile_sprints: Sprints verwalten
+  permission_view_expert_agile_backlog: Backlog ansehen
+  permission_manage_expert_agile_backlog: Backlog verwalten
+
+  # --- Allgemeine Labels ----------------------------------------------
+  label_expert_agile: expert Agile
+  label_expert_agile_board: Agile-Board
+  label_expert_agile_backlog: Backlog
+  label_expert_agile_charts: Agile-Diagramme
+
+  # --- Einstellungen: Abschnitte --------------------------------------
+  label_expert_agile_settings_board: Board
+  label_expert_agile_settings_colors: Farben
+  label_expert_agile_settings_estimates: Schaetzungen
+  label_expert_agile_settings_sprints: Sprints
+  label_expert_agile_settings_charts: Diagramme
+
+  # --- Einstellungen: Board -------------------------------------------
+  label_expert_agile_default_card_columns: Standard-Kartenfelder
+  text_expert_agile_default_card_columns: Kommagetrennte Feldnamen fuer neue Boards, z. B. tracker,assigned_to
+  label_expert_agile_issues_per_column: Tickets pro Spalte
+  label_expert_agile_board_items_limit: Maximale Tickets pro Board
+  text_expert_agile_board_items_limit: Hoechstzahl der Tickets, die in eine Board-Ansicht geladen werden
+  label_expert_agile_allow_create_card: Tickets direkt auf dem Board anlegen
+  label_expert_agile_auto_assign_on_move: Beim Verschieben mir zuweisen
+  text_expert_agile_auto_assign_on_move: Gilt nur fuer nicht zugewiesene Tickets, deren Status sich tatsaechlich aendert
+  label_expert_agile_minimize_closed: Geschlossene Spalten einklappen
+
+  # --- Einstellungen: Farben ------------------------------------------
+  label_expert_agile_color_base: Karten faerben nach
+  label_expert_agile_color_base_none: Keine Farbe
+  label_expert_agile_color_base_tracker: Tracker
+  label_expert_agile_color_base_priority: Prioritaet
+  label_expert_agile_color_base_status: Status
+  label_expert_agile_color_base_assignee: Zugewiesen an
+  label_expert_agile_color_base_project: Projekt
+  label_expert_agile_color_base_issue: Ticket
+  label_expert_agile_color_base_spent_time: Aufgewendete Zeit
+  label_expert_agile_status_colors: Spaltenkoepfe nach Status faerben
+
+  # --- Einstellungen: Schaetzungen ------------------------------------
+  label_expert_agile_estimate_units: Schaetzeinheit
+  label_expert_agile_estimate_units_hours: Stunden
+  label_expert_agile_estimate_units_story_points: Story Points
+  label_expert_agile_story_points_on: Story Points aktivieren
+  label_expert_agile_trackers_for_sp: Tracker mit Story Points
+  text_expert_agile_trackers_for_sp: Nichts auswaehlen aktiviert Story Points fuer alle Tracker
+  label_expert_agile_sp_values: Story-Point-Werte
+  text_expert_agile_sp_values: Kommagetrennte Werte fuer die Story-Point-Auswahl
+
+  # --- Einstellungen: Sprints -----------------------------------------
+  label_expert_agile_sprints_on: Sprints aktivieren
+  label_expert_agile_allow_overlapping_sprints: Ueberlappende Sprints erlauben
+
+  # --- Einstellungen: Diagramme ---------------------------------------
+  label_expert_agile_default_chart: Standard-Diagramm
+  label_expert_agile_exclude_weekends: Wochenenden aus der Ideallinie ausnehmen
+  label_expert_agile_hide_closed_issues_data: Geschlossene Tickets in Diagrammdaten ausblenden
+  label_expert_agile_chart_future_data: Zukuenftige Daten in Diagrammen anzeigen
+  label_expert_agile_chart_items_limit: Maximale Tickets pro Diagramm
+  text_expert_agile_chart_items_limit: Diagramme mit Historienauswertung werden oberhalb dieser Ticketzahl nicht berechnet
+  label_expert_agile_chart_cache_minutes: Diagramm-Cache (Minuten)
+  text_expert_agile_chart_cache_minutes: Berechnete Diagrammdaten werden so lange zwischengespeichert; 0 deaktiviert den Cache
+
+  # --- Story Points ---------------------------------------------------
+  field_story_points: Story Points
+  label_expert_agile_story_points: Story Points
+  label_expert_agile_total_story_points: Story Points gesamt
+
+  # --- Sprints --------------------------------------------------------
+  field_sprint: Sprint
+  label_expert_agile_sprint: Sprint
+  label_expert_agile_sprint_plural: Sprints
+  label_expert_agile_sprint_new: Neuer Sprint
+  label_expert_agile_sprint_status_open: Offen
+  label_expert_agile_sprint_status_active: Aktiv
+  label_expert_agile_sprint_status_closed: Geschlossen
+  label_expert_agile_sprint_sharing_none: Nicht geteilt
+  label_expert_agile_sprint_sharing_descendants: Mit Unterprojekten
+  label_expert_agile_sprint_sharing_hierarchy: Mit Projekthierarchie
+  label_expert_agile_sprint_sharing_tree: Mit Projektbaum
+  label_expert_agile_sprint_sharing_system: Mit allen Projekten
+  error_expert_agile_sprint_dates_order: Enddatum darf nicht vor dem Startdatum liegen
+  error_expert_agile_sprint_dates_overlap: Ueberschneidet sich mit einem anderen Sprint dieses Projekts
+  error_expert_agile_sprint_has_open_issues: Kann nicht geschlossen werden, solange noch offene Tickets enthalten sind
+
+  # --- Board ----------------------------------------------------------
+  label_expert_agile_wip_limit: WIP-Limit
+  text_expert_agile_wip_limit_exceeded: Das WIP-Limit dieser Spalte ist ueberschritten
+  error_expert_agile_status_transition_not_allowed: Der Workflow erlaubt diesen Statuswechsel nicht
+  error_expert_agile_issue_not_editable: Sie duerfen dieses Ticket nicht bearbeiten
+  label_expert_agile_swimlane_none: Keine Swimlanes
+  label_expert_agile_board_truncated: Es werden nur die ersten %{count} Tickets angezeigt
+
+  # --- Diagramme ------------------------------------------------------
+  label_expert_agile_chart_burndown: Burndown
+  label_expert_agile_chart_burnup: Burnup
+  label_expert_agile_chart_velocity: Velocity
+  label_expert_agile_chart_cumulative_flow: Kumulierter Fluss
+  label_expert_agile_chart_cycle_time: Durchlaufzeit
+  label_expert_agile_chart_unit_issues: Tickets
+  label_expert_agile_chart_unit_hours: Stunden
+  label_expert_agile_chart_unit_story_points: Story Points
+  text_expert_agile_chart_too_many_items: Zu viele Tickets fuer dieses Diagramm; bitte Filter einschraenken

@@ -1,0 +1,7 @@
+# Extra gems for redmine_expert_agile.
+#
+# Redmine loads plugins/*/{Gemfile,PluginGemfile} automatically. The plugin
+# deliberately has no runtime dependencies: charts use a vendored Chart.js
+# build under assets/javascripts, and drag & drop uses the jQuery UI that
+# Redmine core already ships. Nothing to declare yet — the file exists so the
+# convention is visible and a dependency can be added without ceremony.

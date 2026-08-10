@@ -1,0 +1,128 @@
+name: Release
+
+# Baut bei jedem gepushten vX.Y.Z-Tag ein Plugin-Archiv (.zip + .tar.gz) und
+# veroeffentlicht ein GitHub-Release mit Notizen aus der CHANGELOG.md.
+# Laeuft NUR auf Tags (nicht auf Branches/PRs) – Releases entstehen also nur,
+# wenn der Maintainer bewusst einen Tag pusht. Ablauf zum Veroeffentlichen:
+#   1. version '...' in init.rb setzen, committen, nach main pushen
+#   2. git tag vX.Y.Z (auf denselben Commit) && git push origin vX.Y.Z
+# Die Versionsnummer lebt in init.rb (Single Source of Truth); der Workflow
+# PRUEFT nur, dass init.rb-Version und Tag uebereinstimmen, und paketiert unveraendert.
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write            # zum Anlegen des Releases + Hochladen der Archive
+
+# Laeufe desselben Tags nicht abbrechen (ein Release soll fertig werden).
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Vollstaendige Historie + Tags auschecken (fuer den Diff der
+      #    Release-Notes gegen den vorherigen Tag).
+      - name: Checkout (volle Historie + Tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Version aus dem Tag ableiten und als semver validieren.
+      - name: Version aus Tag ableiten + validieren
+        id: ver
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VER="${TAG#v}"
+          if ! echo "$VER" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.]+)?$'; then
+            echo "::error::Tag '$TAG' ist keine gueltige semver-Version (erwartet vX.Y.Z)"
+            exit 1
+          fi
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG"     >> "$GITHUB_OUTPUT"
+          case "$VER" in
+            *-*) echo "prerelease=true"  >> "$GITHUB_OUTPUT" ;;
+            *)   echo "prerelease=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      # 3. Sicherstellen, dass die in init.rb gepflegte Version zum Tag passt.
+      #    init.rb ist die Single Source of Truth – der Tag muss darauf zeigen.
+      - name: init.rb-Version gegen Tag pruefen
+        run: |
+          INIT_VER=$(sed -nE "s/^[[:space:]]*version '([^']*)'.*/\1/p" init.rb | head -1)
+          echo "init.rb: '${INIT_VER}'  /  Tag: '${{ steps.ver.outputs.version }}'"
+          if [ "$INIT_VER" != "${{ steps.ver.outputs.version }}" ]; then
+            echo "::error::init.rb-Version '${INIT_VER}' stimmt nicht mit dem Tag '${{ steps.ver.outputs.version }}' ueberein. Bitte version in init.rb setzen, committen und den Tag auf diesen Commit zeigen lassen."
+            exit 1
+          fi
+
+      # 4. Release-Notes aus der CHANGELOG.md erzeugen: der Abschnitt
+      #    "## [<version>]", der zum getaggten Release gehoert.
+      #
+      #    Frueher wurde stattdessen der Diff gegen den vorherigen Tag genommen.
+      #    Das ging nur so lange gut, wie die CHANGELOG-Abschnitte nie umsortiert
+      #    wurden: git diff arbeitet zeilenweise, ein verschobener Block ist fuer
+      #    ihn "geloescht und neu hinzugefuegt". Als die Ueberschriften 2026-08-04
+      #    auf echte Versionen aufgeteilt wurden, waeren so die Eintraege von
+      #    0.2.1 und 0.2.0 in den Notes von 0.2.2 gelandet. Der Abschnitt zur
+      #    getaggten Version ist die direkte Antwort auf die Frage und braucht
+      #    den Vergleich gar nicht.
+      - name: Release-Notes aus CHANGELOG erzeugen
+        run: |
+          VER="${{ steps.ver.outputs.version }}"
+          awk -v ver="$VER" '
+            $0 == "## [" ver "]" || index($0, "## [" ver "] ") == 1 { f = 1; next }
+            f && /^## / { exit }
+            f { print }
+          ' CHANGELOG.md > SECTION.md
+          if ! grep -q '[^[:space:]]' SECTION.md; then
+            echo "::error::CHANGELOG.md hat keinen Abschnitt '## [${VER}]'. Bitte den Eintrag fuer diese Version anlegen, committen und den Tag darauf zeigen lassen."
+            exit 1
+          fi
+          {
+            echo "## redmine_expert_agile ${VER} – $(date +%Y-%m-%d)"
+            cat SECTION.md
+          } > RELEASE_NOTES.md
+          rm -f SECTION.md
+          echo "----- RELEASE_NOTES.md -----"
+          cat RELEASE_NOTES.md
+
+      # 5. Plugin paketieren: Laufzeit-Dateien unter einem Top-Level-Ordner
+      #    redmine_expert_agile/ (entpackt direkt nach redmine/plugins/).
+      #    Dev-/CI-/Doku-nur-intern-Dateien werden ausgeschlossen.
+      - name: Plugin paketieren (.zip + .tar.gz)
+        run: |
+          VER="${{ steps.ver.outputs.version }}"
+          STAGE="$RUNNER_TEMP/pkg/redmine_expert_agile"
+          mkdir -p "$STAGE"
+          rsync -a \
+            --exclude='.git' --exclude='.github' --exclude='.claude' \
+            --exclude='.gitignore' --exclude='.gitattributes' \
+            --exclude='test' --exclude='scripts' --exclude='docs' \
+            --exclude='CLAUDE.md' --exclude='plan.md' --exclude='ROADMAP.md' \
+            --exclude='.dev.env*' --exclude='.tokensave' --exclude='RELEASE_NOTES.md' \
+            ./ "$STAGE/"
+          (
+            cd "$RUNNER_TEMP/pkg"
+            zip -rq "$GITHUB_WORKSPACE/redmine_expert_agile-${VER}.zip"    redmine_expert_agile
+            tar czf "$GITHUB_WORKSPACE/redmine_expert_agile-${VER}.tar.gz" redmine_expert_agile
+          )
+          echo "----- Paketinhalt (.zip) -----"
+          unzip -l "redmine_expert_agile-${VER}.zip" | head -n 40
+
+      # 6. GitHub-Release fuer den Tag anlegen und beide Archive anhaengen.
+      - name: GitHub-Release anlegen
+        uses: softprops/action-gh-release@v2   # nutzt GITHUB_TOKEN automatisch
+        with:
+          name: redmine_expert_agile ${{ steps.ver.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          prerelease: ${{ steps.ver.outputs.prerelease }}
+          files: |
+            redmine_expert_agile-${{ steps.ver.outputs.version }}.zip
+            redmine_expert_agile-${{ steps.ver.outputs.version }}.tar.gz

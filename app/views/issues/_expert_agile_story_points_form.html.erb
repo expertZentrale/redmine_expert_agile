@@ -1,0 +1,22 @@
+<%# Story point field on the issue form.
+    Rendered through the nested expert_agile_data association so the value goes
+    through safe_attributes rather than a bespoke controller path. %>
+<% values = RedmineExpertAgile.sp_values %>
+<p>
+  <%= f.fields_for :expert_agile_data, issue.expert_agile_data! do |ea| %>
+    <% if values.any? %>
+      <%= ea.select :story_points,
+                    options_for_select([[l(:label_none), '']] + values.map { |v| [v.to_s, v] },
+                                       issue.story_points),
+                    {},
+                    :id => 'issue_expert_agile_data_attributes_story_points' %>
+      <%= label_tag 'issue_expert_agile_data_attributes_story_points',
+                    l(:label_expert_agile_story_points) %>
+    <% else %>
+      <%# Empty value list means free entry rather than no field at all. %>
+      <%= ea.number_field :story_points, :min => 0, :step => 1, :size => 6 %>
+      <%= label_tag 'issue_expert_agile_data_attributes_story_points',
+                    l(:label_expert_agile_story_points) %>
+    <% end %>
+  <% end %>
+</p>
