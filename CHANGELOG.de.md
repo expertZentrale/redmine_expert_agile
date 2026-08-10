@@ -101,6 +101,14 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Asset-Verzeichnis eines anderen Plugins zu stammen, und Datumswerte werden in die Zeitzone des
   Betrachters umgerechnet, damit ein Diagramm oestlich von UTC nicht um einen Tag verschoben ist.
 
+- **REST-API.** Die Agile-Daten je Ticket sind les- *und* schreibbar — Story Points und
+  Sprint-Zuordnung lassen sich direkt setzen, nicht nur ueber verschachtelte Attribute am
+  Ticket-Endpunkt — dazu vollstaendiges Sprint-CRUD. Eine Sprint-ID wird gegen die Sprints
+  aufgeloest, in die das Projekt des Tickets tatsaechlich planen darf; eine fremde ID wird
+  abgelehnt statt uebernommen. Der Board-Rang ist bewusst nur lesbar: Raenge berechnet der Server
+  aus den Nachbarkarten, und ein vom Client gesetzter Rang wuerde genau das
+  Nebenlaeufigkeitsproblem zurueckholen, das der Entwurf vermeidet. Dokumentiert in `API.md`.
+
 ### Behoben
 
 - **Das Umhuellen von Kernmethoden fuehrt nicht mehr zu Endlosrekursion**, wenn RedmineUP-Plugins

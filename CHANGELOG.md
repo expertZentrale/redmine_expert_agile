@@ -91,6 +91,14 @@ notes from the section matching the pushed tag.
   borrowed from another plugin's asset directory, and dates are converted to the reader's own
   timezone so a chart is not off by one for anyone east of UTC.
 
+- **REST API.** Agile data per issue is readable *and writable* — story points and sprint
+  assignment can be set directly rather than only through nested attributes on the issue endpoint
+  — plus full sprint CRUD. A sprint id is resolved against the sprints the issue's project may
+  actually plan into, so a foreign id is rejected instead of written in. Board rank is
+  deliberately read-only: ranks are computed by the server from a card's neighbours, and letting a
+  client post one would reintroduce the concurrency problem the design avoids. Documented in
+  `API.md`.
+
 ### Fixed
 
 - **Core method wrapping no longer recurses infinitely** when RedmineUP plugins are installed.

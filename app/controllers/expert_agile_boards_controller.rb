@@ -98,15 +98,29 @@ class ExpertAgileBoardsController < ApplicationController
     end
   end
 
+  # Write agile data for one issue.
+  #
+  # RedmineUP exposes agile data read-only, so story points and sprint
+  # assignment can only be set through nested attributes on the issue endpoint.
+  # This makes it a first-class operation.
   def update_agile_data
-    unless @issue.editable?
-      return render_api_head(:forbidden)
+    return head :forbidden unless @issue.editable?
+
+    attributes = params[:expert_agile_data] || {}
+    data = @issue.expert_agile_data || @issue.build_expert_agile_data
+
+    if attributes.key?(:sprint_id) && attributes[:sprint_id].present?
+      # Resolve against the sprints this issue's project may actually plan
+      # into, so an id from elsewhere cannot be written in.
+      sprint = @issue.project.shared_expert_agile_sprints.find_by(:id => attributes[:sprint_id])
+      return render_api_errors(l(:error_expert_agile_container_not_available)) if sprint.nil?
+
+      data.sprint_id = sprint.id
+    elsif attributes.key?(:sprint_id)
+      data.sprint_id = nil
     end
 
-    data = @issue.expert_agile_data || @issue.build_expert_agile_data
-    attributes = params[:expert_agile_data] || {}
-    data.story_points = attributes[:story_points] if attributes.key?(:story_points)
-    data.sprint_id = attributes[:sprint_id] if attributes.key?(:sprint_id)
+    data.story_points = attributes[:story_points].presence if attributes.key?(:story_points)
 
     if data.save
       respond_to { |format| format.api { render_api_ok } }
