@@ -9,6 +9,29 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [0.1.3] - 2026-08-10
+
+### Fixed
+
+- **Board options were lost on the next page load.** Statuses, WIP limits, swimlanes and the
+  colour basis lived only in the URL, so setting a WIP maximum and then reloading — or simply
+  returning to the board from the project menu — silently reverted everything. The board now
+  remembers its configuration in the session, exactly as Redmine's own issue list does. Only what
+  is needed to rebuild the board is stored, not the whole options blob.
+- **Anyone able to save a board could edit and delete other people's private boards.**
+  `editable_by?` checked only the "save boards" permission and ignored ownership entirely. It now
+  mirrors Redmine's own rule: your own boards are yours, public project boards need the manage
+  permission, and global boards stay admin-only.
+- **Saving a board never worked**: the controller assigned `safe_attributes`, which `Query` does
+  not implement, so creating one raised. Name, description and visibility are now assigned
+  explicitly, and visibility is only assignable with the manage permission — a user without it
+  gets a private board rather than a public one, matching Redmine.
+
+### Changed
+
+- Board display state is session-backed, but what a **move** is permitted to do still comes only
+  from the request and the issue's own workflow — never from the session.
+
 ## [0.1.2] - 2026-08-10
 
 ### Added

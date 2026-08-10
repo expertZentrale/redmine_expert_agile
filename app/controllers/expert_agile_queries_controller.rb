@@ -10,6 +10,9 @@ class ExpertAgileQueriesController < ApplicationController
 
   accept_api_auth :index
 
+  helper :queries
+  include QueriesHelper
+
   def index
     scope = ExpertAgileQuery.only_boards.visible
     scope = scope.global_or_on_project(@project) if @project
@@ -33,7 +36,7 @@ class ExpertAgileQueriesController < ApplicationController
     @query = ExpertAgileQuery.new
     @query.project = @project
     @query.user = User.current
-    @query.safe_attributes = params[:query]
+    @query.attributes = query_attributes
     @query.build_from_params(params)
     @query.apply_board_params(params)
 
@@ -49,7 +52,7 @@ class ExpertAgileQueriesController < ApplicationController
   def edit; end
 
   def update
-    @query.safe_attributes = params[:query]
+    @query.attributes = query_attributes
     @query.build_from_params(params)
     @query.apply_board_params(params)
 
@@ -74,6 +77,20 @@ class ExpertAgileQueriesController < ApplicationController
     render_403 unless @query.editable_by?(User.current)
   rescue ActiveRecord::RecordNotFound
     render_404
+  end
+
+  # Query does not include Redmine::SafeAttributes, so the assignable
+  # attributes are listed explicitly rather than handed the raw params.
+  def query_attributes
+    attrs = params[:query] || {}
+    permitted = {}
+    permitted[:name] = attrs[:name] if attrs.key?(:name)
+    permitted[:description] = attrs[:description] if attrs.key?(:description)
+    if attrs.key?(:visibility) &&
+       User.current.allowed_to?(:manage_public_expert_agile_queries, @project, :global => true)
+      permitted[:visibility] = attrs[:visibility]
+    end
+    permitted
   end
 
   # A private board only needs the "save boards" permission; a public one needs

@@ -95,6 +95,44 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'th.ea-column-header.ea-wip-over'
   end
 
+  def test_applied_options_survive_a_reload
+    # The options panel is a GET form, so without session persistence every
+    # setting would live only in the URL and vanish the moment the page was
+    # reloaded or reached again from the project menu.
+    status_id = @issue.status_id
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :board_status_ids => [status_id.to_s],
+                             :wip_limits => { status_id.to_s => ['', '5'] },
+                             :group_by => 'tracker', :color_base => 'priority',
+                             :show_avatar => '0' }
+    assert_response :success
+
+    # Same page again, with no parameters at all.
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'th.ea-column-header[data-column-id]', :count => 1
+    assert_select "th.ea-column-header[data-column-id=?] .ea-column-wip", status_id.to_s,
+                  :text => '5'
+    assert_select 'th.ea-swimlane-label', :minimum => 1
+    assert_select 'img.ea-avatar', false
+  end
+
+  def test_session_board_is_scoped_to_its_project
+    status_id = @issue.status_id
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :board_status_ids => [status_id.to_s] }
+    assert_response :success
+
+    # A different project must not inherit the first project's columns.
+    other = Project.find(5)
+    other.enable_module!(:expert_agile)
+    get :index, :params => { :project_id => other.id }
+
+    assert_response :success
+    assert_select 'th.ea-column-header[data-column-id]', :minimum => 1
+  end
+
   def test_swimlanes_are_applied
     get :index, :params => { :project_id => @project.id, :set_filter => '1',
                              :group_by => 'tracker' }

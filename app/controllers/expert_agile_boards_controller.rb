@@ -139,31 +139,89 @@ class ExpertAgileBoardsController < ApplicationController
     render_404
   end
 
-  # The board a move is being made on, so WIP feedback and the column scope
-  # come from the query the user is actually looking at.
+  SESSION_KEY = :expert_agile_query
+
+  # The board being looked at.
   #
-  # Taken from the request, never from the session. RedmineUP rebuilds it from
-  # the session, so board columns and WIP limits are whatever that user last
-  # rendered — which may be a different board entirely.
+  # Mirrors Redmine's own retrieve_query: an explicit query_id wins, otherwise
+  # `set_filter` builds a board from the request, otherwise the last board is
+  # restored from the session. Without the session step, every option applied
+  # from the panel — statuses, WIP limits, swimlanes — would be lost the moment
+  # the page reloaded or the user came back via the menu, because those live in
+  # the URL and nowhere else.
+  #
+  # Note this is display state only. What a *move* is allowed to do never comes
+  # from here: the target status is checked against
+  # `issue.new_statuses_allowed_to` and the issue's own permissions. That is the
+  # part RedmineUP gets wrong — there the session query decides which columns
+  # exist for the move itself.
   def retrieve_board_query
-    @query = if params[:query_id].present?
-               scope = ExpertAgileQuery.where(:project_id => nil)
-               scope = scope.or(ExpertAgileQuery.where(:project_id => @project)) if @project
-               scope.find(params[:query_id])
-             else
-               ExpertAgileQuery.new(:name => '_', :project => @project)
-             end
-    @query.project = @project
-    if params[:query_id].blank?
+    if params[:query_id].present?
+      @query = find_board_query(params[:query_id])
+      @query.project = @project
+      # A saved board can still be tweaked for this request without the change
+      # being written back to it.
+      if params[:set_filter].present?
+        @query.build_from_params(params)
+        @query.apply_board_params(params)
+      end
+      session[SESSION_KEY] = { :id => @query.id, :project_id => @query.project_id }
+    elsif params[:set_filter].present? || session_state_stale?
+      @query = ExpertAgileQuery.new(:name => '_', :project => @project)
       @query.build_from_params(params)
       @query.apply_board_params(params)
-    elsif params[:set_filter].present?
-      # An explicitly saved board can still be tweaked for this request without
-      # the change being written back to it.
-      @query.build_from_params(params)
-      @query.apply_board_params(params)
+      store_board_session_state
+    else
+      @query = restore_board_from_session
     end
     @query
+  end
+
+  def find_board_query(id)
+    scope = ExpertAgileQuery.where(:project_id => nil)
+    scope = scope.or(ExpertAgileQuery.where(:project_id => @project)) if @project
+    scope.find(id)
+  end
+
+  def session_state_stale?
+    state = session[SESSION_KEY]
+    state.nil? || state[:project_id] != (@project ? @project.id : nil)
+  end
+
+  # Only what is needed to rebuild the board, not the whole options blob.
+  # RedmineUP stores the entire serialized options hash plus every filter in the
+  # cookie session, which a large filter set can push past the 4 KB limit.
+  def store_board_session_state
+    session[SESSION_KEY] = {
+      :project_id => @query.project_id,
+      :filters => @query.filters,
+      :group_by => @query.group_by,
+      :column_names => @query.column_names,
+      :sort => @query.sort_criteria.to_a,
+      :board => @query.board_session_options
+    }
+  end
+
+  def restore_board_from_session
+    state = session[SESSION_KEY]
+    if state[:id]
+      saved = ExpertAgileQuery.find_by(:id => state[:id])
+      if saved
+        saved.project = @project
+        return saved
+      end
+      # The saved board was deleted since; fall through to a fresh one.
+      session[SESSION_KEY] = nil
+      return ExpertAgileQuery.new(:name => '_', :project => @project)
+    end
+
+    query = ExpertAgileQuery.new(:name => '_', :project => @project)
+    query.filters = state[:filters] || {}
+    query.group_by = state[:group_by]
+    query.column_names = state[:column_names]
+    query.sort_criteria = state[:sort] if state[:sort].present?
+    query.restore_board_options(state[:board])
+    query
   end
 
   def status_allowed?(status_id)

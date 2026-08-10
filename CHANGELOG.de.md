@@ -9,6 +9,32 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [0.1.3] - 2026-08-10
+
+### Behoben
+
+- **Board-Optionen gingen beim naechsten Seitenaufruf verloren.** Status, WIP-Limits, Swimlanes
+  und Farbgrundlage lagen nur in der URL; ein gesetztes WIP-Maximum war nach dem Neuladen — oder
+  schon beim Rueckweg ueber das Projektmenue — stillschweigend wieder weg. Das Board merkt sich
+  seine Konfiguration jetzt in der Session, genau wie Redmines eigene Ticketliste. Gespeichert
+  wird nur, was zum Wiederaufbau noetig ist, nicht der gesamte Optionsblock.
+- **Wer Boards speichern durfte, konnte fremde private Boards bearbeiten und loeschen.**
+  `editable_by?` prueft bisher nur die Berechtigung zum Speichern und ignorierte die
+  Eigentuemerschaft. Es folgt nun Redmines eigener Regel: eigene Boards gehoeren einem selbst,
+  oeffentliche Projekt-Boards erfordern die Verwaltungsberechtigung, globale Boards bleiben
+  Administratoren vorbehalten.
+- **Das Speichern eines Boards funktionierte nie**: Der Controller setzte `safe_attributes`, das
+  `Query` nicht kennt, wodurch das Anlegen eine Ausnahme warf. Name, Beschreibung und
+  Sichtbarkeit werden jetzt ausdruecklich zugewiesen; die Sichtbarkeit nur mit der
+  Verwaltungsberechtigung — ohne sie entsteht ein privates statt eines oeffentlichen Boards,
+  wie in Redmine.
+
+### Geaendert
+
+- Der Anzeigezustand des Boards liegt in der Session; was ein **Zug** aendern darf, ergibt sich
+  aber weiterhin ausschliesslich aus der Anfrage und dem Workflow des Tickets — nie aus der
+  Session.
+
 ## [0.1.2] - 2026-08-10
 
 ### Hinzugefuegt

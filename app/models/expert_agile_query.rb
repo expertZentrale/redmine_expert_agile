@@ -129,6 +129,29 @@ class ExpertAgileQuery < IssueQuery
     card_columns.reject { |column| SPECIAL_CARD_COLUMNS.include?(column.name) }
   end
 
+  # The board-specific settings, as a small plain hash, for stashing in the
+  # session between requests. Deliberately not the whole `options` blob.
+  BOARD_SESSION_KEYS = %i(board_status_ids wip_limits color_base board_type
+                          show_avatar sprint_id backlog_enabled).freeze
+
+  def board_session_options
+    BOARD_SESSION_KEYS.each_with_object({}) do |key, acc|
+      value = options[key]
+      acc[key] = value unless value.nil?
+    end
+  end
+
+  def restore_board_options(stored)
+    return self if stored.blank?
+
+    stored.each do |key, value|
+      next unless BOARD_SESSION_KEYS.include?(key.to_sym)
+
+      options[key.to_sym] = value
+    end
+    self
+  end
+
   # Applies the board-specific parts of the options panel. Redmine's own
   # build_from_params covers filters, columns, grouping and sorting; these are
   # the settings core knows nothing about.
@@ -160,12 +183,18 @@ class ExpertAgileQuery < IssueQuery
 
   # --- Visibility ----------------------------------------------------
 
+  # Mirrors Query#editable_by? with the agile permission substituted.
+  #
+  # Ownership is what matters for a private board: an earlier version checked
+  # only the "save boards" permission, which meant anyone allowed to save a
+  # board of their own could also edit and delete everyone else's private ones.
+  # A global board (no project) stays admin-only, as in core.
   def editable_by?(user)
     return false unless user
     return true if user.admin?
-    return user.allowed_to?(:add_expert_agile_queries, project) if is_private?
+    return true if user_id == user.id
 
-    user.allowed_to?(:manage_public_expert_agile_queries, project)
+    is_public? && !is_global? && user.allowed_to?(:manage_public_expert_agile_queries, project)
   end
 
   # --- Columns -------------------------------------------------------
