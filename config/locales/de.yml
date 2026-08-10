@@ -22,6 +22,7 @@ de:
   label_expert_agile: expert Agile
   label_expert_agile_board: Agile-Board
   label_expert_agile_board_new: Neues Board
+  label_expert_agile_board_plural: Boards
   label_expert_agile_backlog: Backlog
   label_expert_agile_charts: Agile-Diagramme
 

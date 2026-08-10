@@ -164,6 +164,37 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'img.ea-avatar', false
   end
 
+  # --- Sidebar ---------------------------------------------------------
+
+  def test_sidebar_lists_saved_boards_and_the_other_agile_views
+    mine = ExpertAgileQuery.create!(:name => 'Mine', :project => @project,
+                                    :user => User.find(2),
+                                    :visibility => Query::VISIBILITY_PRIVATE)
+    shared = ExpertAgileQuery.create!(:name => 'Shared', :project => @project,
+                                      :user => User.find(1),
+                                      :visibility => Query::VISIBILITY_PUBLIC)
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select '#sidebar a', :text => mine.name
+    assert_select '#sidebar a', :text => shared.name
+    assert_select '#sidebar ul.ea-sidebar-nav a', :minimum => 1
+  end
+
+  def test_sidebar_does_not_list_chart_queries_among_the_boards
+    # ExpertAgileChartsQuery is a subclass, so an unqualified lookup would show
+    # saved charts in the boards list.
+    ExpertAgileChartsQuery.create!(:name => 'A chart', :project => @project,
+                                   :user => User.find(2),
+                                   :visibility => Query::VISIBILITY_PUBLIC)
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select '#sidebar a', { :text => 'A chart', :count => 0 }
+  end
+
   def test_index_requires_the_view_permission
     @role.remove_permission!(:view_expert_agile_board)
 

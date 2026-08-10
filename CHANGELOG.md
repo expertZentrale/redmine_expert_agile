@@ -9,6 +9,31 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [0.1.4] - 2026-08-10
+
+### Added
+
+- **Sidebar on the agile pages.** The board and the charts page now carry a sidebar in the same
+  shape as Redmine's issue list: quick links between board, charts and backlog, the saved boards
+  (or saved charts) split into "My queries" and shared ones, and the project's sprints with a
+  link to create another. Switching between views is a single click.
+- **Saved charts.** `ExpertAgileChartsQueriesController` — like the board's, its routes and
+  permissions had existed since the first commit with no controller behind them. A chart's
+  selection, unit, interval and date range are saved with it. It is the board's query controller
+  pointed at a different class rather than a second copy.
+
+### Fixed
+
+- **Saving a chart was refused with 403.** Only `:index` was mapped for the charts-query
+  controller, and `find_optional_project` authorises the controller/action pair — so every other
+  action was denied by default rather than by intent.
+- **The "save board" link went to the wrong route.** It pointed at the collection path, which is
+  `#index` and simply redirects back to the board, silently discarding the configuration being
+  saved. It now posts to the `new` action, as Redmine's own query form does.
+- **Saved charts no longer appear among the saved boards.** `ExpertAgileChartsQuery` is a
+  subclass of `ExpertAgileQuery`, so an unqualified lookup listed both; the sidebar filters on the
+  exact type.
+
 ## [0.1.3] - 2026-08-10
 
 ### Fixed

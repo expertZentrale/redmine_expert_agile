@@ -67,6 +67,12 @@
 <%# JSON island: read by expert_agile_board.js, never executed as script. %>
 <script type="application/json" id="ea-board-data"><%= expert_agile_board_data(@query, @project).html_safe %></script>
 
+<% content_for :sidebar do %>
+  <%= render :partial => 'expert_agile_common/sidebar',
+             :locals => { :sidebar_query_class => ExpertAgileQuery,
+                          :sidebar_title => l(:label_expert_agile_board_plural) } %>
+<% end %>
+
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag 'expert_agile', :plugin => 'redmine_expert_agile' %>
   <%= javascript_include_tag 'expert_agile_board', :plugin => 'redmine_expert_agile' %>

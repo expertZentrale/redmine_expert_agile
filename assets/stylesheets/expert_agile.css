@@ -294,3 +294,10 @@
 }
 .ea-card-assignee { display: inline-flex; align-items: center; min-width: 0; }
 .ea-card-assignee-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* --- Sidebar ------------------------------------------------------------- */
+.ea-sidebar-nav { list-style: none; padding-left: 0; margin: 0 0 10px; }
+.ea-sidebar-nav li { margin: 2px 0; }
+.ea-sidebar-nav a.selected { font-weight: bold; }
+.ea-sidebar-nav a.ea-sprint-active { font-weight: bold; }
+.ea-sidebar-nav a.ea-sprint-closed { color: #8a919b; }

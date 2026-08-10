@@ -1,0 +1,43 @@
+<%# Sidebar for the agile pages: quick navigation between the three views, plus
+    the saved boards or charts, in the same shape as Redmine's issue list
+    sidebar (My queries / Queries).
+
+    `query_links` is Redmine's own helper — it builds each link from the
+    current controller and action, so this one partial serves both the board
+    and the charts page without knowing which it is on. %>
+
+<h3><%= l(:label_expert_agile) %></h3>
+<ul class="ea-sidebar-nav">
+  <li><%= link_to l(:label_expert_agile_board),
+                  board_path_for(@project),
+                  :class => (controller_name == 'expert_agile_boards' ? 'selected' : nil) %></li>
+  <% if User.current.allowed_to?(:view_expert_agile_charts, @project, :global => @project.nil?) %>
+    <li><%= link_to l(:label_expert_agile_charts),
+                    @project ? project_expert_agile_charts_path(@project) : expert_agile_charts_path,
+                    :class => (controller_name == 'expert_agile_charts' ? 'selected' : nil) %></li>
+  <% end %>
+  <% if @project && @project.module_enabled?(:expert_agile_backlog) &&
+        User.current.allowed_to?(:view_expert_agile_backlog, @project) %>
+    <li><%= link_to l(:label_expert_agile_backlog),
+                    project_expert_agile_backlog_path(@project) %></li>
+  <% end %>
+</ul>
+
+<% saved = expert_agile_saved_queries(sidebar_query_class) %>
+<%= query_links(l(:label_my_queries), saved.select(&:is_private?)) %>
+<%= query_links(sidebar_title, saved.reject(&:is_private?)) %>
+
+<% if @project && User.current.allowed_to?(:manage_expert_agile_sprints, @project) %>
+  <h3><%= l(:label_expert_agile_sprint_plural) %></h3>
+  <ul class="ea-sidebar-nav">
+    <% @project.expert_agile_sprints.sorted.limit(8).each do |sprint| %>
+      <li>
+        <%= link_to h(sprint.name),
+                    edit_project_expert_agile_sprint_path(@project, sprint),
+                    :class => "ea-sprint-#{sprint.status_name}" %>
+      </li>
+    <% end %>
+    <li><%= link_to l(:label_expert_agile_sprint_new),
+                    new_project_expert_agile_sprint_path(@project), :class => 'icon icon-add' %></li>
+  </ul>
+<% end %>

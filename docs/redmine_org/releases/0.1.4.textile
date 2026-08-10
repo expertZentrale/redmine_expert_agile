@@ -1,0 +1,16 @@
+h3. redmine_expert_agile 0.1.4 — 2026-08-10
+
+h4. Added
+
+* *Sidebar on the agile pages*, in the same shape as Redmine's issue list: quick links between board, charts and backlog, the saved boards (or charts) split into "My queries" and shared ones, and the project's sprints.
+* *Saved charts.* A chart's selection, unit, interval and date range are saved with it.
+
+h4. Fixed
+
+* Saving a chart was refused with 403: only @:index@ was mapped for the charts-query controller, and @find_optional_project@ authorises the controller/action pair.
+* The "save board" link pointed at the collection path, which redirects to the board and discarded the configuration being saved. It posts to the @new@ action now, as Redmine's own query form does.
+* Saved charts no longer appear among the saved boards — @ExpertAgileChartsQuery@ is a subclass of @ExpertAgileQuery@, so the sidebar filters on the exact type.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.

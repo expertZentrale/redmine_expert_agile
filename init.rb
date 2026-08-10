@@ -40,7 +40,7 @@ Redmine::Plugin.register :redmine_expert_agile do
   name 'Redmine expert Agile'
   author 'Dennis Buehring'
   description 'Agile boards, story points, sprints and charts for Redmine'
-  version '0.1.3'
+  version '0.1.4'
   requires_redmine :version_or_higher => '5.0'
   url 'https://github.com/expertZentrale/redmine_expert_agile'
 
@@ -102,11 +102,16 @@ Redmine::Plugin.register :redmine_expert_agile do
     permission :edit_expert_agile_board,
                { :expert_agile_boards => [:update, :create_issue, :edit_issue, :update_issue] },
                :require => :member
+    # Both the board and the chart variants of the query controller, or saving
+    # a chart is refused: find_optional_project authorises the controller/action
+    # pair, so an action missing from every permission map is simply denied.
     permission :add_expert_agile_queries,
-               { :expert_agile_queries => [:new, :create, :edit, :update, :destroy] },
+               { :expert_agile_queries => [:new, :create, :edit, :update, :destroy],
+                 :expert_agile_charts_queries => [:new, :create, :edit, :update, :destroy] },
                :require => :loggedin
     permission :manage_public_expert_agile_queries,
-               { :expert_agile_queries => [:new, :create, :edit, :update, :destroy] },
+               { :expert_agile_queries => [:new, :create, :edit, :update, :destroy],
+                 :expert_agile_charts_queries => [:new, :create, :edit, :update, :destroy] },
                :require => :member
     permission :view_expert_agile_charts,
                { :expert_agile_charts         => [:show, :render_chart],

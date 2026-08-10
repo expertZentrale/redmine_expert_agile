@@ -51,6 +51,12 @@
      :type => RedmineExpertAgile::Charts::Registry.chart_class(@query.chart).chart_type
    }.to_json.html_safe %></script>
 
+<% content_for :sidebar do %>
+  <%= render :partial => 'expert_agile_common/sidebar',
+             :locals => { :sidebar_query_class => ExpertAgileChartsQuery,
+                          :sidebar_title => l(:label_expert_agile_charts) } %>
+<% end %>
+
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag 'expert_agile', :plugin => 'redmine_expert_agile' %>
   <%= javascript_include_tag 'chart.umd.min', :plugin => 'redmine_expert_agile' %>

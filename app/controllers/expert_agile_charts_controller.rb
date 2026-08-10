@@ -7,6 +7,7 @@ class ExpertAgileChartsController < ApplicationController
   before_action :build_query
 
   helper :queries
+  helper :expert_agile_boards
   include QueriesHelper
 
   def show

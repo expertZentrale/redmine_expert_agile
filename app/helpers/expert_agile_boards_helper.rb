@@ -61,12 +61,27 @@ module ExpertAgileBoardsHelper
     value.is_a?(Array) ? value.join(', ') : value.to_s
   end
 
+  # Saved boards (or charts) visible to the current user in this scope.
+  #
+  # Filtered to the exact STI type: ExpertAgileChartsQuery and
+  # ExpertAgileBacklogQuery are subclasses of ExpertAgileQuery, so an
+  # unqualified lookup would list charts among the boards.
+  def expert_agile_saved_queries(klass)
+    scope = klass.where(:type => klass.name).visible
+    scope = scope.global_or_on_project(@project) if @project
+    scope.sorted.to_a
+  end
+
   def board_path_for(project)
     project ? project_expert_agile_board_path(project) : expert_agile_board_path
   end
 
+  # The `new` action, not the collection path: the save link re-submits the
+  # board form to it so the configuration the user is looking at arrives with
+  # the request. Pointing at the collection path GETs #index, which just
+  # redirects back to the board and loses everything.
   def new_board_path_for(project)
-    project ? project_expert_agile_queries_path(project) : expert_agile_queries_path
+    project ? new_project_expert_agile_query_path(project) : new_expert_agile_query_path
   end
 
   # Palette class for a column header, so the board reads as a set of stages at

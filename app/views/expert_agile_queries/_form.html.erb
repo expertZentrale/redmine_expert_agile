@@ -35,3 +35,11 @@
   <%= hidden_field_tag "wip_limits[#{status_id}][]", bounds[0], :id => nil %>
   <%= hidden_field_tag "wip_limits[#{status_id}][]", bounds[1], :id => nil %>
 <% end %>
+
+<% if @query.is_a?(ExpertAgileChartsQuery) %>
+  <%= hidden_field_tag 'chart', @query.chart %>
+  <%= hidden_field_tag 'chart_unit', @query.chart_unit %>
+  <%= hidden_field_tag 'interval', @query.interval %>
+  <%= hidden_field_tag 'date_from', @query.date_from %>
+  <%= hidden_field_tag 'date_to', @query.date_to %>
+<% end %>

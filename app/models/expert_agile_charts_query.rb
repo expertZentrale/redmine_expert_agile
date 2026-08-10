@@ -56,6 +56,18 @@ class ExpertAgileChartsQuery < ExpertAgileQuery
 
   # Issues the chart is computed over. Charts ignore the board's status columns
   # — a burndown counts everything the filters select, closed or not.
+  # The chart selection travels with the same request the board settings do,
+  # so the shared query controller can save either kind.
+  def apply_board_params(params)
+    super
+    self.chart = params[:chart] if params[:chart].present?
+    self.chart_unit = params[:chart_unit] if params[:chart_unit].present?
+    self.interval = params[:interval] if params[:interval].present?
+    self.date_from = params[:date_from] if params[:date_from].present?
+    self.date_to = params[:date_to] if params[:date_to].present?
+    self
+  end
+
   def chart_scope
     base_scope.eager_load(:status, :expert_agile_data)
   end

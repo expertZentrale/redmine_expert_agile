@@ -9,6 +9,32 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [0.1.4] - 2026-08-10
+
+### Hinzugefuegt
+
+- **Seitenleiste auf den Agile-Seiten.** Board und Diagrammseite haben nun eine Seitenleiste in
+  derselben Form wie Redmines Ticketliste: Schnellzugriff auf Board, Diagramme und Backlog, die
+  gespeicherten Boards (bzw. Diagramme), getrennt nach "Meine eigenen Abfragen" und geteilten,
+  sowie die Sprints des Projekts mit Link zum Anlegen. Der Wechsel zwischen den Ansichten ist ein
+  Klick.
+- **Gespeicherte Diagramme.** `ExpertAgileChartsQueriesController` — wie beim Board existierten
+  Routen und Berechtigungen seit dem ersten Commit ohne Controller dahinter. Diagrammauswahl,
+  Einheit, Intervall und Zeitraum werden mitgespeichert. Es ist der Query-Controller des Boards
+  auf eine andere Klasse gerichtet, keine zweite Kopie.
+
+### Behoben
+
+- **Das Speichern eines Diagramms wurde mit 403 abgelehnt.** Fuer den Diagramm-Query-Controller
+  war nur `:index` zugeordnet, und `find_optional_project` prueft das Paar aus Controller und
+  Aktion — jede andere Aktion war damit nicht absichtlich, sondern mangels Zuordnung verboten.
+- **Der Link "Speichern" zeigte auf die falsche Route.** Er verwies auf den Sammelpfad, also
+  `#index`, der lediglich zum Board zurueckleitet und die zu speichernde Konfiguration
+  stillschweigend verwirft. Er sendet nun an die Aktion `new`, wie Redmines eigenes Abfrageformular.
+- **Gespeicherte Diagramme erscheinen nicht mehr unter den Boards.** `ExpertAgileChartsQuery` ist
+  eine Unterklasse von `ExpertAgileQuery`; eine ungefilterte Abfrage listete beides. Die
+  Seitenleiste filtert jetzt auf den exakten Typ.
+
 ## [0.1.3] - 2026-08-10
 
 ### Behoben

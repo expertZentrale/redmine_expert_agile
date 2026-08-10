@@ -14,7 +14,7 @@ class ExpertAgileQueriesController < ApplicationController
   include QueriesHelper
 
   def index
-    scope = ExpertAgileQuery.only_boards.visible
+    scope = saved_queries_scope
     scope = scope.global_or_on_project(@project) if @project
     @queries = scope.sorted.to_a
 
@@ -25,7 +25,7 @@ class ExpertAgileQueriesController < ApplicationController
   end
 
   def new
-    @query = ExpertAgileQuery.new
+    @query = query_class.new
     @query.project = @project
     @query.user = User.current
     @query.build_from_params(params)
@@ -33,7 +33,7 @@ class ExpertAgileQueriesController < ApplicationController
   end
 
   def create
-    @query = ExpertAgileQuery.new
+    @query = query_class.new
     @query.project = @project
     @query.user = User.current
     @query.attributes = query_attributes
@@ -71,8 +71,18 @@ class ExpertAgileQueriesController < ApplicationController
 
   private
 
+  # Overridden by the charts variant, which is the same controller against a
+  # different query class.
+  def query_class
+    ExpertAgileQuery
+  end
+
+  def saved_queries_scope
+    query_class.where(:type => query_class.name).visible
+  end
+
   def find_query
-    @query = ExpertAgileQuery.find(params[:id])
+    @query = query_class.find(params[:id])
     @project = @query.project
     render_403 unless @query.editable_by?(User.current)
   rescue ActiveRecord::RecordNotFound
@@ -103,6 +113,8 @@ class ExpertAgileQueriesController < ApplicationController
     end
   end
 
+  # Where to land after saving — the board, or the charts page for the charts
+  # variant.
   def board_path(options = {})
     if @project
       project_expert_agile_board_path(@project, options)
