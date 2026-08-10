@@ -1,0 +1,13 @@
+<%# One row of board cells, for a swimlane or for the whole (ungrouped) board. %>
+<% @board_columns.each do |column| %>
+  <td class="ea-cell"
+      data-column-id="<%= column.id %>"
+      data-swimlane-id="<%= swimlane == :none || swimlane.nil? ? '' : swimlane.id %>">
+    <div class="ea-cell-issues">
+      <% @query.issues_for(column.id, swimlane).each do |issue| %>
+        <%= render :partial => 'expert_agile_boards/issue_card',
+                   :locals => { :issue => issue } %>
+      <% end %>
+    </div>
+  </td>
+<% end %>

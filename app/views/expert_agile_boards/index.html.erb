@@ -1,0 +1,71 @@
+<%# The agile board.
+    Markup only — no inline <script> anywhere in this view or the partials it
+    renders. Everything the board script needs is in the JSON island below,
+    which keeps the page working under a `script-src 'self'` policy. %>
+
+<h2><%= l(:label_expert_agile_board) %></h2>
+
+<% if @query.truncated? %>
+  <p class="warning ea-truncated">
+    <%= l(:label_expert_agile_board_truncated, :count => RedmineExpertAgile.board_items_limit) %>
+  </p>
+<% end %>
+
+<div id="ea-board"
+     class="ea-board"
+     data-ea-board="1">
+  <table class="ea-board-table">
+    <thead>
+      <% expert_agile_header_rows(@board_columns).each do |row| %>
+        <tr>
+          <% if @swimlanes.any? %><th class="ea-swimlane-header" rowspan="1"></th><% end %>
+          <% row.each do |cell| %>
+            <th class="ea-column-header <%= cell[:column] && cell[:column].wip_css_class %>"
+                colspan="<%= cell[:colspan] %>"
+                rowspan="<%= cell[:rowspan] %>"
+                <% if cell[:column] %>data-column-id="<%= cell[:column].id %>"<% end %>>
+              <span class="ea-column-name"><%= cell[:label] %></span>
+              <% if cell[:column] %>
+                <span class="ea-column-count"><%= cell[:column].issue_count %></span>
+                <% if cell[:column].wip_limit? %>
+                  <span class="ea-column-wip" title="<%= l(:label_expert_agile_wip_limit) %>">
+                    <%= cell[:column].wip_label %>
+                  </span>
+                <% end %>
+              <% end %>
+            </th>
+          <% end %>
+        </tr>
+      <% end %>
+    </thead>
+
+    <tbody>
+      <% if @swimlanes.any? %>
+        <% @swimlanes.each do |swimlane| %>
+          <tr class="ea-swimlane">
+            <th class="ea-swimlane-label">
+              <%= swimlane.nil? ? l(:label_none) : swimlane.to_s %>
+            </th>
+            <%= render :partial => 'expert_agile_boards/cells',
+                       :locals => { :swimlane => swimlane } %>
+          </tr>
+        <% end %>
+      <% else %>
+        <tr class="ea-swimlane">
+          <%= render :partial => 'expert_agile_boards/cells',
+                     :locals => { :swimlane => :none } %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<%# JSON island: read by expert_agile_board.js, never executed as script. %>
+<script type="application/json" id="ea-board-data"><%= expert_agile_board_data(@query, @project).html_safe %></script>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'expert_agile', :plugin => 'redmine_expert_agile' %>
+  <%= javascript_include_tag 'expert_agile_board', :plugin => 'redmine_expert_agile' %>
+<% end %>
+
+<% html_title(l(:label_expert_agile_board)) %>

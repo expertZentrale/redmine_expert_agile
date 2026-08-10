@@ -1,0 +1,7 @@
+api.expert_agile_data do
+  api.issue_id @issue.id
+  data = @issue.expert_agile_data
+  api.position data && data.position
+  api.story_points data && data.story_points
+  api.sprint_id data && data.sprint_id
+end

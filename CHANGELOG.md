@@ -41,6 +41,21 @@ notes from the section matching the pushed tag.
   the loaded cards, so a lane only appears when it holds one. The whole board is built from a
   single issue load, and a board that hits its item cap reports it rather than looking complete.
 
+- **The board itself.** Columns from issue statuses, drag & drop between and within columns,
+  swimlanes, sub-column headers from a shared `Prefix:` status naming, advisory WIP limits, card
+  tooltips, and a project menu entry next to the Gantt chart. Card markup contains no inline
+  script and no inline event handlers, and the board reads its configuration from a JSON island,
+  so it works under a `script-src 'self'` content security policy.
+- **Server-computed fractional card ranks.** A move sends only the dragged card and its two
+  neighbours; the server computes the midpoint and writes exactly one row, inside the same
+  transaction as the issue save. Concurrent drags in the same column no longer overwrite each
+  other, and dragging inside a column that is paginated no longer reorders the cards below the
+  fold. When repeated drops into one gap exhaust the available precision the column is re-spread
+  automatically.
+- **Explicit workflow enforcement on the board.** A move to a status the workflow forbids is
+  rejected with a specific error and changes nothing, rather than being inferred from an
+  attribute assignment that silently did not stick.
+
 ### Fixed
 
 - **Core method wrapping no longer recurses infinitely** when RedmineUP plugins are installed.

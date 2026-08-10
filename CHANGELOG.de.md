@@ -45,6 +45,23 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   sie auch eine Karte enthaelt. Das gesamte Board entsteht aus einem einzigen Ticket-Ladevorgang;
   ein Board, das seine Obergrenze erreicht, meldet dies, statt vollstaendig zu wirken.
 
+- **Das Board selbst.** Spalten aus Ticketstatus, Drag & Drop zwischen und innerhalb von
+  Spalten, Swimlanes, Unterspaltenkoepfe aus gemeinsamem Statuspraefix `Praefix:`, hinweisende
+  WIP-Limits, Karten-Tooltips und ein Eintrag im Projektmenue neben dem Gantt-Diagramm. Das
+  Kartenmarkup enthaelt weder Inline-Skripte noch Inline-Eventhandler, und das Board liest seine
+  Konfiguration aus einer JSON-Insel — es funktioniert damit unter einer
+  `script-src 'self'`-Content-Security-Policy.
+- **Serverseitig berechnete gebrochene Kartenraenge.** Ein Zug uebertraegt nur die gezogene Karte
+  und ihre beiden Nachbarn; der Server berechnet den Mittelwert und schreibt genau eine Zeile,
+  innerhalb derselben Transaktion wie die Ticketspeicherung. Gleichzeitige Zuege in derselben
+  Spalte ueberschreiben sich nicht mehr gegenseitig, und ein Zug innerhalb einer paginierten
+  Spalte sortiert die Karten unterhalb der Sichtgrenze nicht mehr um. Wenn wiederholte Zuege in
+  dieselbe Luecke die verfuegbare Genauigkeit erschoepfen, wird die Spalte automatisch neu
+  verteilt.
+- **Explizite Workflow-Pruefung auf dem Board.** Ein Zug auf einen vom Workflow verbotenen Status
+  wird mit einer konkreten Fehlermeldung abgelehnt und aendert nichts — statt aus einer
+  Attributzuweisung abgeleitet zu werden, die stillschweigend nicht gegriffen hat.
+
 ### Behoben
 
 - **Das Umhuellen von Kernmethoden fuehrt nicht mehr zu Endlosrekursion**, wenn RedmineUP-Plugins

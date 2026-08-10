@@ -1,0 +1,184 @@
+require File.expand_path('../../test_helper', __FILE__)
+
+class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
+  tests ExpertAgileBoardsController
+
+  fixtures :projects, :users, :email_addresses, :members, :member_roles, :roles,
+           :enabled_modules, :trackers, :projects_trackers, :issue_statuses,
+           :enumerations, :issues, :issue_categories, :versions,
+           :workflows, :queries
+
+  def setup
+    @project = Project.find(1)
+    @project.enable_module!(:expert_agile)
+    @role = Role.find(1)
+    @role.add_permission!(:view_expert_agile_board, :edit_expert_agile_board)
+    @issue = Issue.find(1)
+    @request.session[:user_id] = 2
+  end
+
+  def teardown
+    ExpertAgileData.delete_all
+  end
+
+  # --- Rendering -------------------------------------------------------
+
+  def test_index_renders_the_board
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'div#ea-board'
+    assert_select 'th.ea-column-header'
+    assert_select 'div.ea-card'
+  end
+
+  def test_index_emits_a_json_island_and_no_inline_script_of_our_own
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'script#ea-board-data[type=?]', 'application/json'
+    # Our markup must contain no executable inline script, so the board works
+    # under `script-src 'self'`. Redmine's own layout emits inline scripts
+    # (importmap, warnLeavingUnsaved), which is outside the plugin's control —
+    # so this asserts about the board subtree, not the whole page.
+    assert_select 'div#ea-board script', false,
+                  'the board must not contain inline <script>'
+    assert_select 'div.ea-card script', false,
+                  'cards must be markup only — they are re-injected after a move'
+    assert_select 'div#ea-board [onclick]', false, 'no inline event handlers'
+  end
+
+  def test_index_requires_the_view_permission
+    @role.remove_permission!(:view_expert_agile_board)
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :forbidden
+  end
+
+  def test_index_requires_the_module
+    @project.disable_module!(:expert_agile)
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :forbidden
+  end
+
+  # --- Moving cards ----------------------------------------------------
+
+  def test_update_moves_a_card_to_another_column
+    target = allowed_status_for(@issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    put :update, :params => { :id => @issue.id, :status_id => target.id }, :format => :js
+
+    assert_response :success
+    assert_equal target.id, @issue.reload.status_id
+    assert_not_nil @issue.expert_agile_data.position, 'the moved card is ranked'
+  end
+
+  def test_update_returns_the_card_and_fresh_column_counts
+    target = allowed_status_for(@issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    put :update, :params => { :id => @issue.id, :status_id => target.id }, :format => :js
+    payload = JSON.parse(response.body)
+
+    assert_equal @issue.id, payload['issueId']
+    assert_includes payload['card'], "ea-card-#{@issue.id}"
+    assert payload['columns'].is_a?(Array)
+  end
+
+  def test_update_rejects_a_status_the_workflow_forbids
+    forbidden = forbidden_status_for(@issue)
+    original = @issue.status_id
+    assert_not_includes @issue.new_statuses_allowed_to(User.find(2)).map(&:id), forbidden.id
+
+    put :update, :params => { :id => @issue.id, :status_id => forbidden.id }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert_equal original, @issue.reload.status_id, 'a rejected move changes nothing'
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  def test_update_reorders_within_a_column_without_changing_status
+    others = 2.times.map do
+      Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id)
+    end
+    others.each_with_index do |issue, index|
+      ExpertAgileData.create!(:issue_id => issue.id, :position => (index + 1) * 100)
+    end
+
+    put :update, :params => { :id => @issue.id,
+                              :prev_id => others[0].id,
+                              :next_id => others[1].id }, :format => :js
+
+    assert_response :success
+    position = @issue.reload.expert_agile_data.position
+    assert_operator position, :>, others[0].reload.expert_agile_data.position
+    assert_operator position, :<, others[1].reload.expert_agile_data.position
+  end
+
+  def test_update_requires_the_edit_permission
+    @role.remove_permission!(:edit_expert_agile_board)
+
+    put :update, :params => { :id => @issue.id }, :format => :js
+
+    assert_response :forbidden
+  end
+
+  def test_update_is_rejected_for_an_issue_the_user_cannot_edit
+    # Issue#editable? is attributes_editable? OR notes_addable?, so both have to
+    # go — dropping :edit_issues alone still leaves the issue "editable".
+    @role.remove_permission!(:edit_issues, :add_issue_notes)
+
+    put :update, :params => { :id => @issue.id }, :format => :js
+
+    assert_response :forbidden
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  # --- WIP limits ------------------------------------------------------
+
+  def test_wip_limit_does_not_block_a_move
+    # Advisory only: the column reports the breach, the move still happens.
+    target = allowed_status_for(@issue)
+    skip 'workflow offers no other status' if target.nil?
+    query = ExpertAgileQuery.new(:name => 'Board', :project => @project)
+    query.board_status_ids = [@issue.status_id, target.id]
+    query.wip_limits = { target.id => [nil, 0] }
+    query.visibility = Query::VISIBILITY_PUBLIC
+    query.save!
+
+    put :update, :params => { :id => @issue.id, :status_id => target.id,
+                              :query_id => query.id }, :format => :js
+
+    assert_response :success
+    assert_equal target.id, @issue.reload.status_id
+    moved_column = JSON.parse(response.body)['columns'].detect { |c| c['id'] == target.id }
+    assert moved_column['over_wip_limit'], 'the breach is reported back to the board'
+  end
+
+  # --- Tooltip ---------------------------------------------------------
+
+  def test_issue_tooltip
+    get :issue_tooltip, :params => { :id => @issue.id }
+
+    assert_response :success
+    assert_select 'div.ea-tooltip'
+  end
+
+  private
+
+  def allowed_status_for(issue)
+    issue.new_statuses_allowed_to(User.find(2)).detect { |status| status.id != issue.status_id }
+  end
+
+  # A status no workflow transition mentions, so it can never be reached.
+  # Picking "some status the role happens not to have" is not deterministic —
+  # a Manager role may well be allowed every status in the fixtures, and the
+  # test would quietly skip exactly the behaviour it exists to prove.
+  def forbidden_status_for(_issue)
+    IssueStatus.create!(:name => 'Unreachable by workflow')
+  end
+end

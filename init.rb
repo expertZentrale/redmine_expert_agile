@@ -17,6 +17,7 @@
 require File.expand_path('../lib/redmine_expert_agile', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/board_column', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/board_grid', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/board_positions', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/hooks', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issue_patch', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issue_query_patch', __FILE__)
@@ -101,6 +102,15 @@ Redmine::Plugin.register :redmine_expert_agile do
                { :expert_agile_sprints => [:index, :show, :new, :create, :edit, :update, :destroy] },
                :require => :member
   end
+
+  # Board entry in the project menu, next to the other planning views.
+  # The module gating does the visibility work, so no :if proc is needed.
+  agile_menu_options = { :caption => :label_expert_agile_board, :after => :gantt,
+                         :param => :project_id }
+  agile_menu_options[:plugin] = :redmine_expert_agile if Redmine::VERSION::MAJOR >= 6
+  menu :project_menu, :expert_agile,
+       { :controller => 'expert_agile_boards', :action => 'index' },
+       agile_menu_options
 
   # Backlog planner. Separate module so a project can run a plain Kanban board
   # without the backlog UI, mirroring how RedmineUP splits :agile/:agile_backlog.

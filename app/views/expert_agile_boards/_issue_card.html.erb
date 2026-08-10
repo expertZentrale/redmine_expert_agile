@@ -1,0 +1,46 @@
+<%# One card. Markup only: no <script>, no inline handlers.
+    RedmineUP's equivalent carries six separate inline <script> blocks and is
+    re-injected over AJAX and WebSocket as raw html_safe, which makes any
+    meaningful content security policy impossible. %>
+<div class="<%= expert_agile_card_classes(issue, @query) %>"
+     id="ea-card-<%= issue.id %>"
+     data-issue-id="<%= issue.id %>"
+     data-status-id="<%= issue.status_id %>">
+
+  <div class="ea-card-header">
+    <span class="ea-card-id"><%= link_to("##{issue.id}", issue_path(issue)) %></span>
+    <span class="ea-card-tracker"><%= issue.tracker.name %></span>
+  </div>
+
+  <div class="ea-card-subject">
+    <%= link_to issue.subject, issue_path(issue) %>
+  </div>
+
+  <div class="ea-card-footer">
+    <% if issue.assigned_to %>
+      <span class="ea-card-assignee"><%= issue.assigned_to.name %></span>
+    <% end %>
+    <% if issue.story_points.present? %>
+      <span class="ea-card-story-points" title="<%= l(:label_expert_agile_story_points) %>">
+        <%= issue.story_points %>
+      </span>
+    <% elsif issue.estimated_hours.present? %>
+      <span class="ea-card-hours"><%= l_hours_short(issue.estimated_hours) %></span>
+    <% end %>
+    <% if issue.done_ratio.to_i > 0 %>
+      <span class="ea-card-done"><%= issue.done_ratio %>%</span>
+    <% end %>
+  </div>
+
+  <% extra = @query.extra_card_columns %>
+  <% if extra.any? %>
+    <dl class="ea-card-fields">
+      <% extra.each do |column| %>
+        <% value = column_value(column, issue, column.value_object(issue)) rescue nil %>
+        <% next if value.blank? %>
+        <dt><%= column.caption %></dt>
+        <dd><%= value %></dd>
+      <% end %>
+    </dl>
+  <% end %>
+</div>
