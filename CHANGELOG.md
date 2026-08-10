@@ -28,6 +28,19 @@ notes from the section matching the pushed tag.
   the core issue query. Issues with no agile data row correctly count as having no story points,
   so `is not` and `none` include them instead of silently dropping them.
 
+- **Saved agile boards.** `ExpertAgileQuery` subclasses Redmine's own `IssueQuery`, so every
+  issue filter, column, visibility rule and project scope applies to a board unchanged, and a
+  saved board is a single row in the `queries` table with no extra schema. The board's own
+  settings — visible status columns, WIP limits, colour basis, swimlane field, card fields, board
+  type, sprint and backlog flags — ride in the serialized options, with typed accessors so the
+  stored shape lives in one place. WIP limits are stored as integer pairs rather than a
+  `"2-7"` string that has to be re-parsed on every render.
+- **Board columns and swimlanes.** Columns are plain `BoardColumn` value objects carrying issue
+  count, estimated hours, story points and WIP state; statuses sharing a `Prefix:` naming prefix
+  expose a `path` for sub-column headers. Swimlanes reuse Redmine's grouping and are derived from
+  the loaded cards, so a lane only appears when it holds one. The whole board is built from a
+  single issue load, and a board that hits its item cap reports it rather than looking complete.
+
 ### Fixed
 
 - **Core method wrapping no longer recurses infinitely** when RedmineUP plugins are installed.

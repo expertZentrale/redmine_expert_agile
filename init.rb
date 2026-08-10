@@ -15,10 +15,13 @@
 # lowercase "e" in user-facing text. Code identifiers keep their normal casing.
 
 require File.expand_path('../lib/redmine_expert_agile', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/board_column', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/board_grid', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/hooks', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issue_patch', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issue_query_patch', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issues_controller_patch', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/patches/queries_helper_patch', __FILE__)
 
 Redmine::Plugin.register :redmine_expert_agile do
   name 'Redmine expert Agile'
@@ -120,3 +123,4 @@ end
 RedmineExpertAgile::Patches::IssuePatch.apply!
 RedmineExpertAgile::Patches::IssueQueryPatch.apply!
 RedmineExpertAgile::Patches::IssuesControllerPatch.apply!
+RedmineExpertAgile::Patches::QueriesHelperPatch.apply!
