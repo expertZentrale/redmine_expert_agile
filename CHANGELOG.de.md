@@ -71,6 +71,16 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   die Administrationsseite loest ihre Zielklasse ueber eine Whitelist auf, statt einen
   Request-Parameter zu constantizen.
 
+- **Sprints.** Ein eigenstaendiger Sprint mit Name, Beschreibung, Start- und Enddatum,
+  Lebenszyklus offen/aktiv/geschlossen und Freigabe ueber den Projektbaum wie bei Versionen.
+  Das Aktivieren eines Sprints setzt den bisher aktiven Sprint des Projekts auf offen, ein
+  Sprint laesst sich nicht schliessen, solange er offene Tickets enthaelt, und ueberlappende
+  Sprints werden abgelehnt, sofern nicht ausdruecklich erlaubt. Sprints werden ueber einen
+  Reiter in den Projekteinstellungen und eine eigene Verwaltungsseite gepflegt, sind im
+  Ticketformular zuweisbar und ueber die REST-API verfuegbar. Das Loeschen eines Sprints hebt
+  die Zuordnung seiner Tickets auf, statt sie zu loeschen. Sprintwechsel werden in das Journal
+  des Tickets geschrieben und erscheinen damit in der Ticket-Historie.
+
 ### Behoben
 
 - **Das Umhuellen von Kernmethoden fuehrt nicht mehr zu Endlosrekursion**, wenn RedmineUP-Plugins

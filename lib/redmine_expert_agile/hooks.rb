@@ -19,7 +19,27 @@ module RedmineExpertAgile
         out << caller.send(:render, :partial => 'issues/expert_agile_card_color_form',
                                     :locals => { :issue => issue })
       end
+      if sprint_visible?(issue)
+        out << caller.send(:render, :partial => 'issues/expert_agile_sprint_form',
+                                    :locals => { :f => context[:form], :issue => issue })
+      end
       out
+    end
+
+    # Renders the sprint id stored in a journal detail as the sprint's name.
+    def helper_issues_show_detail_after_setting(context = {})
+      detail = context[:detail]
+      return unless detail && detail.prop_key == 'expert_agile_sprint_id'
+
+      context[:detail].instance_variable_set(:@expert_agile_labelled, true)
+      %i(old_value value).each do |field|
+        id = detail.send(field)
+        next if id.blank?
+
+        sprint = ExpertAgileSprint.find_by(:id => id)
+        detail.send("#{field}=", sprint ? sprint.name : id)
+      end
+      nil
     end
 
     # Story points in the issue attribute table.

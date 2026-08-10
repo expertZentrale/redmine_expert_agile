@@ -15,7 +15,12 @@ module RedmineExpertAgile
 
       def self.included(base)
         base.class_eval do
-          has_one :expert_agile_data, :dependent => :destroy, :foreign_key => 'issue_id'
+          # inverse_of matters: without it, ExpertAgileData#issue loads a fresh
+          # Issue from the database, so the sprint-change callback would look
+          # for `current_journal` on an object that never had one and the change
+          # would go unjournalled.
+          has_one :expert_agile_data, :dependent => :destroy, :foreign_key => 'issue_id',
+                                      :inverse_of => :issue
           has_one :expert_agile_sprint, :through => :expert_agile_data, :source => :sprint
 
           accepts_nested_attributes_for :expert_agile_data, :update_only => true

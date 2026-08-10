@@ -1,0 +1,16 @@
+<%# Sprint selector on the issue form.
+    Goes through the nested expert_agile_data association so the value passes
+    through safe_attributes rather than a bespoke controller path. %>
+<% sprints = issue.project.shared_expert_agile_sprints.available.sorted.to_a %>
+<% if sprints.any? %>
+  <p>
+    <%= f.fields_for :expert_agile_data, issue.expert_agile_data! do |ea| %>
+      <%= ea.select :sprint_id,
+                    options_for_select([[l(:label_none), '']] + sprints.map { |s| [s.name, s.id] },
+                                       issue.expert_agile_data && issue.expert_agile_data.sprint_id),
+                    {},
+                    :id => 'issue_expert_agile_data_attributes_sprint_id' %>
+      <%= label_tag 'issue_expert_agile_data_attributes_sprint_id', l(:label_expert_agile_sprint) %>
+    <% end %>
+  </p>
+<% end %>

@@ -64,6 +64,15 @@ notes from the section matching the pushed tag.
   admin screen resolves its target class through a whitelist rather than constantizing a request
   parameter.
 
+- **Sprints.** A first-class sprint with a name, description, start and end date, an
+  open/active/closed lifecycle and Version-style sharing across a project tree. Activating a
+  sprint stands the project's other active sprint down, a sprint cannot be closed while it still
+  holds open issues, and overlapping sprints are rejected unless explicitly allowed. Sprints are
+  managed from a project settings tab and a full CRUD screen, assignable from the issue form,
+  and exposed over the REST API. Deleting a sprint unassigns its issues rather than deleting
+  them. Sprint changes are written into the issue's own journal, so a re-plan shows up in the
+  issue history alongside the other changes of that edit.
+
 ### Fixed
 
 - **Core method wrapping no longer recurses infinitely** when RedmineUP plugins are installed.

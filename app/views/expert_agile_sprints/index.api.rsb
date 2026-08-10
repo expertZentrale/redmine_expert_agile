@@ -1,0 +1,14 @@
+api.array :expert_agile_sprints, api_meta(:total_count => @sprints.size) do
+  @sprints.each do |sprint|
+    api.expert_agile_sprint do
+      api.id sprint.id
+      api.project_id sprint.project_id
+      api.name sprint.name
+      api.description sprint.description
+      api.status sprint.status_name
+      api.sharing sprint.sharing_name
+      api.start_date sprint.start_date
+      api.end_date sprint.end_date
+    end
+  end
+end

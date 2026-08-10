@@ -1,0 +1,12 @@
+api.expert_agile_sprint do
+  api.id @sprint.id
+  api.project_id @sprint.project_id
+  api.name @sprint.name
+  api.description @sprint.description
+  api.status @sprint.status_name
+  api.sharing @sprint.sharing_name
+  api.start_date @sprint.start_date
+  api.end_date @sprint.end_date
+  api.issue_count @sprint.issues.count
+  api.story_points ExpertAgileData.where(:sprint_id => @sprint.id).sum(:story_points)
+end

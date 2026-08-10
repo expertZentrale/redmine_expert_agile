@@ -22,6 +22,8 @@ require File.expand_path('../lib/redmine_expert_agile/colorable', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/card_color', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/hooks', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issue_patch', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/patches/project_patch', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/patches/projects_helper_patch', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issue_query_patch', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issues_controller_patch', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/queries_helper_patch', __FILE__)
@@ -155,3 +157,5 @@ end
 RedmineExpertAgile::Patches::IssueQueryPatch.apply!
 RedmineExpertAgile::Patches::IssuesControllerPatch.apply!
 RedmineExpertAgile::Patches::QueriesHelperPatch.apply!
+RedmineExpertAgile::Patches::ProjectPatch.apply!
+RedmineExpertAgile::Patches::ProjectsHelperPatch.apply!

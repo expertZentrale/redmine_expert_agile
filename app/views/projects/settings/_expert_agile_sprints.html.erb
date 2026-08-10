@@ -1,0 +1,36 @@
+<%# Sprint list inside the project settings, with a link to the full manager. %>
+<div class="contextual">
+  <%= link_to l(:label_expert_agile_sprint_new), new_project_expert_agile_sprint_path(@project),
+              :class => 'icon icon-add' %>
+</div>
+
+<% sprints = @project.expert_agile_sprints.sorted.to_a %>
+<% if sprints.empty? %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+  <table class="list">
+    <thead>
+      <tr>
+        <th><%= l(:field_name) %></th>
+        <th><%= l(:field_status) %></th>
+        <th><%= l(:field_start_date) %></th>
+        <th><%= l(:field_due_date) %></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% sprints.each do |sprint| %>
+        <tr>
+          <td><%= h sprint.name %></td>
+          <td><%= l("label_expert_agile_sprint_status_#{sprint.status_name}") %></td>
+          <td><%= format_date(sprint.start_date) %></td>
+          <td><%= format_date(sprint.end_date) %></td>
+          <td class="buttons">
+            <%= link_to l(:button_edit), edit_project_expert_agile_sprint_path(@project, sprint),
+                        :class => 'icon icon-edit' %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
