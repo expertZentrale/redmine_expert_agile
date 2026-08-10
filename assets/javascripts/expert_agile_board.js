@@ -56,24 +56,30 @@
     if (!box) {
       box = document.createElement('div');
       box.id = 'ea-board-message';
-      var board = document.getElementById('ea-board');
-      board.parentNode.insertBefore(box, board);
+      var anchor = document.getElementById('ea-board') || document.getElementById('ea-backlog');
+      anchor.parentNode.insertBefore(box, anchor);
     }
     box.className = isError ? 'flash error' : 'flash notice';
     box.textContent = text || '';
     box.style.display = text ? 'block' : 'none';
   }
 
+  /* One implementation drives both the board and the backlog planner. The two
+   * differ only in the endpoint and in what the drop target means — a status
+   * on the board, a sprint or version in the planner — so both are read from
+   * the JSON island. RedmineUP carries two separate initSortable
+   * implementations with divergent payloads. */
   function submitMove(card, cell) {
     var issueId = card.getAttribute('data-issue-id');
-    var statusId = cell.getAttribute('data-column-id');
+    var dropId = cell.getAttribute('data-drop-id');
     var around = neighbours(card);
 
     var body = new URLSearchParams();
-    body.append('status_id', statusId);
+    body.append(config.dropParam, dropId === null ? '' : dropId);
     body.append('prev_id', around.prev);
     body.append('next_id', around.next);
     if (config.queryId) { body.append('query_id', config.queryId); }
+    if (config.containerType) { body.append('container_type', config.containerType); }
 
     fetch(config.updateUrlTemplate.replace('__ID__', issueId), {
       method: 'PUT',
@@ -108,6 +114,7 @@
       makeDraggable(fresh);
     }
     updateColumns(payload.columns);
+    updateLaneTotals(payload.totals, payload.containerId);
     origin = null;
   }
 
@@ -127,6 +134,26 @@
         header.classList.toggle('ea-wip-over', !!column.over_wip_limit);
       });
     });
+  }
+
+  /* Backlog planner: refresh the counts in the two lanes a move touched. */
+  function updateLaneTotals(totals, containerId) {
+    if (!totals) { return; }
+    applyLaneTotals('', totals.backlog);
+    if (totals.container) {
+      applyLaneTotals(containerId === null || containerId === undefined ? '' : containerId,
+                      totals.container);
+    }
+  }
+
+  function applyLaneTotals(containerId, values) {
+    if (!values) { return; }
+    var header = document.querySelector('.ea-backlog-lane-header[data-container-id="' + containerId + '"]');
+    if (!header) { return; }
+    var count = header.querySelector('.ea-lane-count');
+    if (count) { count.textContent = values.issue_count; }
+    var points = header.querySelector('.ea-lane-points');
+    if (points) { points.textContent = values.story_points || 0; }
   }
 
   function makeDraggable(card) {
@@ -185,11 +212,12 @@
   function init() {
     config = readConfig();
     if (!config) { return; }
-    var board = document.getElementById('ea-board');
-    if (!board) { return; }
+    /* Same script, either screen. */
+    var root = document.getElementById('ea-board') || document.getElementById('ea-backlog');
+    if (!root) { return; }
 
-    Array.prototype.forEach.call(board.querySelectorAll('.ea-card'), makeDraggable);
-    Array.prototype.forEach.call(board.querySelectorAll('.ea-cell'), makeDroppable);
+    Array.prototype.forEach.call(root.querySelectorAll('.ea-card'), makeDraggable);
+    Array.prototype.forEach.call(root.querySelectorAll('.ea-cell'), makeDroppable);
   }
 
   window.ExpertAgileBoard = {

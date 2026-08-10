@@ -1,0 +1,16 @@
+<%# A backlog card. Same contract as a board card: markup only. %>
+<div class="ea-card ea-backlog-card"
+     id="ea-card-<%= issue.id %>"
+     data-issue-id="<%= issue.id %>">
+  <div class="ea-card-header">
+    <span class="ea-card-id"><%= link_to("##{issue.id}", issue_path(issue)) %></span>
+    <span class="ea-card-tracker"><%= issue.tracker.name %></span>
+  </div>
+  <div class="ea-card-subject"><%= link_to issue.subject, issue_path(issue) %></div>
+  <div class="ea-card-footer">
+    <span class="ea-card-status"><%= issue.status.name %></span>
+    <% if issue.story_points.present? %>
+      <span class="ea-card-story-points"><%= issue.story_points %></span>
+    <% end %>
+  </div>
+</div>

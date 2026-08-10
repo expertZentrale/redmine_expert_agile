@@ -108,6 +108,8 @@ en:
   label_expert_agile_swimlane_none: No swimlanes
   label_expert_agile_board_truncated: Only the first %{count} issues are shown
 
+  error_expert_agile_container_not_available: This sprint or version is not available for this project
+
   # --- Charts ---------------------------------------------------------
   label_expert_agile_chart_burndown: Burndown
   label_expert_agile_chart_burnup: Burnup

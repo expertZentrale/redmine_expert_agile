@@ -108,6 +108,8 @@ de:
   label_expert_agile_swimlane_none: Keine Swimlanes
   label_expert_agile_board_truncated: Es werden nur die ersten %{count} Tickets angezeigt
 
+  error_expert_agile_container_not_available: Dieser Sprint bzw. diese Version steht fuer dieses Projekt nicht zur Verfuegung
+
   # --- Diagramme ------------------------------------------------------
   label_expert_agile_chart_burndown: Burndown
   label_expert_agile_chart_burnup: Burnup

@@ -73,6 +73,14 @@ notes from the section matching the pushed tag.
   them. Sprint changes are written into the issue's own journal, so a re-plan shows up in the
   issue history alongside the other changes of that edit.
 
+- **Backlog planner.** A separate planning view, behind its own `expert Agile Backlog` module,
+  showing an unplanned backlog alongside one lane per sprint or per version. Issues are dragged
+  into a lane with the same server-computed ranking the board uses, lane totals update in place,
+  and the backlog can be searched by subject or issue id. Planning into sprints and into versions
+  is one parameterised query rather than two near-identical ones, and the drag & drop behaviour is
+  the same implementation as the board's. A container id that the project may not plan into is
+  rejected, so a crafted request cannot move an issue into an unrelated project's sprint.
+
 ### Fixed
 
 - **Core method wrapping no longer recurses infinitely** when RedmineUP plugins are installed.

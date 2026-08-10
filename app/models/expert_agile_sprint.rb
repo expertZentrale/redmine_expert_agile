@@ -48,7 +48,14 @@ class ExpertAgileSprint < ExpertAgileApplicationRecord
   scope :for_project, ->(project) { where(:project_id => project) }
   # Sorted the way a planner reads them: active first, then open, then closed,
   # newest start date first within each.
-  scope :sorted, -> { order(Arel.sql('CASE status WHEN 1 THEN 0 WHEN 0 THEN 1 ELSE 2 END')).order(:start_date => :desc) }
+  # The column is qualified because this scope is used on top of a join to
+  # projects, which has a `status` column of its own — unqualified it is
+  # ambiguous and the query fails.
+  scope :sorted, lambda {
+    order(Arel.sql("CASE #{table_name}.status WHEN #{STATUS_ACTIVE} THEN 0 " \
+                   "WHEN #{STATUS_OPEN} THEN 1 ELSE 2 END"))
+      .order(:start_date => :desc)
+  }
   scope :visible, lambda { |user = User.current|
     joins(:project).where(Project.allowed_to_condition(user, :view_expert_agile_board))
   }

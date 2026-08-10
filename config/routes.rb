@@ -35,8 +35,8 @@ RedmineApp::Application.routes.draw do
   # --- Backlog ----------------------------------------------------------
   get 'projects/:project_id/expert_agile/backlog', :to => 'expert_agile_backlogs#index',
       :as => 'project_expert_agile_backlog'
-  put 'projects/:project_id/expert_agile/backlog', :to => 'expert_agile_backlogs#update',
-      :as => 'update_expert_agile_backlog'
+  put 'projects/:project_id/expert_agile/backlog/issues/:id', :to => 'expert_agile_backlogs#update',
+      :as => 'update_expert_agile_backlog_issue'
   get 'projects/:project_id/expert_agile/backlog/load_more', :to => 'expert_agile_backlogs#load_more',
       :as => 'load_more_expert_agile_backlog'
   get 'projects/:project_id/expert_agile/backlog/autocomplete', :to => 'expert_agile_backlogs#autocomplete',

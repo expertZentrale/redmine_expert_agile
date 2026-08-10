@@ -81,6 +81,15 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   die Zuordnung seiner Tickets auf, statt sie zu loeschen. Sprintwechsel werden in das Journal
   des Tickets geschrieben und erscheinen damit in der Ticket-Historie.
 
+- **Backlog-Planer.** Eine eigene Planungsansicht hinter dem Modul `expert Agile Backlog`, die
+  ein ungeplantes Backlog neben je einer Bahn pro Sprint oder Version zeigt. Tickets werden mit
+  derselben serverseitigen Rangberechnung wie auf dem Board in eine Bahn gezogen, die Summen der
+  Bahnen aktualisieren sich direkt, und das Backlog laesst sich nach Betreff oder Ticketnummer
+  durchsuchen. Die Planung in Sprints und in Versionen ist eine parameterisierte Abfrage statt
+  zweier nahezu identischer, und Drag & Drop verwendet dieselbe Implementierung wie das Board.
+  Eine Container-ID, in die das Projekt nicht planen darf, wird abgelehnt — ein manipulierter
+  Aufruf kann ein Ticket also nicht in den Sprint eines fremden Projekts verschieben.
+
 ### Behoben
 
 - **Das Umhuellen von Kernmethoden fuehrt nicht mehr zu Endlosrekursion**, wenn RedmineUP-Plugins

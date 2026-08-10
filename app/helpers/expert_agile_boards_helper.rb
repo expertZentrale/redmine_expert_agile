@@ -52,6 +52,8 @@ module ExpertAgileBoardsHelper
   # inline JavaScript so the board works under `script-src 'self'`.
   def expert_agile_board_data(query, project)
     {
+      :mode => 'board',
+      :dropParam => 'status_id',
       :updateUrlTemplate => update_expert_agile_board_issue_path(:id => '__ID__'),
       :tooltipUrlTemplate => expert_agile_board_issue_tooltip_path(:id => '__ID__'),
       :queryId => query.id,

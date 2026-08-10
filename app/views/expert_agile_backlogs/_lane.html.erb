@@ -1,0 +1,22 @@
+<%# One planning lane: the unplanned backlog (container nil) or a container. %>
+<% totals = @query.totals_for(container) %>
+<div class="ea-backlog-lane">
+  <h3 class="ea-backlog-lane-header" data-container-id="<%= container && container.id %>">
+    <span class="ea-backlog-lane-name">
+      <%= container ? h(container.to_s) : l(:label_expert_agile_backlog) %>
+    </span>
+    <span class="ea-backlog-lane-totals">
+      <span class="ea-lane-count"><%= totals[:issue_count] %></span>
+      <% if totals[:story_points].to_i > 0 %>
+        <span class="ea-lane-points"><%= totals[:story_points].to_i %></span>
+      <% end %>
+    </span>
+  </h3>
+  <div class="ea-cell ea-backlog-drop"
+       data-drop-id="<%= container && container.id %>">
+    <div class="ea-cell-issues">
+      <%= render :partial => 'expert_agile_backlogs/issue_list',
+                 :locals => { :issues => container ? @query.issues_for(container) : @query.backlog_issues } %>
+    </div>
+  </div>
+</div>
