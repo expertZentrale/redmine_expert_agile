@@ -18,6 +18,8 @@ require File.expand_path('../lib/redmine_expert_agile', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/board_column', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/board_grid', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/board_positions', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/colorable', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/card_color', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/hooks', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issue_patch', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/patches/issue_query_patch', __FILE__)
@@ -103,6 +105,17 @@ Redmine::Plugin.register :redmine_expert_agile do
                :require => :member
   end
 
+  # Card colours are instance-wide, so they live in the admin area.
+  colors_menu_options = { :caption => :label_expert_agile_colors,
+                          :html => { :class => 'icon' } }
+  if Redmine::VERSION::MAJOR >= 6
+    colors_menu_options[:icon] = 'palette'
+    colors_menu_options[:plugin] = :redmine_expert_agile
+  end
+  menu :admin_menu, :expert_agile_colors,
+       { :controller => 'expert_agile_colors', :action => 'index', :container_type => 'tracker' },
+       colors_menu_options
+
   # Board entry in the project menu, next to the other planning views.
   # The module gating does the visibility work, so no :if proc is needed.
   agile_menu_options = { :caption => :label_expert_agile_board, :after => :gantt,
@@ -131,6 +144,14 @@ end
 # in production, because the callbacks have already been copied into the
 # reloader by that point.
 RedmineExpertAgile::Patches::IssuePatch.apply!
+
+# Colour support goes only into the models that can actually be coloured.
+# RedmineUP mixes its equivalent into ActiveRecord::Base, i.e. every model in
+# the instance.
+[Issue, Project, Tracker, IssuePriority, IssueStatus].each do |model|
+  model.include(RedmineExpertAgile::Colorable) unless model.included_modules.include?(RedmineExpertAgile::Colorable)
+end
+
 RedmineExpertAgile::Patches::IssueQueryPatch.apply!
 RedmineExpertAgile::Patches::IssuesControllerPatch.apply!
 RedmineExpertAgile::Patches::QueriesHelperPatch.apply!

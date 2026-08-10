@@ -1,0 +1,10 @@
+<%# Per-issue card colour, shown only when the board is set to colour by issue. %>
+<p>
+  <label for="issue_expert_agile_card_color"><%= l(:label_expert_agile_color) %></label>
+  <%= select_tag 'issue[expert_agile_card_color]',
+                 options_for_select(
+                   [[l(:label_none), '']] +
+                     ExpertAgileColor::COLORS.map { |c| [l("label_expert_agile_color_#{c}"), c] },
+                   issue.expert_agile_card_color),
+                 :id => 'issue_expert_agile_card_color' %>
+</p>

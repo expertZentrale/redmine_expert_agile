@@ -118,3 +118,18 @@ de:
   label_expert_agile_chart_unit_hours: Stunden
   label_expert_agile_chart_unit_story_points: Story Points
   text_expert_agile_chart_too_many_items: Zu viele Tickets fuer dieses Diagramm; bitte Filter einschraenken
+
+  # --- Farben ---------------------------------------------------------
+  label_expert_agile_colors: Farben der Agile-Karten
+  label_expert_agile_color: Farbe
+  label_expert_agile_color_green: Gruen
+  label_expert_agile_color_light_green: Hellgruen
+  label_expert_agile_color_turquoise: Tuerkis
+  label_expert_agile_color_blue: Blau
+  label_expert_agile_color_purple: Violett
+  label_expert_agile_color_yellow: Gelb
+  label_expert_agile_color_orange: Orange
+  label_expert_agile_color_red: Rot
+  label_expert_agile_color_gray: Grau
+  label_expert_agile_color_base_issue_status: Status
+  label_expert_agile_color_base_issue_priority: Prioritaet

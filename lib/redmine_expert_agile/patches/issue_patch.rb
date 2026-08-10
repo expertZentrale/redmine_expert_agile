@@ -35,6 +35,14 @@ module RedmineExpertAgile
                           :if => lambda { |issue, user|
                             issue.new_record? || user.allowed_to?(:edit_issues, issue.project)
                           }
+
+          # Named expert_agile_card_color rather than 'color': the attribute
+          # goes through safe_attributes into a shared namespace, and
+          # redmine_agile already ships an agile_color_attributes of its own.
+          safe_attributes 'expert_agile_card_color',
+                          :if => lambda { |issue, user|
+                            issue.new_record? || user.allowed_to?(:edit_issues, issue.project)
+                          }
         end
       end
 
@@ -66,6 +74,14 @@ module RedmineExpertAgile
       # Whether the story point field applies to this issue at all.
       def story_points_available?
         RedmineExpertAgile.story_points_for_tracker?(tracker)
+      end
+
+      def expert_agile_card_color
+        color
+      end
+
+      def expert_agile_card_color=(value)
+        self.color = value
       end
     end
   end

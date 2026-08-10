@@ -1,0 +1,40 @@
+<%# Admin: assign card colours to the objects a board can colour by. %>
+<h2><%= l(:label_expert_agile_colors) %></h2>
+
+<p>
+  <% ExpertAgileColor::COLORABLE_CLASSES.each do |param, class_name| %>
+    <%= link_to l("label_expert_agile_color_base_#{param}"),
+                expert_agile_colors_path(:container_type => param),
+                :class => (class_name == @container_class.name ? 'selected' : nil) %>
+  <% end %>
+</p>
+
+<%= form_tag update_expert_agile_colors_path(:container_type => params[:container_type]),
+              :method => :put do %>
+  <table class="list">
+    <thead>
+      <tr>
+        <th><%= l(:label_name) %></th>
+        <th><%= l(:label_expert_agile_color) %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @containers.each do |container| %>
+        <tr>
+          <td><%= h container.to_s %></td>
+          <td>
+            <%= select_tag "colors[#{container.id}]",
+                           options_for_select(
+                             [[l(:label_none), '']] +
+                               ExpertAgileColor::COLORS.map { |c| [l("label_expert_agile_color_#{c}"), c] },
+                             @colors[container.id]),
+                           :class => 'ea-color-select' %>
+            <span class="ea-color-swatch ea-color-<%= @colors[container.id] %>"></span>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <p><%= submit_tag l(:button_save) %></p>
+<% end %>

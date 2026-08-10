@@ -118,3 +118,18 @@ en:
   label_expert_agile_chart_unit_hours: Hours
   label_expert_agile_chart_unit_story_points: Story points
   text_expert_agile_chart_too_many_items: Too many issues to compute this chart; narrow the filters
+
+  # --- Colors ---------------------------------------------------------
+  label_expert_agile_colors: Agile card colors
+  label_expert_agile_color: Color
+  label_expert_agile_color_green: Green
+  label_expert_agile_color_light_green: Light green
+  label_expert_agile_color_turquoise: Turquoise
+  label_expert_agile_color_blue: Blue
+  label_expert_agile_color_purple: Purple
+  label_expert_agile_color_yellow: Yellow
+  label_expert_agile_color_orange: Orange
+  label_expert_agile_color_red: Red
+  label_expert_agile_color_gray: Gray
+  label_expert_agile_color_base_issue_status: Status
+  label_expert_agile_color_base_issue_priority: Priority

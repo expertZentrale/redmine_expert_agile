@@ -111,3 +111,37 @@
 .ea-tooltip-attributes { list-style: none; padding-left: 0; }
 
 .ea-truncated { margin-bottom: 8px; }
+
+/* --- Card colour palette -------------------------------------------------
+ * A closed, named palette rather than free hex entry. Every value is picked to
+ * keep the card's dark text readable, so a board stays legible no matter who
+ * assigned the colours. Applied to the card's left border and background tint.
+ */
+.ea-card.ea-color-green       { border-left-color: #3c9c3c; background: #f2fbf2; }
+.ea-card.ea-color-light_green { border-left-color: #8dc63f; background: #f7fcef; }
+.ea-card.ea-color-turquoise   { border-left-color: #29a8a0; background: #f0fbfa; }
+.ea-card.ea-color-blue        { border-left-color: #3d7ec4; background: #f2f7fd; }
+.ea-card.ea-color-purple      { border-left-color: #8a5fbf; background: #f8f4fd; }
+.ea-card.ea-color-yellow      { border-left-color: #dcb800; background: #fffcef; }
+.ea-card.ea-color-orange      { border-left-color: #e08a1e; background: #fff8ef; }
+.ea-card.ea-color-red         { border-left-color: #cc3b3b; background: #fdf3f3; }
+.ea-card.ea-color-gray        { border-left-color: #8c8c8c; background: #f7f7f7; }
+
+.ea-color-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #999;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+.ea-color-swatch.ea-color-green       { background: #3c9c3c; }
+.ea-color-swatch.ea-color-light_green { background: #8dc63f; }
+.ea-color-swatch.ea-color-turquoise   { background: #29a8a0; }
+.ea-color-swatch.ea-color-blue        { background: #3d7ec4; }
+.ea-color-swatch.ea-color-purple      { background: #8a5fbf; }
+.ea-color-swatch.ea-color-yellow      { background: #dcb800; }
+.ea-color-swatch.ea-color-orange      { background: #e08a1e; }
+.ea-color-swatch.ea-color-red         { background: #cc3b3b; }
+.ea-color-swatch.ea-color-gray        { background: #8c8c8c; }

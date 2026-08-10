@@ -56,6 +56,14 @@ notes from the section matching the pushed tag.
   rejected with a specific error and changes nothing, rather than being inferred from an
   attribute assignment that silently did not stick.
 
+- **Card colours.** Cards can be coloured by tracker, priority, status, project, assignee, spent
+  time, or per issue, from a closed nine-colour palette chosen so the card text stays readable.
+  Colours for trackers, priorities and statuses are managed from a new admin screen; per-issue
+  colours appear on the issue form when a board colours by issue. Colour support is a concern
+  included into the five models that can be coloured, not mixed into `ActiveRecord::Base`, and the
+  admin screen resolves its target class through a whitelist rather than constantizing a request
+  parameter.
+
 ### Fixed
 
 - **Core method wrapping no longer recurses infinitely** when RedmineUP plugins are installed.

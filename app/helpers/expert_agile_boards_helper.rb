@@ -39,9 +39,13 @@ module ExpertAgileBoardsHelper
     classes.compact.join(' ')
   end
 
-  # Placeholder until the colour feature lands; keeps the card markup stable.
-  def expert_agile_color_class(_issue, _query)
-    nil
+  # Palette class for one card, or nil when the board is not coloured.
+  def expert_agile_color_class(issue, query)
+    base = query && query.color_base
+    return nil if base.blank? || base == 'none'
+
+    color = RedmineExpertAgile::CardColor.for(issue, base)
+    color.present? ? "ea-color-#{color}" : nil
   end
 
   # The data the board script needs, emitted as a JSON island rather than

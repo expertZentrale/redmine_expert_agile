@@ -5,13 +5,21 @@
 # JSON island, so the plugin stays usable under a `script-src 'self'` policy.
 module RedmineExpertAgile
   class Hooks < Redmine::Hook::ViewListener
-    # Story point field on the issue create/edit form.
+    # Story point and card colour fields on the issue create/edit form.
     def view_issues_form_details_bottom(context = {})
       issue = context[:issue]
-      return '' unless story_points_visible?(issue)
+      out = ''.html_safe
+      caller = context[:hook_caller]
 
-      context[:hook_caller].send(:render, :partial => 'issues/expert_agile_story_points_form',
-                                          :locals => { :f => context[:form], :issue => issue })
+      if story_points_visible?(issue)
+        out << caller.send(:render, :partial => 'issues/expert_agile_story_points_form',
+                                    :locals => { :f => context[:form], :issue => issue })
+      end
+      if card_color_visible?(issue)
+        out << caller.send(:render, :partial => 'issues/expert_agile_card_color_form',
+                                    :locals => { :issue => issue })
+      end
+      out
     end
 
     # Story points in the issue attribute table.
@@ -36,9 +44,17 @@ module RedmineExpertAgile
     private
 
     def story_points_visible?(issue)
-      issue.present? &&
-        issue.project&.module_enabled?(:expert_agile) &&
-        issue.story_points_available?
+      agile_issue?(issue) && issue.story_points_available?
+    end
+
+    # Only worth showing when a board actually colours by issue.
+    def card_color_visible?(issue)
+      agile_issue?(issue) && RedmineExpertAgile.color_base == 'issue'
+    end
+
+    def agile_issue?(issue)
+      issue.present? && issue.project.present? &&
+        issue.project.module_enabled?(:expert_agile)
     end
   end
 end

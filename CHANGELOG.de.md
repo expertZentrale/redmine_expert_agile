@@ -62,6 +62,15 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   wird mit einer konkreten Fehlermeldung abgelehnt und aendert nichts — statt aus einer
   Attributzuweisung abgeleitet zu werden, die stillschweigend nicht gegriffen hat.
 
+- **Kartenfarben.** Karten lassen sich nach Tracker, Prioritaet, Status, Projekt, Bearbeiter,
+  aufgewendeter Zeit oder je Ticket einfaerben, aus einer geschlossenen Palette von neun Farben,
+  die so gewaehlt sind, dass der Kartentext lesbar bleibt. Farben fuer Tracker, Prioritaeten und
+  Status werden ueber eine neue Administrationsseite gepflegt; die Farbe je Ticket erscheint im
+  Ticketformular, sobald ein Board nach Ticket einfaerbt. Die Farbunterstuetzung ist ein Concern,
+  das nur in die fuenf faerbbaren Modelle eingebunden wird und nicht in `ActiveRecord::Base`, und
+  die Administrationsseite loest ihre Zielklasse ueber eine Whitelist auf, statt einen
+  Request-Parameter zu constantizen.
+
 ### Behoben
 
 - **Das Umhuellen von Kernmethoden fuehrt nicht mehr zu Endlosrekursion**, wenn RedmineUP-Plugins
