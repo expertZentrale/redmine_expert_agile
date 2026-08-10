@@ -11,6 +11,7 @@ Benoetigt **Redmine 5.0 oder neuer**. Lizenziert unter der **GPL-2.0-or-later**
 ## Inhalt
 
 - [Funktionen](#funktionen)
+- [REST-API](API.md)
 - [Installation](#installation)
 - [Konfiguration](#konfiguration)
 - [Berechtigungen](#berechtigungen)
@@ -18,10 +19,6 @@ Benoetigt **Redmine 5.0 oder neuer**. Lizenziert unter der **GPL-2.0-or-later**
 - [Lizenz](#lizenz)
 
 ## Funktionen
-
-> Das Plugin befindet sich in aktiver Entwicklung Richtung erstes Release (0.1.0). Die folgenden
-> Punkte beschreiben dessen Umfang; was bereits umgesetzt ist, steht in
-> [CHANGELOG.de.md](CHANGELOG.de.md).
 
 - **Board** — Spalten aus Ticket-Status, Drag & Drop, Swimlanes, WIP-Limits (nur hinweisend),
   konfigurierbare Kartenfelder, Unterspalten ueber ein gemeinsames Statusnamen-Praefix, eine

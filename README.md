@@ -10,6 +10,7 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
 ## Contents
 
 - [Features](#features)
+- [REST API](API.md)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Permissions](#permissions)
@@ -17,9 +18,6 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
 - [License](#license)
 
 ## Features
-
-> The plugin is under active development towards its first release (0.1.0). Items below are the
-> scope of that release; see [CHANGELOG.md](CHANGELOG.md) for what has landed so far.
 
 - **Board** — columns from issue statuses, drag & drop, swimlanes, advisory WIP limits,
   configurable card fields, sub-columns via a shared status name prefix, a backlog column, and

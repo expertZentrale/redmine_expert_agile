@@ -1,0 +1,45 @@
+h3. redmine_expert_agile 0.1.0 — 2026-08-10
+
+First release. Agile boards for Redmine, built on Redmine's own query system.
+
+h4. Board
+
+* Kanban board with columns from issue statuses, drag & drop between and within columns, swimlanes, and sub-column headers from a shared @Prefix:@ status naming.
+* Advisory WIP limits — a column over its limit is flagged, the move is never blocked.
+* Configurable card fields, card tooltips, and a project menu entry next to the Gantt chart.
+* Boards are saved queries: every issue filter, column and visibility rule applies unchanged.
+
+h4. Story points
+
+* A story point value per issue, offered either as a configurable value list (modified Fibonacci by default) or as free numeric entry, and restrictable to selected trackers.
+* Available on the issue form, in the issue attribute table, in bulk edit, and as a sortable column and filter on the issue list.
+* Parent issues show the total across their subtree. "Not estimated" stays distinguishable from "estimated as zero".
+
+h4. Sprints and backlog
+
+* Sprints with start and end dates, an open/active/closed lifecycle and Version-style sharing across a project tree.
+* Activating a sprint stands the project's other active sprint down; a sprint cannot be closed while it still holds open issues; overlapping sprints are rejected unless explicitly allowed.
+* A backlog planner, behind its own project module, for dragging issues into sprints or versions.
+* Sprint changes appear in the issue's own journal.
+
+h4. Charts
+
+Burndown, burnup, cumulative flow, velocity and cycle time, in issues, hours or story points, over day, week or month intervals. Chart.js is vendored with the plugin.
+
+h4. Colours
+
+Cards coloured by tracker, priority, status, project, assignee, spent time, or per issue, from a fixed palette chosen so card text stays readable.
+
+h4. REST API
+
+Agile data per issue is readable and writable, plus full sprint CRUD. See the API reference in the repository.
+
+h4. Upgrade notes
+
+New installation — three migrations create @expert_agile_data@, @expert_agile_sprints@ and @expert_agile_colors@. Run:
+
+<pre>
+bundle exec rake redmine:plugins:migrate NAME=redmine_expert_agile RAILS_ENV=production
+</pre>
+
+Enable the *expert Agile* module per project and grant the new permissions to your roles. If you also run RedmineUP's Agile plugin, do not enable both on the same project.

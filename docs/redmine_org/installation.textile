@@ -1,0 +1,47 @@
+h3. Installation
+
+# Copy the plugin into your Redmine's @plugins@ directory:
+<pre>
+cd /path/to/redmine/plugins
+git clone https://github.com/expertZentrale/redmine_expert_agile.git
+</pre>
+Or unpack a release archive from the "Releases page":https://github.com/expertZentrale/redmine_expert_agile/releases into @plugins/@. The archive already contains a top-level @redmine_expert_agile/@ directory.
+# Run the plugin migrations:
+<pre>
+cd /path/to/redmine
+bundle exec rake redmine:plugins:migrate NAME=redmine_expert_agile RAILS_ENV=production
+</pre>
+# Restart Redmine.
+# Enable the *expert Agile* module per project under *Project settings → Modules*. Enable *expert Agile Backlog* as well if you want the backlog planner.
+# Grant the permissions your roles need under *Administration → Roles and permissions*.
+
+No additional gems are required. Chart.js ships with the plugin, so there is no dependency on any other plugin's assets.
+
+h3. Upgrading
+
+Re-run the migration step after replacing the plugin directory, then restart. Migrations are numbered and additive; none is ever edited after release.
+
+h3. Permissions
+
+|_. Module |_. Permission |_. Allows |
+| expert Agile | View agile board | Open the board, read cards |
+| expert Agile | Edit agile board | Drag & drop, create and edit cards |
+| expert Agile | Save agile boards | Create private saved boards |
+| expert Agile | Manage public agile boards | Create and edit public saved boards |
+| expert Agile | View agile charts | Open the charts page |
+| expert Agile | Manage sprints | Create, edit and close sprints |
+| expert Agile Backlog | View backlog | Open the backlog planner |
+| expert Agile Backlog | Manage backlog | Plan issues into sprints and versions |
+
+h3. Configuration
+
+*Administration → Plugins → Redmine expert Agile.* Every setting ships with a default, so a fresh install is usable immediately. Two worth knowing:
+
+* *Board item limit* (default 500) caps how many issues one board render loads. A board that hits the cap says so rather than looking complete.
+* *Chart item limit* (default 1000) and *chart cache duration* (default 60 minutes) bound the cost of the charts that replay issue history. The counting charts are not subject to the cap.
+
+Card colours for trackers, priorities and statuses are managed under *Administration → Agile card colors*.
+
+h3. Running alongside RedmineUP Agile
+
+All classes, tables and routes are prefixed, so both plugins can be installed at the same time. However, both patch @Issue@, @IssueQuery@ and @ProjectsHelper@, so *enabling both on the same project is not supported*. Migrate a project by disabling one module and enabling the other.

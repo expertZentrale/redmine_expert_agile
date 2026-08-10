@@ -1,0 +1,38 @@
+h3. Redmine expert Agile
+
+Agile boards for Redmine: a Kanban/Scrum board built on Redmine's own query system, story points, sprints with a backlog planner, and charts.
+
+The board *is* a Redmine query. Every filter, column, grouping and visibility rule you already use on the issue list applies to a board unchanged, and a saved board is a single row in Redmine's @queries@ table — the plugin adds no query schema of its own.
+
+h3. Features
+
+* *Board* — columns from issue statuses, drag & drop, swimlanes, advisory WIP limits, configurable card fields, sub-columns from a shared @Prefix:@ status naming, and saved boards.
+* *Story points* — stored per issue, offered as a configurable value list (modified Fibonacci by default), restrictable to selected trackers, and available as a sortable column and filter on the issue list.
+* *Sprints* — a first-class entity with start and end dates, an open/active/closed lifecycle, and Version-style sharing across a project tree. Redmine versions remain usable for planning alongside sprints.
+* *Backlog planner* — drag issues into sprints or versions from a dedicated planning view, behind its own project module.
+* *Charts* — burndown, burnup, cumulative flow, velocity and cycle time, in issues, hours or story points.
+* *Colours* — cards coloured by tracker, priority, status, project, assignee, spent time, or per issue.
+* *REST API* — read *and write* agile data (story points, sprint assignment), plus full sprint CRUD.
+
+h3. Design notes
+
+A few deliberate choices, because they affect correctness rather than taste:
+
+* *Board ranks are fractional and computed on the server.* A move sends only the dragged card and its two neighbours and writes one row. Re-indexing a whole column in the browser loses concurrent moves and silently reorders cards that are paginated out of view.
+* *Chart history is reconstructed in a single pass* over one journal query and cached, rather than re-scanning every issue's journals once per date.
+* *No inline JavaScript.* Views render markup; data reaches the browser through a JSON island. The board works under a @script-src 'self'@ content security policy.
+* *No global monkeypatching* of @ActiveRecord::Base@ or @ApplicationController@.
+
+h3. Requirements
+
+* Redmine 5.0 or newer (tested against 5.1, 6.0, 6.1 and 7.0)
+* Ruby 3.2+ / MySQL, MariaDB or PostgreSQL
+* No additional gems — Chart.js is vendored with the plugin
+
+h3. Links
+
+* "Source and issue tracker":https://github.com/expertZentrale/redmine_expert_agile
+* "Changelog":https://github.com/expertZentrale/redmine_expert_agile/blob/main/CHANGELOG.md
+* "REST API reference":https://github.com/expertZentrale/redmine_expert_agile/blob/main/API.md
+
+Licensed under the GPL-2.0-or-later. This is an independent, clean-room implementation and contains no code from any other agile plugin.
