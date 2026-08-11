@@ -9,6 +9,20 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [0.1.5] - 2026-08-11
+
+### Behoben
+
+- **Swimlanes waren als Bahnen kaum zu erkennen.** Jede Bahn war eine Tabellenzeile mit einer
+  schmalen Beschriftungszelle am linken Rand; ueber die Spalten hinweg hielt die Zeile optisch
+  nichts zusammen. Eine Bahn ist jetzt ein Band ueber die volle Breite des Boards, mit dem Namen
+  der Bahn und ihren eigenen Summen aus Tickets und Story Points. Ist das Board breit genug zum
+  Scrollen, bleibt der Name der Bahn stehen, waehrend die Spalten darunter wandern.
+- **Alle Bahnen sahen gleich aus.** Bahnen haben nun eine Akzentfarbe. Eine Bahn, deren Wert
+  faerbbar ist — Tracker, Prioritaet oder Status — nutzt dessen Farbe, sodass das Band zu seinen
+  Karten passt und die Gruppierung nach Prioritaet die erwartete Skala von ruhig bis rot ergibt;
+  alles andere erhaelt eine stabile, aus der ID abgeleitete Palettenfarbe.
+
 ## [0.1.4] - 2026-08-10
 
 ### Hinzugefuegt

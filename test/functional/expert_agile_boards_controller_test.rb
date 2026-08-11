@@ -114,7 +114,7 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'th.ea-column-header[data-column-id]', :count => 1
     assert_select "th.ea-column-header[data-column-id=?] .ea-column-wip", status_id.to_s,
                   :text => '5'
-    assert_select 'th.ea-swimlane-label', :minimum => 1
+    assert_select 'tr.ea-swimlane-title th', :minimum => 1
     assert_select 'img.ea-avatar', false
   end
 
@@ -138,7 +138,49 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
                              :group_by => 'tracker' }
 
     assert_response :success
-    assert_select 'th.ea-swimlane-label', :minimum => 1
+    assert_select 'tr.ea-swimlane-title th', :minimum => 1
+  end
+
+  def test_swimlane_band_spans_every_column
+    # A lane has to read as one band across the board. A narrow label cell on
+    # the left leaves the row visually unconnected across the columns.
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :group_by => 'tracker' }
+
+    assert_response :success
+    columns = css_select('thead th.ea-column-header[data-column-id]').size
+    assert_operator columns, :>, 0
+    assert_select 'tr.ea-swimlane-title th' do |cells|
+      cells.each do |cell|
+        assert_equal columns.to_s, cell['colspan'],
+                     'the lane band must span every column'
+      end
+    end
+  end
+
+  def test_swimlane_band_carries_its_own_totals
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :group_by => 'tracker' }
+
+    assert_response :success
+    assert_select 'tr.ea-swimlane-title .ea-swimlane-count', :minimum => 1
+  end
+
+  def test_swimlanes_are_given_distinguishable_colours
+    # Grouping by a field with several values must not paint every lane the
+    # same hue, or the bands stop carrying information.
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :group_by => 'priority' }
+
+    assert_response :success
+    classes = css_select('tr.ea-swimlane-title').map do |row|
+      row['class'].to_s.split.detect { |c| c.start_with?('ea-lane-') }
+    end.compact
+    assert classes.any?, 'lanes must carry an accent class'
+    if classes.size > 1
+      assert_operator classes.uniq.size, :>, 1,
+                      'adjacent lanes must not all share one colour'
+    end
   end
 
   def test_colour_basis_is_applied

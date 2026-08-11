@@ -61,6 +61,19 @@ module ExpertAgileBoardsHelper
     value.is_a?(Array) ? value.join(', ') : value.to_s
   end
 
+  # Accent colour for one swimlane, so adjacent lanes are told apart at a
+  # glance rather than all sharing one hue.
+  #
+  # A lane that carries its own colour — a tracker, priority or status the
+  # administrator has coloured — uses it, so the lane matches its cards.
+  # Anything else gets a stable palette entry derived from its id.
+  def expert_agile_swimlane_color_class(swimlane)
+    return 'ea-lane-gray' if swimlane.nil?
+
+    colour = RedmineExpertAgile::CardColor.for_container(swimlane)
+    colour.present? ? "ea-lane-#{colour}" : 'ea-lane-gray'
+  end
+
   # Saved boards (or charts) visible to the current user in this scope.
   #
   # Filtered to the exact STI type: ExpertAgileChartsQuery and

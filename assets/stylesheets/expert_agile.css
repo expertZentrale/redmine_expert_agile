@@ -65,18 +65,6 @@
 .ea-column-header.ea-wip-over .ea-column-count { background: #f6c9c9; border-color: #e2a6a6; }
 .ea-column-header.ea-wip-under { background: #fffaea; border-color: #e3d59b; }
 
-.ea-swimlane-header, .ea-swimlane-label {
-  width: 130px;
-  min-width: 130px;
-  background: #fafbfc;
-  border: 1px solid #d3d9e0;
-  border-radius: 4px;
-  padding: 6px 8px;
-  text-align: left;
-  vertical-align: top;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
 
 .ea-cell {
   border: 1px solid #dfe3e8;
@@ -301,3 +289,57 @@
 .ea-sidebar-nav a.selected { font-weight: bold; }
 .ea-sidebar-nav a.ea-sprint-active { font-weight: bold; }
 .ea-sidebar-nav a.ea-sprint-closed { color: #8a919b; }
+
+/* --- Swimlanes ----------------------------------------------------------- */
+
+/* The lane band spans every column, so the row reads as one lane rather than a
+ * label stuck to the left edge. */
+.ea-swimlane-title th {
+  text-align: left;
+  padding: 6px 10px;
+  border: 1px solid #d3d9e0;
+  border-left-width: 5px;
+  border-radius: 4px 4px 0 0;
+  background: #f0f2f5;
+  font-weight: 600;
+}
+
+/* The band spans every column, so on a board wide enough to scroll the lane
+ * name would slide out of view. Pinning the name keeps it readable while the
+ * columns move underneath it. */
+.ea-swimlane-name {
+  font-size: 1.02em;
+  position: sticky;
+  left: 10px;
+}
+
+.ea-swimlane-totals { float: right; font-weight: normal; }
+
+.ea-swimlane-count, .ea-swimlane-points {
+  display: inline-block;
+  min-width: 18px;
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: #fff;
+  border: 1px solid #cdd4dc;
+  font-size: 0.82em;
+  text-align: center;
+}
+
+.ea-swimlane-points { background: #e5ecfb; color: #2f5aa8; border-color: #c3d3f0; }
+
+/* Separate one lane from the next. */
+.ea-swimlane td { border-bottom: 2px solid #e3e7ec; padding-bottom: 10px; }
+
+/* Per-lane accent. Only the band is tinted — tinting the cells as well would
+ * fight with the card colours. */
+.ea-swimlane-title.ea-lane-green       th { border-left-color: #3c9c3c; background: #f1f9f1; }
+.ea-swimlane-title.ea-lane-light_green th { border-left-color: #8dc63f; background: #f6fbee; }
+.ea-swimlane-title.ea-lane-turquoise   th { border-left-color: #29a8a0; background: #eff9f8; }
+.ea-swimlane-title.ea-lane-blue        th { border-left-color: #3d7ec4; background: #eff5fc; }
+.ea-swimlane-title.ea-lane-purple      th { border-left-color: #8a5fbf; background: #f6f2fc; }
+.ea-swimlane-title.ea-lane-yellow      th { border-left-color: #dcb800; background: #fdfaec; }
+.ea-swimlane-title.ea-lane-orange      th { border-left-color: #e08a1e; background: #fdf6ec; }
+.ea-swimlane-title.ea-lane-red         th { border-left-color: #cc3b3b; background: #fcf1f1; }
+.ea-swimlane-title.ea-lane-gray        th { border-left-color: #8c8c8c; background: #f2f3f4; }

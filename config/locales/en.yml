@@ -108,6 +108,7 @@ en:
   error_expert_agile_status_transition_not_allowed: The workflow does not allow this status change
   error_expert_agile_issue_not_editable: You are not allowed to edit this issue
   label_expert_agile_swimlane_none: No swimlanes
+  label_expert_agile_swimlane_none_value: (none)
   label_expert_agile_board_truncated: Only the first %{count} issues are shown
   label_expert_agile_card_fields: Card fields
   label_expert_agile_swimlanes: Swimlanes

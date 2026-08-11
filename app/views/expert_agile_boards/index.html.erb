@@ -22,7 +22,6 @@
     <thead>
       <% expert_agile_header_rows(@board_columns).each do |row| %>
         <tr>
-          <% if @swimlanes.any? %><th class="ea-swimlane-header" rowspan="1"></th><% end %>
           <% row.each do |cell| %>
             <th class="ea-column-header <%= cell[:column] && cell[:column].wip_css_class %> <%= expert_agile_status_color_class(cell[:column]) %>"
                 colspan="<%= cell[:colspan] %>"
@@ -46,10 +45,29 @@
     <tbody>
       <% if @swimlanes.any? %>
         <% @swimlanes.each do |swimlane| %>
-          <tr class="ea-swimlane">
-            <th class="ea-swimlane-label">
-              <%= swimlane.nil? ? l(:label_none) : swimlane.to_s %>
+          <%# A band across the full width of the board, then the lane's cells
+              beneath it. A narrow label cell on the left does not read as a
+              lane — the eye has nothing tying the row together across the
+              columns. %>
+          <tr class="ea-swimlane-title <%= expert_agile_swimlane_color_class(swimlane) %>">
+            <th colspan="<%= @board_columns.size %>">
+              <span class="ea-swimlane-name">
+                <%= swimlane.nil? ? l(:label_expert_agile_swimlane_none_value) : h(swimlane.to_s) %>
+              </span>
+              <% totals = @query.swimlane_totals(swimlane) %>
+              <span class="ea-swimlane-totals">
+                <span class="ea-swimlane-count" title="<%= l(:label_issue_plural) %>">
+                  <%= totals[:issue_count] %>
+                </span>
+                <% if totals[:story_points].to_i > 0 %>
+                  <span class="ea-swimlane-points" title="<%= l(:label_expert_agile_story_points) %>">
+                    <%= totals[:story_points] %>
+                  </span>
+                <% end %>
+              </span>
             </th>
+          </tr>
+          <tr class="ea-swimlane <%= expert_agile_swimlane_color_class(swimlane) %>">
             <%= render :partial => 'expert_agile_boards/cells',
                        :locals => { :swimlane => swimlane } %>
           </tr>

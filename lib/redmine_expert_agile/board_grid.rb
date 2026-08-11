@@ -62,6 +62,25 @@ module RedmineExpertAgile
       end
     end
 
+    # Every issue in one lane, across all its columns.
+    def swimlane_issues(swimlane)
+      return board_issues if swimlane == :none || !grouped?
+
+      column = group_by_column
+      key = lane_key(swimlane)
+      board_issues.select { |issue| lane_key(column.group_value(issue)) == key }
+    end
+
+    # Aggregates for the lane band. Story points are already loaded with the
+    # board, so this costs no extra query.
+    def swimlane_totals(swimlane)
+      issues = swimlane_issues(swimlane)
+      {
+        :issue_count => issues.size,
+        :story_points => issues.sum { |issue| issue.story_points.to_i }
+      }
+    end
+
     # Issues of one cell. Pass :none for an ungrouped board, or a swimlane
     # (including nil, the "no value" lane) for a grouped one.
     def issues_for(status_id, swimlane = :none)

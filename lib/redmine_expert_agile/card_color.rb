@@ -26,6 +26,21 @@ module RedmineExpertAgile
         colour_of(status)
       end
 
+      # Colour of an arbitrary container — a swimlane's tracker, priority,
+      # status or user. Falls back to a stable palette entry so lanes differ
+      # from one another even when nothing has been coloured by hand.
+      def for_container(container)
+        return nil if container.nil?
+
+        if container.respond_to?(:expert_agile_color)
+          colour_of(container, :fallback_for => (container.is_a?(IssuePriority) ? :priority : nil))
+        else
+          # Users, versions and categories are not colourable containers, but a
+          # lane still needs a hue.
+          ExpertAgileColor.for_principal(container)
+        end
+      end
+
       # Preloads the colours for a whole board in one query per container type,
       # so rendering N cards does not issue N lookups.
       def preload(issues, base)

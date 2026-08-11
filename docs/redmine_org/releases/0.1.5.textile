@@ -1,0 +1,10 @@
+h3. redmine_expert_agile 0.1.5 — 2026-08-11
+
+h4. Fixed
+
+* *Swimlanes now read as lanes.* Each lane was a table row with a narrow label cell on the left, so nothing tied the row together across the columns. A lane is now a band spanning the full width of the board, carrying the lane name and its own issue and story point totals. On a board wide enough to scroll, the lane name stays pinned while the columns move underneath it.
+* *Lanes are told apart by colour.* A lane whose value can be coloured — tracker, priority or status — uses that colour, so the band matches its cards and grouping by priority gives the expected calm-to-red ramp. Anything else gets a stable palette entry derived from its id.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.

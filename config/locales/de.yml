@@ -108,6 +108,7 @@ de:
   error_expert_agile_status_transition_not_allowed: Der Workflow erlaubt diesen Statuswechsel nicht
   error_expert_agile_issue_not_editable: Sie duerfen dieses Ticket nicht bearbeiten
   label_expert_agile_swimlane_none: Keine Swimlanes
+  label_expert_agile_swimlane_none_value: (ohne)
   label_expert_agile_board_truncated: Es werden nur die ersten %{count} Tickets angezeigt
   label_expert_agile_card_fields: Kartenfelder
   label_expert_agile_swimlanes: Swimlanes

@@ -9,6 +9,19 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [0.1.5] - 2026-08-11
+
+### Fixed
+
+- **Swimlanes did not read as lanes.** Each lane was a table row with a narrow label cell on the
+  left, so nothing tied the row together across the columns. A lane is now a band spanning the
+  full width of the board, with the lane name and its own issue and story point totals. On a
+  board wide enough to scroll, the lane name stays pinned while the columns move underneath it.
+- **Every lane looked the same.** Lanes now carry an accent colour. A lane whose value can be
+  coloured — a tracker, priority or status — uses that colour, so the band matches its cards and
+  grouping by priority gives the expected calm-to-red ramp; anything else gets a stable palette
+  entry derived from its id.
+
 ## [0.1.4] - 2026-08-10
 
 ### Added
