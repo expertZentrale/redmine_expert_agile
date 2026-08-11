@@ -62,6 +62,35 @@ module RedmineExpertAgile
       end
     end
 
+    # When each board issue last changed status, as {issue_id => Time}.
+    #
+    # One grouped query for the whole board. Asking per card would be an N+1
+    # over the journals, which is the shape that makes RedmineUP's "in status"
+    # card field expensive.
+    def status_changed_at
+      @status_changed_at ||= begin
+        ids = board_issues.map(&:id)
+        if ids.empty?
+          {}
+        else
+          JournalDetail.joins(:journal)
+                       .where(:journals => { :journalized_type => 'Issue', :journalized_id => ids })
+                       .where(:property => 'attr', :prop_key => 'status_id')
+                       .group("#{Journal.table_name}.journalized_id")
+                       .maximum("#{Journal.table_name}.created_on")
+        end
+      end
+    end
+
+    # Whole days the issue has sat in its current status. An issue that has
+    # never changed status counts from when it was created.
+    def days_in_status(issue)
+      since = status_changed_at[issue.id] || issue.created_on
+      return nil if since.blank?
+
+      ((Time.now - since) / 86_400).floor
+    end
+
     # Every issue in one lane, across all its columns.
     def swimlane_issues(swimlane)
       return board_issues if swimlane == :none || !grouped?

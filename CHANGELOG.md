@@ -9,6 +9,29 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [0.1.6] - 2026-08-11
+
+### Added
+
+- **More card fields.** Created and updated were already selectable; the card picker now also
+  offers **time in status** — whole days since the issue last changed status, answered from one
+  grouped journal query for the whole board rather than a lookup per card — and a **short excerpt
+  of the description**, whose length is configurable in the plugin settings. Description is a
+  block column in Redmine, so the options panel now exposes block columns the way Redmine's own
+  query form does.
+- The excerpt is plain text: HTML and wiki markup are stripped rather than rendered, because a
+  card is a summary and full markup drags headings, tables and images into it. Descriptions
+  ingested from email are mostly HTML, so this matters in practice.
+
+### Fixed
+
+- **A setting added in a later version never took effect on an existing installation.** Redmine
+  hands back the stored settings hash wholesale once the settings form has been saved even once,
+  so a newly declared key is simply absent and reads as nil — which for a numeric setting becomes
+  0. The declared defaults are now merged underneath the stored values, so a stored value still
+  wins (including a deliberately blank one) while new keys get their default. This is what made
+  the description excerpt collapse to its 20-character floor.
+
 ## [0.1.5] - 2026-08-11
 
 ### Fixed

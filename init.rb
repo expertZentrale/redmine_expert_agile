@@ -40,7 +40,7 @@ Redmine::Plugin.register :redmine_expert_agile do
   name 'Redmine expert Agile'
   author 'Dennis Buehring'
   description 'Agile boards, story points, sprints and charts for Redmine'
-  version '0.1.5'
+  version '0.1.6'
   requires_redmine :version_or_higher => '5.0'
   url 'https://github.com/expertZentrale/redmine_expert_agile'
 
@@ -58,6 +58,9 @@ Redmine::Plugin.register :redmine_expert_agile do
              'issues_per_column'       => '10',
              # Hard cap on issues pulled into one board render.
              'board_items_limit'       => '500',
+             # Characters of the description shown on a card, when the
+             # description field is switched on for that board.
+             'card_description_length' => '140',
              'allow_create_card'       => '0',
              'auto_assign_on_move'     => '0',
              'minimize_closed'         => '0',

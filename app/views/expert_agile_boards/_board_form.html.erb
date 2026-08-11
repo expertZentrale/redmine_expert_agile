@@ -32,6 +32,12 @@
             <td class="field"><%= l(:label_expert_agile_card_fields) %></td>
             <td><%= render_query_columns_selection(@query) %></td>
           </tr>
+          <% if @query.available_block_columns.any? %>
+            <tr>
+              <td class="field"><%= l(:label_expert_agile_card_text_fields) %></td>
+              <td><%= available_block_columns_tags(@query) %></td>
+            </tr>
+          <% end %>
           <tr>
             <td class="field"><label for="group_by"><%= l(:label_expert_agile_swimlanes) %></label></td>
             <td><%= group_by_column_select_tag(@query) %></td>

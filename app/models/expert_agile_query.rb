@@ -24,7 +24,7 @@ class ExpertAgileQuery < IssueQuery
   # Card fields we render ourselves and therefore never repeat in the generic
   # attribute list at the bottom of a card.
   SPECIAL_CARD_COLUMNS = %i(id project tracker status subject assigned_to done_ratio
-                            estimated_hours spent_hours story_points).freeze
+                            estimated_hours spent_hours story_points description).freeze
 
   def initialize(attributes = nil, *args)
     super
@@ -105,6 +105,20 @@ class ExpertAgileQuery < IssueQuery
   # fields — with no parallel mechanism to keep in sync.
   def card_columns
     columns
+  end
+
+  # Adds the board's own card field. Time in status has no equivalent in
+  # Redmine, and it is board-only on purpose — it is answered from a grouped
+  # query over the board's issues, which the issue list has no equivalent of.
+  def available_columns
+    return @available_columns if @available_columns
+
+    columns = super
+    unless columns.any? { |column| column.name == :day_in_state }
+      columns << QueryColumn.new(:day_in_state, :sortable => false, :groupable => false,
+                                                :caption => :label_expert_agile_day_in_state)
+    end
+    @available_columns = columns
   end
 
   # The board's default card fields come from the plugin setting rather than

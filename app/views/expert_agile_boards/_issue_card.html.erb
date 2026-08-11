@@ -35,6 +35,15 @@
     <% end %>
   </div>
 
+  <%# Description is a block column, so it gets its own place on the card
+      rather than being squeezed into the field list. %>
+  <% if @query.has_column?(:description) %>
+    <% excerpt = expert_agile_description_excerpt(issue) %>
+    <% if excerpt.present? %>
+      <p class="ea-card-description"><%= h excerpt %></p>
+    <% end %>
+  <% end %>
+
   <%# Everything else the board was configured to show, including custom
       fields — they come from the query's own column selection. %>
   <% extra = @query.extra_card_columns %>

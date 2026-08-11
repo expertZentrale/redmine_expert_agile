@@ -343,3 +343,12 @@
 .ea-swimlane-title.ea-lane-orange      th { border-left-color: #e08a1e; background: #fdf6ec; }
 .ea-swimlane-title.ea-lane-red         th { border-left-color: #cc3b3b; background: #fcf1f1; }
 .ea-swimlane-title.ea-lane-gray        th { border-left-color: #8c8c8c; background: #f2f3f4; }
+
+.ea-card-description {
+  margin: 4px 0 0;
+  padding-top: 4px;
+  border-top: 1px solid #f0f1f3;
+  color: #5a616b;
+  font-size: 11px;
+  line-height: 1.4;
+}

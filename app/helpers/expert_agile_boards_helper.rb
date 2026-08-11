@@ -55,10 +55,45 @@ module ExpertAgileBoardsHelper
   # issue list. Falls back to the raw value if a column raises — one awkward
   # custom field must not take the whole board down.
   def expert_agile_card_value(column, issue)
+    # The board's own field: there is no Issue#day_in_state for column_content
+    # to call, the value comes from the board's grouped journal lookup.
+    return expert_agile_days_in_status_label(issue) if column.name == :day_in_state
+
     column_content(column, issue)
   rescue StandardError
     value = column.value_object(issue) rescue nil
     value.is_a?(Array) ? value.join(', ') : value.to_s
+  end
+
+  def expert_agile_days_in_status_label(issue)
+    days = @query.days_in_status(issue)
+    return nil if days.nil?
+
+    days.zero? ? l(:label_expert_agile_today) : l(:label_expert_agile_days_count, :count => days)
+  end
+
+  # A plain-text opening of the description, for the card.
+  #
+  # Deliberately not textilizable: a card is a summary, and rendering full
+  # wiki markup inside one drags in headings, tables and images that break the
+  # card layout.
+  def expert_agile_description_excerpt(issue)
+    text = issue.description.to_s.strip
+    return nil if text.blank?
+
+    text = text.gsub(/<[^>]*>/, ' ')              # HTML — descriptions ingested
+                                                  # from email are full of it
+               .gsub(/!\S+!/, '')                 # inline image macros
+               .gsub(/\{\{[^}]*\}\}/, '')         # wiki macros
+               .gsub(/[*_+\-#>|]+/, ' ')          # textile decoration
+               .gsub(/\s+/, ' ')
+               .strip
+    # No :separator. Breaking on whitespace looks tidier until the text
+    # contains a long unbroken token — an email address or a URL, which is
+    # exactly what a forwarded mail starts with — and then the last space
+    # before the limit is near the beginning and the excerpt collapses to a
+    # few characters.
+    truncate(text, :length => RedmineExpertAgile.card_description_length)
   end
 
   # Accent colour for one swimlane, so adjacent lanes are told apart at a

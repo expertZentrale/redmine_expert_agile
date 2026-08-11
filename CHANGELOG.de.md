@@ -9,6 +9,31 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [0.1.6] - 2026-08-11
+
+### Hinzugefuegt
+
+- **Mehr Kartenfelder.** Angelegt und Aktualisiert waren bereits waehlbar; die Feldauswahl bietet
+  nun zusaetzlich **Zeit im Status** — volle Tage seit dem letzten Statuswechsel, beantwortet aus
+  einer einzigen gruppierten Journalabfrage fuer das gesamte Board statt einer Abfrage je Karte —
+  sowie einen **kurzen Auszug der Beschreibung**, dessen Laenge in den Plugin-Einstellungen
+  konfigurierbar ist. Die Beschreibung ist in Redmine eine Blockspalte, daher bietet der
+  Optionsbereich Blockspalten jetzt so an, wie es Redmines eigenes Abfrageformular tut.
+- Der Auszug ist reiner Text: HTML und Wiki-Markup werden entfernt statt gerendert, denn eine
+  Karte ist eine Zusammenfassung, und vollstaendiges Markup zoege Ueberschriften, Tabellen und
+  Bilder hinein. Aus E-Mails uebernommene Beschreibungen bestehen groesstenteils aus HTML, was
+  das praktisch relevant macht.
+
+### Behoben
+
+- **Eine spaeter hinzugefuegte Einstellung wurde in einer bestehenden Installation nie wirksam.**
+  Redmine liefert den gespeicherten Einstellungs-Hash vollstaendig zurueck, sobald das Formular
+  einmal gespeichert wurde; ein neu deklarierter Schluessel fehlt darin schlicht und wird als nil
+  gelesen — bei einer Zahl also als 0. Die deklarierten Standardwerte liegen jetzt unter den
+  gespeicherten Werten, ein gespeicherter Wert hat also weiterhin Vorrang (auch ein bewusst
+  leerer), waehrend neue Schluessel ihren Standard erhalten. Genau dadurch fiel der
+  Beschreibungsauszug auf seine Untergrenze von 20 Zeichen zurueck.
+
 ## [0.1.5] - 2026-08-11
 
 ### Behoben

@@ -22,6 +22,12 @@
   </p>
 
   <p>
+    <label for="settings_card_description_length"><%= l(:label_expert_agile_card_description_length) %></label>
+    <%= text_field_tag 'settings[card_description_length]', @settings['card_description_length'], :size => 6 %>
+    <em class="info"><%= l(:text_expert_agile_card_description_length) %></em>
+  </p>
+
+  <p>
     <label for="settings_allow_create_card"><%= l(:label_expert_agile_allow_create_card) %></label>
     <%= hidden_field_tag 'settings[allow_create_card]', '0' %>
     <%= check_box_tag 'settings[allow_create_card]', '1', @settings['allow_create_card'].to_s == '1' %>

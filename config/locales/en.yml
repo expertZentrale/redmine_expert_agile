@@ -111,6 +111,12 @@ en:
   label_expert_agile_swimlane_none_value: (none)
   label_expert_agile_board_truncated: Only the first %{count} issues are shown
   label_expert_agile_card_fields: Card fields
+  label_expert_agile_day_in_state: Time in status
+  label_expert_agile_today: today
+  label_expert_agile_days_count: "%{count} d"
+  label_expert_agile_card_text_fields: Text fields
+  label_expert_agile_card_description_length: Description excerpt length
+  text_expert_agile_card_description_length: Characters of the description shown on a card when that field is switched on
   label_expert_agile_swimlanes: Swimlanes
   label_expert_agile_show_avatar: Show assignee avatar
   label_expert_agile_columns_and_limits: Columns and WIP limits

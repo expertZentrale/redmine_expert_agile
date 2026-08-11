@@ -15,8 +15,26 @@ module RedmineExpertAgile
   ESTIMATE_UNITS = %w(hours story_points).freeze
 
   class << self
+    # Stored settings, with any key the administrator has never saved filled in
+    # from the defaults declared in init.rb.
+    #
+    # Redmine returns the stored hash wholesale once the settings form has been
+    # submitted even once, so a setting added in a later version is simply
+    # absent on an existing installation and reads as nil — which for a numeric
+    # setting silently becomes 0. That is how the description excerpt length
+    # collapsed to its floor of 20 characters on the dev instance. Merging the
+    # declared defaults underneath keeps a stored value authoritative, including
+    # a deliberately blank one, while new keys still get their default.
     def settings
-      Setting.plugin_redmine_expert_agile || {}
+      stored = Setting.plugin_redmine_expert_agile || {}
+      declared_defaults.merge(stored.to_h)
+    end
+
+    def declared_defaults
+      plugin = Redmine::Plugin.find(:redmine_expert_agile)
+      (plugin && plugin.settings[:default]) || {}
+    rescue Redmine::PluginNotFound
+      {}
     end
 
     def setting(key)
@@ -53,6 +71,10 @@ module RedmineExpertAgile
 
     def board_items_limit
       [setting_int(:board_items_limit), 1].max
+    end
+
+    def card_description_length
+      [setting_int(:card_description_length), 20].max
     end
 
     def allow_create_card?

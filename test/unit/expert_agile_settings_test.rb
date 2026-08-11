@@ -24,6 +24,31 @@ class ExpertAgileSettingsTest < ActiveSupport::TestCase
     end
   end
 
+  def test_settings_added_later_still_read_their_declared_default
+    # Redmine hands back the stored hash wholesale once the settings form has
+    # been saved once, so a key introduced in a later version is absent on an
+    # existing installation. Without merging the declared defaults underneath,
+    # a numeric setting reads as nil -> 0, which is how the description excerpt
+    # length collapsed to its floor on a real instance.
+    Setting.plugin_redmine_expert_agile = { 'color_base' => 'status' }
+
+    assert_equal 140, RedmineExpertAgile.card_description_length
+    assert_equal 500, RedmineExpertAgile.board_items_limit
+    assert_equal 'status', RedmineExpertAgile.color_base, 'a stored value still wins'
+  ensure
+    Setting.plugin_redmine_expert_agile = {}
+  end
+
+  def test_a_stored_blank_value_is_not_overwritten_by_the_default
+    # "no trackers selected" is a real choice and must not be replaced by the
+    # default just because it is empty.
+    Setting.plugin_redmine_expert_agile = { 'sp_values' => '' }
+
+    assert_equal [], RedmineExpertAgile.sp_values
+  ensure
+    Setting.plugin_redmine_expert_agile = {}
+  end
+
   def test_boolean_settings_read_as_booleans
     with_agile_settings('story_points_on' => '1') do
       assert RedmineExpertAgile.use_story_points?

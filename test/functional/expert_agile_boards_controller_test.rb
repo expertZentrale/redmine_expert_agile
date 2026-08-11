@@ -2,6 +2,7 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
   tests ExpertAgileBoardsController
+  include Redmine::I18n
 
   fixtures :projects, :users, :email_addresses, :members, :member_roles, :roles,
            :enabled_modules, :trackers, :projects_trackers, :issue_statuses,
@@ -197,6 +198,98 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
 
     assert_response :success
     assert_select 'dl.ea-card-fields dt', :minimum => 1
+  end
+
+  def test_created_and_updated_are_available_as_card_fields
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :c => %w(created_on updated_on) }
+
+    assert_response :success
+    assert_select 'dl.ea-card-fields dt', :text => l(:field_created_on), :minimum => 1
+    assert_select 'dl.ea-card-fields dt', :text => l(:field_updated_on), :minimum => 1
+  end
+
+  def test_time_in_status_card_field
+    # Redmine has no such attribute, so this is the board's own column, answered
+    # from one grouped journal query rather than a lookup per card.
+    issue = Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id)
+    journal = Journal.create!(:journalized => issue, :user => User.find(2))
+    journal.update_columns(:created_on => 5.days.ago)
+    JournalDetail.create!(:journal_id => journal.id, :property => 'attr',
+                          :prop_key => 'status_id', :old_value => '1',
+                          :value => issue.status_id.to_s)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :c => %w(day_in_state) }
+
+    assert_response :success
+    assert_select 'dl.ea-card-fields dt', :text => l(:label_expert_agile_day_in_state), :minimum => 1
+    assert_select "div#ea-card-#{issue.id} dl.ea-card-fields dd", :text => l(:label_expert_agile_days_count, :count => 5)
+  end
+
+  def test_time_in_status_falls_back_to_creation_for_untouched_issues
+    fresh = Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :c => %w(day_in_state) }
+
+    assert_response :success
+    assert_select "div#ea-card-#{fresh.id} dl.ea-card-fields dd",
+                  :text => l(:label_expert_agile_today)
+  end
+
+  def test_description_excerpt_is_shown_when_selected
+    issue = Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id,
+                            :description => 'h1. Heading' + "\n\n" + ('lorem ipsum ' * 60))
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :c => %w(description) }
+
+    assert_response :success
+    excerpt = css_select("div#ea-card-#{issue.id} p.ea-card-description").first
+    assert_not_nil excerpt, 'the description excerpt must be rendered'
+    assert excerpt.text.length <= RedmineExpertAgile.card_description_length + 10,
+           'the excerpt must be short'
+    # A card is a summary: wiki markup would drag headings and tables into it.
+    assert_select "div#ea-card-#{issue.id} p.ea-card-description h1", false
+  end
+
+  def test_description_excerpt_strips_html_and_survives_long_tokens
+    # Descriptions ingested from email are full of HTML and start with a long
+    # unbroken token (an address), which is what makes a whitespace-separated
+    # truncation collapse to a few characters.
+    long_address = 'sender.with.a.very.long.name@some.extremely.long.example.domain.invalid'
+    issue = Issue.generate!(
+      :project_id => @project.id, :status_id => @issue.status_id,
+      :description => "test2 <img src='x'/> <b>bold</b> Von: #{long_address} " + ('wort ' * 60)
+    )
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :c => %w(description) }
+
+    assert_response :success
+    excerpt = css_select("div#ea-card-#{issue.id} p.ea-card-description").first.text
+    assert_not_includes excerpt, '<img', 'HTML must be stripped, not escaped into view'
+    assert_not_includes excerpt, '<b>'
+    assert_operator excerpt.length, :>, 60,
+                    'a long token must not collapse the excerpt to a few characters'
+  end
+
+  def test_description_is_not_shown_unless_selected
+    Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id,
+                    :description => 'some text')
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :c => %w(tracker) }
+
+    assert_response :success
+    assert_select 'p.ea-card-description', false
+  end
+
+  def test_description_is_offered_in_the_options_panel
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'fieldset#options input[type=checkbox][name=?][value=?]', 'c[]', 'description'
   end
 
   def test_avatar_can_be_switched_off

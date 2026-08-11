@@ -111,6 +111,12 @@ de:
   label_expert_agile_swimlane_none_value: (ohne)
   label_expert_agile_board_truncated: Es werden nur die ersten %{count} Tickets angezeigt
   label_expert_agile_card_fields: Kartenfelder
+  label_expert_agile_day_in_state: Zeit im Status
+  label_expert_agile_today: heute
+  label_expert_agile_days_count: "%{count} T"
+  label_expert_agile_card_text_fields: Textfelder
+  label_expert_agile_card_description_length: Laenge des Beschreibungsauszugs
+  text_expert_agile_card_description_length: Zeichen der Beschreibung, die auf einer Karte erscheinen, wenn das Feld aktiviert ist
   label_expert_agile_swimlanes: Swimlanes
   label_expert_agile_show_avatar: Avatar des Bearbeiters anzeigen
   label_expert_agile_columns_and_limits: Spalten und WIP-Limits
