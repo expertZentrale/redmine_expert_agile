@@ -9,6 +9,32 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [0.1.9] - 2026-08-11
+
+### Behoben
+
+- **Die Backlog-Bahnen ueberlappten einander.** Die feste Spaltenbreite von 300 Pixeln des Boards
+  stand als ungebundene `.ea-cell`-Regel, und der Backlog verwendet dieselbe Klasse — jede
+  Ablagezone wurde daher 314 Pixel breit in einer 280 Pixel breiten Bahn und ragte in die
+  Nachbarbahn hinein. Die Breite gehoert jetzt zur Tabelle des Boards, und die Elemente des
+  Plugins rechnen mit `border-box`.
+
+### Geaendert
+
+- **Der Backlog-Planer sieht nach Planungswerkzeug aus.** Die Umschaltung zwischen Sprints und
+  Versionen ist ein Segment-Schalter statt zweier blanker Links. Eine Sprint-Bahn zeigt Status,
+  Zeitraum und verbleibende Tage, sodass ohne Seitenwechsel erkennbar ist, welcher Sprint laeuft;
+  eine Versionsbahn zeigt ihr Datum. Die ungeplante Spalte ist gestrichelt und damit als Quelle
+  statt als Ziel gekennzeichnet, Bahnen tragen dieselbe Akzentfarbe wie auf dem Board, eine leere
+  Bahn erklaert sich selbst, und jede Bahn scrollt intern — ein grosses Backlog macht die Seite
+  also nicht mehr tausende Pixel lang.
+
+### Hinzugefuegt
+
+- Controller-Tests fuer den Backlog-Planer, der bisher keine hatte: Aufbau der Bahnen, genau eine
+  Ablagezone je Bahn, Container-IDs, Summen, die Sprint-Metadaten, Modul- und
+  Berechtigungspruefung sowie das Planen eines Tickets in einen Sprint und zurueck.
+
 ## [0.1.8] - 2026-08-11
 
 ### Geaendert

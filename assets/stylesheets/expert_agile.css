@@ -71,11 +71,18 @@
   border-top: none;
   vertical-align: top;
   padding: 6px;
+  background: #f7f8fa;
+  border-radius: 0 0 4px 4px;
+  box-sizing: border-box;
+}
+
+/* Column width belongs to the board's table, not to every .ea-cell — the
+ * backlog reuses the class, and an unscoped fixed width made each drop zone
+ * wider than the lane containing it and overlap its neighbour. */
+.ea-board-table .ea-cell {
   width: 300px;
   min-width: 300px;
   max-width: 300px;
-  background: #f7f8fa;
-  border-radius: 0 0 4px 4px;
 }
 
 .ea-cell.ea-cell-hover { background: #e8f0fb; box-shadow: inset 0 0 0 2px #9dbde8; }
@@ -224,26 +231,6 @@
 .ea-color-swatch.ea-color-red         { background: #cc3b3b; }
 .ea-color-swatch.ea-color-gray        { background: #8c8c8c; }
 
-/* --- Backlog planner ---------------------------------------------------- */
-.ea-backlog { display: flex; gap: 10px; overflow-x: auto; align-items: flex-start; }
-.ea-backlog-lane { min-width: 280px; flex: 0 0 280px; }
-.ea-backlog-lane-header {
-  margin: 0 0 4px;
-  padding: 4px 6px;
-  background: #f5f5f5;
-  border: 1px solid #d0d0d0;
-  font-size: 1em;
-  display: flex;
-  justify-content: space-between;
-}
-.ea-backlog-lane-totals { font-weight: normal; color: #666; }
-.ea-lane-count, .ea-lane-points {
-  display: inline-block; margin-left: 4px; padding: 0 5px;
-  border-radius: 8px; background: #e0e0e0; font-size: 0.85em;
-}
-.ea-backlog-drop { display: block; min-height: 80px; }
-.ea-backlog-switch { margin-bottom: 8px; }
-.ea-backlog-switch a.selected { font-weight: bold; text-decoration: none; }
 
 /* --- Charts ------------------------------------------------------------- */
 .ea-chart-container { position: relative; height: 360px; margin-top: 10px; }
@@ -261,13 +248,6 @@
 .ea-column-header.ea-status-red         { border-bottom-color: #cc3b3b; }
 .ea-column-header.ea-status-gray        { border-bottom-color: #8c8c8c; }
 
-.ea-backlog-empty {
-  flex: 0 0 260px;
-  padding: 12px;
-  border: 1px dashed #cdd4dc;
-  border-radius: 4px;
-  color: #6b727c;
-}
 
 
 .ea-avatar {
@@ -438,3 +418,154 @@
 .ea-wip-input { width: 100%; box-sizing: border-box; padding: 1px 3px; }
 
 .ea-hint { color: #858c95; margin: 0 0 6px; font-size: 0.85em; }
+
+/* --- Backlog planner ----------------------------------------------------- */
+
+.ea-backlog {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  align-items: flex-start;
+  padding-bottom: 8px;
+}
+
+.ea-backlog-lane {
+  flex: 0 0 300px;
+  min-width: 300px;
+  box-sizing: border-box;
+  border: 1px solid #d3d9e0;
+  border-radius: 5px;
+  background: #fbfcfd;
+  overflow: hidden;
+}
+
+/* The unplanned column is the source, not a target you plan into — dashed to
+ * say so. */
+.ea-backlog-lane.ea-backlog-source { border-style: dashed; background: #fff; }
+
+.ea-backlog-lane-header {
+  margin: 0;
+  padding: 7px 10px;
+  border-bottom: 1px solid #e3e7ec;
+  border-left: 4px solid #b9bec6;
+  background: #f2f4f7;
+  font-size: 1em;
+  line-height: 1.3;
+}
+
+.ea-backlog-lane-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.ea-backlog-lane-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ea-backlog-lane-meta {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.78em;
+  font-weight: normal;
+  color: #7a828c;
+}
+
+.ea-backlog-status {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 8px;
+  font-size: 0.92em;
+  background: #e6e9ee;
+  color: #5a616b;
+}
+.ea-backlog-status.ea-sprint-active { background: #dff0df; color: #2f7a2f; }
+.ea-backlog-status.ea-sprint-closed { background: #eceef1; color: #8a919b; }
+
+.ea-backlog-lane-totals { white-space: nowrap; font-weight: normal; }
+
+.ea-lane-count, .ea-lane-points {
+  display: inline-block;
+  min-width: 18px;
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: #fff;
+  border: 1px solid #cdd4dc;
+  font-size: 0.78em;
+  text-align: center;
+}
+.ea-lane-points { background: #e5ecfb; color: #2f5aa8; border-color: #c3d3f0; }
+
+/* Lanes scroll internally so a 500-card backlog does not make the page
+ * itself thousands of pixels tall. */
+.ea-backlog-drop {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 0;
+  padding: 8px;
+  background: transparent;
+  min-height: 120px;
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+}
+
+.ea-backlog-drop.ea-cell-hover { background: #e8f0fb; box-shadow: inset 0 0 0 2px #9dbde8; }
+
+.ea-backlog-empty-hint {
+  margin: 0;
+  padding: 14px 6px;
+  text-align: center;
+  color: #9aa1aa;
+  font-size: 0.85em;
+  border: 1px dashed #dfe3e8;
+  border-radius: 4px;
+}
+
+/* Sprint / version switch as a segmented control rather than two bare links. */
+.ea-backlog-switch {
+  display: inline-flex;
+  margin-bottom: 10px;
+  border: 1px solid #cdd4dc;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.ea-backlog-switch a {
+  padding: 4px 14px;
+  font-size: 0.92em;
+  color: #4a5058;
+  text-decoration: none;
+  background: #f5f7f9;
+  border-right: 1px solid #cdd4dc;
+}
+.ea-backlog-switch a:last-child { border-right: none; }
+.ea-backlog-switch a:hover { background: #e9edf2; }
+.ea-backlog-switch a.selected { background: #3d7ec4; color: #fff; font-weight: 600; }
+
+.ea-backlog-empty {
+  flex: 0 0 280px;
+  padding: 14px;
+  border: 1px dashed #cdd4dc;
+  border-radius: 5px;
+  color: #7a828c;
+  background: #fff;
+}
+
+/* The lane carries the same accent class as a board swimlane, so a sprint
+ * reads the same on both screens. */
+.ea-backlog-lane.ea-lane-green       .ea-backlog-lane-header { border-left-color: #3c9c3c; }
+.ea-backlog-lane.ea-lane-light_green .ea-backlog-lane-header { border-left-color: #8dc63f; }
+.ea-backlog-lane.ea-lane-turquoise   .ea-backlog-lane-header { border-left-color: #29a8a0; }
+.ea-backlog-lane.ea-lane-blue        .ea-backlog-lane-header { border-left-color: #3d7ec4; }
+.ea-backlog-lane.ea-lane-purple      .ea-backlog-lane-header { border-left-color: #8a5fbf; }
+.ea-backlog-lane.ea-lane-yellow      .ea-backlog-lane-header { border-left-color: #dcb800; }
+.ea-backlog-lane.ea-lane-orange      .ea-backlog-lane-header { border-left-color: #e08a1e; }
+.ea-backlog-lane.ea-lane-red         .ea-backlog-lane-header { border-left-color: #cc3b3b; }
+.ea-backlog-lane.ea-lane-gray        .ea-backlog-lane-header { border-left-color: #8c8c8c; }

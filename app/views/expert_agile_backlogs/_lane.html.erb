@@ -1,22 +1,36 @@
 <%# One planning lane: the unplanned backlog (container nil) or a container. %>
 <% totals = @query.totals_for(container) %>
-<div class="ea-backlog-lane">
+<% issues = container ? @query.issues_for(container) : @query.backlog_issues %>
+<div class="ea-backlog-lane <%= container ? expert_agile_swimlane_color_class(container) : 'ea-backlog-source' %>">
   <h3 class="ea-backlog-lane-header" data-container-id="<%= container && container.id %>">
-    <span class="ea-backlog-lane-name">
-      <%= container ? h(container.to_s) : l(:label_expert_agile_backlog) %>
+    <span class="ea-backlog-lane-title">
+      <span class="ea-backlog-lane-name" title="<%= container ? h(container.to_s) : l(:label_expert_agile_backlog) %>">
+        <%= container ? h(container.to_s) : l(:label_expert_agile_backlog) %>
+      </span>
+      <span class="ea-backlog-lane-totals">
+        <span class="ea-lane-count" title="<%= l(:label_issue_plural) %>"><%= totals[:issue_count] %></span>
+        <% if totals[:story_points].to_i > 0 %>
+          <span class="ea-lane-points" title="<%= l(:label_expert_agile_story_points) %>">
+            <%= totals[:story_points].to_i %>
+          </span>
+        <% end %>
+      </span>
     </span>
-    <span class="ea-backlog-lane-totals">
-      <span class="ea-lane-count"><%= totals[:issue_count] %></span>
-      <% if totals[:story_points].to_i > 0 %>
-        <span class="ea-lane-points"><%= totals[:story_points].to_i %></span>
-      <% end %>
-    </span>
+
+    <%# Dates and lifecycle turn a bare name into something you can plan
+        against — which sprint is running, which is next, when it ends. %>
+    <% meta = expert_agile_container_meta(container) %>
+    <% if meta.present? %>
+      <span class="ea-backlog-lane-meta"><%= meta %></span>
+    <% end %>
   </h3>
-  <div class="ea-cell ea-backlog-drop"
-       data-drop-id="<%= container && container.id %>">
+
+  <div class="ea-cell ea-backlog-drop" data-drop-id="<%= container && container.id %>">
     <div class="ea-cell-issues">
-      <%= render :partial => 'expert_agile_backlogs/issue_list',
-                 :locals => { :issues => container ? @query.issues_for(container) : @query.backlog_issues } %>
+      <%= render :partial => 'expert_agile_backlogs/issue_list', :locals => { :issues => issues } %>
     </div>
+    <% if issues.empty? %>
+      <p class="ea-backlog-empty-hint"><%= l(:text_expert_agile_drop_issues_here) %></p>
+    <% end %>
   </div>
 </div>

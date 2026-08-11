@@ -1,0 +1,17 @@
+h3. redmine_expert_agile 0.1.9 — 2026-08-11
+
+h4. Fixed
+
+* *Backlog lanes overlapped each other.* The board's fixed 300px column width was an unscoped @.ea-cell@ rule and the backlog reuses that class, so every drop zone rendered 314px wide inside a 280px lane and spilled into its neighbour. The width now belongs to the board's table and the plugin's boxes size with @border-box@.
+
+h4. Changed
+
+* *The backlog planner looks like a planning tool.* The sprint/version switch is a segmented control rather than two bare links. A sprint lane shows its status, date range and days left; a version lane shows its date. The unplanned column is dashed to mark it as the source rather than a target, lanes carry the same accent colour they have on the board, an empty lane explains itself, and each lane scrolls internally so a large backlog does not make the page thousands of pixels tall.
+
+h4. Added
+
+* Controller tests for the backlog planner, which previously had none.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.

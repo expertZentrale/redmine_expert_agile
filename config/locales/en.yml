@@ -129,6 +129,8 @@ en:
   error_expert_agile_container_not_available: This sprint or version is not available for this project
   text_expert_agile_no_sprints: No sprints yet. Create one to start planning.
   text_expert_agile_no_versions: This project has no open versions to plan into.
+  text_expert_agile_drop_issues_here: Drag issues here to plan them
+  label_expert_agile_days_remaining: "%{count} d left"
 
   # --- Charts ---------------------------------------------------------
   label_expert_agile_chart_burndown: Burndown

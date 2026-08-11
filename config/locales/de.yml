@@ -129,6 +129,8 @@ de:
   error_expert_agile_container_not_available: Dieser Sprint bzw. diese Version steht fuer dieses Projekt nicht zur Verfuegung
   text_expert_agile_no_sprints: Noch keine Sprints vorhanden. Legen Sie einen an, um zu planen.
   text_expert_agile_no_versions: Dieses Projekt hat keine offenen Versionen zum Planen.
+  text_expert_agile_drop_issues_here: Tickets zum Planen hierher ziehen
+  label_expert_agile_days_remaining: "noch %{count} T"
 
   # --- Diagramme ------------------------------------------------------
   label_expert_agile_chart_burndown: Burndown

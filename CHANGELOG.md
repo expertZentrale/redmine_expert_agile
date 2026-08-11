@@ -9,6 +9,30 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [0.1.9] - 2026-08-11
+
+### Fixed
+
+- **Backlog lanes overlapped each other.** The board's fixed 300px column width was written as an
+  unscoped `.ea-cell` rule, and the backlog reuses that class — so every drop zone rendered 314px
+  wide inside a 280px lane and spilled over its neighbour. The width now belongs to the board's
+  table, and the plugin's boxes size with `border-box`.
+
+### Changed
+
+- **The backlog planner looks like a planning tool.** The sprint/version switch is a segmented
+  control rather than two bare links. A sprint lane shows its status, its date range and the days
+  left, so you can tell which sprint is running without leaving the page; a version lane shows its
+  date. The unplanned column is dashed to mark it as the source rather than a target, lanes carry
+  the same accent colour they have on the board, an empty lane says what to do with it, and each
+  lane scrolls internally so a large backlog no longer makes the page thousands of pixels tall.
+
+### Added
+
+- Controller tests for the backlog planner, which had none: lane structure, exactly one drop
+  target per lane, container ids, totals, the sprint metadata, module and permission gating, and
+  planning an issue into and back out of a sprint.
+
 ## [0.1.8] - 2026-08-11
 
 ### Changed
