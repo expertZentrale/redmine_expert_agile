@@ -9,6 +9,22 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [0.1.7] - 2026-08-11
+
+### Behoben
+
+- **Jede Ticketseite lieferte einen 500er.** Der Hook im Ticketformular rief eine Pruefmethode
+  auf, die nie geschrieben worden war; das Oeffnen eines Tickets — auch per Klick auf eine Karte
+  des Boards — scheiterte mit `undefined method 'sprint_visible?'`. Die Pruefung existiert nun
+  und zeigt die Sprint-Auswahl nur, wenn Sprints aktiviert sind und das Projekt einen Sprint zur
+  Planung hat.
+- **Die View-Hooks des Plugins sind jetzt durch Tests abgedeckt, die Redmines eigene Seiten
+  rendern** — Ticketansicht, Bearbeiten, Neu, Massenbearbeitung und Ticketliste, jeweils mit
+  aktiviertem und deaktiviertem Modul sowie mit Sprints und Story Points. Die gesamte Testsuite
+  lief waehrend dieses Ausfalls durch, weil nie eine Kernseite mit geladenem Plugin gerendert
+  wurde; ein Hook, der eine Kernseite zerstoert, ist genau der Fehler, den ein Plugin am
+  dringendsten abfangen muss.
+
 ## [0.1.6] - 2026-08-11
 
 ### Hinzugefuegt

@@ -1,0 +1,10 @@
+h3. redmine_expert_agile 0.1.7 — 2026-08-11
+
+h4. Fixed
+
+* *Every issue page returned a 500.* The issue form hook called a guard method that had never been written, so opening any issue — including clicking a card on the board — failed with @undefined method 'sprint_visible?'@. The guard now exists and shows the sprint selector only when sprints are enabled and the project has one to plan into.
+* The plugin's view hooks are now covered by tests that render Redmine's own pages: issue show, edit, new, bulk edit and the issue list, with the module on and off and with sprints and story points enabled.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart. Anyone running 0.1.5 or 0.1.6 should upgrade — issue pages are unusable on those versions when the agile module is enabled.

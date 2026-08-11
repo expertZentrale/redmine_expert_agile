@@ -72,6 +72,15 @@ module RedmineExpertAgile
       agile_issue?(issue) && RedmineExpertAgile.color_base == 'issue'
     end
 
+    # The sprint selector is only useful once sprints are switched on and the
+    # project actually has one to plan into.
+    def sprint_visible?(issue)
+      return false unless agile_issue?(issue)
+      return false unless RedmineExpertAgile.sprints_on?
+
+      issue.project.shared_expert_agile_sprints.available.exists?
+    end
+
     def agile_issue?(issue)
       issue.present? && issue.project.present? &&
         issue.project.module_enabled?(:expert_agile)

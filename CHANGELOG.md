@@ -9,6 +9,20 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [0.1.7] - 2026-08-11
+
+### Fixed
+
+- **Every issue page returned a 500.** The issue form hook asked a guard method that had never
+  been written, so opening any issue — including clicking a card on the board — failed with
+  `undefined method 'sprint_visible?'`. The guard now exists and shows the sprint selector only
+  when sprints are switched on and the project has one to plan into.
+- **The plugin's view hooks are now covered by tests that render Redmine's own pages** — issue
+  show, edit, new, bulk edit and the issue list, with the module on and off and with sprints and
+  story points enabled. The whole plugin suite passed throughout this outage because nothing had
+  ever rendered a core page with the plugin loaded; a hook that breaks a core page is the one
+  failure a plugin most needs to catch.
+
 ## [0.1.6] - 2026-08-11
 
 ### Added
