@@ -111,6 +111,7 @@ de:
   label_expert_agile_swimlane_none_value: (ohne)
   label_expert_agile_board_truncated: Es werden nur die ersten %{count} Tickets angezeigt
   label_expert_agile_card_fields: Kartenfelder
+  label_expert_agile_appearance: Darstellung
   label_expert_agile_day_in_state: Zeit im Status
   label_expert_agile_today: heute
   label_expert_agile_days_count: "%{count} T"

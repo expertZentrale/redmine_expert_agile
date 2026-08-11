@@ -1,0 +1,11 @@
+h3. redmine_expert_agile 0.1.8 — 2026-08-11
+
+h4. Changed
+
+* *The board options panel is compact.* Three stacked fieldsets — one of them Redmine's two-list-with-arrows column picker, around 400px tall by itself — are now one panel of three side-by-side groups that wrap on narrow screens: card fields, appearance, and columns with their WIP limits. Opening the options costs 279px instead of pushing the board most of a screen down.
+* *Card fields are a checkbox grid.* Ordering matters in a table and much less on a card, so that space now shows every available field — custom fields and description included — in two dense columns. Selections still post as @c[]@. Note this drops the ability to *order* card fields; they follow Redmine's own column order.
+* Status columns and WIP limits are a three-column grid with closed statuses in italic. Long names carry a tooltip and both scrollable lists fade at the bottom so a half-visible row reads as "more below".
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.

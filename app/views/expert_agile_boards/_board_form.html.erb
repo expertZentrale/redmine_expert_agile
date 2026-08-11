@@ -27,85 +27,65 @@
     <fieldset id="options" class="collapsible collapsed">
       <legend onclick="toggleFieldset(this);" class="icon icon-collapsed"><%= l(:label_options) %></legend>
       <div class="hidden">
-        <table>
-          <tr>
-            <td class="field"><%= l(:label_expert_agile_card_fields) %></td>
-            <td><%= render_query_columns_selection(@query) %></td>
-          </tr>
-          <% if @query.available_block_columns.any? %>
-            <tr>
-              <td class="field"><%= l(:label_expert_agile_card_text_fields) %></td>
-              <td><%= available_block_columns_tags(@query) %></td>
-            </tr>
-          <% end %>
-          <tr>
-            <td class="field"><label for="group_by"><%= l(:label_expert_agile_swimlanes) %></label></td>
-            <td><%= group_by_column_select_tag(@query) %></td>
-          </tr>
-          <tr>
-            <td class="field"><label for="color_base"><%= l(:label_expert_agile_color_base) %></label></td>
-            <td>
+        <%# One grid of three panels rather than three stacked fieldsets with a
+            400px dual-listbox in the middle. Everything a board is configured
+            with is visible at once. %>
+        <div class="ea-options-grid">
+
+          <section class="ea-options-panel">
+            <h4><%= l(:label_expert_agile_card_fields) %></h4>
+            <div class="ea-field-options">
+              <%= expert_agile_card_field_tags(@query) %>
+            </div>
+          </section>
+
+          <section class="ea-options-panel">
+            <h4><%= l(:label_expert_agile_appearance) %></h4>
+            <p class="ea-options-row">
+              <label for="group_by"><%= l(:label_expert_agile_swimlanes) %></label>
+              <%= group_by_column_select_tag(@query) %>
+            </p>
+            <p class="ea-options-row">
+              <label for="color_base"><%= l(:label_expert_agile_color_base) %></label>
               <%= select_tag 'color_base',
                              options_for_select(
                                RedmineExpertAgile::COLOR_BASES.map { |b| [l("label_expert_agile_color_base_#{b}"), b] },
                                @query.color_base) %>
-            </td>
-          </tr>
-          <tr>
-            <td class="field"><label for="show_avatar"><%= l(:label_expert_agile_show_avatar) %></label></td>
-            <td>
-              <%= hidden_field_tag 'show_avatar', '0' %>
-              <%= check_box_tag 'show_avatar', '1', @query.show_avatar? %>
-            </td>
-          </tr>
-        </table>
-      </div>
-    </fieldset>
+            </p>
+            <p class="ea-options-row">
+              <label for="show_avatar"><%= l(:label_expert_agile_show_avatar) %></label>
+              <span>
+                <%= hidden_field_tag 'show_avatar', '0' %>
+                <%= check_box_tag 'show_avatar', '1', @query.show_avatar? %>
+              </span>
+            </p>
+          </section>
 
-    <fieldset id="ea-columns-options" class="collapsible collapsed">
-      <legend onclick="toggleFieldset(this);" class="icon icon-collapsed">
-        <%= l(:label_expert_agile_columns_and_limits) %>
-      </legend>
-      <div class="hidden">
-        <p class="ea-hint"><%= l(:text_expert_agile_board_statuses_hint) %></p>
-        <table class="ea-status-options">
-          <thead>
-            <tr>
-              <th><%= l(:field_status) %></th>
-              <th><%= l(:label_expert_agile_wip_min) %></th>
-              <th><%= l(:label_expert_agile_wip_max) %></th>
-            </tr>
-          </thead>
-          <tbody>
-            <%# Every status the project's workflows can reach, pre-ticked with
-                the board's current columns. %>
+          <section class="ea-options-panel" id="ea-columns-options">
+            <h4><%= l(:label_expert_agile_columns_and_limits) %></h4>
+            <p class="ea-hint"><%= l(:text_expert_agile_board_statuses_hint) %></p>
             <% selected = @query.board_statuses.map(&:id) %>
             <% limits = @query.wip_limits %>
             <%= hidden_field_tag 'board_status_ids[]', '' %>
-            <% expert_agile_selectable_statuses(@query).each do |status| %>
-              <tr>
-                <td>
-                  <label>
-                    <%= check_box_tag 'board_status_ids[]', status.id,
-                                      selected.include?(status.id), :id => "ea_status_#{status.id}" %>
-                    <%= h status.name %>
-                    <% if status.is_closed? %>
-                      <span class="ea-status-closed">(<%= l(:label_closed_issues) %>)</span>
-                    <% end %>
-                  </label>
-                </td>
-                <td>
-                  <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][0],
-                                     :size => 3, :id => nil %>
-                </td>
-                <td>
-                  <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][1],
-                                     :size => 3, :id => nil %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
+            <div class="ea-status-grid">
+              <span class="ea-status-grid-head"><%= l(:field_status) %></span>
+              <span class="ea-status-grid-head"><%= l(:label_expert_agile_wip_min) %></span>
+              <span class="ea-status-grid-head"><%= l(:label_expert_agile_wip_max) %></span>
+              <% expert_agile_selectable_statuses(@query).each do |status| %>
+                <label class="ea-status-name<%= ' ea-status-closed' if status.is_closed? %>">
+                  <%= check_box_tag 'board_status_ids[]', status.id,
+                                    selected.include?(status.id), :id => "ea_status_#{status.id}" %>
+                  <%= h status.name %>
+                </label>
+                <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][0],
+                                   :size => 2, :id => nil, :class => 'ea-wip-input' %>
+                <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][1],
+                                   :size => 2, :id => nil, :class => 'ea-wip-input' %>
+              <% end %>
+            </div>
+          </section>
+
+        </div>
       </div>
     </fieldset>
   </div>

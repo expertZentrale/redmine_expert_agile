@@ -62,7 +62,7 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_response :success
     assert_select 'form#ea_query_form'
     assert_select 'fieldset#filters'
-    assert_select 'fieldset#ea-columns-options input[name=?]', 'board_status_ids[]'
+    assert_select '#ea-columns-options input[name=?]', 'board_status_ids[]'
     assert_select 'select#color_base'
     assert_select 'input[name=?]', 'show_avatar'
   end

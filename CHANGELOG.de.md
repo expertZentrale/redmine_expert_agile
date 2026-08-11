@@ -9,6 +9,28 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [0.1.8] - 2026-08-11
+
+### Geaendert
+
+- **Der Optionsbereich des Boards ist kompakt.** Aus drei gestapelten Fieldsets — darunter
+  Redmines Spaltenauswahl mit zwei Listen und Pfeilen, allein rund 400 Pixel hoch — ist ein
+  Bereich mit drei nebeneinander liegenden Gruppen geworden, die auf schmalen Bildschirmen
+  umbrechen: Kartenfelder, Darstellung sowie Spalten mit ihren WIP-Limits. Das Aufklappen kostet
+  279 statt fast einer Bildschirmhoehe, und alle Einstellungen sind gleichzeitig sichtbar.
+- **Kartenfelder sind ein Kaestchenraster.** Die Reihenfolge von Spalten zaehlt in einer Tabelle,
+  auf einer Karte kaum; der Platz, den die Pfeilauswahl fuer die Sortierung verbrauchte, zeigt
+  nun alle verfuegbaren Felder — auch benutzerdefinierte und die Beschreibung — in zwei dichten
+  Spalten. Die Auswahl wird weiterhin als `c[]` gesendet, Redmines Parameterverarbeitung bleibt
+  unveraendert.
+
+  Damit entfaellt die Moeglichkeit, Kartenfelder zu *sortieren*; sie folgen jetzt Redmines
+  eigener Spaltenreihenfolge.
+- Statusspalten und ihre WIP-Limits bilden ein dreispaltiges Raster, geschlossene Status kursiv,
+  damit die "Erledigt"-Spalte leicht zu finden ist. Lange Feldnamen tragen einen Tooltip, und
+  beide scrollbaren Listen blenden am unteren Rand aus, damit eine halb sichtbare Zeile als
+  "weiter unten geht es weiter" gelesen wird und nicht als Darstellungsfehler.
+
 ## [0.1.7] - 2026-08-11
 
 ### Behoben

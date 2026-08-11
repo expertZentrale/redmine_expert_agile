@@ -9,6 +9,25 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [0.1.8] - 2026-08-11
+
+### Changed
+
+- **The board options panel is compact.** Three stacked fieldsets — one of them Redmine's
+  two-list-with-arrows column picker, about 400px tall on its own — are now a single panel of
+  three side-by-side groups that wrap on narrow screens: card fields, appearance, and columns with
+  their WIP limits. Opening the options costs 279px instead of pushing the board most of a screen
+  down, and every setting is visible at once.
+- **Card fields are a checkbox grid.** Ordering columns matters in a table and much less on a
+  card, so the space the arrow picker spent on ordering now shows every available field, custom
+  fields and description included, in two dense columns. Selections still post as `c[]`, so
+  Redmine's own parameter handling is unchanged.
+
+  Note this drops the ability to *order* card fields; they now follow Redmine's own column order.
+- Status columns and their WIP limits are a three-column grid with closed statuses in italic, so
+  the "done" column is easy to spot. Long field names carry a tooltip, and both scrollable lists
+  fade at the bottom edge so a half-visible row reads as "more below" rather than as a glitch.
+
 ## [0.1.7] - 2026-08-11
 
 ### Fixed

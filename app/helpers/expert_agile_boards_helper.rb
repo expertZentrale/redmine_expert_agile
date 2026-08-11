@@ -96,6 +96,29 @@ module ExpertAgileBoardsHelper
     truncate(text, :length => RedmineExpertAgile.card_description_length)
   end
 
+  # Card fields as a compact checkbox grid.
+  #
+  # Replaces Redmine's two-list-with-arrows column picker, which is built for
+  # ordering columns in a table and costs about 400px of height. Order carries
+  # far less meaning on a card, so a grid of checkboxes says the same thing in
+  # a quarter of the space. Posts `c[]`, exactly as core's picker does, so
+  # build_from_params handles it unchanged.
+  #
+  # Block columns (description) are listed alongside the inline ones — on a card
+  # that distinction does not exist.
+  def expert_agile_card_field_tags(query)
+    selected = query.columns.map(&:name)
+    columns = (query.available_columns + query.available_block_columns).uniq(&:name)
+
+    safe_join(columns.map { |column|
+      # Long captions are ellipsised by CSS, so the full name goes in a title.
+      content_tag(:label, :class => 'ea-field-option', :title => column.caption) do
+        check_box_tag('c[]', column.name, selected.include?(column.name), :id => nil) +
+          content_tag(:span, column.caption)
+      end
+    })
+  end
+
   # Accent colour for one swimlane, so adjacent lanes are told apart at a
   # glance rather than all sharing one hue.
   #
