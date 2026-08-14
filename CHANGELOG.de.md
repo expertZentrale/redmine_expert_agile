@@ -11,6 +11,21 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ## [Unreleased]
 
+### Behoben
+
+- **Ein gespeichertes Board oder Backlog liess sich ueber seine ID von jedem oeffnen.** Beide
+  Abfragen loesten die ID direkt in der Tabelle auf, sodass ein privates Board eines anderen
+  Benutzers fuer jedes Projektmitglied aufging — Name und vollstaendiger Filtersatz, nicht jedoch
+  Ticketdaten, die weiterhin ueber `Issue.visible` geschuetzt sind. Beide loesen jetzt ueber
+  `visible` und `global_or_on_project` auf, also ueber den Bereich, den Seitenleiste und
+  Abfrage-Controller ohnehin schon verwendeten.
+- **Ein gespeichertes Board oder Backlog blieb offen, nachdem es nicht mehr sichtbar war.** Die
+  Sitzung haelt nur eine ID und ueberlebt die Abfrage, auf die sie zeigt; ein Eigentuemer, der ein
+  geteiltes Board auf privat stellt, oder eine Rolle, die das Recht verliert, blieb daher ohne
+  Wirkung, bis die Sitzung des Betrachters zufaellig endete. Die Wiederherstellung aus der Sitzung
+  loest jetzt ueber denselben Bereich auf und faellt auf ein frisches Board zurueck, wenn das
+  gespeicherte fehlt oder nicht mehr sichtbar ist.
+
 ### Hinzugefuegt
 
 - **Der Backlog-Planer hat jetzt das Filter- und Optionsfeld des Boards.** Der Backlog-Tab war der

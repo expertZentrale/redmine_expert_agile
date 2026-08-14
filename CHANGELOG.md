@@ -11,6 +11,19 @@ notes from the section matching the pushed tag.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A saved board or backlog could be opened by anyone who knew its id.** Both lookups resolved
+  the id straight from the table, so a private board belonging to another user opened for any
+  member of the project — its name and its whole filter set, though not issue data, which
+  `Issue.visible` still gates. Both now resolve through `visible` and `global_or_on_project`, the
+  scope the sidebar and the query controller already used.
+- **A saved board or backlog stayed open after it stopped being visible.** The session carries
+  only an id and outlives the query it points at, so an owner turning a shared board private, or a
+  role losing the permission, had no effect until the viewer's session happened to end. The
+  session restore now resolves through the same scope and falls back to a fresh board when the
+  saved one is gone or no longer visible.
+
 ### Added
 
 - **The backlog planner has the board's filter and options panel.** The backlog tab was the one

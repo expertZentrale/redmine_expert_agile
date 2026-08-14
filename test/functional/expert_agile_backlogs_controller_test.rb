@@ -297,6 +297,28 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     end
   end
 
+  def test_a_backlog_that_turns_private_is_dropped_from_the_session
+    # The session holds only an id, and it outlives the query it points at.
+    # Restoring by id alone means the owner making a shared backlog private has
+    # no effect until the viewer's session happens to end.
+    shared = saved_backlog!(:name => 'Was shared', :user => User.find(3),
+                            :visibility => Query::VISIBILITY_PUBLIC)
+
+    get :index, :params => { :project_id => @project.id, :query_id => shared.id }
+    assert_response :success
+    assert_select 'h2', :text => 'Was shared'
+
+    shared.update!(:visibility => Query::VISIBILITY_PRIVATE)
+
+    # Same session, no params — the restore path.
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'h2', { :text => 'Was shared', :count => 0 },
+                  'a backlog the user may no longer open must not come back from the session'
+    assert_select 'h2', :text => l(:label_expert_agile_backlog)
+  end
+
   def test_a_public_backlog_is_reachable_by_id
     shared = saved_backlog!(:name => 'Team planning', :user => User.find(3),
                             :visibility => Query::VISIBILITY_PUBLIC)
