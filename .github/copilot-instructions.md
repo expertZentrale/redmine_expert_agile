@@ -75,7 +75,7 @@ Every release also updates `docs/redmine_org/` — Textile (not Markdown: `h3.`,
 of the release commit:
 
 - `releases/<version>.textile` — new file per release, user-facing changes only, derived from the
-  CHANGELOG rather than copied. `h3. redmine_expert_agile <version> — <date>`, then
+  CHANGELOG rather than copied. `h3. redmine_expert_agile <version> — <YYYY-MM-DD>`, then
   `h4. Added`/`Changed`/`Fixed`, closing with `h4. Upgrade notes`.
 - `description.textile` — what the plugin is. Drifts silently because nothing forces it; read it
   end to end against the CHANGELOG since the last tag before tagging.
