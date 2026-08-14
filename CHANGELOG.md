@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.2.0] - 2026-08-14
 
 ### Security
 - **A saved board or backlog could be opened by anyone who knew its id.** Both lookups resolved
