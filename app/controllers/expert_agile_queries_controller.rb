@@ -13,6 +13,12 @@ class ExpertAgileQueriesController < ApplicationController
   helper :queries
   include QueriesHelper
 
+  # The new/edit templates are shared by all three variants, so where they post
+  # is the controller's business rather than the template's. With the routes
+  # hardcoded in the template, a chart or a backlog saved from its own screen
+  # would POST to the board's controller and be stored as a board.
+  helper_method :query_collection_path, :query_member_path, :query_page_title
+
   def index
     scope = saved_queries_scope
     scope = scope.global_or_on_project(@project) if @project
@@ -71,10 +77,22 @@ class ExpertAgileQueriesController < ApplicationController
 
   private
 
-  # Overridden by the charts variant, which is the same controller against a
-  # different query class.
+  # Overridden by the charts and backlog variants, which are the same controller
+  # against a different query class.
   def query_class
     ExpertAgileQuery
+  end
+
+  def query_collection_path
+    @project ? project_expert_agile_queries_path(@project) : expert_agile_queries_path
+  end
+
+  def query_member_path(query)
+    expert_agile_query_path(query)
+  end
+
+  def query_page_title
+    l(:label_expert_agile_board_new)
   end
 
   def saved_queries_scope

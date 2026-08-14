@@ -1,14 +1,21 @@
 <%# Backlog planner. Markup only; configuration travels in the JSON island. %>
-<h2><%= l(:label_expert_agile_backlog) %></h2>
+<h2><%= @query.new_record? ? l(:label_expert_agile_backlog) : h(@query.name) %></h2>
 
+<%# The container switch stays a pair of links rather than moving into the
+    options panel: it is the one setting worth a single click, and the panel
+    carries it as a hidden field so applying a filter keeps it. %>
 <div class="ea-backlog-switch">
   <%= link_to l(:label_expert_agile_sprint_plural),
-              project_expert_agile_backlog_path(@project, :container_type => 'sprint'),
+              backlog_path_for(@project, :container_type => 'sprint', :query_id => @query.id),
               :class => (@query.sprints? ? 'selected' : nil) %>
   <%= link_to l(:label_version_plural),
-              project_expert_agile_backlog_path(@project, :container_type => 'version'),
+              backlog_path_for(@project, :container_type => 'version', :query_id => @query.id),
               :class => (@query.sprints? ? nil : 'selected') %>
 </div>
+
+<%= form_tag(backlog_path_for(@project), :method => :get, :id => 'ea_query_form') do %>
+  <%= render :partial => 'expert_agile_backlogs/backlog_form' %>
+<% end %>
 
 <div id="ea-backlog" class="ea-backlog">
   <%= render :partial => 'expert_agile_backlogs/lane', :locals => { :container => nil } %>
@@ -27,6 +34,12 @@
 </div>
 
 <script type="application/json" id="ea-board-data"><%= expert_agile_backlog_data(@query, @project).html_safe %></script>
+
+<% content_for :sidebar do %>
+  <%= render :partial => 'expert_agile_common/sidebar',
+             :locals => { :sidebar_query_class => ExpertAgileBacklogQuery,
+                          :sidebar_title => l(:label_expert_agile_backlog_plural) } %>
+<% end %>
 
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag 'expert_agile', :plugin => 'redmine_expert_agile' %>

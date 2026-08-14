@@ -1,16 +1,61 @@
-<%# A backlog card. Same contract as a board card: markup only. %>
+<%# A backlog card. Same contract as a board card: markup only, and the same
+    configurable field set, so the panel's card fields mean the same thing on
+    both screens. It stays a partial of its own because a planning card carries
+    no status column to drop into — hence no data-status-id — and because
+    #update re-renders exactly this one after a move. %>
 <div class="<%= expert_agile_card_classes(issue, @query) %> ea-backlog-card"
      id="ea-card-<%= issue.id %>"
      data-issue-id="<%= issue.id %>">
+
   <div class="ea-card-header">
     <span class="ea-card-id"><%= link_to("##{issue.id}", issue_path(issue)) %></span>
     <span class="ea-card-tracker"><%= issue.tracker.name %></span>
   </div>
+
   <div class="ea-card-subject"><%= link_to issue.subject, issue_path(issue) %></div>
+
   <div class="ea-card-footer">
+    <%# The status is what a planner most often needs and the board gets from
+        its column, so it keeps its place on the card here. %>
     <span class="ea-card-status"><%= issue.status.name %></span>
+    <% if issue.assigned_to %>
+      <span class="ea-card-assignee" title="<%= h issue.assigned_to.name %>">
+        <%= avatar(issue.assigned_to, :size => 16, :class => 'ea-avatar') if @query.show_avatar? %>
+        <span class="ea-card-assignee-name"><%= h issue.assigned_to.name %></span>
+      </span>
+    <% end %>
     <% if issue.story_points.present? %>
-      <span class="ea-card-story-points"><%= issue.story_points %></span>
+      <span class="ea-card-story-points" title="<%= l(:label_expert_agile_story_points) %>">
+        <%= issue.story_points %>
+      </span>
+    <% elsif issue.estimated_hours.present? %>
+      <span class="ea-card-hours"><%= l_hours_short(issue.estimated_hours) %></span>
+    <% end %>
+    <% if issue.done_ratio.to_i > 0 %>
+      <span class="ea-card-done"><%= issue.done_ratio %>%</span>
     <% end %>
   </div>
+
+  <%# Description is a block column, so it gets its own place on the card
+      rather than being squeezed into the field list. %>
+  <% if @query.has_column?(:description) %>
+    <% excerpt = expert_agile_description_excerpt(issue) %>
+    <% if excerpt.present? %>
+      <p class="ea-card-description"><%= h excerpt %></p>
+    <% end %>
+  <% end %>
+
+  <%# Everything else the backlog was configured to show, including custom
+      fields — they come from the query's own column selection. %>
+  <% extra = @query.extra_card_columns %>
+  <% if extra.any? %>
+    <dl class="ea-card-fields">
+      <% extra.each do |column| %>
+        <% value = expert_agile_card_value(column, issue) %>
+        <% next if value.blank? %>
+        <dt><%= column.caption %></dt>
+        <dd><%= value %></dd>
+      <% end %>
+    </dl>
+  <% end %>
 </div>

@@ -24,7 +24,10 @@ en:
   label_expert_agile_board_new: New board
   label_expert_agile_board_plural: Boards
   label_expert_agile_backlog: Backlog
+  label_expert_agile_backlog_new: New backlog
+  label_expert_agile_backlog_plural: Backlogs
   label_expert_agile_charts: Agile charts
+  label_expert_agile_chart_new: New chart
 
   # --- Settings: sections ---------------------------------------------
   label_expert_agile_settings_board: Board
@@ -126,6 +129,7 @@ en:
   text_expert_agile_board_statuses_hint: Tick the statuses to show as board columns. With none ticked the board shows every open status of this project's workflows.
   error_expert_agile_board_not_saveable: You are not allowed to save a board of this visibility
 
+  # --- Backlog --------------------------------------------------------
   error_expert_agile_container_not_available: This sprint or version is not available for this project
   text_expert_agile_no_sprints: No sprints yet. Create one to start planning.
   text_expert_agile_no_versions: This project has no open versions to plan into.

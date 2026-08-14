@@ -10,12 +10,28 @@ module ExpertAgileBacklogsHelper
       :updateUrlTemplate => update_expert_agile_backlog_issue_path(:project_id => project,
                                                                    :id => '__ID__'),
       :containerType => query.container_type,
+      # A move ranks the card within its lane, and the lane is what the filters
+      # select — so the planning request has to arrive at the same backlog the
+      # user is looking at, saved one included.
+      :queryId => query.id,
       :projectId => project.id,
       :editable => User.current.allowed_to?(:manage_expert_agile_backlog, project),
       :labels => {
         :moveFailed => l(:error_expert_agile_container_not_available)
       }
     }.to_json
+  end
+
+  def backlog_path_for(project, options = {})
+    project_expert_agile_backlog_path(project, options)
+  end
+
+  # The `new` action, not the collection path: the save link re-submits the
+  # panel to it so the configuration the user is looking at arrives with the
+  # request. Pointing at the collection path GETs #index, which just redirects
+  # back to the backlog and loses everything.
+  def new_backlog_query_path_for(project)
+    new_project_expert_agile_backlog_query_path(project)
   end
 
   # Dates and lifecycle for a planning lane's subtitle.

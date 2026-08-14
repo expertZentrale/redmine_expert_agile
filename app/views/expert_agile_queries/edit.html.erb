@@ -1,6 +1,6 @@
 <h2><%= h @query.name %></h2>
 
-<%= form_tag(expert_agile_query_path(@query), :method => :put) do %>
+<%= form_tag(query_member_path(@query), :method => :put) do %>
   <%= fields_for :query, @query do |f| %>
     <%= render :partial => 'form', :locals => { :f => f } %>
   <% end %>

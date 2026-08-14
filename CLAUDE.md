@@ -114,7 +114,9 @@ bundle exec ruby -Itest plugins/redmine_expert_agile/test/unit/board_positions_t
 From the parent repo root, via the compose test profile:
 
 ```bash
-PLUGIN=redmine_expert_agile docker-compose -f docker-compose.yml --profile test run --build --rm redmine-test
+# Note the -e: the compose command reads PLUGIN from the *container's* environment, so a
+# plain `PLUGIN=... docker-compose ...` prefix is ignored and the helpdesk suite runs instead.
+docker-compose -f docker-compose.yml --profile test run --build --rm -e PLUGIN=redmine_expert_agile redmine-test
 ```
 
 `test/test_helper.rb` provides `with_agile_settings(hash) { ... }` for scoping plugin settings.

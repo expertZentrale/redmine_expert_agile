@@ -1,0 +1,89 @@
+<%# Backlog options panel.
+    The board's panel minus the parts a planner has no use for: there is no
+    status-column or WIP fieldset, because `planning_scope` deliberately ignores
+    where an issue sits in the workflow — an issue is planned or it is not.
+    Same ids as the board and as Redmine's own queries/_query_form, so the core
+    stylesheet and toggleFieldset apply unchanged.
+
+    Note: Redmine's own filters partial emits an inline <script> block. The
+    backlog *content* — lanes and cards, which are also re-injected after a
+    move — stays free of inline script; the panel inherits whatever core does,
+    because it is core's markup. %>
+
+<%= hidden_field_tag 'set_filter', '1' %>
+<%# No `type` field: nothing reads params[:type], the query controller decides
+    the class from `query_class`. Carrying it would only exist to be re-enabled
+    by an inline handler on the way to #new. %>
+<%# Which containers are being planned into is chosen by the switch above, which
+    is a pair of links outside this form. Without carrying it here, applying a
+    filter on a version backlog would silently drop back to sprints. %>
+<%= hidden_field_tag 'container_type', @query.container_type %>
+
+<div id="query_form_with_buttons" class="hide-when-print">
+  <div id="query_form_content">
+
+    <fieldset id="filters" class="collapsible <%= @query.new_record? ? '' : 'collapsed' %>">
+      <legend onclick="toggleFieldset(this);" class="icon icon-<%= @query.new_record? ? 'expanded' : 'collapsed' %>">
+        <%= l(:label_filter_plural) %>
+      </legend>
+      <div style="<%= @query.new_record? ? '' : 'display: none;' %>">
+        <%= render :partial => 'queries/filters', :locals => { :query => @query } %>
+      </div>
+    </fieldset>
+
+    <fieldset id="options" class="collapsible collapsed">
+      <legend onclick="toggleFieldset(this);" class="icon icon-collapsed"><%= l(:label_options) %></legend>
+      <div class="hidden">
+        <div class="ea-options-grid">
+
+          <section class="ea-options-panel">
+            <h4><%= l(:label_expert_agile_card_fields) %></h4>
+            <div class="ea-field-options">
+              <%= expert_agile_card_field_tags(@query) %>
+            </div>
+          </section>
+
+          <section class="ea-options-panel">
+            <h4><%= l(:label_expert_agile_appearance) %></h4>
+            <p class="ea-options-row">
+              <label for="color_base"><%= l(:label_expert_agile_color_base) %></label>
+              <%= select_tag 'color_base',
+                             options_for_select(
+                               RedmineExpertAgile::COLOR_BASES.map { |b| [l("label_expert_agile_color_base_#{b}"), b] },
+                               @query.color_base) %>
+            </p>
+            <p class="ea-options-row">
+              <label for="show_avatar"><%= l(:label_expert_agile_show_avatar) %></label>
+              <span>
+                <%= hidden_field_tag 'show_avatar', '0' %>
+                <%= check_box_tag 'show_avatar', '1', @query.show_avatar? %>
+              </span>
+            </p>
+          </section>
+
+        </div>
+      </div>
+    </fieldset>
+  </div>
+
+  <p class="buttons hide-when-print">
+    <%= submit_tag l(:button_apply), :class => 'icon icon-checked', :name => nil %>
+    <%= link_to l(:button_clear), backlog_path_for(@project, :container_type => @query.container_type),
+                :class => 'icon icon-reload' %>
+    <% if @query.new_record? && User.current.allowed_to?(:add_expert_agile_queries, @project, :global => true) %>
+      <%# A second submit with formaction, not a link that rewrites the form's
+          action from an inline onclick. Saving has to reach #new carrying
+          everything the user just configured, and the browser does exactly that
+          for free — no script, so the page still works under
+          `script-src 'self'`. Apply stays the first submit, so Enter in a
+          filter field still applies rather than saves. %>
+      <%= submit_tag l(:button_save), :name => nil, :class => 'icon icon-save',
+                     :formaction => new_backlog_query_path_for(@project) %>
+    <% elsif @query.persisted? && @query.editable_by?(User.current) %>
+      <%= link_to l(:button_edit), edit_expert_agile_backlog_query_path(@query), :class => 'icon icon-edit' %>
+      <%= link_to l(:button_delete), expert_agile_backlog_query_path(@query),
+                  :data => { :confirm => l(:text_are_you_sure) }, :method => :delete,
+                  :class => 'icon icon-del' %>
+    <% end %>
+  </p>
+</div>
