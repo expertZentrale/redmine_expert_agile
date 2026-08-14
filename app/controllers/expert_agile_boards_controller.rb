@@ -185,8 +185,12 @@ class ExpertAgileBoardsController < ApplicationController
   # outlives the query it points at: an owner turning a shared board private, or
   # a role losing the permission, has to take effect on the next request rather
   # than whenever the user next happens to pass a query_id.
+  # `only_boards`, because charts and backlogs are STI subclasses: an unqualified
+  # ExpertAgileQuery lookup matches them too, and `visible` would then gate them
+  # on *this* class's view_permission — the board's. A user with board access but
+  # no backlog or charts permission could otherwise resolve one by id.
   def visible_board_query(id)
-    scope = ExpertAgileQuery.visible
+    scope = ExpertAgileQuery.only_boards.visible
     scope = scope.global_or_on_project(@project) if @project
     scope.find_by(:id => id)
   end

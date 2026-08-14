@@ -11,8 +11,7 @@ notes from the section matching the pushed tag.
 
 ## [Unreleased]
 
-### Fixed
-
+### Security
 - **A saved board or backlog could be opened by anyone who knew its id.** Both lookups resolved
   the id straight from the table, so a private board belonging to another user opened for any
   member of the project — its name and its whole filter set, though not issue data, which
@@ -45,15 +44,6 @@ notes from the section matching the pushed tag.
   subject, status and story points; they now render the assignee and avatar, estimated hours, done
   ratio, the description excerpt and any selected column including custom fields, exactly as a
   board card does.
-
-### Fixed
-
-- **A chart saved from its own screen was stored as a board.** `expert_agile_queries/new` and
-  `edit` hardcoded the board's routes, so every variant of the query controller posted its form to
-  `ExpertAgileQueriesController` regardless of which screen it came from. Where the shared form
-  posts, and what it is titled, is now the controller's business. The charts variant had no Save
-  link in the UI, so this only ever bit the API; the backlog would have hit it on the first click.
-
 - **Screenshots in both READMEs.** `README.md` and `README.de.md` now open a *Screenshots* section
   covering the board with its sub-columns and WIP limits, swimlanes, the backlog planner, the
   sprint list, story points on the issue form, burndown, velocity, cumulative flow, the card
@@ -75,6 +65,11 @@ notes from the section matching the pushed tag.
 
 ### Fixed
 
+- **A chart saved from its own screen was stored as a board.** `expert_agile_queries/new` and
+  `edit` hardcoded the board's routes, so every variant of the query controller posted its form to
+  `ExpertAgileQueriesController` regardless of which screen it came from. Where the shared form
+  posts, and what it is titled, is now the controller's business. The charts variant had no Save
+  link in the UI, so this only ever bit the API; the backlog would have hit it on the first click.
 - **"Show future data on charts" did nothing.** The setting was declared, documented in the
   settings screen and read by `RedmineExpertAgile.chart_future_data?`, but no chart ever consulted
   it: every series was drawn to the end of the selected range, so a burndown looked at mid-sprint

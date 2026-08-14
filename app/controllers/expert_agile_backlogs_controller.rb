@@ -137,8 +137,12 @@ class ExpertAgileBacklogsController < ApplicationController
   # outlives the query it points at: an owner turning a shared backlog private,
   # or a role losing the permission, has to take effect on the next request
   # rather than whenever the user next happens to pass a query_id.
+  # `only_backlogs` for the same reason the board uses `only_boards`: the type
+  # has to be pinned so a lookup never resolves a sibling query class gated on
+  # the wrong permission. Nothing subclasses this one today, which is exactly
+  # why it is worth stating rather than relying on.
   def visible_backlog_query(id)
-    scope = ExpertAgileBacklogQuery.visible
+    scope = ExpertAgileBacklogQuery.only_backlogs.visible
     scope = scope.global_or_on_project(@project) if @project
     scope.find_by(:id => id)
   end

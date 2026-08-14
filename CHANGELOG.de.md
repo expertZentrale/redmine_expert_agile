@@ -11,8 +11,7 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ## [Unreleased]
 
-### Behoben
-
+### Sicherheit
 - **Ein gespeichertes Board oder Backlog liess sich ueber seine ID von jedem oeffnen.** Beide
   Abfragen loesten die ID direkt in der Tabelle auf, sodass ein privates Board eines anderen
   Benutzers fuer jedes Projektmitglied aufging — Name und vollstaendiger Filtersatz, nicht jedoch
@@ -48,17 +47,6 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Tracker, Thema, Status und Story Points; sie zeigen nun Bearbeiter samt Avatar, geschaetzten
   Aufwand, Fortschritt, den Beschreibungsauszug und jede gewaehlte Spalte einschliesslich
   benutzerdefinierter Felder — genau wie eine Board-Karte.
-
-### Behoben
-
-- **Ein auf seinem eigenen Bildschirm gespeichertes Diagramm wurde als Board abgelegt.**
-  `expert_agile_queries/new` und `edit` hatten die Routen des Boards fest verdrahtet, sodass jede
-  Variante des Abfrage-Controllers ihr Formular an `ExpertAgileQueriesController` schickte,
-  gleichgueltig von welchem Bildschirm sie kam. Wohin das gemeinsame Formular schickt und wie es
-  ueberschrieben ist, entscheidet jetzt der Controller. Die Diagramm-Variante hatte keinen
-  Speichern-Link in der Oberflaeche, der Fehler traf also nur die API; das Backlog waere beim
-  ersten Klick hineingelaufen.
-
 - **Bildschirmfotos in beiden READMEs.** `README.md` und `README.de.md` haben jetzt einen Abschnitt
   *Bildschirmfotos*: das Board mit Unterspalten und WIP-Grenzen, Swimlanes, den Backlog-Planer, die
   Sprintliste, Story Points im Ticketformular, Burndown, Velocity, kumulativen Fluss, die
@@ -83,6 +71,13 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ### Behoben
 
+- **Ein auf seinem eigenen Bildschirm gespeichertes Diagramm wurde als Board abgelegt.**
+  `expert_agile_queries/new` und `edit` hatten die Routen des Boards fest verdrahtet, sodass jede
+  Variante des Abfrage-Controllers ihr Formular an `ExpertAgileQueriesController` schickte,
+  gleichgueltig von welchem Bildschirm sie kam. Wohin das gemeinsame Formular schickt und wie es
+  ueberschrieben ist, entscheidet jetzt der Controller. Die Diagramm-Variante hatte keinen
+  Speichern-Link in der Oberflaeche, der Fehler traf also nur die API; das Backlog waere beim
+  ersten Klick hineingelaufen.
 - **„Zukunftsdaten in Diagrammen anzeigen" war wirkungslos.** Die Einstellung war deklariert, in
   den Einstellungen dokumentiert und ueber `RedmineExpertAgile.chart_future_data?` lesbar, aber
   kein Diagramm hat sie je ausgewertet: jede Reihe wurde bis zum Ende des gewaehlten Zeitraums
