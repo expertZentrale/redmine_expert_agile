@@ -11,6 +11,7 @@ Benoetigt **Redmine 5.0 oder neuer**. Lizenziert unter der **GPL-2.0-or-later**
 ## Inhalt
 
 - [Funktionen](#funktionen)
+- [Bildschirmfotos](#bildschirmfotos)
 - [REST-API](API.md)
 - [Installation](#installation)
 - [Konfiguration](#konfiguration)
@@ -54,6 +55,87 @@ Einige bewusste Unterschiede zu vergleichbaren Plugins, weil sie die Korrektheit
 - **Kein Inline-JavaScript.** Views liefern nur Markup; Daten erreichen den Browser ueber eine
   JSON-Insel. Das Board funktioniert unter einer `script-src 'self'`-Content-Security-Policy.
 - **Kein globales Monkeypatching** von `ActiveRecord::Base` oder `ApplicationController`.
+
+## Bildschirmfotos
+
+Alle Bildschirmfotos zeigen ein Demo-Projekt mit synthetischen Daten, aufgebaut von
+`scripts/seed_screenshot_demo.rb`.
+
+### Board
+
+Die Spalten sind Ticketstatus, Karten werden zwischen ihnen verschoben. Status mit gemeinsamem
+Praefix — `Dev: Review` und `Dev: Test` — laufen unter einer gemeinsamen Ueberschrift zusammen,
+und eine Spalte oberhalb ihrer WIP-Grenze markiert sich selbst.
+
+![Agile-Board mit fuenf Statusspalten: Zu erledigen, In Arbeit, eine gemeinsame Dev-Ueberschrift
+ueber den Unterspalten Review und Test sowie Fertig. Jede Spaltenueberschrift traegt ihre
+Kartenzahl und WIP-Grenze, Review ist hervorgehoben, weil dort fuenf Karten gegen eine Grenze von
+vier stehen, und die Karten zeigen Ticketnummer, Tracker, Titel, Bearbeiter, Story Points und
+Fortschritt](docs/screenshots/de/01-board.png)
+
+Jedes Feld, nach dem die Abfrage gruppieren kann, wird zur Swimlane — dasselbe Board laesst sich
+so nach Bearbeiter, Tracker oder Prioritaet lesen.
+
+![Dasselbe Board, in Swimlanes nach Bearbeiter gruppiert: ein beschriftetes Band je Teammitglied
+plus ein Band fuer nicht zugewiesene Tickets, jedes ueber alle fuenf Statusspalten](docs/screenshots/de/02-board-swimlanes.png)
+
+### Story Points
+
+Story Points sind eine Spalte der plugineigenen Tabelle, kein benutzerdefiniertes Feld. Das
+Ticketformular bietet sie als feste Skala an, direkt neben dem Sprint des Tickets.
+
+![Ticketformular mit Redmines eigenen Attributfeldern und darunter zwei Feldern des Plugins: ein
+Auswahlfeld Story Points mit dem Wert 5 und ein Auswahlfeld Sprint mit Sprint 24](docs/screenshots/de/05-story-points.png)
+
+### Sprints
+
+Sprints sind datierte Behaelter mit eigenem Lebenszyklus — offen, aktiv, abgeschlossen —, die in
+den Projekteinstellungen verwaltet werden. Ein Projekt fuehrt genau einen aktiven Sprint.
+
+![Reiter Sprints in den Projekteinstellungen mit fuenf Sprints samt Status, Start- und Enddatum:
+einer aktiv, einer offen und drei abgeschlossen](docs/screenshots/de/04-sprints.png)
+
+### Backlog-Planer
+
+Der Planer stellt den ungeplanten Backlog neben die Sprints, in die er gezogen werden kann; jede
+Bahn summiert Ticketzahl und Story Points. Ein zweiter Reiter plant stattdessen in
+Redmine-Versionen.
+
+![Backlog-Planer mit den Reitern Sprints und Versionen: links eine Backlog-Bahn, daneben je eine
+Bahn pro verfuegbarem Sprint, jede mit Ticketzahl, Story-Point-Summe, Zeitraum und Restlaufzeit in
+der Kopfzeile](docs/screenshots/de/03-backlog.png)
+
+### Diagramme
+
+Burndown und Burnup rekonstruieren den Ticketverlauf aus den Journalen. Gemessene Linien enden am
+heutigen Tag, die Ideallinie laeuft bis zum Ende des Zeitraums.
+
+![Burndown-Diagramm ueber einen Sprint in Story Points: die Restlinie faellt von 200 Punkten und
+endet heute, darunter eine gestrichelte graue Ideallinie, die zum Sprintende auf null laeuft. Die
+Seitenleiste listet die gespeicherten Diagramme und die Sprints des Projekts](docs/screenshots/de/06-chart-burndown.png)
+
+![Velocity-Diagramm als gruppierte Balken je Woche, das erstellte gegen abgeschlossene Tickets der
+letzten sechzig Tage stellt](docs/screenshots/de/07-chart-velocity.png)
+
+![Diagramm des kumulativen Flusses: sieben gestapelte Baender, eines je Ticketstatus, die ueber
+sechzig Tage von fuenf auf hundertfuenfundzwanzig Tickets anwachsen](docs/screenshots/de/08-chart-cumulative-flow.png)
+
+### Farben
+
+Karten beziehen ihre Farbe aus Tracker, Status, Prioritaet, Bearbeiter, Projekt oder dem
+Verhaeltnis von geschaetztem zu gebuchtem Aufwand — oder aus einer Farbe am Ticket selbst. Die
+Zuordnung wird zentral verwaltet.
+
+![Verwaltungsseite fuer Kartenfarben mit Reitern fuer Ticket, Projekt, Tracker, Prioritaet und
+Status, die jeden Status neben einem Farb-Auswahlfeld auflistet](docs/screenshots/de/09-card-colors.png)
+
+### Konfiguration
+
+![Plugin-Einstellungen mit fuenf Abschnitten — Board, Farben, Schaetzungen, Sprints und
+Diagramme — mit den Standard-Kartenfeldern, dem Board-Limit, der Farbbasis, der Schaetzeinheit,
+der Story-Point-Skala, den Sprint-Schaltern und den Diagramm-Vorgaben](docs/screenshots/de/10-settings.png)
+
+Die REST-API hat keine eigene Oberflaeche — siehe [API.md](API.md).
 
 ## Installation
 
@@ -116,8 +198,11 @@ Wurzelverzeichnis des uebergeordneten `redmine-expert`-Repositorys:
 # Lokalen Stack starten (Redmine auf :3000)
 docker-compose -f docker-compose.yml up --build
 
-# Testsuite des Plugins ausfuehren
-PLUGIN=redmine_expert_agile docker-compose -f docker-compose.yml --profile test run --build --rm redmine-test
+# Testsuite des Plugins ausfuehren. Der Pluginname muss als -e uebergeben werden:
+# eine Shell-Variable erreicht den Container nicht, und der Dienst testet dann
+# stillschweigend sein Standard-Plugin.
+docker-compose -f docker-compose.yml --profile test run --build --rm \
+  -e PLUGIN=redmine_expert_agile redmine-test
 ```
 
 Innerhalb einer Redmine-Umgebung:

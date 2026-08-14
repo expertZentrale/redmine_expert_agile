@@ -9,6 +9,55 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Hinzugefuegt
+
+- **Bildschirmfotos in beiden READMEs.** `README.md` und `README.de.md` haben jetzt einen Abschnitt
+  *Bildschirmfotos*: das Board mit Unterspalten und WIP-Grenzen, Swimlanes, den Backlog-Planer, die
+  Sprintliste, Story Points im Ticketformular, Burndown, Velocity, kumulativen Fluss, die
+  Kartenfarben-Verwaltung und die Plugin-Einstellungen — das Plugin laesst sich damit beurteilen,
+  ohne es vorher zu installieren. Die Bilder liegen in `docs/screenshots/{en,de}/` und sind wie der
+  Rest von `docs/` aus den Release-Archiven ausgeschlossen; das Installationspaket waechst dadurch
+  nicht.
+- **`scripts/seed_screenshot_demo.rb` und `scripts/teardown_screenshot_demo.rb`** bauen das
+  synthetische Demo-Projekt auf, aus dem die Bildschirmfotos stammen, und raeumen es wieder ab:
+  fuenf Sprints ueber den gesamten Lebenszyklus offen/aktiv/abgeschlossen, ~130 Tickets mit
+  rueckdatierten Statusjournalen, damit die verlaufsauswertenden Diagramme etwas auszuwerten haben,
+  Story Points, Board-Positionen, Zeiterfassung, Kartenfarben und drei gespeicherte Boards. Anders
+  als ihre Helpdesk-Gegenstuecke schreiben diese Skripte globalen Zustand — Story Points und
+  Sprints sind standardmaessig aus, sonst waere keines der beiden Funktionen sichtbar —, deshalb
+  sichert das Seed-Skript jeden veraenderten Wert und jede angelegte Zeile in der Einstellung
+  `expert_agile_screenshot_backup`, aus der das Teardown-Skript den Ausgangszustand
+  wiederherstellt. `RELABEL=de` benennt die Demo-Status zwischen dem englischen und dem deutschen
+  Durchlauf um, sodass beide Bildstrecken denselben Datenbestand zeigen.
+
+### Behoben
+
+- **„Zukunftsdaten in Diagrammen anzeigen" war wirkungslos.** Die Einstellung war deklariert, in
+  den Einstellungen dokumentiert und ueber `RedmineExpertAgile.chart_future_data?` lesbar, aber
+  kein Diagramm hat sie je ausgewertet: jede Reihe wurde bis zum Ende des gewaehlten Zeitraums
+  gezeichnet. Ein mitten im Sprint betrachteter Burndown lief dadurch ab heute waagerecht bis zum
+  Sprintende, und die Velocity zeigte leere Balken fuer Wochen, die noch gar nicht stattgefunden
+  haben. Gemessene Reihen (`:actual`, `:total`, `:created`, `:closed`, `:trend`) enden jetzt am
+  heutigen Tag, solange die Einstellung aus ist; die Ideallinie — eine Projektion, keine Messung —
+  laeuft weiterhin ueber den ganzen Zeitraum. Ein Intervall, das den heutigen Tag *enthaelt*,
+  bleibt erhalten, denn eine Woche ist an dem Tag, an dem man sie ansieht, zu Recht unvollstaendig.
+- **Die Baender des kumulativen Flusses waren nicht unterscheidbar.** Die Bandfarbe war ein
+  Farbton, der sich aus der Position des Status unter *allen* Status der Installation ergab. Auf
+  einer Installation mit fuenfzig Status zeichnete ein Diagramm mit sechs Baendern deshalb sechs
+  benachbarte Farbtoene — sechs Abstufungen desselben Rosas uebereinander. Die Palette verteilt
+  sich jetzt auf die Baender, die das Diagramm tatsaechlich zeichnet, sodass sie im Farbkreis so
+  weit auseinanderliegen wie moeglich.
+- **Unuebersetzte Spaltenueberschrift in der Kartenfarben-Verwaltung.** Die Tabelle rief
+  `l(:label_name)` auf — einen Schluessel, den weder das Plugin noch Redmine definiert —, sodass
+  die Verwaltungsseite „Translation missing: de.label_name" anzeigte. Sie verwendet jetzt Redmines
+  eigenes `field_name`.
+- **Der dokumentierte Testbefehl fuehrte das falsche Plugin aus.** Beide READMEs stellten `PLUGIN=`
+  vor `docker-compose … run`, wo es eine Shell-Variable bleibt und den Container nie erreicht — der
+  Dienst fiel auf seinen Standard zurueck und fuehrte die Helpdesk-Suite aus, die mit 417 gruenen
+  Tests meldete, waehrend die Agile-Suite nie lief. Der Befehl uebergibt jetzt `-e PLUGIN=…`.
+
 ## [0.1.9] - 2026-08-11
 
 ### Behoben

@@ -14,6 +14,11 @@ module RedmineExpertAgile
 
       INTERVALS = %w(day week month).freeze
 
+      # Series that report what actually happened. Everything here is cut off at
+      # today unless the instance opts into future data; :ideal is a projection
+      # and is drawn across the whole range either way.
+      MEASURED_SERIES = %i(actual total created closed trend).freeze
+
       PALETTE = {
         :actual => '54, 126, 196',
         :ideal => '140, 140, 140',
@@ -122,6 +127,7 @@ module RedmineExpertAgile
 
       def dataset(label, values, color_key, options = {})
         rgb = PALETTE[color_key] || PALETTE[:actual]
+        values = truncate_future(values) if MEASURED_SERIES.include?(color_key)
         {
           :label => label,
           :data => values,
@@ -133,6 +139,23 @@ module RedmineExpertAgile
           :pointRadius => options.fetch(:point_radius, 0),
           :tension => 0.1
         }.merge(options[:extra] || {})
+      end
+
+      # Nils out the buckets that start after today, so a series that measures
+      # what happened stops at today instead of running flat to the end of the
+      # range. Chart.js skips nil points, so the ideal line — a projection, and
+      # deliberately not in MEASURED_SERIES — still spans the whole sprint.
+      #
+      # A bucket that merely *contains* today is kept: a week or month interval
+      # is legitimately partial on the day you look at it.
+      def truncate_future(values)
+        return values if RedmineExpertAgile.chart_future_data?
+
+        today = User.current.today
+        values.each_with_index.map do |value, index|
+          date = dates[index]
+          date && date > today ? nil : value
+        end
       end
 
       def round(value)
