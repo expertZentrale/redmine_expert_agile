@@ -177,9 +177,12 @@ class ExpertAgileBoardsController < ApplicationController
     @query
   end
 
+  # Through `visible`, so a guessed id cannot open somebody else's private
+  # board. Without it the id is the only thing standing between a project member
+  # and another user's saved filter set.
   def find_board_query(id)
-    scope = ExpertAgileQuery.where(:project_id => nil)
-    scope = scope.or(ExpertAgileQuery.where(:project_id => @project)) if @project
+    scope = ExpertAgileQuery.visible
+    scope = scope.global_or_on_project(@project) if @project
     scope.find(id)
   end
 

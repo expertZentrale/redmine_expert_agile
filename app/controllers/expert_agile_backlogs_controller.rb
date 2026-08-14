@@ -129,9 +129,12 @@ class ExpertAgileBacklogsController < ApplicationController
     store_backlog_session_state unless @query.persisted?
   end
 
+  # Through `visible`, so a guessed id cannot open somebody else's private
+  # backlog. Without it the id is the only thing standing between a project
+  # member and another user's saved filter set.
   def find_backlog_query(id)
-    scope = ExpertAgileBacklogQuery.where(:project_id => nil)
-    scope = scope.or(ExpertAgileBacklogQuery.where(:project_id => @project)) if @project
+    scope = ExpertAgileBacklogQuery.visible
+    scope = scope.global_or_on_project(@project) if @project
     scope.find(id)
   end
 

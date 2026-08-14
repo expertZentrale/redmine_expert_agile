@@ -11,7 +11,9 @@
     because it is core's markup. %>
 
 <%= hidden_field_tag 'set_filter', '1' %>
-<%= hidden_field_tag 'type', @query.type, :disabled => true, :id => 'query_type' %>
+<%# No `type` field: nothing reads params[:type], the query controller decides
+    the class from `query_class`. Carrying it would only exist to be re-enabled
+    by an inline handler on the way to #new. %>
 <%# Which containers are being planned into is chosen by the switch above, which
     is a pair of links outside this form. Without carrying it here, applying a
     filter on a version backlog would silently drop back to sprints. %>
@@ -69,10 +71,14 @@
     <%= link_to l(:button_clear), backlog_path_for(@project, :container_type => @query.container_type),
                 :class => 'icon icon-reload' %>
     <% if @query.new_record? && User.current.allowed_to?(:add_expert_agile_queries, @project, :global => true) %>
-      <%= link_to l(:button_save), '#',
-                  :onclick => "$('#query_type').prop('disabled', false); " \
-                              "$('#ea_query_form').attr('action', '#{escape_javascript(new_backlog_query_path_for(@project))}').submit(); return false;",
-                  :class => 'icon icon-save' %>
+      <%# A second submit with formaction, not a link that rewrites the form's
+          action from an inline onclick. Saving has to reach #new carrying
+          everything the user just configured, and the browser does exactly that
+          for free — no script, so the page still works under
+          `script-src 'self'`. Apply stays the first submit, so Enter in a
+          filter field still applies rather than saves. %>
+      <%= submit_tag l(:button_save), :name => nil, :class => 'icon icon-save',
+                     :formaction => new_backlog_query_path_for(@project) %>
     <% elsif @query.persisted? && @query.editable_by?(User.current) %>
       <%= link_to l(:button_edit), edit_expert_agile_backlog_query_path(@query), :class => 'icon icon-edit' %>
       <%= link_to l(:button_delete), expert_agile_backlog_query_path(@query),

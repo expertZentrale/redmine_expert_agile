@@ -219,16 +219,32 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_select "#ea-card-#{issue.id} .ea-card-fields dt", :text => l(:field_priority)
   end
 
-  def test_the_save_link_needs_the_permission
+  def test_the_save_control_needs_the_permission
     get :index, :params => { :project_id => @project.id }
     assert_response :success
-    assert_select 'p.buttons a.icon-save', :count => 0
+    assert_select 'p.buttons .icon-save', :count => 0
 
     @role.add_permission!(:add_expert_agile_queries)
     get :index, :params => { :project_id => @project.id }
 
     assert_response :success
-    assert_select 'p.buttons a.icon-save'
+    assert_select 'p.buttons input.icon-save[formaction=?]',
+                  new_project_expert_agile_backlog_query_path(@project)
+  end
+
+  def test_the_buttons_carry_no_inline_event_handlers
+    # The planner must work under `script-src 'self'`. Core's filters partial
+    # emits inline script and the fieldset legends use core's own
+    # toggleFieldset onclick — those are core's markup and the accepted
+    # exception. The buttons are ours, so they carry no handler at all.
+    @role.add_permission!(:add_expert_agile_queries)
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'p.buttons [onclick]', :count => 0
+    assert_select '#ea-backlog [onclick]', :count => 0
+    assert_select '#ea-backlog script', :count => 0
   end
 
   # --- Saved backlogs ---------------------------------------------------
@@ -264,6 +280,31 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_response :success
     assert_select '.ea-backlog-switch a.selected', :text => l(:label_expert_agile_sprint_plural)
     assert_equal 'version', saved.reload.container_type, 'the tweak is not written back'
+  end
+
+  def test_another_users_private_backlog_is_not_reachable_by_id
+    # The id is otherwise the only thing protecting somebody else's saved filter
+    # set from any member of the same project.
+    private_to_someone_else = ExpertAgileBacklogQuery.new(:name => 'Not yours',
+                                                          :project => @project,
+                                                          :user => User.find(3),
+                                                          :visibility => Query::VISIBILITY_PRIVATE)
+    private_to_someone_else.save!
+
+    assert_raise ActiveRecord::RecordNotFound do
+      get :index, :params => { :project_id => @project.id,
+                               :query_id => private_to_someone_else.id }
+    end
+  end
+
+  def test_a_public_backlog_is_reachable_by_id
+    shared = saved_backlog!(:name => 'Team planning', :user => User.find(3),
+                            :visibility => Query::VISIBILITY_PUBLIC)
+
+    get :index, :params => { :project_id => @project.id, :query_id => shared.id }
+
+    assert_response :success
+    assert_select 'h2', :text => 'Team planning'
   end
 
   def test_a_saved_backlog_of_another_project_is_not_loaded
