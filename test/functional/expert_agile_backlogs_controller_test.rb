@@ -152,6 +152,32 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_select '.ea-backlog-switch a.selected', :text => l(:label_version_plural)
   end
 
+  def test_the_switch_still_works_once_a_session_exists
+    # The switch is a plain link, so from the second page view onwards it lands
+    # on the session-restore path with no set_filter. Reading the container type
+    # only where the query is built from params leaves the switch dead in the
+    # browser while every first-request test still passes.
+    get :index, :params => { :project_id => @project.id }
+    assert_response :success
+
+    get :index, :params => { :project_id => @project.id, :container_type => 'version' }
+
+    assert_response :success
+    assert_select '.ea-backlog-switch a.selected', :text => l(:label_version_plural)
+    assert_select 'form#ea_query_form input[type=hidden][name=?][value=?]',
+                  'container_type', 'version'
+  end
+
+  def test_a_switched_container_type_sticks
+    get :index, :params => { :project_id => @project.id }
+    get :index, :params => { :project_id => @project.id, :container_type => 'version' }
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select '.ea-backlog-switch a.selected', :text => l(:label_version_plural)
+  end
+
   def test_a_filter_narrows_the_backlog
     wanted = Issue.generate!(:project_id => @project.id)
     other = Issue.generate!(:project_id => @project.id)

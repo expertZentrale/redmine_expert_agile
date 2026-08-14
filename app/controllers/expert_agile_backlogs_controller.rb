@@ -110,8 +110,23 @@ class ExpertAgileBacklogsController < ApplicationController
       store_backlog_session_state
     else
       @query = restore_backlog_from_session
+      apply_switched_container_type
     end
     @query
+  end
+
+  # The sprint/version switch is a plain link carrying the container type and
+  # nothing else, so it never reaches the set_filter branch once a session
+  # exists — which is every click after the first page view. Honouring it here
+  # is what keeps the switch working at all, and storing it back makes it stick
+  # the way an applied filter does. A saved backlog is left alone: like every
+  # other tweak on that path, the switch applies to this request only.
+  def apply_switched_container_type
+    return if params[:container_type].blank?
+    return if params[:container_type] == @query.container_type
+
+    @query.container_type = params[:container_type]
+    store_backlog_session_state unless @query.persisted?
   end
 
   def find_backlog_query(id)
