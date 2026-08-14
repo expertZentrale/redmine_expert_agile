@@ -132,10 +132,23 @@ class ExpertAgileBacklogsController < ApplicationController
   # Through `visible`, so a guessed id cannot open somebody else's private
   # backlog. Without it the id is the only thing standing between a project
   # member and another user's saved filter set.
-  def find_backlog_query(id)
-    scope = ExpertAgileBacklogQuery.visible
+  #
+  # Both ways in go through here. The session carries only an id, and a session
+  # outlives the query it points at: an owner turning a shared backlog private,
+  # or a role losing the permission, has to take effect on the next request
+  # rather than whenever the user next happens to pass a query_id.
+  # `only_backlogs` for the same reason the board uses `only_boards`: the type
+  # has to be pinned so a lookup never resolves a sibling query class gated on
+  # the wrong permission. Nothing subclasses this one today, which is exactly
+  # why it is worth stating rather than relying on.
+  def visible_backlog_query(id)
+    scope = ExpertAgileBacklogQuery.only_backlogs.visible
     scope = scope.global_or_on_project(@project) if @project
-    scope.find(id)
+    scope.find_by(:id => id)
+  end
+
+  def find_backlog_query(id)
+    visible_backlog_query(id) || raise(ActiveRecord::RecordNotFound)
   end
 
   def session_state_stale?
@@ -159,12 +172,13 @@ class ExpertAgileBacklogsController < ApplicationController
   def restore_backlog_from_session
     state = session[SESSION_KEY]
     if state[:id]
-      saved = ExpertAgileBacklogQuery.find_by(:id => state[:id])
+      saved = visible_backlog_query(state[:id])
       if saved
         saved.project = @project
         return saved
       end
-      # The saved backlog was deleted since; fall through to a fresh one.
+      # Deleted since, or no longer visible to this user; fall through to a
+      # fresh one rather than showing a backlog they may no longer open.
       session[SESSION_KEY] = nil
       return ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
     end

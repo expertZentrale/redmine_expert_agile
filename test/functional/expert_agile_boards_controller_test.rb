@@ -134,6 +134,59 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'th.ea-column-header[data-column-id]', :minimum => 1
   end
 
+  def test_another_users_private_board_is_not_reachable_by_id
+    private_to_someone_else = ExpertAgileQuery.create!(:name => 'Not yours', :project => @project,
+                                                       :user => User.find(3),
+                                                       :visibility => Query::VISIBILITY_PRIVATE)
+
+    assert_raise ActiveRecord::RecordNotFound do
+      get :index, :params => { :project_id => @project.id,
+                               :query_id => private_to_someone_else.id }
+    end
+  end
+
+  def test_a_saved_backlog_or_chart_cannot_be_opened_as_a_board
+    # Both are STI subclasses, so an unqualified ExpertAgileQuery lookup matches
+    # them — and `visible` would then gate them on this class's view_permission,
+    # the board's. Someone with board access but no backlog or charts permission
+    # could otherwise read their name and filters by id.
+    @project.enable_module!(:expert_agile_backlog)
+    backlog = ExpertAgileBacklogQuery.create!(:name => 'A backlog', :project => @project,
+                                              :user => User.find(2),
+                                              :visibility => Query::VISIBILITY_PUBLIC)
+    chart = ExpertAgileChartsQuery.create!(:name => 'A chart', :project => @project,
+                                           :user => User.find(2),
+                                           :visibility => Query::VISIBILITY_PUBLIC)
+
+    [backlog, chart].each do |query|
+      assert_raise ActiveRecord::RecordNotFound, "#{query.class} must not open as a board" do
+        get :index, :params => { :project_id => @project.id, :query_id => query.id }
+      end
+    end
+  end
+
+  def test_a_board_that_turns_private_is_dropped_from_the_session
+    # The session holds only an id, and it outlives the query it points at.
+    # Restoring by id alone means the owner making a shared board private has no
+    # effect until the viewer's session happens to end.
+    shared = ExpertAgileQuery.create!(:name => 'Was shared', :project => @project,
+                                      :user => User.find(3),
+                                      :visibility => Query::VISIBILITY_PUBLIC)
+
+    get :index, :params => { :project_id => @project.id, :query_id => shared.id }
+    assert_response :success
+    assert_select 'h2', :text => 'Was shared'
+
+    shared.update!(:visibility => Query::VISIBILITY_PRIVATE)
+
+    # Same session, no params — the restore path.
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'h2', { :text => 'Was shared', :count => 0 },
+                  'a board the user may no longer open must not come back from the session'
+  end
+
   def test_swimlanes_are_applied
     get :index, :params => { :project_id => @project.id, :set_filter => '1',
                              :group_by => 'tracker' }

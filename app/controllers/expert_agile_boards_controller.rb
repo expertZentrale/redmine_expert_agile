@@ -180,10 +180,23 @@ class ExpertAgileBoardsController < ApplicationController
   # Through `visible`, so a guessed id cannot open somebody else's private
   # board. Without it the id is the only thing standing between a project member
   # and another user's saved filter set.
-  def find_board_query(id)
-    scope = ExpertAgileQuery.visible
+  #
+  # Both ways in go through here. The session carries only an id, and a session
+  # outlives the query it points at: an owner turning a shared board private, or
+  # a role losing the permission, has to take effect on the next request rather
+  # than whenever the user next happens to pass a query_id.
+  # `only_boards`, because charts and backlogs are STI subclasses: an unqualified
+  # ExpertAgileQuery lookup matches them too, and `visible` would then gate them
+  # on *this* class's view_permission — the board's. A user with board access but
+  # no backlog or charts permission could otherwise resolve one by id.
+  def visible_board_query(id)
+    scope = ExpertAgileQuery.only_boards.visible
     scope = scope.global_or_on_project(@project) if @project
-    scope.find(id)
+    scope.find_by(:id => id)
+  end
+
+  def find_board_query(id)
+    visible_board_query(id) || raise(ActiveRecord::RecordNotFound)
   end
 
   def session_state_stale?
@@ -208,12 +221,13 @@ class ExpertAgileBoardsController < ApplicationController
   def restore_board_from_session
     state = session[SESSION_KEY]
     if state[:id]
-      saved = ExpertAgileQuery.find_by(:id => state[:id])
+      saved = visible_board_query(state[:id])
       if saved
         saved.project = @project
         return saved
       end
-      # The saved board was deleted since; fall through to a fresh one.
+      # Deleted since, or no longer visible to this user; fall through to a
+      # fresh one rather than showing a board they may no longer open.
       session[SESSION_KEY] = nil
       return ExpertAgileQuery.new(:name => '_', :project => @project)
     end
