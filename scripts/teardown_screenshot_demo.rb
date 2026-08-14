@@ -34,9 +34,15 @@ unless ENV['DEMO_STACK'] == '1'
         'Set it only against a disposable database.'
 end
 
+# A corrupted backup row must not stop the demo project from being removed:
+# report it and carry on, leaving the global settings for a human to sort out.
 backup = begin
   raw = Setting.where(:name => BACKUP_KEY).pick(:value)
   raw.blank? ? nil : JSON.parse(raw)
+rescue JSON::ParserError => e
+  say "WARNING: the backup row is not valid JSON (#{e.message}) — global settings, demo " \
+      'trackers and demo statuses are left untouched; the demo project is still removed.'
+  nil
 end
 
 # --- project -------------------------------------------------------------------

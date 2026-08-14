@@ -159,9 +159,26 @@ end
 
 password = ENV['DEMO_PASSWORD'].presence || SecureRandom.alphanumeric(20)
 
-user = User.find_by(:login => LOGIN) ||
-       User.new(:login => LOGIN, :firstname => 'Screenshot', :lastname => 'Demo',
-                :mail => 'screenshot-agile-demo@example.com')
+CAPTURE_MAIL = 'screenshot-agile-demo@example.com'.freeze
+
+# Every account this script touches is looked up by login and then overwritten —
+# for the capture user that means the admin flag, the status and a password
+# printed to stdout. An unrelated account that happens to hold one of these
+# logins would be escalated, so a pre-existing user is only reused when its mail
+# proves it is ours.
+def demo_account!(login, mail)
+  existing = User.find_by(:login => login)
+  return User.new(:login => login, :mail => mail) if existing.nil?
+  return existing if existing.mail == mail
+
+  abort "refusing to reuse the account '#{login}': it exists with mail #{existing.mail}, not " \
+        "#{mail}. This script would overwrite its password and status. Rename or remove that " \
+        'account first.'
+end
+
+user = demo_account!(LOGIN, CAPTURE_MAIL)
+user.firstname = 'Screenshot'
+user.lastname = 'Demo'
 user.language = 'en'
 user.admin = true
 user.must_change_passwd = false
@@ -177,8 +194,7 @@ TEAM = [%w[ada-demo Ada Byron], %w[linus-demo Linus Chen],
         %w[grace-demo Grace Weber], %w[kent-demo Kent Vogel]].freeze
 
 team = TEAM.map do |login, firstname, lastname|
-  member = User.find_by(:login => login) ||
-           User.new(:login => login, :mail => "#{login}@example.com")
+  member = demo_account!(login, "#{login}@example.com")
   member.firstname = firstname
   member.lastname = lastname
   member.language = 'en'

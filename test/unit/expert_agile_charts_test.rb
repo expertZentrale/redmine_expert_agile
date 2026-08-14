@@ -93,7 +93,13 @@ class ExpertAgileChartsTest < ActiveSupport::TestCase
     close!(a, Date.new(2026, 1, 3))
 
     datasets = Charts::CumulativeFlow.new([a.reload], chart_options).data[:datasets]
-    hues = datasets.map { |set| set[:backgroundColor][/hsla\((\d+)/, 1].to_i }
+    hues = datasets.map do |set|
+      match = set[:backgroundColor].to_s.match(/\Ahsla\((\d+),/)
+      # Without this the extraction would read a missing match as hue 0, and the
+      # first band's assertion below would hold for any colour format at all.
+      assert match, "expected an hsla() background, got #{set[:backgroundColor].inspect}"
+      match[1].to_i
+    end
 
     assert_equal 2, datasets.size, 'one band per status the issue actually occupied'
     # Two bands out of dozens of instance statuses must still land on opposite
