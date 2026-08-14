@@ -1,6 +1,7 @@
 # Removes everything scripts/seed_screenshot_demo.rb created.
 #
-#   bundle exec rails runner plugins/redmine_expert_agile/scripts/teardown_screenshot_demo.rb
+#   DEMO_STACK=1 bundle exec rails runner \
+#     plugins/redmine_expert_agile/scripts/teardown_screenshot_demo.rb
 #
 # Deletes the demo project with its issues, journals, sprints, saved boards and
 # time entries, the demo trackers/statuses/workflow transitions, and the capture
@@ -24,6 +25,15 @@ def say(msg)
   puts("[teardown] #{msg}")
 end
 
+# Same explicit opt-in as the seed script, and for the same reason: the stack
+# this is written for boots in production mode, so Rails.env cannot tell a
+# disposable database from a real one.
+unless ENV['DEMO_STACK'] == '1'
+  abort 'refusing to run without DEMO_STACK=1. This script destroys a project with its issues ' \
+        'and journals, deletes trackers, statuses and users, and overwrites global settings. ' \
+        'Set it only against a disposable database.'
+end
+
 backup = begin
   raw = Setting.where(:name => BACKUP_KEY).pick(:value)
   raw.blank? ? nil : JSON.parse(raw)
@@ -45,6 +55,9 @@ else
   say "project ##{project.id}, #{issue_ids.size} issues, #{journal_ids.size} journals"
 
   counts = {
+    # Two queries, one count: the second catches rows whose issue lives in
+    # another project but which point at a sprint this project shared down the
+    # tree. The first query's rows are already gone, so nothing is counted twice.
     :expert_agile_data => ExpertAgileData.where(:issue_id => issue_ids).delete_all +
                           ExpertAgileData.where(:sprint_id => sprint_ids).delete_all,
     :expert_agile_sprints => ExpertAgileSprint.where(:id => sprint_ids).delete_all,

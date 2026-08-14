@@ -30,7 +30,10 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   sichert das Seed-Skript jeden veraenderten Wert und jede angelegte Zeile in der Einstellung
   `expert_agile_screenshot_backup`, aus der das Teardown-Skript den Ausgangszustand
   wiederherstellt. `RELABEL=de` benennt die Demo-Status zwischen dem englischen und dem deutschen
-  Durchlauf um, sodass beide Bildstrecken denselben Datenbestand zeigen.
+  Durchlauf um, sodass beide Bildstrecken denselben Datenbestand zeigen. Beide Skripte verweigern
+  den Dienst ohne `DEMO_STACK=1`: sie laufen unter dem offiziellen Redmine-Image, das im
+  Production-Modus startet, sodass `Rails.env` eine Wegwerf-Datenbank nicht von einer echten
+  unterscheiden kann — die Zustimmung muss also ausdruecklich getippt werden.
 
 ### Behoben
 

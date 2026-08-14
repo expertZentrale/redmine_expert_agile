@@ -130,6 +130,25 @@ class ExpertAgileChartsTest < ActiveSupport::TestCase
     end
   end
 
+  def test_cycle_time_keeps_every_point_when_the_range_runs_into_the_future
+    today = User.current.today
+    issues = 3.times.map { |i| issue_on(today - 10 - i) }
+    issues.each { |issue| close!(issue, today - 1) }
+
+    # A range ending in the future is the normal case for a running sprint, and
+    # this one is deliberately short: with buckets [today-1, today, today+1 …],
+    # the third point sits at index 2, which is a *future* bucket. Truncating
+    # this chart against the date axis would drop it, even though all three are
+    # closures that already happened.
+    data = Charts::CycleTime.new(issues.map(&:reload),
+                                 :date_from => today - 1, :date_to => today + 5).data
+
+    assert_equal 3, data[:labels].size
+    assert_equal 3, data[:datasets].first[:data].compact.size,
+                 'a measured point is not a date bucket and must survive a future date_to'
+    assert_equal 3, data[:datasets].last[:data].compact.size, 'the moving average survives too'
+  end
+
   def test_a_week_bucket_containing_today_is_kept
     today = User.current.today
     issue = issue_on(today - 2)

@@ -28,7 +28,9 @@ notes from the section matching the pushed tag.
   otherwise — so the seed records every value and every row id it touches in an
   `expert_agile_screenshot_backup` setting and the teardown restores the instance from it.
   `RELABEL=de` renames the demo statuses between the English and the German capture pass, so both
-  screenshot sets share one dataset.
+  screenshot sets share one dataset. Both scripts refuse to run without `DEMO_STACK=1`: they boot
+  under the official Redmine image, which runs in production mode, so `Rails.env` cannot tell a
+  disposable database from a real one and the opt-in has to be typed.
 
 ### Fixed
 

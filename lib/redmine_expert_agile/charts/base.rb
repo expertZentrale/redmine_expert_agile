@@ -55,6 +55,14 @@ module RedmineExpertAgile
         'line'
       end
 
+      # Whether a series index maps onto `dates`, i.e. whether the chart's x
+      # axis is the date axis. Cycle time is the exception: it plots one point
+      # per closed issue, so index 3 there is an issue, not the fourth bucket,
+      # and truncating it against the date axis would drop real measurements.
+      def self.date_aligned?
+        true
+      end
+
       protected
 
       def projection
@@ -149,6 +157,7 @@ module RedmineExpertAgile
       # A bucket that merely *contains* today is kept: a week or month interval
       # is legitimately partial on the day you look at it.
       def truncate_future(values)
+        return values unless self.class.date_aligned?
         return values if RedmineExpertAgile.chart_future_data?
 
         today = User.current.today

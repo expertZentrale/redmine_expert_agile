@@ -1,6 +1,7 @@
 # Seeds a self-contained demo project used to generate the README screenshots.
 #
-#   bundle exec rails runner plugins/redmine_expert_agile/scripts/seed_screenshot_demo.rb
+#   DEMO_STACK=1 bundle exec rails runner \
+#     plugins/redmine_expert_agile/scripts/seed_screenshot_demo.rb
 #
 # Everything it creates lives inside a single project (identifier
 # "screenshot-agile") and is removed again by scripts/teardown_screenshot_demo.rb.
@@ -42,6 +43,17 @@ def say(msg)
 end
 
 abort 'redmine_expert_agile is not installed' unless Redmine::Plugin.installed?(:redmine_expert_agile)
+
+# Deliberately not a Rails.env check. The stack this is written for runs the
+# official Redmine image, which boots in production mode, so an env-based guard
+# would refuse the one database it is meant for — and would wave the script
+# through on a real instance that happens to be booted for a migration. The
+# opt-in is explicit and has to be typed instead.
+unless ENV['DEMO_STACK'] == '1'
+  abort 'refusing to run without DEMO_STACK=1. This script creates an admin user, rewrites ' \
+        'global plugin settings and adds trackers, statuses and workflow transitions. Set it ' \
+        'only against a disposable database.'
+end
 
 # Statuses are the board's column headers and trackers are its card colours, so
 # both carry the label a reader sees. Tracker names are the same in both
@@ -294,6 +306,10 @@ journal_ids = Journal.where(:journalized_type => 'Issue', :journalized_id => iss
 # delete_all, never destroy_all: the plugins installed alongside hook Issue and
 # Journal callbacks, and a wipe must not fire them.
 ExpertAgileData.where(:issue_id => issue_ids).delete_all
+# Not redundant with the line above and not double-counted: a sprint can be
+# shared down the project tree, so a row belonging to an issue in a *different*
+# project may point at a sprint about to be deleted. Whatever the first query
+# removed is already gone by the time this one runs.
 ExpertAgileData.where(:sprint_id => sprint_ids).delete_all
 ExpertAgileSprint.where(:id => sprint_ids).delete_all
 ExpertAgileColor.where(:container_type => 'Issue', :container_id => issue_ids).delete_all
