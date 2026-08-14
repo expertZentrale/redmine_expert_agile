@@ -26,12 +26,14 @@ h3. Permissions
 |_. Module |_. Permission |_. Allows |
 | expert Agile | View agile board | Open the board, read cards |
 | expert Agile | Edit agile board | Drag & drop, create and edit cards |
-| expert Agile | Save agile boards | Create private saved boards |
-| expert Agile | Manage public agile boards | Create and edit public saved boards |
+| expert Agile | Save agile boards | Create private saved boards, charts and backlogs |
+| expert Agile | Manage public agile boards | Create and edit public saved boards, charts and backlogs |
 | expert Agile | View agile charts | Open the charts page |
 | expert Agile | Manage sprints | Create, edit and close sprints |
-| expert Agile Backlog | View backlog | Open the backlog planner |
+| expert Agile Backlog | View backlog | Open the backlog planner, filter it, open a saved backlog |
 | expert Agile Backlog | Manage backlog | Plan issues into sprints and versions |
+
+Saving a backlog uses the two board permissions above, which belong to the *expert Agile* module. A project that enables *expert Agile Backlog* on its own can therefore filter its backlog but not save one — enable both modules if saved backlogs are wanted.
 
 h3. Configuration
 

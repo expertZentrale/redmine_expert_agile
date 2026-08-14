@@ -1,0 +1,25 @@
+h3. redmine_expert_agile 0.2.0 — 2026-08-14
+
+h4. Added
+
+* *The backlog planner has the board's filter and options panel.* It was the one agile screen without one, so it always showed every open issue of the project and nothing you chose survived a page reload. It now carries Redmine's own filter widget, a collapsible *Options* fieldset for card fields and colouring, and Apply / Clear / Save, kept in the session so returning to the planner shows it as you left it. There are deliberately no status columns or WIP limits here: the planner ignores where an issue sits in the workflow, since an issue is either planned or it is not.
+* *Saved backlogs.* A backlog can be saved, edited and deleted like a board or a chart, and saved backlogs are listed in the agile sidebar — which the backlog tab now shows at all. Saving needs the *Save agile boards* permission from the *expert Agile* module, so a project running only the *expert Agile Backlog* module can filter its backlog but not save one.
+* *Backlog cards show the fields you select.* They were a fixed set of number, tracker, subject, status and story points; they now show the assignee and avatar, estimated hours, progress, the description excerpt and any selected column including custom fields, exactly as a board card does.
+
+h4. Security
+
+* *A saved board or backlog could be opened by anyone who knew its id.* Both lookups resolved the id straight from the table, so a private board belonging to another user opened for any member of the project — its name and its whole filter set, though never issue data, which Redmine's own issue visibility continued to enforce. Both now resolve through the visibility scope, and pin the query type so a board lookup cannot reach a saved chart or backlog gated on a different permission.
+* *A saved board or backlog stayed open after it stopped being visible.* The session stores only an id and outlives the query it points at, so turning a shared board private, or removing the permission from a role, had no effect until the viewer's session happened to end. The session restore now checks visibility on every request and falls back to an unsaved board when the saved one is gone or no longer permitted.
+
+h4. Fixed
+
+* *A chart saved from its own screen was stored as a board.* The shared new/edit form hardcoded the board's routes, so every variant of the query controller posted to the board's. Where that form posts is now decided by the controller handling it.
+* *"Show future data on charts" did nothing.* The setting was declared, documented and read, but no chart consulted it: series were drawn to the end of the selected range, so a burndown looked at mid-sprint ran flat to the sprint end and velocity showed empty buckets for weeks that had not happened. Measured series now stop at today unless the setting is on, while the ideal line — a projection, not a measurement — still spans the whole range.
+* *Cumulative flow bands were indistinguishable.* Band colours were derived from each status's index among *all* statuses in the instance, so on an installation with many statuses a six-band chart drew six neighbouring shades of the same hue. The palette is now spread over the bands the chart actually draws.
+* *Untranslated column header on the card colours screen.* The table header used a translation key neither this plugin nor Redmine defines, so the admin screen showed "Translation missing".
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+Saved backlogs reuse the existing *Save agile boards* and *Manage public agile boards* permissions, which live in the *expert Agile* module — no new permission to grant, but a project that has enabled *expert Agile Backlog* without *expert Agile* will be able to filter its backlog and not save it.
