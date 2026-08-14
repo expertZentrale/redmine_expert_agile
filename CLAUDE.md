@@ -140,10 +140,28 @@ first, then tag the same commit and push (`git tag vX.Y.Z && git push origin vX.
 mismatch), builds `redmine_expert_agile-<version>.{zip,tar.gz}` from the tagged tree, and
 publishes the release with notes taken from the matching `## [<version>]` CHANGELOG section.
 
-**Every release must also update `docs/redmine_org/`** — Textile (`h3.`, `*bold*`, `@code@`,
-`"label":url`) copy-paste sources for the redmine.org listing: a new
-`releases/<version>.textile`, plus `description.textile` and `installation.textile` when
-relevant. `docs/` is excluded from release archives.
+**Every release must also update `docs/redmine_org/`** — the copy-paste sources for the listing
+at <https://www.redmine.org/plugins/redmine_expert_agile>. That directory renders **Textile**, not
+Markdown (`h3.` headings, `*bold*`, `@code@`, `"label":url`), so these files are written in Textile
+and are pasted in unedited. The directory keeps description and installation notes in **separate
+fields** — keep them split. Part of the release commit, not an afterthought:
+
+- `docs/redmine_org/releases/<version>.textile` — new file per release. User-facing changes only;
+  the CHANGELOG is the source but this is not a copy of it. House shape:
+  `h3. redmine_expert_agile <version> — <YYYY-MM-DD>`, then `h4. Added`/`Changed`/`Fixed`, always
+  closing with `h4. Upgrade notes` (say "No migrations. Replace the plugin directory and restart."
+  when that is all it takes).
+- `docs/redmine_org/description.textile` — what the plugin *is*; update when a release adds a
+  feature worth listing under *Features*, drops a limitation, or changes a design note, and bump
+  the Redmine versions under *Requirements* when they move. **This one drifts silently**, because
+  nothing forces it the way a release forces the notes: read it end to end against the CHANGELOG
+  since the last tag before tagging, not just the part you happened to touch.
+- `docs/redmine_org/installation.textile` — how to install and run it; update when a release
+  changes a step (new migration, new permission or project module, new setting, new gem, or a
+  change to how it coexists with RedmineUP Agile).
+
+`docs/redmine_org/README.md` is the full checklist. `docs/` is excluded from the release archives,
+so none of it ships to users.
 
 ## Architecture
 
