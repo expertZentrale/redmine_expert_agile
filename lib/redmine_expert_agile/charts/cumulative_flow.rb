@@ -3,18 +3,24 @@ module RedmineExpertAgile
     # Issue counts per status over time. A widening band is a bottleneck.
     class CumulativeFlow < Base
       def data
-        statuses = IssueStatus.sorted.to_a
         counts_per_date = dates.map { |date| projection.states_on(date) }
 
-        datasets = statuses.filter_map do |status|
+        # Collect the bands first: the palette is spread over the statuses this
+        # chart actually draws, not over every status in the instance.
+        bands = IssueStatus.sorted.to_a.filter_map do |status|
           series = counts_per_date.map do |states|
             states.count { |_id, snapshot| snapshot.status_id == status.id }
           end
           next if series.all?(&:zero?)
 
+          [status, series]
+        end
+
+        datasets = bands.each_with_index.map do |(status, series), index|
           dataset(status.name, series, :actual,
                   :fill => true,
-                  :extra => { :backgroundColor => status_color(status), :borderWidth => 1 })
+                  :extra => { :backgroundColor => status_color(index, bands.size),
+                              :borderWidth => 1 })
         end
 
         {
@@ -29,11 +35,13 @@ module RedmineExpertAgile
 
       private
 
-      # Deterministic hue per status, evenly spaced round the colour wheel.
-      def status_color(status)
-        index = IssueStatus.sorted.to_a.index(status).to_i
-        total = [IssueStatus.count, 1].max
-        "hsla(#{(index * 360 / total) % 360}, 55%, 60%, 0.65)"
+      # Deterministic hue per band, evenly spaced round the colour wheel.
+      #
+      # Spread over the bands in this chart, not over IssueStatus.count: an
+      # installation with fifty statuses would otherwise give a five-band chart
+      # five neighbouring hues, and the bands would be indistinguishable.
+      def status_color(index, total)
+        "hsla(#{(index * 360 / [total, 1].max) % 360}, 55%, 60%, 0.65)"
       end
     end
   end

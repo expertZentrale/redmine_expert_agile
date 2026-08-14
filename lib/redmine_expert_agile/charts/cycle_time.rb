@@ -13,6 +13,13 @@ module RedmineExpertAgile
         'line'
       end
 
+      # One point per closed issue, not one per date bucket — see
+      # Base.date_aligned?. Every point is a closure that already happened, so
+      # there is nothing in the future to cut off either.
+      def self.date_aligned?
+        false
+      end
+
       def data
         points = closed_issues.map do |issue|
           { :date => issue.closed_on.to_date, :days => cycle_days(issue), :id => issue.id }

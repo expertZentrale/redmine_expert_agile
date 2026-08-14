@@ -10,6 +10,7 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
 ## Contents
 
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [REST API](API.md)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -48,6 +49,84 @@ A few deliberate differences from comparable plugins, because they affect correc
 - **No inline JavaScript.** Views render markup; data reaches the browser through a JSON island.
   The board works under a `script-src 'self'` content security policy.
 - **No global monkeypatching** of `ActiveRecord::Base` or `ApplicationController`.
+
+## Screenshots
+
+All screenshots show a demo project with synthetic data, built by
+`scripts/seed_screenshot_demo.rb`.
+
+### Board
+
+Columns are issue statuses and cards are dragged between them. Statuses sharing a prefix —
+`Dev: Review` and `Dev: Test` — are merged under one header, and a column over its WIP limit
+flags itself.
+
+![Agile board with five status columns: To do, In Progress, a merged Dev header spanning the
+Review and Test sub-columns, and Done. Each column header carries its card count and WIP limit,
+Review is highlighted for holding five cards against a limit of four, and the cards show issue
+id, tracker, subject, assignee, story points and percent done](docs/screenshots/en/01-board.png)
+
+Any field the query can group by becomes a swimlane, so the same board can be read per assignee,
+per tracker or per priority.
+
+![The same board grouped into swimlanes by assignee: one labelled band per team member plus a
+band for unassigned issues, each spanning all five status columns](docs/screenshots/en/02-board-swimlanes.png)
+
+### Story points
+
+Story points are a column of the plugin's own table, not a custom field, and are offered as a
+fixed scale on the issue form next to the sprint the issue belongs to.
+
+![Issue form showing Redmine's own attribute fields above two fields added by the plugin: a Story
+points dropdown set to 5 and a Sprint dropdown set to Sprint 24](docs/screenshots/en/05-story-points.png)
+
+### Sprints
+
+Sprints are dated containers with their own lifecycle — open, active, closed — managed in the
+project settings. A project runs one active sprint at a time.
+
+![Sprints tab in the project settings listing five sprints with their status, start and due date:
+one active, one open and three closed](docs/screenshots/en/04-sprints.png)
+
+### Backlog planner
+
+The planner puts the unplanned backlog next to the sprints it can be dragged into, each lane
+totalling its issue count and story points. A second tab plans into Redmine versions instead.
+
+![Backlog planner with a Sprints and a Versions tab: a Backlog lane on the left and one lane per
+available sprint beside it, each headed by its issue count, story point total, date range and
+days remaining](docs/screenshots/en/03-backlog.png)
+
+### Charts
+
+Burndown and burnup replay the issue history from the journals. Measured lines stop at today; the
+ideal line runs to the end of the range.
+
+![Burndown chart over a sprint in story points: the remaining line descends from 200 points and
+stops at today, above a dashed grey ideal line falling to zero at the sprint end. The sidebar
+lists the saved charts and the project's sprints](docs/screenshots/en/06-chart-burndown.png)
+
+![Velocity chart as grouped bars per week, comparing issues created against issues closed over
+the last sixty days](docs/screenshots/en/07-chart-velocity.png)
+
+![Cumulative flow chart: seven stacked bands, one per issue status, growing over sixty days from
+five to a hundred and twenty-five issues](docs/screenshots/en/08-chart-cumulative-flow.png)
+
+### Colours
+
+Cards take their colour from their tracker, status, priority, assignee, project or spent-time
+ratio, or from a colour set on the issue itself. The mapping is administered centrally.
+
+![Card colours administration screen with tabs for issue, project, tracker, priority and status,
+listing each status beside a colour dropdown](docs/screenshots/en/09-card-colors.png)
+
+### Configuration
+
+![Plugin settings with five sections — Board, Colors, Estimates, Sprints and Charts — holding the
+default card fields, board item limit, colour base, estimation unit, story point scale, sprint
+switches and chart defaults](docs/screenshots/en/10-settings.png)
+
+The REST API has no screen of its own — see [API.md](API.md).
 
 ## Installation
 
@@ -108,8 +187,10 @@ See [CLAUDE.md](CLAUDE.md) for the full development guide. In short, from the pa
 # Start the local stack (Redmine on :3000)
 docker-compose -f docker-compose.yml up --build
 
-# Run the plugin test suite
-PLUGIN=redmine_expert_agile docker-compose -f docker-compose.yml --profile test run --build --rm redmine-test
+# Run the plugin test suite. The plugin name has to travel as -e: a shell variable
+# never reaches the container, and the service then silently tests its default plugin.
+docker-compose -f docker-compose.yml --profile test run --build --rm \
+  -e PLUGIN=redmine_expert_agile redmine-test
 ```
 
 Inside a Redmine environment:

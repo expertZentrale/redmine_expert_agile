@@ -9,6 +9,52 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Added
+
+- **Screenshots in both READMEs.** `README.md` and `README.de.md` now open a *Screenshots* section
+  covering the board with its sub-columns and WIP limits, swimlanes, the backlog planner, the
+  sprint list, story points on the issue form, burndown, velocity, cumulative flow, the card
+  colours screen and the plugin settings — so the plugin can be evaluated without installing it
+  first. The images live in `docs/screenshots/{en,de}/` and, like the rest of `docs/`, are excluded
+  from the release archives, so the installable package does not grow.
+- **`scripts/seed_screenshot_demo.rb` and `scripts/teardown_screenshot_demo.rb`** build and remove
+  the synthetic demo project the screenshots are taken from: five sprints across the
+  open/active/closed lifecycle, ~130 issues with backdated status journals so the
+  history-replaying charts have something to replay, story points, board positions, time entries,
+  card colours and three saved boards. Unlike their helpdesk counterparts these scripts do write
+  global state — story points and sprints are off by default and neither feature is visible
+  otherwise — so the seed records every value and every row id it touches in an
+  `expert_agile_screenshot_backup` setting and the teardown restores the instance from it.
+  `RELABEL=de` renames the demo statuses between the English and the German capture pass, so both
+  screenshot sets share one dataset. Both scripts refuse to run without `DEMO_STACK=1`: they boot
+  under the official Redmine image, which runs in production mode, so `Rails.env` cannot tell a
+  disposable database from a real one and the opt-in has to be typed.
+
+### Fixed
+
+- **"Show future data on charts" did nothing.** The setting was declared, documented in the
+  settings screen and read by `RedmineExpertAgile.chart_future_data?`, but no chart ever consulted
+  it: every series was drawn to the end of the selected range, so a burndown looked at mid-sprint
+  ran flat from today to the sprint end and a velocity chart showed empty buckets for weeks that
+  have not happened. Measured series (`:actual`, `:total`, `:created`, `:closed`, `:trend`) now
+  stop at today unless the setting is on, while the ideal line — a projection, not a measurement —
+  still spans the whole range. An interval bucket that merely *contains* today is kept, because a
+  week is legitimately partial on the day you look at it.
+- **Cumulative flow bands were indistinguishable.** The band colour was a hue derived from the
+  status's index among *all* of the instance's statuses, so on an installation with fifty statuses
+  a six-band chart drew six neighbouring hues — six shades of the same pink, one on top of the
+  other. The palette is now spread over the bands the chart actually draws, so the bands are as far
+  apart on the colour wheel as they can be.
+- **Untranslated column header on the card colours screen.** The table header called
+  `l(:label_name)`, a key neither the plugin nor Redmine defines, so the admin screen rendered
+  "Translation missing: en.label_name". It now uses Redmine's own `field_name`.
+- **The documented test command ran the wrong plugin.** Both READMEs put `PLUGIN=` in front of
+  `docker-compose … run`, where it stays a shell variable and never reaches the container — the
+  service fell through to its default and the helpdesk suite ran instead, reporting a clean 417
+  green tests while the agile suite was never executed. The command now passes `-e PLUGIN=…`.
+
 ## [0.1.9] - 2026-08-11
 
 ### Fixed

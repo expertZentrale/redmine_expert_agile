@@ -86,6 +86,86 @@ class ExpertAgileChartsTest < ActiveSupport::TestCase
     assert_equal ideal.sort.reverse, ideal, 'the ideal line only descends'
   end
 
+  # --- Cumulative flow --------------------------------------------------
+
+  def test_cumulative_flow_spreads_its_palette_over_the_bands_it_draws
+    a = issue_on(@from)
+    close!(a, Date.new(2026, 1, 3))
+
+    datasets = Charts::CumulativeFlow.new([a.reload], chart_options).data[:datasets]
+    hues = datasets.map do |set|
+      match = set[:backgroundColor].to_s.match(/\Ahsla\((\d+),/)
+      # Without this the extraction would read a missing match as hue 0, and the
+      # first band's assertion below would hold for any colour format at all.
+      assert match, "expected an hsla() background, got #{set[:backgroundColor].inspect}"
+      match[1].to_i
+    end
+
+    assert_equal 2, datasets.size, 'one band per status the issue actually occupied'
+    # Two bands out of dozens of instance statuses must still land on opposite
+    # sides of the wheel, not on two neighbouring hues.
+    assert_equal [0, 180], hues
+  end
+
+  # --- Future data ------------------------------------------------------
+
+  def test_measured_series_stops_at_today_but_the_ideal_line_does_not
+    today = User.current.today
+    issue = issue_on(today - 2)
+    options = { :date_from => today - 2, :date_to => today + 2 }
+
+    data = Charts::Burndown.new([issue], options).data
+    remaining = data[:datasets].first[:data]
+    ideal = data[:datasets].last[:data]
+
+    assert_equal [1.0, 1.0, 1.0, nil, nil], remaining,
+                 'the measured line has no values for days that have not happened'
+    assert_not ideal.any?(&:nil?), 'the ideal line is a projection and spans the whole range'
+    assert_equal 0.0, ideal.last
+  end
+
+  def test_future_data_setting_draws_the_measured_series_to_the_end
+    today = User.current.today
+    issue = issue_on(today - 2)
+    options = { :date_from => today - 2, :date_to => today + 2 }
+
+    with_agile_settings('chart_future_data' => '1') do
+      remaining = Charts::Burndown.new([issue], options).data[:datasets].first[:data]
+
+      assert_equal [1.0, 1.0, 1.0, 1.0, 1.0], remaining
+    end
+  end
+
+  def test_cycle_time_keeps_every_point_when_the_range_runs_into_the_future
+    today = User.current.today
+    issues = 3.times.map { |i| issue_on(today - 10 - i) }
+    issues.each { |issue| close!(issue, today - 1) }
+
+    # A range ending in the future is the normal case for a running sprint, and
+    # this one is deliberately short: with buckets [today-1, today, today+1 …],
+    # the third point sits at index 2, which is a *future* bucket. Truncating
+    # this chart against the date axis would drop it, even though all three are
+    # closures that already happened.
+    data = Charts::CycleTime.new(issues.map(&:reload),
+                                 :date_from => today - 1, :date_to => today + 5).data
+
+    assert_equal 3, data[:labels].size
+    assert_equal 3, data[:datasets].first[:data].compact.size,
+                 'a measured point is not a date bucket and must survive a future date_to'
+    assert_equal 3, data[:datasets].last[:data].compact.size, 'the moving average survives too'
+  end
+
+  def test_a_week_bucket_containing_today_is_kept
+    today = User.current.today
+    issue = issue_on(today - 2)
+    options = { :date_from => today - 2, :date_to => today + 9, :interval => 'week' }
+
+    remaining = Charts::Burndown.new([issue], options).data[:datasets].first[:data]
+
+    assert_equal 1.0, remaining.first, 'the bucket today falls into is partial, not absent'
+    assert_nil remaining.last, 'a bucket starting after today has no value'
+  end
+
   # --- Burnup -----------------------------------------------------------
 
   def test_burnup_tracks_completed_against_scope
