@@ -68,8 +68,21 @@ docker-compose -f docker-compose.yml --profile test run --build --rm -e PLUGIN=r
 Branch `type/short-desc` (Conventional-Commit types), PR into protected `main`, CI must pass,
 squash-merge. Releases are tag-driven: bump `version` in `init.rb` (single source of truth),
 commit, then `git tag vX.Y.Z && git push origin vX.Y.Z`. `release.yml` verifies tag == init.rb
-version and builds the notes from the matching `## [<version>]` CHANGELOG section. Every release
-also updates `docs/redmine_org/` (Textile).
+version and builds the notes from the matching `## [<version>]` CHANGELOG section.
+
+Every release also updates `docs/redmine_org/` — Textile (not Markdown: `h3.`, `*bold*`, `@code@`,
+`"label":url`) copy-paste sources for <https://www.redmine.org/plugins/redmine_expert_agile>, part
+of the release commit:
+
+- `releases/<version>.textile` — new file per release, user-facing changes only, derived from the
+  CHANGELOG rather than copied. `h3. redmine_expert_agile <version> — <YYYY-MM-DD>`, then
+  `h4. Added`/`Changed`/`Fixed`, closing with `h4. Upgrade notes`.
+- `description.textile` — what the plugin is. Drifts silently because nothing forces it; read it
+  end to end against the CHANGELOG since the last tag before tagging.
+- `installation.textile` — install/upgrade steps, permissions, settings, RedmineUP coexistence.
+  Description and installation are separate fields on redmine.org — keep them split.
+
+`docs/redmine_org/README.md` is the full checklist; `docs/` is excluded from release archives.
 
 ## Architecture notes
 

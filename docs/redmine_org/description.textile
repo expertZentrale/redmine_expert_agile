@@ -9,7 +9,7 @@ h3. Features
 * *Board* — columns from issue statuses, drag & drop, swimlanes, advisory WIP limits, configurable card fields, sub-columns from a shared @Prefix:@ status naming, and saved boards.
 * *Story points* — stored per issue, offered as a configurable value list (modified Fibonacci by default), restrictable to selected trackers, and available as a sortable column and filter on the issue list.
 * *Sprints* — a first-class entity with start and end dates, an open/active/closed lifecycle, and Version-style sharing across a project tree. Redmine versions remain usable for planning alongside sprints.
-* *Backlog planner* — drag issues into sprints or versions from a dedicated planning view, behind its own project module.
+* *Backlog planner* — drag issues into sprints or versions from a dedicated planning view, with the same filters and card fields as the board plus saved backlogs, behind its own project module.
 * *Charts* — burndown, burnup, cumulative flow, velocity and cycle time, in issues, hours or story points.
 * *Colours* — cards coloured by tracker, priority, status, project, assignee, spent time, or per issue.
 * *REST API* — read *and write* agile data (story points, sprint assignment), plus full sprint CRUD.
