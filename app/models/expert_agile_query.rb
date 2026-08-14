@@ -148,8 +148,14 @@ class ExpertAgileQuery < IssueQuery
   BOARD_SESSION_KEYS = %i(board_status_ids wip_limits color_base board_type
                           show_avatar sprint_id backlog_enabled).freeze
 
+  # Read through this rather than the constant, so a subclass with settings of
+  # its own can add them to what survives a request.
+  def self.session_option_keys
+    BOARD_SESSION_KEYS
+  end
+
   def board_session_options
-    BOARD_SESSION_KEYS.each_with_object({}) do |key, acc|
+    self.class.session_option_keys.each_with_object({}) do |key, acc|
       value = options[key]
       acc[key] = value unless value.nil?
     end
@@ -158,8 +164,9 @@ class ExpertAgileQuery < IssueQuery
   def restore_board_options(stored)
     return self if stored.blank?
 
+    permitted = self.class.session_option_keys
     stored.each do |key, value|
-      next unless BOARD_SESSION_KEYS.include?(key.to_sym)
+      next unless permitted.include?(key.to_sym)
 
       options[key.to_sym] = value
     end

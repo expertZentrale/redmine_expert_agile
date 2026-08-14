@@ -58,7 +58,9 @@ docker-compose -f docker-compose.yml up --build
 
 # Tests (inside a Redmine environment)
 bundle exec rake redmine:plugins:test NAME=redmine_expert_agile RAILS_ENV=test
-PLUGIN=redmine_expert_agile docker-compose -f docker-compose.yml --profile test run --build --rm redmine-test
+# Note the -e: the compose command reads PLUGIN from the *container's* environment, so a
+# plain `PLUGIN=... docker-compose ...` prefix is ignored and the helpdesk suite runs instead.
+docker-compose -f docker-compose.yml --profile test run --build --rm -e PLUGIN=redmine_expert_agile redmine-test
 ```
 
 ## Git and releases

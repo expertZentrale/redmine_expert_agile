@@ -13,6 +13,37 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ### Hinzugefuegt
 
+- **Der Backlog-Planer hat jetzt das Filter- und Optionsfeld des Boards.** Der Backlog-Tab war der
+  einzige Agile-Bildschirm ohne eines: er baute bei jedem Aufruf eine Wegwerf-Abfrage, zeigte
+  dadurch immer alle offenen Tickets des Projekts, und nichts von dem, was jemand einstellte,
+  ueberlebte einen Seitenwechsel. Er traegt nun dasselbe Feld wie das Board — Redmines eigenes
+  Filterwerkzeug, ein einklappbares Feld *Optionen* mit Kartenfeldern und Einfaerbung sowie
+  Anwenden / Zuruecksetzen / Speichern —, abgelegt in einem eigenen Sitzungsschluessel, sodass der
+  Rueckweg ueber das Projektmenue den Backlog so zeigt, wie er verlassen wurde. Spalten und
+  WIP-Grenzen fehlen bewusst: der Planer ignoriert, wo ein Ticket im Workflow steht.
+- **Gespeicherte Backlogs.** Ein Backlog laesst sich wie ein Board oder ein Diagramm speichern,
+  bearbeiten und loeschen; gespeicherte Backlogs erscheinen in der Agile-Seitenleiste, die der
+  Backlog-Tab jetzt ueberhaupt erst darstellt. Es sind `ExpertAgileBacklogQuery`-Zeilen in Redmines
+  Tabelle `queries`, sichtbar ueber das Recht `view_expert_agile_backlog` statt ueber das des
+  Boards, und `ExpertAgileBacklogQueriesController` ist der Abfrage-Controller des Boards auf diese
+  Klasse gerichtet — dieselbe Wiederverwendung, die die Diagramm-Variante bereits nutzt. Speichern
+  verlangt `add_expert_agile_queries` aus dem Modul `expert_agile`; ein Projekt, das nur das
+  Backlog-Modul aktiviert hat, kann daher filtern, aber nicht speichern.
+- **Backlog-Karten zeigen die im Feld gewaehlten Felder.** Sie hatten einen festen Satz aus Nummer,
+  Tracker, Thema, Status und Story Points; sie zeigen nun Bearbeiter samt Avatar, geschaetzten
+  Aufwand, Fortschritt, den Beschreibungsauszug und jede gewaehlte Spalte einschliesslich
+  benutzerdefinierter Felder — genau wie eine Board-Karte.
+
+### Behoben
+
+- **Ein auf seinem eigenen Bildschirm gespeichertes Diagramm wurde als Board abgelegt.**
+  `expert_agile_queries/new` und `edit` hatten die Routen des Boards fest verdrahtet, sodass jede
+  Variante des Abfrage-Controllers ihr Formular an `ExpertAgileQueriesController` schickte,
+  gleichgueltig von welchem Bildschirm sie kam. Wohin das gemeinsame Formular schickt und wie es
+  ueberschrieben ist, entscheidet jetzt der Controller. Die Diagramm-Variante hatte keinen
+  Speichern-Link in der Oberflaeche, der Fehler traf also nur die API; das Backlog waere beim
+  ersten Klick hineingelaufen.
+
 - **Bildschirmfotos in beiden READMEs.** `README.md` und `README.de.md` haben jetzt einen Abschnitt
   *Bildschirmfotos*: das Board mit Unterspalten und WIP-Grenzen, Swimlanes, den Backlog-Planer, die
   Sprintliste, Story Points im Ticketformular, Burndown, Velocity, kumulativen Fluss, die

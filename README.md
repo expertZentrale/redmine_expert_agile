@@ -29,7 +29,8 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
 - **Sprints** — a first-class entity with start and end dates, an open/active/closed lifecycle,
   and Version-style sharing across a project tree. Redmine versions remain usable for planning
   alongside sprints.
-- **Backlog planner** — drag issues into sprints or versions from a dedicated planning view.
+- **Backlog planner** — drag issues into sprints or versions from a dedicated planning view, with
+  the same filters, card fields and saved queries as the board.
 - **Charts** — burndown, burnup, velocity, cumulative flow and cycle time, in issues, hours or
   story points.
 - **Colors** — cards coloured by tracker, priority, status, assignee, project, spent time, or
@@ -92,6 +93,12 @@ one active, one open and three closed](docs/screenshots/en/04-sprints.png)
 
 The planner puts the unplanned backlog next to the sprints it can be dragged into, each lane
 totalling its issue count and story points. A second tab plans into Redmine versions instead.
+
+It carries the same filter and options panel as the board: Redmine's own filter widget, the card
+fields and colouring, and Apply / Clear / Save. What is applied is kept in the session, so coming
+back to the planner shows it as it was left, and a planner worth keeping can be saved and reopened
+from the sidebar. There are no status columns or WIP limits here — the planner ignores where an
+issue sits in the workflow, since an issue is planned or it is not.
 
 ![Backlog planner with a Sprints and a Versions tab: a Backlog lane on the left and one lane per
 available sprint beside it, each headed by its issue count, story point total, date range and

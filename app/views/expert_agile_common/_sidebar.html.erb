@@ -19,7 +19,8 @@
   <% if @project && @project.module_enabled?(:expert_agile_backlog) &&
         User.current.allowed_to?(:view_expert_agile_backlog, @project) %>
     <li><%= link_to l(:label_expert_agile_backlog),
-                    project_expert_agile_backlog_path(@project) %></li>
+                    project_expert_agile_backlog_path(@project),
+                    :class => (controller_name == 'expert_agile_backlogs' ? 'selected' : nil) %></li>
   <% end %>
 </ul>
 

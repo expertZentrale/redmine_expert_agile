@@ -6,9 +6,23 @@
 # sprint and planning into a version is isolated in the four small methods at
 # the bottom of this class.
 class ExpertAgileBacklogQuery < ExpertAgileQuery
+  # Reading a saved backlog needs the backlog permission, not the board one it
+  # would otherwise inherit — the two are separate project modules, so a project
+  # may well have one without the other.
+  self.view_permission = :view_expert_agile_backlog
+
+  # STI guard for our own listings, as on the board and the charts.
+  scope :only_backlogs, -> { where(:type => name) }
+
   CONTAINER_SPRINT = 'sprint'.freeze
   CONTAINER_VERSION = 'version'.freeze
   CONTAINER_TYPES = [CONTAINER_SPRINT, CONTAINER_VERSION].freeze
+
+  # Which containers are being planned into is display state like any other
+  # panel setting, so it has to survive a request the same way.
+  def self.session_option_keys
+    super + [:container_type]
+  end
 
   def container_type
     value = options[:container_type].to_s
@@ -21,6 +35,19 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
 
   def sprints?
     container_type == CONTAINER_SPRINT
+  end
+
+  # The planner's own part of the options panel. Redmine's build_from_params
+  # covers filters, card fields and sorting; the inherited implementation covers
+  # colouring and the avatar. Only the container kind is left.
+  #
+  # The board settings the parent also reads — status columns, WIP limits — are
+  # inert here: the panel never offers them and `planning_scope` ignores where an
+  # issue sits in the workflow.
+  def apply_board_params(params)
+    super
+    self.container_type = params[:container_type] if params[:container_type].present?
+    self
   end
 
   # The lanes to plan into, in planning order.

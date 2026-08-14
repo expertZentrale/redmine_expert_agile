@@ -13,6 +13,34 @@ notes from the section matching the pushed tag.
 
 ### Added
 
+- **The backlog planner has the board's filter and options panel.** The backlog tab was the one
+  agile screen without one: it built a throwaway query on every request, so it always showed every
+  open issue of the project and nothing a user chose survived a page reload. It now carries the
+  same panel the board does — Redmine's own filter widget, a collapsible *Options* fieldset with
+  card fields and colouring, and Apply / Clear / Save — persisted in its own session key so
+  coming back via the project menu shows the backlog as it was left. There is no status-column or
+  WIP part: the planner deliberately ignores where an issue sits in the workflow.
+- **Saved backlogs.** A backlog can be saved, edited and deleted like a board or a chart, and
+  saved backlogs are listed in the agile sidebar, which the backlog tab now renders. They are
+  `ExpertAgileBacklogQuery` rows in Redmine's `queries` table, visible through the
+  `view_expert_agile_backlog` permission rather than the board's, and
+  `ExpertAgileBacklogQueriesController` is the board's query controller pointed at that class —
+  the same reuse the charts variant already uses. Saving needs `add_expert_agile_queries`, which
+  lives in the `expert_agile` module, so a project running the backlog module alone can filter but
+  not save.
+- **Backlog cards show the fields the panel selects.** They were a fixed set of id, tracker,
+  subject, status and story points; they now render the assignee and avatar, estimated hours, done
+  ratio, the description excerpt and any selected column including custom fields, exactly as a
+  board card does.
+
+### Fixed
+
+- **A chart saved from its own screen was stored as a board.** `expert_agile_queries/new` and
+  `edit` hardcoded the board's routes, so every variant of the query controller posted its form to
+  `ExpertAgileQueriesController` regardless of which screen it came from. Where the shared form
+  posts, and what it is titled, is now the controller's business. The charts variant had no Save
+  link in the UI, so this only ever bit the API; the backlog would have hit it on the first click.
+
 - **Screenshots in both READMEs.** `README.md` and `README.de.md` now open a *Screenshots* section
   covering the board with its sub-columns and WIP limits, swimlanes, the backlog planner, the
   sprint list, story points on the issue form, burndown, velocity, cumulative flow, the card

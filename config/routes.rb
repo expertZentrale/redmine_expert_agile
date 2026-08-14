@@ -42,12 +42,14 @@ RedmineApp::Application.routes.draw do
   get 'projects/:project_id/expert_agile/backlog/autocomplete', :to => 'expert_agile_backlogs#autocomplete',
       :as => 'autocomplete_expert_agile_backlog'
 
-  # --- Saved boards / chart queries -------------------------------------
+  # --- Saved boards / chart / backlog queries ---------------------------
   resources :expert_agile_queries, :except => [:show]
   resources :expert_agile_charts_queries, :except => [:show]
+  resources :expert_agile_backlog_queries, :except => [:show]
   resources :projects, :only => [] do
     resources :expert_agile_queries, :only => [:index, :new, :create]
     resources :expert_agile_charts_queries, :only => [:index, :new, :create]
+    resources :expert_agile_backlog_queries, :only => [:index, :new, :create]
 
     # --- Sprints --------------------------------------------------------
     resources :expert_agile_sprints

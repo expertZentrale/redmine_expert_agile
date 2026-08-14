@@ -42,4 +42,6 @@
   <%= hidden_field_tag 'interval', @query.interval %>
   <%= hidden_field_tag 'date_from', @query.date_from %>
   <%= hidden_field_tag 'date_to', @query.date_to %>
+<% elsif @query.is_a?(ExpertAgileBacklogQuery) %>
+  <%= hidden_field_tag 'container_type', @query.container_type %>
 <% end %>

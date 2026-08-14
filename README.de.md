@@ -32,7 +32,8 @@ Benoetigt **Redmine 5.0 oder neuer**. Lizenziert unter der **GPL-2.0-or-later**
   offen/aktiv/geschlossen und Freigabe ueber den Projektbaum wie bei Versionen.
   Redmine-Versionen bleiben parallel zur Planung nutzbar.
 - **Backlog-Planer** — Tickets in einer eigenen Planungsansicht per Drag & Drop Sprints oder
-  Versionen zuordnen.
+  Versionen zuordnen, mit denselben Filtern, Kartenfeldern und gespeicherten Abfragen wie das
+  Board.
 - **Diagramme** — Burndown, Burnup, Velocity, kumulierter Fluss und Durchlaufzeit, wahlweise in
   Tickets, Stunden oder Story Points.
 - **Farben** — Karten eingefaerbt nach Tracker, Prioritaet, Status, Bearbeiter, Projekt,
@@ -100,6 +101,13 @@ einer aktiv, einer offen und drei abgeschlossen](docs/screenshots/de/04-sprints.
 Der Planer stellt den ungeplanten Backlog neben die Sprints, in die er gezogen werden kann; jede
 Bahn summiert Ticketzahl und Story Points. Ein zweiter Reiter plant stattdessen in
 Redmine-Versionen.
+
+Er traegt dasselbe Filter- und Optionsfeld wie das Board: Redmines eigenes Filterwerkzeug, die
+Kartenfelder und die Einfaerbung sowie Anwenden / Zuruecksetzen / Speichern. Das Angewandte bleibt
+in der Sitzung erhalten, der Rueckweg zum Planer zeigt ihn also so, wie er verlassen wurde, und ein
+Planer, der sich lohnt, laesst sich speichern und aus der Seitenleiste wieder oeffnen. Spalten und
+WIP-Grenzen gibt es hier nicht — der Planer ignoriert, wo ein Ticket im Workflow steht, denn ein
+Ticket ist geplant oder nicht.
 
 ![Backlog-Planer mit den Reitern Sprints und Versionen: links eine Backlog-Bahn, daneben je eine
 Bahn pro verfuegbarem Sprint, jede mit Ticketzahl, Story-Point-Summe, Zeitraum und Restlaufzeit in

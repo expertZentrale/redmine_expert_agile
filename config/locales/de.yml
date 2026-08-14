@@ -24,7 +24,10 @@ de:
   label_expert_agile_board_new: Neues Board
   label_expert_agile_board_plural: Boards
   label_expert_agile_backlog: Backlog
+  label_expert_agile_backlog_new: Neues Backlog
+  label_expert_agile_backlog_plural: Backlogs
   label_expert_agile_charts: Agile-Diagramme
+  label_expert_agile_chart_new: Neues Diagramm
 
   # --- Einstellungen: Abschnitte --------------------------------------
   label_expert_agile_settings_board: Board
@@ -126,6 +129,7 @@ de:
   text_expert_agile_board_statuses_hint: Die Status ankreuzen, die als Boardspalten erscheinen sollen. Ohne Auswahl zeigt das Board alle offenen Status der Workflows dieses Projekts.
   error_expert_agile_board_not_saveable: Sie duerfen kein Board mit dieser Sichtbarkeit speichern
 
+  # --- Backlog --------------------------------------------------------
   error_expert_agile_container_not_available: Dieser Sprint bzw. diese Version steht fuer dieses Projekt nicht zur Verfuegung
   text_expert_agile_no_sprints: Noch keine Sprints vorhanden. Legen Sie einen an, um zu planen.
   text_expert_agile_no_versions: Dieses Projekt hat keine offenen Versionen zum Planen.

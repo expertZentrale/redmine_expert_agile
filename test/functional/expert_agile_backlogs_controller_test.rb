@@ -121,6 +121,145 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_select 'div#ea-backlog'
   end
 
+  # --- Filter and options panel ----------------------------------------
+
+  def test_index_renders_the_filter_panel
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'form#ea_query_form'
+    assert_select 'div#query_form_with_buttons'
+    assert_select 'fieldset#filters'
+    assert_select 'fieldset#options'
+    assert_select 'input[name=?][value=?]', 'set_filter', '1'
+  end
+
+  def test_the_panel_carries_the_container_type
+    # The switch is a pair of links outside the form, so without this hidden
+    # field applying a filter on a version backlog drops back to sprints.
+    get :index, :params => { :project_id => @project.id, :container_type => 'version' }
+
+    assert_response :success
+    assert_select 'form#ea_query_form input[type=hidden][name=?][value=?]',
+                  'container_type', 'version'
+  end
+
+  def test_container_type_survives_an_apply
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :container_type => 'version' }
+
+    assert_response :success
+    assert_select '.ea-backlog-switch a.selected', :text => l(:label_version_plural)
+  end
+
+  def test_a_filter_narrows_the_backlog
+    wanted = Issue.generate!(:project_id => @project.id)
+    other = Issue.generate!(:project_id => @project.id)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :f => ['issue_id'], :op => { 'issue_id' => '=' },
+                             :v => { 'issue_id' => [wanted.id.to_s] } }
+
+    assert_response :success
+    assert_select "#ea-card-#{wanted.id}"
+    assert_select "#ea-card-#{other.id}", :count => 0
+  end
+
+  def test_filters_survive_a_bare_request_through_the_session
+    # Coming back via the project menu carries no params at all. Without the
+    # session step everything applied from the panel would be lost there.
+    wanted = Issue.generate!(:project_id => @project.id)
+    other = Issue.generate!(:project_id => @project.id)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :f => ['issue_id'], :op => { 'issue_id' => '=' },
+                             :v => { 'issue_id' => [wanted.id.to_s] } }
+    assert_response :success
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select "#ea-card-#{wanted.id}"
+    assert_select "#ea-card-#{other.id}", :count => 0
+  end
+
+  def test_card_fields_reach_the_cards
+    issue = Issue.generate!(:project_id => @project.id)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :c => ['priority'] }
+
+    assert_response :success
+    assert_select "#ea-card-#{issue.id} .ea-card-fields dt", :text => l(:field_priority)
+  end
+
+  def test_the_save_link_needs_the_permission
+    get :index, :params => { :project_id => @project.id }
+    assert_response :success
+    assert_select 'p.buttons a.icon-save', :count => 0
+
+    @role.add_permission!(:add_expert_agile_queries)
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'p.buttons a.icon-save'
+  end
+
+  # --- Saved backlogs ---------------------------------------------------
+
+  def saved_backlog!(attributes = {})
+    query = ExpertAgileBacklogQuery.new({ :name => 'Version planning', :project => @project,
+                                          :user => User.find(2),
+                                          :visibility => Query::VISIBILITY_PRIVATE }
+                                          .merge(attributes))
+    query.container_type = attributes[:container_type] || 'version'
+    query.save!
+    query
+  end
+
+  def test_a_saved_backlog_is_loaded_by_id
+    saved = saved_backlog!
+
+    get :index, :params => { :project_id => @project.id, :query_id => saved.id }
+
+    assert_response :success
+    assert_select 'h2', :text => 'Version planning'
+    assert_select '.ea-backlog-switch a.selected', :text => l(:label_version_plural)
+  end
+
+  def test_the_switch_still_works_on_a_saved_backlog
+    # The switch link arrives without set_filter, so the container type has to be
+    # honoured on the query_id path too or the switch is dead there.
+    saved = saved_backlog!
+
+    get :index, :params => { :project_id => @project.id, :query_id => saved.id,
+                             :container_type => 'sprint' }
+
+    assert_response :success
+    assert_select '.ea-backlog-switch a.selected', :text => l(:label_expert_agile_sprint_plural)
+    assert_equal 'version', saved.reload.container_type, 'the tweak is not written back'
+  end
+
+  def test_a_saved_backlog_of_another_project_is_not_loaded
+    foreign = ExpertAgileBacklogQuery.new(:name => 'Elsewhere', :project => Project.find(2),
+                                          :user => User.find(2),
+                                          :visibility => Query::VISIBILITY_PRIVATE)
+    foreign.save!
+
+    assert_raise ActiveRecord::RecordNotFound do
+      get :index, :params => { :project_id => @project.id, :query_id => foreign.id }
+    end
+  end
+
+  def test_the_sidebar_lists_saved_backlogs
+    saved_backlog!
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select '#sidebar a', :text => 'Version planning'
+  end
+
   def test_index_requires_the_module
     @project.disable_module!(:expert_agile_backlog)
 

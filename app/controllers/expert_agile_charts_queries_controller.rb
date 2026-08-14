@@ -19,4 +19,20 @@ class ExpertAgileChartsQueriesController < ExpertAgileQueriesController
       expert_agile_charts_path(options)
     end
   end
+
+  def query_collection_path
+    if @project
+      project_expert_agile_charts_queries_path(@project)
+    else
+      expert_agile_charts_queries_path
+    end
+  end
+
+  def query_member_path(query)
+    expert_agile_charts_query_path(query)
+  end
+
+  def query_page_title
+    l(:label_expert_agile_chart_new)
+  end
 end

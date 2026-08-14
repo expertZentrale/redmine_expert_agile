@@ -4,7 +4,7 @@ class ExpertAgileBacklogsController < ApplicationController
 
   before_action :find_project_by_project_id
   before_action :authorize
-  before_action :build_query
+  before_action :retrieve_backlog_query
   before_action :find_issue_for_planning, :only => [:update]
 
   helper :queries
@@ -13,6 +13,8 @@ class ExpertAgileBacklogsController < ApplicationController
   include QueriesHelper
 
   def index
+    return render_error(:status => :unprocessable_entity) unless @query.valid?
+
     respond_to do |format|
       format.html { render :layout => 'base' }
     end
@@ -70,11 +72,92 @@ class ExpertAgileBacklogsController < ApplicationController
 
   private
 
-  def build_query
-    @query = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
-    @query.container_type = params[:container_type] if params[:container_type].present?
-    @query.build_from_params(params)
+  SESSION_KEY = :expert_agile_backlog_query
+
+  # The backlog being looked at.
+  #
+  # The same three-way retrieval the board uses: an explicit query_id wins,
+  # otherwise `set_filter` builds a backlog from the request, otherwise the last
+  # one is restored from the session. Without the session step every filter and
+  # option applied from the panel would be lost the moment the page reloaded or
+  # the user came back via the project menu, because those live in the URL and
+  # nowhere else.
+  #
+  # It runs for every action, not just #index: a planning move ranks the dragged
+  # card within `siblings_for`, which is filtered, so the move has to see the
+  # same backlog the user is looking at. Its own key, because the board's
+  # session state is a different query class.
+  def retrieve_backlog_query
+    if params[:query_id].present?
+      @query = find_backlog_query(params[:query_id])
+      @query.project = @project
+      # A saved backlog can still be tweaked for this request without the change
+      # being written back to it.
+      if params[:set_filter].present?
+        @query.build_from_params(params)
+        @query.apply_board_params(params)
+      end
+      # The sprint/version switch is a plain link, so it arrives without
+      # set_filter. Honouring it here is what keeps the switch working on a saved
+      # backlog; like every other tweak on this path it is not written back, so
+      # the next bare request shows the backlog as it was saved.
+      @query.container_type = params[:container_type] if params[:container_type].present?
+      session[SESSION_KEY] = { :id => @query.id, :project_id => @query.project_id }
+    elsif params[:set_filter].present? || session_state_stale?
+      @query = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
+      @query.build_from_params(params)
+      @query.apply_board_params(params)
+      store_backlog_session_state
+    else
+      @query = restore_backlog_from_session
+    end
     @query
+  end
+
+  def find_backlog_query(id)
+    scope = ExpertAgileBacklogQuery.where(:project_id => nil)
+    scope = scope.or(ExpertAgileBacklogQuery.where(:project_id => @project)) if @project
+    scope.find(id)
+  end
+
+  def session_state_stale?
+    state = session[SESSION_KEY]
+    state.nil? || state[:project_id] != (@project ? @project.id : nil)
+  end
+
+  # Only what is needed to rebuild the backlog, not the whole options blob — a
+  # large filter set would otherwise push the cookie session past its 4 KB limit.
+  def store_backlog_session_state
+    session[SESSION_KEY] = {
+      :project_id => @query.project_id,
+      :filters => @query.filters,
+      :group_by => @query.group_by,
+      :column_names => @query.column_names,
+      :sort => @query.sort_criteria.to_a,
+      :board => @query.board_session_options
+    }
+  end
+
+  def restore_backlog_from_session
+    state = session[SESSION_KEY]
+    if state[:id]
+      saved = ExpertAgileBacklogQuery.find_by(:id => state[:id])
+      if saved
+        saved.project = @project
+        return saved
+      end
+      # The saved backlog was deleted since; fall through to a fresh one.
+      session[SESSION_KEY] = nil
+      return ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
+    end
+
+    query = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
+    query.filters = state[:filters] || {}
+    query.group_by = state[:group_by]
+    query.column_names = state[:column_names]
+    query.sort_criteria = state[:sort] if state[:sort].present?
+    query.restore_board_options(state[:board])
+    query
   end
 
   def find_issue_for_planning

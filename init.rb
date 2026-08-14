@@ -105,16 +105,24 @@ Redmine::Plugin.register :redmine_expert_agile do
     permission :edit_expert_agile_board,
                { :expert_agile_boards => [:update, :create_issue, :edit_issue, :update_issue] },
                :require => :member
-    # Both the board and the chart variants of the query controller, or saving
-    # a chart is refused: find_optional_project authorises the controller/action
-    # pair, so an action missing from every permission map is simply denied.
+    # Every variant of the query controller — board, chart and backlog — or
+    # saving that kind is refused: find_optional_project authorises the
+    # controller/action pair, so an action missing from every permission map is
+    # simply denied.
+    #
+    # The backlog variant is listed here rather than in the backlog module
+    # because saving is one permission across all three screens. The
+    # consequence is that a project running the backlog module without the board
+    # module can filter its backlog but not save one.
     permission :add_expert_agile_queries,
                { :expert_agile_queries => [:new, :create, :edit, :update, :destroy],
-                 :expert_agile_charts_queries => [:new, :create, :edit, :update, :destroy] },
+                 :expert_agile_charts_queries => [:new, :create, :edit, :update, :destroy],
+                 :expert_agile_backlog_queries => [:new, :create, :edit, :update, :destroy] },
                :require => :loggedin
     permission :manage_public_expert_agile_queries,
                { :expert_agile_queries => [:new, :create, :edit, :update, :destroy],
-                 :expert_agile_charts_queries => [:new, :create, :edit, :update, :destroy] },
+                 :expert_agile_charts_queries => [:new, :create, :edit, :update, :destroy],
+                 :expert_agile_backlog_queries => [:new, :create, :edit, :update, :destroy] },
                :require => :member
     permission :view_expert_agile_charts,
                { :expert_agile_charts         => [:show, :render_chart],
@@ -156,7 +164,8 @@ Redmine::Plugin.register :redmine_expert_agile do
   # without the backlog UI, mirroring how RedmineUP splits :agile/:agile_backlog.
   project_module :expert_agile_backlog do
     permission :view_expert_agile_backlog,
-               { :expert_agile_backlogs => [:index, :load_more, :autocomplete] },
+               { :expert_agile_backlogs => [:index, :load_more, :autocomplete],
+                 :expert_agile_backlog_queries => [:index] },
                :read => true
     permission :manage_expert_agile_backlog,
                { :expert_agile_backlogs => [:update] },

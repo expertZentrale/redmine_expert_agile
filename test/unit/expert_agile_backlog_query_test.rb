@@ -59,6 +59,52 @@ class ExpertAgileBacklogQueryTest < ActiveSupport::TestCase
     assert_not query.sprints?
   end
 
+  def test_apply_board_params_sets_the_container_type
+    query = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
+
+    query.apply_board_params(:container_type => 'version')
+    assert_equal 'version', query.container_type
+
+    query.apply_board_params(:container_type => 'nonsense')
+    assert_equal 'sprint', query.container_type, 'junk falls back to the default'
+  end
+
+  def test_the_container_type_survives_the_session_round_trip
+    # It is display state like every other panel setting, so it has to come back
+    # when the user returns to the planner without any params.
+    assert_includes ExpertAgileBacklogQuery.session_option_keys, :container_type
+
+    restored = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
+    restored.restore_board_options(query_for('version').board_session_options)
+
+    assert_equal 'version', restored.container_type
+  end
+
+  def test_a_board_does_not_carry_the_container_type
+    assert_not_includes ExpertAgileQuery.session_option_keys, :container_type
+  end
+
+  # --- Saving -----------------------------------------------------------
+
+  def test_a_backlog_can_be_saved_and_reloaded
+    query = query_for('version')
+    query.name = 'Version planning'
+    query.user = User.current
+    query.visibility = Query::VISIBILITY_PRIVATE
+
+    assert query.save, query.errors.full_messages.join(', ')
+
+    reloaded = ExpertAgileBacklogQuery.find(query.id)
+    assert_equal ExpertAgileBacklogQuery, reloaded.class
+    assert_equal 'version', reloaded.container_type
+  end
+
+  def test_visibility_is_gated_on_the_backlog_permission
+    # It would otherwise inherit the board's, and the two are separate project
+    # modules — a project may well have the backlog without the board.
+    assert_equal :view_expert_agile_backlog, ExpertAgileBacklogQuery.view_permission
+  end
+
   def test_containers_list_sprints_or_versions
     sprint = make_sprint
 
