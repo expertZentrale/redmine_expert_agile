@@ -18,7 +18,7 @@ h3. Design notes
 
 A few deliberate choices, because they affect correctness rather than taste:
 
-* *Board ranks are fractional and computed on the server.* A move sends only the dragged card and its two neighbours and writes one row. Re-indexing a whole column in the browser loses concurrent moves and silently reorders cards that are paginated out of view.
+* *Board ranks are fractional and computed on the server.* A move sends only the dragged card and its two neighbours, and writes one row once the cards around it carry ranks. Re-indexing a whole column in the browser loses concurrent moves and silently reorders cards that are paginated out of view.
 * *Chart history is reconstructed in a single pass* over one journal query and cached, rather than re-scanning every issue's journals once per date.
 * *No inline JavaScript.* Views render markup; data reaches the browser through a JSON island. The board works under a @script-src 'self'@ content security policy.
 * *No global monkeypatching* of @ActiveRecord::Base@ or @ApplicationController@.
