@@ -20,6 +20,13 @@ require 'bigdecimal'
 # neighbour gap has collapsed is re-spread before the move is retried. With
 # decimal(30,15) and a STEP of 1024 that takes roughly 50 consecutive drops
 # into the same gap, so rebalancing is rare.
+#
+# Ranks are created lazily — an issue nobody has dragged has no row at all and
+# sorts, with the rest of the unranked cards, after the ranked ones in id order.
+# That means a midpoint is not always available: a card dropped between two
+# never-moved cards has to sit inside a run that is ordered by id, where no
+# number fits. Those cards are given real ranks first, down to the drop point
+# only, and the move proceeds as usual.
 module RedmineExpertAgile
   class BoardPositions
     # Distance between freshly assigned ranks, and the gap left at either end.
@@ -31,13 +38,25 @@ module RedmineExpertAgile
       # Places `issue` between `prev_issue` and `next_issue` and returns the
       # assigned rank.
       #
-      # `siblings` is the ordered scope of the destination column, used only if
-      # the gap has collapsed and the column has to be re-spread.
+      # `siblings` is the ordered scope of the destination column. It is read
+      # when a neighbour has never been ranked, and re-spread when the gap
+      # between two ranks has collapsed.
       def place!(issue, prev_issue: nil, next_issue: nil, siblings: nil)
         ExpertAgileData.transaction do
+          # A neighbour that was never dragged carries no rank to sit next to.
+          # Unranked cards trail the column in id order and no number sorts
+          # *inside* that tail, so the cards above the drop point are given real
+          # ranks first, in the order they are already displayed in.
+          #
+          # Without this a drop between two never-moved cards was placed as if
+          # the column were empty, and the card jumped to the top instead. The
+          # column that consists entirely of such cards is the one issues are
+          # created in — "New" — where reordering therefore never held.
+          column = materialize_ranks_above!(issue, prev_issue, siblings) if unranked?(prev_issue)
+
           before = position_of(prev_issue)
           after = position_of(next_issue)
-          rank = midpoint(before, after)
+          rank = place_between(before, after, siblings, column)
 
           if rank.nil?
             # The neighbours are adjacent at full precision. Re-spread the
@@ -45,7 +64,7 @@ module RedmineExpertAgile
             rebalance!(siblings) if siblings
             before = position_of(reload_data(prev_issue))
             after = position_of(reload_data(next_issue))
-            rank = midpoint(before, after)
+            rank = place_between(before, after, siblings, nil)
             raise ArgumentError, 'unable to allocate a board position' if rank.nil?
           end
 
@@ -58,8 +77,7 @@ module RedmineExpertAgile
 
       # The rank for a card appended to the end of a column.
       def append_position(siblings)
-        last = maximum_position(siblings)
-        last ? last + STEP : STEP
+        end_position(ordered_ids(siblings))
       end
 
       # Re-spreads an ordered collection of issues onto clean, evenly separated
@@ -79,16 +97,72 @@ module RedmineExpertAgile
 
       private
 
+      # The rank for a drop, or nil when there is no room between the
+      # neighbours. `column` is the ordered id list if one was already read.
+      def place_between(before, after, siblings, column)
+        return midpoint(before, after) unless after.nil?
+
+        # Nothing ranked below the drop point: the card belongs at the end of
+        # the column's ranked run, still above the unranked tail. Measured
+        # against the whole column rather than `before + STEP`, so two cards
+        # dropped into the same spot cannot land on the same rank.
+        end_position(column || ordered_ids(siblings), before)
+      end
+
       # nil means "there is no room between these two".
       def midpoint(before, after)
-        return STEP if before.nil? && after.nil?
         # Dropped at the top: leave a full step of headroom below the first card
         # so later drops above it do not immediately collapse.
         return after - STEP if before.nil?
-        return before + STEP if after.nil?
         return nil if after - before < MIN_GAP
 
         (before + after) / 2
+      end
+
+      # Gives every card from the top of the column down to `boundary` a real
+      # rank, keeping the order they are displayed in and writing only the rows
+      # that need a number. Cards below the drop point are left untouched, so
+      # the work is bounded by where the card was dropped rather than by the
+      # size of the column. Returns the column's ordered ids.
+      def materialize_ranks_above!(issue, boundary, siblings)
+        ids = ordered_ids(siblings)
+        cut = ids.index(boundary.id)
+        return ids if cut.nil?
+
+        # The moved card is skipped: it is leaving this slot anyway, and the
+        # backlog planner passes a sibling scope that still contains it.
+        prefix = ids[0..cut] - [issue.id]
+        rows = ExpertAgileData.where(:issue_id => prefix).index_by(&:issue_id)
+        last = nil
+
+        prefix.each do |id|
+          row = rows[id]
+          current = row && row.position && BigDecimal(row.position.to_s)
+          # An existing rank is kept as long as it still increases. Equal ranks
+          # — two cards once dropped into the same spot — are re-spread.
+          if current && (last.nil? || current > last)
+            last = current
+            next
+          end
+
+          last = last.nil? ? STEP : last + STEP
+          row ||= ExpertAgileData.new(:issue_id => id)
+          row.position = last
+          row.save!
+        end
+
+        reload_data(boundary)
+        ids
+      end
+
+      # Above every rank in `ids`, and above `before`.
+      def end_position(ids, before = nil)
+        highest = [maximum_position(ids), before].compact.max
+        highest ? highest + STEP : STEP
+      end
+
+      def unranked?(issue)
+        !issue.nil? && position_of(issue).nil?
       end
 
       def position_of(issue)
@@ -105,11 +179,16 @@ module RedmineExpertAgile
         issue
       end
 
-      def maximum_position(siblings)
-        return nil if siblings.nil?
+      # Ids in board order. Plucked rather than loaded: the column can hold
+      # thousands of issues and none of them is needed as an object here.
+      def ordered_ids(siblings)
+        return [] if siblings.nil?
 
-        ids = siblings.respond_to?(:map) ? siblings.map { |i| i.respond_to?(:id) ? i.id : i } : []
-        return nil if ids.empty?
+        (siblings.respond_to?(:pluck) ? siblings.pluck(:id) : Array(siblings).map(&:id)).uniq
+      end
+
+      def maximum_position(ids)
+        return nil if ids.blank?
 
         value = ExpertAgileData.where(:issue_id => ids).maximum(:position)
         value && BigDecimal(value.to_s)
