@@ -9,6 +9,28 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Behoben
+- **In der Spalte "Neu" liessen sich Karten nicht umsortieren.** Eine zwischen zwei Karten
+  abgelegte Karte sprang an den Anfang der Spalte, statt dort zu bleiben, wo sie abgelegt wurde;
+  betroffen war nur diese eine Spalte. Raenge entstehen erst bei Bedarf — ein Ticket, das noch nie
+  gezogen wurde, hat gar keinen Rang und sortiert zusammen mit allen anderen ranglosen Karten nach
+  Ticket-Id hinter die mit Rang —, und "Neu" ist die Spalte, in der Tickets entstehen, besteht also
+  ausschliesslich aus ranglosen Karten. Eine Karte zu platzieren hiess, die Mitte zwischen den
+  Raengen ihrer beiden Nachbarn zu nehmen, und zwischen zwei Karten ohne Rang gibt es keine Mitte:
+  Der Zug wurde berechnet, als waere die Spalte leer, und die Karte landete ganz oben. Die Karten
+  oberhalb der Ablagestelle bekommen jetzt echte Raenge, in genau der Reihenfolge, in der sie schon
+  angezeigt werden, bevor die Mitte gebildet wird. Und nur sie: Eine Ablage nahe dem Anfang einer
+  Spalte mit Tausenden Karten fasst eine Handvoll Zeilen an, nicht Tausende — die Karten darunter
+  werden weder gelesen noch geschrieben und behalten ihren Platz. Spalten, in denen bereits
+  gezogene Karten liegen, waren nicht betroffen und bleiben, wie sie sind.
+- **Zwei an derselben Stelle abgelegte Karten konnten denselben Rang bekommen.** Alles, was
+  unterhalb der letzten Karte mit Rang abgelegt wurde, bekam einen Rang eine Stufe darunter; eine
+  zweite Ablage an derselben Stelle wiederholte damit den Rang der ersten, und die Reihenfolge
+  zwischen beiden entschied die Ticket-Id. Der Rang wird jetzt gegen die gesamte Spalte gemessen
+  statt gegen die Karte oberhalb der Ablagestelle.
+
 ## [0.2.0] - 2026-08-14
 
 ### Sicherheit

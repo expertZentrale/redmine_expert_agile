@@ -9,6 +9,26 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Fixed
+- **Cards could not be reordered inside the "New" column.** A card dropped between two others
+  jumped to the top of the column instead of staying where it was dropped, and only that column
+  was affected. Ranks are created lazily — an issue nobody has dragged yet carries no rank at all
+  and sorts, with every other unranked card, after the ranked ones in id order — and "New" is the
+  column issues are created in, so it consists of nothing but unranked cards. Placing a card meant
+  taking the midpoint of its two neighbours' ranks, and between two cards that have none there is
+  no midpoint to take: the move was ranked as though the column were empty, which put the card
+  first. The cards above the drop point are now given real ranks, in the order they are already
+  displayed in, before the midpoint is taken. Only they are: a drop near the top of a column of
+  thousands touches a handful of rows, not thousands — the cards below it are neither read nor
+  rewritten, and keep their place.
+  Columns that already hold dragged cards were unaffected and stay as they are.
+- **Two cards dropped into the same spot could land on the same rank.** Anything dropped below the
+  last ranked card in a column was ranked one step below that card, so a second drop into the same
+  spot repeated the rank of the first and the order between them fell back to issue id. The rank
+  is now measured against the whole column rather than the card above the drop point.
+
 ## [0.2.0] - 2026-08-14
 
 ### Security

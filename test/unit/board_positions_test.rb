@@ -116,6 +116,88 @@ class BoardPositionsTest < ActiveSupport::TestCase
                    'the unrendered card keeps its place relative to the rest'
   end
 
+  # --- Columns that were never dragged in ------------------------------
+
+  # Every issue starts life unranked, so the column issues are created in —
+  # "New" — holds nothing but unranked cards. A drop between two of them used to
+  # be ranked as though the column were empty, which sent the card to the top.
+
+  def order_of(*issues)
+    Issue.where(:id => issues.map(&:id)).sorted_by_rank.pluck(:id)
+  end
+
+  def column_of(*issues)
+    Issue.where(:id => issues.map(&:id)).sorted_by_rank
+  end
+
+  def test_dropping_between_two_unranked_cards_lands_between_them
+    Positions.place!(@c, :prev_issue => @a, :next_issue => @b,
+                     :siblings => column_of(@a, @b))
+
+    assert_equal [@a.id, @c.id, @b.id], order_of(@a, @b, @c)
+  end
+
+  def test_dropping_below_the_last_unranked_card_lands_at_the_bottom
+    Positions.place!(@a, :prev_issue => @c, :next_issue => nil,
+                     :siblings => column_of(@b, @c))
+
+    assert_equal [@b.id, @c.id, @a.id], order_of(@a, @b, @c)
+  end
+
+  def test_dropping_above_the_first_unranked_card_lands_at_the_top
+    Positions.place!(@c, :prev_issue => nil, :next_issue => @a,
+                     :siblings => column_of(@a, @b))
+
+    assert_equal [@c.id, @a.id, @b.id], order_of(@a, @b, @c)
+  end
+
+  def test_only_the_cards_above_the_drop_point_are_ranked
+    # The work a move does is bounded by where the card was dropped, not by the
+    # size of the column: a column of thousands of unranked issues must not be
+    # rewritten wholesale because one card moved near the top.
+    Positions.place!(@c, :prev_issue => @a, :next_issue => @b,
+                     :siblings => column_of(@a, @b))
+
+    assert_not_nil @a.reload.expert_agile_data, 'the card above the drop point is ranked'
+    assert_nil @b.reload.expert_agile_data, 'the card below it is left alone'
+  end
+
+  def test_a_ranked_card_above_the_drop_point_keeps_its_rank
+    rank_at(@a, 100)
+
+    Positions.place!(@c, :prev_issue => @b, :next_issue => nil,
+                     :siblings => column_of(@a, @b))
+
+    assert_equal BigDecimal('100'), BigDecimal(rank(@a).to_s), 'no needless rewrite'
+    assert_equal [@a.id, @b.id, @c.id], order_of(@a, @b, @c)
+  end
+
+  def test_two_cards_dropped_at_the_end_of_the_ranked_run_get_distinct_ranks
+    # Both land between the last ranked card and the unranked tail. Ranking the
+    # second one as `prev + STEP` would put it on the rank the first one took.
+    rank_at(@a, 100)
+    first = Issue.generate!(:project_id => @project.id)
+    second = Issue.generate!(:project_id => @project.id)
+    siblings = lambda { |moved| Issue.where(:id => [@a.id, @b.id, first.id, second.id] - [moved.id]).sorted_by_rank }
+
+    Positions.place!(first, :prev_issue => @a, :next_issue => @b, :siblings => siblings.call(first))
+    Positions.place!(second, :prev_issue => @a, :next_issue => @b, :siblings => siblings.call(second))
+
+    assert_not_equal rank(first), rank(second)
+    assert_equal [@a.id, first.id, second.id, @b.id], order_of(@a, @b, first, second)
+  end
+
+  def test_a_card_dragged_down_into_the_unranked_tail_stays_where_it_was_dropped
+    rank_at(@a, 100)
+    tail = Issue.generate!(:project_id => @project.id)
+
+    # @a is dragged from the top of the column down between @c and tail.
+    Positions.place!(@a, :prev_issue => @c, :next_issue => tail,
+                     :siblings => Issue.where(:id => [@b.id, @c.id, tail.id]).sorted_by_rank)
+
+    assert_equal [@b.id, @c.id, @a.id, tail.id], order_of(@a, @b, @c, tail)
+  end
+
   # --- Precision and rebalancing --------------------------------------
 
   def test_repeated_drops_into_a_narrowing_gap_keep_working

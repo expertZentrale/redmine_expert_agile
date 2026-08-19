@@ -454,6 +454,27 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_operator position, :<, others[1].reload.expert_agile_data.position
   end
 
+  def test_update_reorders_within_a_column_of_cards_that_were_never_dragged
+    # The column issues are created in holds nothing but unranked cards, so a
+    # drop there has no two ranks to fall between. This is the board's normal
+    # starting state, not an edge case.
+    others = 2.times.map do
+      Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id)
+    end
+    assert others.none? { |issue| issue.expert_agile_data }, 'the neighbours start unranked'
+
+    put :update, :params => { :id => @issue.id,
+                              :prev_id => others[0].id,
+                              :next_id => others[1].id }, :format => :js
+
+    assert_response :success
+    moved = [others[0], @issue, others[1]].map(&:id)
+    assert_equal moved, Issue.where(:id => moved).sorted_by_rank.pluck(:id),
+                 'the card stays where it was dropped'
+    assert_nil others[1].reload.expert_agile_data,
+               'cards below the drop point are left unranked'
+  end
+
   def test_update_requires_the_edit_permission
     @role.remove_permission!(:edit_expert_agile_board)
 
