@@ -121,17 +121,22 @@ module RedmineExpertAgile
 
       # Gives every card from the top of the column down to `boundary` a real
       # rank, keeping the order they are displayed in and writing only the rows
-      # that need a number. Cards below the drop point are left untouched, so
-      # the work is bounded by where the card was dropped rather than by the
-      # size of the column. Returns the column's ordered ids.
+      # that need a number. Cards below the drop point are neither read nor
+      # written, so the work is bounded by where the card was dropped rather
+      # than by the size of the column. Returns the ids it read, which always
+      # include every ranked card in the column.
       def materialize_ranks_above!(issue, boundary, siblings)
-        ids = ordered_ids(siblings)
-        cut = ids.index(boundary.id)
-        return ids if cut.nil?
+        return [] if siblings.nil?
+
+        ids = ordered_ids(above(siblings, boundary))
+        # `boundary` is missing when it is not part of this column at all — a
+        # neighbour the client reported from a board that has moved on. Nothing
+        # to place it against, so nothing is rewritten.
+        return ids unless ids.include?(boundary.id)
 
         # The moved card is skipped: it is leaving this slot anyway, and the
         # backlog planner passes a sibling scope that still contains it.
-        prefix = ids[0..cut] - [issue.id]
+        prefix = ids - [issue.id]
         rows = ExpertAgileData.where(:issue_id => prefix).index_by(&:issue_id)
         last = nil
 
@@ -177,6 +182,19 @@ module RedmineExpertAgile
 
         issue.association(:expert_agile_data).reload
         issue
+      end
+
+      # The part of a column that sorts above `boundary`, which is only ever
+      # asked for an unranked card. Ranked cards all come first, and the
+      # unranked tail behind them is ordered by id (see `sorted_by_rank`), so
+      # that is every ranked card plus every unranked id up to the boundary's
+      # own. Written as a condition rather than a slice off the full id list to
+      # keep a drop near the top of a long column from reading all of it.
+      def above(siblings, boundary)
+        siblings.where(
+          "#{ExpertAgileData.table_name}.position IS NOT NULL OR #{Issue.table_name}.id <= ?",
+          boundary.id
+        )
       end
 
       # Ids in board order. Plucked rather than loaded: the column can hold

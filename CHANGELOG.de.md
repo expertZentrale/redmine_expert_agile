@@ -22,9 +22,9 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Der Zug wurde berechnet, als waere die Spalte leer, und die Karte landete ganz oben. Die Karten
   oberhalb der Ablagestelle bekommen jetzt echte Raenge, in genau der Reihenfolge, in der sie schon
   angezeigt werden, bevor die Mitte gebildet wird. Und nur sie: Eine Ablage nahe dem Anfang einer
-  Spalte mit Tausenden Karten schreibt eine Handvoll Zeilen, nicht Tausende, und die Karten
-  darunter behalten ihren Platz. Spalten, in denen bereits gezogene Karten liegen, waren nicht
-  betroffen und bleiben, wie sie sind.
+  Spalte mit Tausenden Karten fasst eine Handvoll Zeilen an, nicht Tausende — die Karten darunter
+  werden weder gelesen noch geschrieben und behalten ihren Platz. Spalten, in denen bereits
+  gezogene Karten liegen, waren nicht betroffen und bleiben, wie sie sind.
 - **Zwei an derselben Stelle abgelegte Karten konnten denselben Rang bekommen.** Alles, was
   unterhalb der letzten Karte mit Rang abgelegt wurde, bekam einen Rang eine Stufe darunter; eine
   zweite Ablage an derselben Stelle wiederholte damit den Rang der ersten, und die Reihenfolge

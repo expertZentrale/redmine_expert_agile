@@ -21,7 +21,8 @@ notes from the section matching the pushed tag.
   no midpoint to take: the move was ranked as though the column were empty, which put the card
   first. The cards above the drop point are now given real ranks, in the order they are already
   displayed in, before the midpoint is taken. Only they are: a drop near the top of a column of
-  thousands writes a handful of rows, not thousands, and the cards below it keep their place.
+  thousands touches a handful of rows, not thousands — the cards below it are neither read nor
+  rewritten, and keep their place.
   Columns that already hold dragged cards were unaffected and stay as they are.
 - **Two cards dropped into the same spot could land on the same rank.** Anything dropped below the
   last ranked card in a column was ranked one step below that card, so a second drop into the same
