@@ -1,0 +1,12 @@
+h3. redmine_expert_agile 0.2.1 — 2026-08-19
+
+h4. Fixed
+
+* *Cards could not be reordered inside the "New" column.* A card dropped between two others jumped to the top of the column instead of staying where it was dropped, and only that column was affected. A card gets its rank when it is dragged, so the column issues are created in is the one column that holds nothing but unranked cards — and a card dropped between two of those had no two ranks to fall between. The cards above the drop point are now ranked first, in the order they are already displayed in, before the card is placed between them. Only those: a drop near the top of a column of thousands touches a handful of rows, and the cards below it keep their place. The backlog planner, which plans the same never-dragged issues, is fixed with it.
+* *Two cards dropped into the same spot could take the same rank.* Anything dropped below the last ranked card in a column was ranked one step below that card, so a second drop into the same spot repeated the rank of the first and the order between them fell back to issue id. The rank is now measured against the whole column.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+Columns that already hold dragged cards were never affected and keep the order they have. Nothing is rewritten on upgrade: the first drop into a column that was never dragged in is what gives its cards their ranks.
