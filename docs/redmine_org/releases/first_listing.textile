@@ -1,0 +1,243 @@
+h3. redmine_expert_agile 0.2.1 — 2026-08-19
+
+h4. Fixed
+
+* *Cards could not be reordered inside the "New" column.* A card dropped between two others jumped to the top of the column instead of staying where it was dropped, and only that column was affected. A card gets its rank when it is dragged, so the column issues are created in is the one column that holds nothing but unranked cards — and a card dropped between two of those had no two ranks to fall between. The cards above the drop point are now ranked first, in the order they are already displayed in, before the card is placed between them. Only those: a drop near the top of a column of thousands touches a handful of rows, and the cards below it keep their place. The backlog planner, which plans the same never-dragged issues, is fixed with it.
+* *Two cards dropped into the same spot could take the same rank.* Anything dropped below the last ranked card in a column was ranked one step below that card, so a second drop into the same spot repeated the rank of the first and the order between them fell back to issue id. The rank is now measured against the whole column.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+Columns that already hold dragged cards were never affected and keep the order they have. Nothing is rewritten on upgrade: the first drop into a column that was never dragged in is what gives its cards their ranks.
+
+---
+
+h3. redmine_expert_agile 0.2.0 — 2026-08-14
+
+h4. Added
+
+* *The backlog planner has the board's filter and options panel.* It was the one agile screen without one, so it always showed every open issue of the project and nothing you chose survived a page reload. It now carries Redmine's own filter widget, a collapsible *Options* fieldset for card fields and colouring, and Apply / Clear / Save, kept in the session so returning to the planner shows it as you left it. There are deliberately no status columns or WIP limits here: the planner ignores where an issue sits in the workflow, since an issue is either planned or it is not.
+* *Saved backlogs.* A backlog can be saved, edited and deleted like a board or a chart, and saved backlogs are listed in the agile sidebar — which the backlog tab now shows at all. Saving needs the *Save agile boards* permission from the *expert Agile* module, so a project running only the *expert Agile Backlog* module can filter its backlog but not save one.
+* *Backlog cards show the fields you select.* They were a fixed set of number, tracker, subject, status and story points; they now show the assignee and avatar, estimated hours, progress, the description excerpt and any selected column including custom fields, exactly as a board card does.
+
+h4. Security
+
+* *A saved board or backlog could be opened by anyone who knew its id.* Both lookups resolved the id straight from the table, so a private board belonging to another user opened for any member of the project — its name and its whole filter set, though never issue data, which Redmine's own issue visibility continued to enforce. Both now resolve through the visibility scope, and pin the query type so a board lookup cannot reach a saved chart or backlog gated on a different permission.
+* *A saved board or backlog stayed open after it stopped being visible.* The session stores only an id and outlives the query it points at, so turning a shared board private, or removing the permission from a role, had no effect until the viewer's session happened to end. The session restore now checks visibility on every request and falls back to an unsaved board when the saved one is gone or no longer permitted.
+
+h4. Fixed
+
+* *A chart saved from its own screen was stored as a board.* The shared new/edit form hardcoded the board's routes, so every variant of the query controller posted to the board's. Where that form posts is now decided by the controller handling it.
+* *"Show future data on charts" did nothing.* The setting was declared, documented and read, but no chart consulted it: series were drawn to the end of the selected range, so a burndown looked at mid-sprint ran flat to the sprint end and velocity showed empty buckets for weeks that had not happened. Measured series now stop at today unless the setting is on, while the ideal line — a projection, not a measurement — still spans the whole range.
+* *Cumulative flow bands were indistinguishable.* Band colours were derived from each status's index among *all* statuses in the instance, so on an installation with many statuses a six-band chart drew six neighbouring shades of the same hue. The palette is now spread over the bands the chart actually draws.
+* *Untranslated column header on the card colours screen.* The table header used a translation key neither this plugin nor Redmine defines, so the admin screen showed "Translation missing".
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+Saved backlogs reuse the existing *Save agile boards* and *Manage public agile boards* permissions, which live in the *expert Agile* module — no new permission to grant, but a project that has enabled *expert Agile Backlog* without *expert Agile* will be able to filter its backlog and not save it.
+
+---
+
+h3. redmine_expert_agile 0.1.9 — 2026-08-11
+
+h4. Fixed
+
+* *Backlog lanes overlapped each other.* The board's fixed 300px column width was an unscoped @.ea-cell@ rule and the backlog reuses that class, so every drop zone rendered 314px wide inside a 280px lane and spilled into its neighbour. The width now belongs to the board's table and the plugin's boxes size with @border-box@.
+
+h4. Changed
+
+* *The backlog planner looks like a planning tool.* The sprint/version switch is a segmented control rather than two bare links. A sprint lane shows its status, date range and days left; a version lane shows its date. The unplanned column is dashed to mark it as the source rather than a target, lanes carry the same accent colour they have on the board, an empty lane explains itself, and each lane scrolls internally so a large backlog does not make the page thousands of pixels tall.
+
+h4. Added
+
+* Controller tests for the backlog planner, which previously had none.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+---
+
+h3. redmine_expert_agile 0.1.8 — 2026-08-11
+
+h4. Changed
+
+* *The board options panel is compact.* Three stacked fieldsets — one of them Redmine's two-list-with-arrows column picker, around 400px tall by itself — are now one panel of three side-by-side groups that wrap on narrow screens: card fields, appearance, and columns with their WIP limits. Opening the options costs 279px instead of pushing the board most of a screen down.
+* *Card fields are a checkbox grid.* Ordering matters in a table and much less on a card, so that space now shows every available field — custom fields and description included — in two dense columns. Selections still post as @c[]@. Note this drops the ability to *order* card fields; they follow Redmine's own column order.
+* Status columns and WIP limits are a three-column grid with closed statuses in italic. Long names carry a tooltip and both scrollable lists fade at the bottom so a half-visible row reads as "more below".
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+---
+
+h3. redmine_expert_agile 0.1.7 — 2026-08-11
+
+h4. Fixed
+
+* *Every issue page returned a 500.* The issue form hook called a guard method that had never been written, so opening any issue — including clicking a card on the board — failed with @undefined method 'sprint_visible?'@. The guard now exists and shows the sprint selector only when sprints are enabled and the project has one to plan into.
+* The plugin's view hooks are now covered by tests that render Redmine's own pages: issue show, edit, new, bulk edit and the issue list, with the module on and off and with sprints and story points enabled.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart. Anyone running 0.1.5 or 0.1.6 should upgrade — issue pages are unusable on those versions when the agile module is enabled.
+
+---
+
+h3. redmine_expert_agile 0.1.6 — 2026-08-11
+
+h4. Added
+
+* *More card fields.* Created and updated were already selectable; the picker now also offers *time in status* — whole days since the issue last changed status, answered from one grouped journal query for the whole board rather than a lookup per card — and a *short excerpt of the description*, whose length is configurable in the plugin settings. Description is a block column in Redmine, so the options panel now exposes block columns the way Redmine's own query form does.
+* The excerpt is plain text: HTML and wiki markup are stripped rather than rendered. A card is a summary, and descriptions ingested from email are mostly HTML.
+
+h4. Fixed
+
+* *A setting added in a later version never took effect on an existing installation.* Redmine returns the stored settings hash wholesale once the form has been saved once, so a newly declared key is absent and reads as nil — for a numeric setting, 0. The declared defaults are now merged underneath the stored values: a stored value still wins, including a deliberately blank one, while new keys get their default.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+---
+
+h3. redmine_expert_agile 0.1.5 — 2026-08-11
+
+h4. Fixed
+
+* *Swimlanes now read as lanes.* Each lane was a table row with a narrow label cell on the left, so nothing tied the row together across the columns. A lane is now a band spanning the full width of the board, carrying the lane name and its own issue and story point totals. On a board wide enough to scroll, the lane name stays pinned while the columns move underneath it.
+* *Lanes are told apart by colour.* A lane whose value can be coloured — tracker, priority or status — uses that colour, so the band matches its cards and grouping by priority gives the expected calm-to-red ramp. Anything else gets a stable palette entry derived from its id.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+---
+
+h3. redmine_expert_agile 0.1.4 — 2026-08-10
+
+h4. Added
+
+* *Sidebar on the agile pages*, in the same shape as Redmine's issue list: quick links between board, charts and backlog, the saved boards (or charts) split into "My queries" and shared ones, and the project's sprints.
+* *Saved charts.* A chart's selection, unit, interval and date range are saved with it.
+
+h4. Fixed
+
+* Saving a chart was refused with 403: only @:index@ was mapped for the charts-query controller, and @find_optional_project@ authorises the controller/action pair.
+* The "save board" link pointed at the collection path, which redirects to the board and discarded the configuration being saved. It posts to the @new@ action now, as Redmine's own query form does.
+* Saved charts no longer appear among the saved boards — @ExpertAgileChartsQuery@ is a subclass of @ExpertAgileQuery@, so the sidebar filters on the exact type.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+---
+
+h3. redmine_expert_agile 0.1.3 — 2026-08-10
+
+h4. Fixed
+
+* *Board options were lost on the next page load.* Statuses, WIP limits, swimlanes and colour basis lived only in the URL, so setting a WIP maximum and reloading reverted everything. The board now keeps its configuration in the session, as Redmine's own issue list does.
+* *Anyone able to save a board could edit and delete other people's private boards.* @editable_by?@ ignored ownership; it now mirrors Redmine's rule — your own boards are yours, public project boards need the manage permission, global boards are admin-only.
+* *Saving a board never worked*: the controller used @safe_attributes@, which @Query@ does not implement. Attributes are assigned explicitly now, and visibility only with the manage permission.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+---
+
+h3. redmine_expert_agile 0.1.2 — 2026-08-10
+
+h4. Added
+
+* *Board options panel.* The board carries the same collapsible filter and options panel as every other Redmine list, so a board is configured where it is used. It offers Redmine's own filter widget plus: which statuses become columns (closed ones included, for the "done" column), per-column WIP limits, the swimlane field, the colour basis, the assignee avatar toggle, and the card fields.
+* *Card fields are the query's own columns*, so anything Redmine shows in the issue list — custom fields included — can go on a card, formatted by Redmine's own column rendering.
+* *Saved boards.* Boards can be saved, edited and deleted, private or public according to the agile permissions.
+* *Assignee avatars on cards*, on by default, switchable per board.
+
+h4. Fixed
+
+* Setting a WIP limit crashed the board with a 500: @ActionController::Parameters@ is not a Hash and has no @each_with_object@. The setters accept both shapes now, and the options panel is covered by controller tests driven with real request parameters.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+---
+
+h3. redmine_expert_agile 0.1.1 — 2026-08-10
+
+A presentation fix release. Everything in 0.1.0 worked, but the board did not look like a usable board on a real installation.
+
+h4. Fixed
+
+* *Board columns come from the project's own workflow.* Previously every open status in the whole instance became a column — on a real installation, 37 columns of which 3 were used, each squeezed to roughly 27 pixels with card text wrapping one character per line. Columns are now taken from Redmine's own @Project#rolled_up_statuses@.
+* *Cards are coloured out of the box.* Choosing a colour basis previously did nothing until an administrator had assigned a colour to every tracker, priority or status by hand. A container with no explicit colour now falls back to a stable palette entry derived from its id; an explicit colour still wins. Colouring by issue keeps no fallback, because there only marked issues should stand out.
+* *Priorities use a semantic colour ramp* — calm through to red, derived from position in the enumeration, so "urgent" looks urgent.
+* *Card text no longer overflows and columns are uniform.* Long subjects, URLs and compound words break inside the card, subjects clamp to three lines, and all columns share one width with the board scrolling sideways.
+* *The backlog planner appears in the project menu*, colours its cards like the board, and explains itself when a project has no sprints yet.
+* *Column headers are tinted by status* when status colours are enabled.
+* *Two chart labels rendered as "Translation missing"* because the date range reused Redmine core keys absent from the German locale. The charts page also highlighted the board's menu item instead of its own.
+
+h4. Changed
+
+Card and column styling reworked throughout: larger columns, clearer hierarchy on the card, status and story point chips, hover states.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+Two plugin settings change their default for *new* installations: cards are coloured by tracker, and status colours are on. Existing installations keep whatever is already saved.
+
+---
+
+h3. redmine_expert_agile 0.1.0 — 2026-08-10
+
+First release. Agile boards for Redmine, built on Redmine's own query system.
+
+h4. Board
+
+* Kanban board with columns from issue statuses, drag & drop between and within columns, swimlanes, and sub-column headers from a shared @Prefix:@ status naming.
+* Advisory WIP limits — a column over its limit is flagged, the move is never blocked.
+* Configurable card fields, card tooltips, and a project menu entry next to the Gantt chart.
+* Boards are saved queries: every issue filter, column and visibility rule applies unchanged.
+
+h4. Story points
+
+* A story point value per issue, offered either as a configurable value list (modified Fibonacci by default) or as free numeric entry, and restrictable to selected trackers.
+* Available on the issue form, in the issue attribute table, in bulk edit, and as a sortable column and filter on the issue list.
+* Parent issues show the total across their subtree. "Not estimated" stays distinguishable from "estimated as zero".
+
+h4. Sprints and backlog
+
+* Sprints with start and end dates, an open/active/closed lifecycle and Version-style sharing across a project tree.
+* Activating a sprint stands the project's other active sprint down; a sprint cannot be closed while it still holds open issues; overlapping sprints are rejected unless explicitly allowed.
+* A backlog planner, behind its own project module, for dragging issues into sprints or versions.
+* Sprint changes appear in the issue's own journal.
+
+h4. Charts
+
+Burndown, burnup, cumulative flow, velocity and cycle time, in issues, hours or story points, over day, week or month intervals. Chart.js is vendored with the plugin.
+
+h4. Colours
+
+Cards coloured by tracker, priority, status, project, assignee, spent time, or per issue, from a fixed palette chosen so card text stays readable.
+
+h4. REST API
+
+Agile data per issue is readable and writable, plus full sprint CRUD. See the API reference in the repository.
+
+h4. Upgrade notes
+
+New installation — three migrations create @expert_agile_data@, @expert_agile_sprints@ and @expert_agile_colors@. Run:
+
+<pre>
+bundle exec rake redmine:plugins:migrate NAME=redmine_expert_agile RAILS_ENV=production
+</pre>
+
+Enable the *expert Agile* module per project and grant the new permissions to your roles. If you also run RedmineUP's Agile plugin, do not enable both on the same project.
