@@ -9,6 +9,23 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Behoben
+- **Ein vom Workflow abgelehnter Zug wurde trotzdem als erledigt angezeigt.** Wurde eine Karte in
+  eine Spalte gezogen, die der Workflow nicht erlaubt, meldete das Board die Ablehnung — und liess
+  die Karte anschliessend in der Zielspalte liegen, als haette es den eben noch fuer unmoeglich
+  erklaerten Zug doch angenommen. Erst ein Neuladen holte die Karte zurueck, denn gespeichert
+  wurde nie etwas. Die Karte kehrt jetzt genau an die Position zurueck, von der sie aufgenommen
+  wurde, ebenso bei jeder anderen Ablehnung. Ob ein Zug ueberhaupt abgelehnt wird, haengt am
+  Workflow der Rolle: derselbe Zug kann fuer den einen Benutzer erlaubt und fuer den anderen
+  abgelehnt sein.
+- **Jeder fehlgeschlagene Zug meldete einen abgelehnten Statuswechsel.** Die Meldung fuer eine
+  Anfrage, die nie zurueckkam — abgerissene Verbindung, Serverfehler, unerwartete Antwort —, war
+  auf dem Board die Workflow-Meldung und im Backlog-Planer "Sprint bzw. Version steht nicht zur
+  Verfuegung"; beide hatten mit der tatsaechlichen Ursache nichts zu tun. Sie bleiben das, was der
+  Server bei einer echten Ablehnung schickt; eine Anfrage ohne Antwort sagt das jetzt auch.
+
 ## [0.2.1] - 2026-08-19
 
 ### Behoben

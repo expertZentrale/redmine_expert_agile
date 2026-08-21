@@ -9,6 +9,22 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Fixed
+- **A move the workflow refused was still shown as done.** Dragging a card to a column the
+  workflow does not allow reported the refusal — and then left the card lying in the target
+  column, as though the board had accepted the move it had just called impossible. Only a reload
+  put the card back, because the server never wrote anything. The card is now returned to the
+  exact position it was picked up from, which is also what happens when a move is refused for any
+  other reason. Whether a move is refused at all depends on the workflow of the user's role, so
+  the same drag can be fine for one user and refused for another.
+- **Any failed move reported a refused status change.** The message shown when a request never
+  came back — a dropped connection, a server error, a response that was not the expected answer —
+  was the workflow one on the board and "sprint or version not available" in the backlog planner,
+  neither of which had anything to do with what actually went wrong. Those two remain what the
+  server sends when it really does refuse a move; a request that got no answer now says so.
+
 ## [0.2.1] - 2026-08-19
 
 ### Fixed
