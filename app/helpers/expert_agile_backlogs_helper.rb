@@ -17,7 +17,7 @@ module ExpertAgileBacklogsHelper
       :projectId => project.id,
       :editable => User.current.allowed_to?(:manage_expert_agile_backlog, project),
       :labels => {
-        :moveFailed => l(:error_expert_agile_container_not_available)
+        :moveFailed => l(:error_expert_agile_move_failed)
       }
     }.to_json
   end

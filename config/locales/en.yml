@@ -109,6 +109,7 @@ en:
   label_expert_agile_wip_limit: WIP limit
   text_expert_agile_wip_limit_exceeded: The WIP limit for this column is exceeded
   error_expert_agile_status_transition_not_allowed: The workflow does not allow this status change
+  error_expert_agile_move_failed: The move could not be saved
   error_expert_agile_issue_not_editable: You are not allowed to edit this issue
   label_expert_agile_swimlane_none: No swimlanes
   label_expert_agile_swimlane_none_value: (none)

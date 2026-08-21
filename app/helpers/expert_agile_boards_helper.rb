@@ -187,7 +187,9 @@ module ExpertAgileBoardsHelper
       :columns => query.board_columns.map(&:to_h),
       :labels => {
         :wipExceeded => l(:text_expert_agile_wip_limit_exceeded),
-        :moveFailed => l(:error_expert_agile_status_transition_not_allowed)
+        # Only for a request that never came back with an answer. A move the
+        # server refuses carries its own reason, which the board shows instead.
+        :moveFailed => l(:error_expert_agile_move_failed)
       }
     }.to_json
   end
