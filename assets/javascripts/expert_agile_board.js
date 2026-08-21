@@ -122,13 +122,19 @@
 
   /* Puts a card back where it was picked up. `where` is passed down through the
    * move rather than read from `origin`, because by the time a response arrives
-   * the user may already be dragging the next card. */
+   * the user may already be dragging the next card.
+   *
+   * Both cards are looked up again rather than kept as nodes: a move that was
+   * accepted in the meantime replaces the card it redrew, and re-inserting the
+   * node we picked up would put a detached duplicate of it back on the board. */
   function restore(where) {
     if (!where || !where.parent) { return; }
-    var before = where.next;
+    var card = document.getElementById(where.cardId);
+    if (!card) { return; }
+    var before = where.nextId ? document.getElementById(where.nextId) : null;
     /* The card it stood in front of may itself have moved since. */
     if (before && before.parentNode !== where.parent) { before = null; }
-    where.parent.insertBefore(where.card, before);
+    where.parent.insertBefore(card, before);
   }
 
   /* A refused move has written nothing, so the board must show what the server
@@ -177,7 +183,8 @@
     card.setAttribute('draggable', 'true');
     card.addEventListener('dragstart', function (event) {
       dragged = card;
-      origin = { card: card, parent: card.parentNode, next: card.nextElementSibling };
+      var next = card.nextElementSibling;
+      origin = { cardId: card.id, parent: card.parentNode, nextId: next ? next.id : null };
       card.classList.add('ea-dragging');
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', card.getAttribute('data-issue-id'));
