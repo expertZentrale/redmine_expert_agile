@@ -109,6 +109,7 @@ de:
   label_expert_agile_wip_limit: WIP-Limit
   text_expert_agile_wip_limit_exceeded: Das WIP-Limit dieser Spalte ist ueberschritten
   error_expert_agile_status_transition_not_allowed: Der Workflow erlaubt diesen Statuswechsel nicht
+  error_expert_agile_move_failed: Der Zug konnte nicht gespeichert werden
   error_expert_agile_issue_not_editable: Sie duerfen dieses Ticket nicht bearbeiten
   label_expert_agile_swimlane_none: Keine Swimlanes
   label_expert_agile_swimlane_none_value: (ohne)

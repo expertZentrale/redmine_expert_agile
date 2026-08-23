@@ -14,6 +14,9 @@
 
   var config = null;
   var dragged = null;
+  /* Where the dragged card sat before it was picked up: its cell and the card
+   * it stood in front of. Kept so a move the server refuses can be put back
+   * exactly there. */
   var origin = null;
 
   function readConfig() {
@@ -69,7 +72,7 @@
    * on the board, a sprint or version in the planner — so both are read from
    * the JSON island. RedmineUP carries two separate initSortable
    * implementations with divergent payloads. */
-  function submitMove(card, cell) {
+  function submitMove(card, cell, from) {
     var issueId = card.getAttribute('data-issue-id');
     var dropId = cell.getAttribute('data-drop-id');
     var around = neighbours(card);
@@ -96,10 +99,10 @@
       body: body.toString()
     }).then(function (response) {
       return response.json().then(function (payload) {
-        if (response.ok) { applyMove(payload); } else { revertMove(payload); }
+        if (response.ok) { applyMove(payload); } else { revertMove(payload, from); }
       });
     }).catch(function () {
-      revertMove({ error: config.labels.moveFailed });
+      revertMove({ error: config.labels.moveFailed }, from);
     });
   }
 
@@ -115,13 +118,32 @@
     }
     updateColumns(payload.columns);
     updateLaneTotals(payload.totals, payload.containerId);
-    origin = null;
   }
 
-  function revertMove(payload) {
-    if (dragged && origin) { origin.appendChild(dragged); }
+  /* Puts a card back where it was picked up. `where` is passed down through the
+   * move rather than read from `origin`, because by the time a response arrives
+   * the user may already be dragging the next card.
+   *
+   * Both cards are looked up again rather than kept as nodes: a move that was
+   * accepted in the meantime replaces the card it redrew, and re-inserting the
+   * node we picked up would put a detached duplicate of it back on the board. */
+  function restore(where) {
+    if (!where || !where.parent) { return; }
+    var card = document.getElementById(where.cardId);
+    if (!card) { return; }
+    var before = where.nextId ? document.getElementById(where.nextId) : null;
+    /* The card it stood in front of may itself have moved since. */
+    if (before && before.parentNode !== where.parent) { before = null; }
+    where.parent.insertBefore(card, before);
+  }
+
+  /* A refused move has written nothing, so the board must show what the server
+   * holds: the card goes back to the position it was picked up from, not to the
+   * end of its old column. It used to stay wherever it was dropped, which read
+   * as the board accepting a move it had just reported as refused. */
+  function revertMove(payload, from) {
+    restore(from);
     setMessage(payload && payload.error ? payload.error : config.labels.moveFailed, true);
-    origin = null;
   }
 
   function updateColumns(columns) {
@@ -161,7 +183,8 @@
     card.setAttribute('draggable', 'true');
     card.addEventListener('dragstart', function (event) {
       dragged = card;
-      origin = card.parentNode;
+      var next = card.nextElementSibling;
+      origin = { cardId: card.id, parent: card.parentNode, nextId: next ? next.id : null };
       card.classList.add('ea-dragging');
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', card.getAttribute('data-issue-id'));
@@ -204,8 +227,10 @@
       cell.classList.remove('ea-cell-hover');
       if (!dragged) { return; }
       var card = dragged;
+      var from = origin;
       dragged = null;
-      submitMove(card, cell);
+      origin = null;
+      submitMove(card, cell, from);
     });
   }
 
