@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.2.2] - 2026-08-26
 
 ### Fixed
 - **A move the workflow refused was still shown as done.** Dragging a card to a column the
