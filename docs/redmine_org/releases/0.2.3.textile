@@ -1,0 +1,19 @@
+h3. redmine_expert_agile 0.2.3 — 2026-08-26
+
+h4. Changed
+
+* *Card colours are picked from the palette itself instead of from a list of colour names.* Both places that assign one — the administration screen and the colour field on an issue — offered a dropdown reading "Green", "Light green", "Turquoise", so the one thing you need to see while choosing was the one thing not shown. Both now show the palette as the colours themselves, with the current one marked and a slashed swatch to clear it. They are radio buttons underneath, so the keyboard works as before.
+* *The palette has grown from 9 colours to 18*, ordered by hue so related shades sit together. The nine that existed keep their names and values, and anything already coloured keeps its colour.
+* *The plugin has one entry in the administration menu, named after itself.* Its settings were reachable only through Administration → Plugins → Configure, while the one thing the plugin put in the administration menu was the card colour screen, listed among Redmine's own areas under a name that said nothing about which plugin it belongs to. There is now a single *expert Agile* entry leading to the settings, and the card colour screen is reached from the colour section of those settings.
+
+h4. Fixed
+
+* *The plugin's administration entry had no icon on Redmine 6 and newer.* It asked for an icon from the plugin's own icon sprite, which this plugin never shipped — and an icon requested that way is not looked up in Redmine's core set, so nothing was drawn. The plugin now ships a sprite.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+Two things moved. The settings are now under *Administration → expert Agile* instead of Administration → Plugins → Configure, and the card colour screen is reached from the *Colors* section of that page rather than from its own entry in the administration menu; its address is unchanged, so a bookmark still works.
+
+One visible change without a setting behind it: a board that colours by assignee derives the colour from the palette, so those cards change colour now that the palette has grown. Nothing is stored for them — the assignment was never meaningful, only stable.

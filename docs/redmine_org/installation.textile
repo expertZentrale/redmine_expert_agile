@@ -37,12 +37,12 @@ Saving a backlog uses the two board permissions above, which belong to the *expe
 
 h3. Configuration
 
-*Administration → Plugins → Redmine expert Agile.* Every setting ships with a default, so a fresh install is usable immediately. Two worth knowing:
+*Administration → expert Agile.* Every setting ships with a default, so a fresh install is usable immediately. Two worth knowing:
 
 * *Board item limit* (default 500) caps how many issues one board render loads. A board that hits the cap says so rather than looking complete.
 * *Chart item limit* (default 1000) and *chart cache duration* (default 60 minutes) bound the cost of the charts that replay issue history. The counting charts are not subject to the cap.
 
-Card colours for trackers, priorities and statuses are managed under *Administration → Agile card colors*.
+Card colours for trackers, priorities and statuses are managed from the *Colors* section of that settings page, which links to the screen that assigns them.
 
 h3. Running alongside RedmineUP Agile
 
