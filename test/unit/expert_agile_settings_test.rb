@@ -14,6 +14,50 @@ class ExpertAgileSettingsTest < ActiveSupport::TestCase
     assert_match(/\A\d+\.\d+\.\d+/, plugin.version)
   end
 
+  # One entry in the administration menu, named after the plugin, leading to its
+  # settings — everything else the plugin has to administer hangs off that page.
+  def test_the_administration_menu_carries_exactly_one_entry_for_the_plugin
+    entries = Redmine::MenuManager.items(:admin_menu).children.select do |item|
+      url = item.url
+      url.is_a?(Hash) &&
+        (url[:id].to_s == 'redmine_expert_agile' ||
+         url[:controller].to_s.start_with?('expert_agile'))
+    end
+
+    assert_equal 1, entries.size,
+                 "expected one administration entry, got #{entries.map(&:name).inspect}"
+    # MenuItem#caption hands back the translated string, not the key.
+    assert_equal I18n.t(:label_expert_agile), entries.first.caption
+    # Compared field by field: rendering a menu puts the registered hash through
+    # url_for, which normalises :controller to "/settings" in place, so whether
+    # the leading slash is there depends on what ran before this test.
+    url = entries.first.url
+    assert_equal 'settings', url[:controller].to_s.delete_prefix('/')
+    assert_equal 'plugin', url[:action]
+    assert_equal 'redmine_expert_agile', url[:id]
+  end
+
+  # An icon asked for with `plugin:` is resolved against the sprite the plugin
+  # ships — Redmine does not fall back to its own. A name that exists only in
+  # the core sprite therefore renders as nothing at all, which is how the
+  # administration entry lost its icon.
+  def test_every_menu_icon_is_in_the_sprite_the_plugin_ships
+    # Menu icons arrived with Redmine 6; on 5.x a MenuItem has no icon or plugin
+    # to ask about, which is also why the registration only sets them there.
+    skip 'menu icons need Redmine 6' if Redmine::VERSION::MAJOR < 6
+
+    sprite = File.read(File.expand_path('../../../assets/images/icons.svg', __FILE__))
+
+    [:admin_menu, :project_menu, :top_menu].each do |menu|
+      Redmine::MenuManager.items(menu).children.each do |item|
+        next unless item.plugin.to_s == 'redmine_expert_agile' && item.icon.present?
+
+        assert_includes sprite, %(id="icon--#{item.icon}"),
+                        "#{menu} entry #{item.name} asks for an icon the plugin does not ship"
+      end
+    end
+  end
+
   def test_every_declared_default_is_readable
     defaults = Redmine::Plugin.find(:redmine_expert_agile).settings[:default]
 

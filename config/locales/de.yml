@@ -163,6 +163,8 @@ de:
 
   # --- Farben ---------------------------------------------------------
   label_expert_agile_colors: Farben der Agile-Karten
+  label_expert_agile_manage_colors: Kartenfarben verwalten
+  text_expert_agile_manage_colors: Oeffnet einen eigenen Bildschirm; dieses Formular vorher speichern
   label_expert_agile_color: Farbe
   label_expert_agile_color_green: Gruen
   label_expert_agile_color_light_green: Hellgruen

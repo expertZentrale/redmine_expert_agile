@@ -9,6 +9,25 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Changed
+- **The plugin has one entry in the administration menu, named after itself.** Its settings were
+  reachable only through Administration → Plugins → Configure, while the one thing the plugin did
+  put in the administration menu was the card colour screen — listed among Redmine's own areas as
+  "Agile card colors", with nothing to say which plugin it belongs to or where the rest of the
+  plugin is configured. There is now a single *expert Agile* entry leading to the settings, the
+  same shape the helpdesk plugin uses, and the card colour screen is reached from the colour
+  section of those settings. Nothing moved on the settings page itself, and the colour screen is
+  unchanged and keeps its address.
+
+### Fixed
+- **The plugin's administration entry had no icon on Redmine 6 and newer.** It asked for the icon
+  named "palette" from the plugin's own icon sprite, which this plugin never shipped — and an icon
+  requested that way is not looked up in Redmine's core set, so nothing was drawn and the entry
+  sat among the core ones as the only item without an icon. The plugin now ships a sprite, and a
+  test fails if a menu entry asks for a symbol that is not in it.
+
 ## [0.2.2] - 2026-08-26
 
 ### Fixed

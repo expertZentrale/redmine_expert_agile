@@ -133,16 +133,30 @@ Redmine::Plugin.register :redmine_expert_agile do
                :require => :member
   end
 
-  # Card colours are instance-wide, so they live in the admin area.
-  colors_menu_options = { :caption => :label_expert_agile_colors,
-                          :html => { :class => 'icon' } }
+  # One entry in the administration menu, named after the plugin and pointing at
+  # its settings — the shape redmine_expert_helpdesk already uses, so the two
+  # sit together and read as belonging to something.
+  #
+  # The card colour screen is reached from the colour section of those settings
+  # rather than as a second top-level entry: as one it stood among Redmine's own
+  # areas under a bare functional name ("Card colours of Agile") that said
+  # nothing about which plugin owns it.
+  admin_menu_options = { :caption => :label_expert_agile }
   if Redmine::VERSION::MAJOR >= 6
-    colors_menu_options[:icon] = 'palette'
-    colors_menu_options[:plugin] = :redmine_expert_agile
+    # `plugin:` makes Redmine resolve the icon against
+    # plugin_assets/redmine_expert_agile/icons.svg, so the name has to be one
+    # this plugin ships. The entry used to ask for 'palette' with no sprite in
+    # the plugin at all, which left it as the one item in the menu with a
+    # missing icon.
+    admin_menu_options[:icon] = 'expert-agile'
+    admin_menu_options[:plugin] = :redmine_expert_agile
+    admin_menu_options[:html] = { :class => 'icon' }
+  else
+    admin_menu_options[:html] = { :class => 'icon icon-settings' }
   end
-  menu :admin_menu, :expert_agile_colors,
-       { :controller => 'expert_agile_colors', :action => 'index', :container_type => 'tracker' },
-       colors_menu_options
+  menu :admin_menu, :redmine_expert_agile,
+       { :controller => 'settings', :action => 'plugin', :id => 'redmine_expert_agile' },
+       admin_menu_options
 
   # Board entry in the project menu, next to the other planning views.
   # The module gating does the visibility work, so no :if proc is needed.
