@@ -9,6 +9,29 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Behoben
+- **Die Farbauswahl zeigte keine Farben.** 0.2.3 ersetzte die Auswahlfelder durch Farbfelder, aber
+  keiner der beiden Bildschirme, die sie zeigen, laedt das Stylesheet des Plugins — eingebunden
+  wird es vom Board, vom Backlog und von den Diagrammen, und der Kartenfarben-Bildschirm wie das
+  Ticketformular sind nichts davon. Ohne das Stylesheet waren die Farbfelder leere Elemente ohne
+  Groesse, und die Radiobuttons dahinter wurden nie ausgeblendet; uebrig blieb eine Reihe
+  Radiobuttons, deren Farben nur noch im Tooltip existierten. Dieselbe Aenderung hatte die
+  Farbnamen aus dem sichtbaren Text genommen, aus lesbar wurde also unbenutzbar. Beide Bildschirme
+  laden das Stylesheet jetzt, und jedes Farbfeld traegt Farbe, Groesse und Rahmen inline bei sich —
+  es ist damit auch auf einer Seite sichtbar, die gar kein Stylesheet laedt.
+- **Das Farbfeld am Ticket lief auf einen Fehler, statt zu rendern.** Die Farbfelder holen ihre
+  Darstellung aus einem Plugin-Helper, und Redmine schaltet Rails' automatische Helper-Einbindung
+  ab: ein Helper steht nur dem gleichnamigen Controller zur Verfuegung. Das Kartenfarbfeld wird
+  per Hook ins Ticketformular gerendert — im Ticket-Controller von Redmine —, wo der Helper nicht
+  registriert war.
+
+### Hinzugefuegt
+- **Die aktuelle Farbe steht neben der Palette im Klartext**: als Farbfeld mit Namen und
+  Hex-Code, und sie folgt dem, was angeklickt wird, statt dem zuletzt Gespeicherten. Welches von
+  neunzehn Farbfeldern die Markierung traegt, ist nichts, woran man eine Tabelle ablesen sollte.
+
 ## [0.2.3] - 2026-08-26
 
 ### Geaendert

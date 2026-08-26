@@ -36,3 +36,10 @@
 
   <p><%= submit_tag l(:button_save) %></p>
 <% end %>
+
+<%# This screen is not a board screen, so nothing else pulls the plugin's assets
+    in. Without them the picker was a column of bare radio buttons. %>
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'expert_agile', :plugin => 'redmine_expert_agile' %>
+  <%= javascript_include_tag 'expert_agile_colors', :plugin => 'redmine_expert_agile' %>
+<% end %>

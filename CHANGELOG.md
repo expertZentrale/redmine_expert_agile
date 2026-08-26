@@ -9,6 +9,29 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Fixed
+- **The colour picker showed no colours.** 0.2.3 replaced the colour dropdowns with swatches, but
+  neither screen that shows them loads the plugin's stylesheet — it is pulled in by the board, the
+  backlog and the charts, and the card colour screen and the issue form are none of those. Without
+  it the swatches were empty spans of no size and the radio buttons behind them were never hidden,
+  so what was left was a row of radio buttons whose colours existed only in a hover title. The
+  same change also moved the colour names out of the visible text, so the screen went from
+  readable to unusable. Both screens now load the stylesheet, and each swatch carries its own
+  colour, size and border inline, so it is a visible colour even on a page that fails to load a
+  stylesheet at all.
+- **The colour field on an issue raised rather than rendered.** The picker takes its swatch styling
+  from a plugin helper, and Redmine switches off Rails' automatic helper inclusion, so a helper is
+  only available to the controller of the same name. The card colour field is rendered into the
+  issue form through a hook — in Redmine's own issues controller — where the helper was not
+  registered.
+
+### Added
+- **The current colour is spelled out beside the palette**, as a swatch with the colour's name and
+  its hex code, and it follows what you click rather than what was last saved. Which of nineteen
+  swatches carries the marker is not something to read a table by.
+
 ## [0.2.3] - 2026-08-26
 
 ### Changed

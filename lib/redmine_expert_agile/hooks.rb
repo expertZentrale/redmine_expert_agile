@@ -5,6 +5,18 @@
 # JSON island, so the plugin stays usable under a `script-src 'self'` policy.
 module RedmineExpertAgile
   class Hooks < Redmine::Hook::ViewListener
+    # The card colour field is rendered into the issue form by a hook, far too
+    # late to add anything to the layout's head. Issue pages therefore get the
+    # plugin's colour assets from here — without the stylesheet the picker has
+    # no layout, and without the script its "current colour" field stops
+    # following what is clicked.
+    def view_layouts_base_html_head(context = {})
+      return '' unless context[:controller].is_a?(IssuesController)
+
+      stylesheet_link_tag('expert_agile', :plugin => 'redmine_expert_agile') +
+        javascript_include_tag('expert_agile_colors', :plugin => 'redmine_expert_agile')
+    end
+
     # Story point and card colour fields on the issue create/edit form.
     def view_issues_form_details_bottom(context = {})
       issue = context[:issue]

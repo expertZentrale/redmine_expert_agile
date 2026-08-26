@@ -225,46 +225,46 @@
 .ea-card.ea-color-slate        { border-left-color: #64748b; background: #f4f6f9; }
 .ea-card.ea-color-gray         { border-left-color: #8c8c8c; background: #f7f7f7; }
 
-.ea-color-swatch {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 1px solid #999;
-  border-radius: 3px;
-  vertical-align: middle;
-  margin-left: 6px;
-}
-.ea-color-swatch.ea-color-dark_green   { background: #2f7d55; }
-.ea-color-swatch.ea-color-green        { background: #3c9c3c; }
-.ea-color-swatch.ea-color-light_green  { background: #8dc63f; }
-.ea-color-swatch.ea-color-olive        { background: #7f8c34; }
-.ea-color-swatch.ea-color-turquoise    { background: #29a8a0; }
-.ea-color-swatch.ea-color-light_blue   { background: #3fa5d8; }
-.ea-color-swatch.ea-color-blue         { background: #3d7ec4; }
-.ea-color-swatch.ea-color-indigo       { background: #4257b2; }
-.ea-color-swatch.ea-color-purple       { background: #8a5fbf; }
-.ea-color-swatch.ea-color-light_purple { background: #a98cd9; }
-.ea-color-swatch.ea-color-pink         { background: #d1489b; }
-.ea-color-swatch.ea-color-red          { background: #cc3b3b; }
-.ea-color-swatch.ea-color-salmon       { background: #e0715e; }
-.ea-color-swatch.ea-color-orange       { background: #e08a1e; }
-.ea-color-swatch.ea-color-brown        { background: #9c6b42; }
-.ea-color-swatch.ea-color-yellow       { background: #dcb800; }
-.ea-color-swatch.ea-color-slate        { background: #64748b; }
-.ea-color-swatch.ea-color-gray         { background: #8c8c8c; }
-
-/* The picker itself, on the administration screen and on the issue form. A
- * list of colour names cannot show what it is offering, so the palette is laid
- * out as the colours themselves. The radio keeps doing the work — it stays in
- * the DOM, keyboard-reachable and named — and only its box is hidden, so the
- * group still behaves like a group of radio buttons.
+/* The picker, on the administration screen and on the issue form. A list of
+ * colour names cannot show what it is offering, so the palette is laid out as
+ * the colours themselves — painted inline by the markup, not from here, so a
+ * page that misses this file still shows colours rather than empty boxes.
  *
- * Ten swatches to a row: 10 x 18px plus 9 x 4px of gap. */
+ * The radio keeps doing the work: it stays in the DOM, keyboard-reachable and
+ * named, and only its box is hidden. */
+.ea-color-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* What is set right now, spelled out: swatch, name, hex. */
+.ea-color-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 150px;
+  padding: 3px 8px 3px 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.ea-color-current-name { font-weight: bold; }
+
+.ea-color-current-hex {
+  font-family: Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.9em;
+  color: #666;
+}
+
+/* Ten swatches to a row: 10 x 20px plus 9 x 4px of gap. */
 .ea-color-choice {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  max-width: 216px;
+  max-width: 236px;
 }
 
 .ea-color-option {
@@ -281,13 +281,6 @@
   margin: 0;
 }
 
-.ea-color-option .ea-color-swatch {
-  width: 18px;
-  height: 18px;
-  box-sizing: border-box;
-  margin-left: 0;
-}
-
 /* An inset white ring plus an outer dark one, so the mark reads on a light
  * swatch as well as on a dark one. */
 .ea-color-option input:checked + .ea-color-swatch {
@@ -297,15 +290,6 @@
 .ea-color-option input:focus-visible + .ea-color-swatch {
   outline: 2px solid #3d7ec4;
   outline-offset: 2px;
-}
-
-/* "No colour": a slash across an empty swatch. */
-.ea-color-swatch.ea-color-none {
-  background:
-    linear-gradient(to top right,
-                    transparent calc(50% - 1px), #b0b0b0 calc(50% - 1px),
-                    #b0b0b0 calc(50% + 1px), transparent calc(50% + 1px)),
-    #fff;
 }
 
 

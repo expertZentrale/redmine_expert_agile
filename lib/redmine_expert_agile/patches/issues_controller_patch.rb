@@ -1,3 +1,6 @@
+# Two things on the issues controller: the story point field in bulk edit, and
+# the helper the colour field needs.
+#
 # Makes the story point field behave like every other field in Redmine's bulk
 # edit form: blank means "leave unchanged", 'none' means "clear the value".
 #
@@ -9,6 +12,12 @@ module RedmineExpertAgile
   module Patches
     module IssuesControllerPatch
       def self.apply!(base = IssuesController)
+        # Redmine turns off Rails' automatic helper inclusion, so a plugin
+        # helper is only there for the controller of the same name. The colour
+        # field is rendered into the issue form through a hook, in this
+        # controller's view context, and without this its swatches raise.
+        base.helper(ExpertAgileColorsHelper)
+
         return if base.instance_variable_get(:@expert_agile_bulk_edit_patched)
 
         original = base.instance_method(:parse_params_for_bulk_update)

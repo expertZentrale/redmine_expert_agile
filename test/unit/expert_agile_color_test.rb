@@ -132,20 +132,18 @@ class ExpertAgileColorTest < ActiveSupport::TestCase
     assert_nil RedmineExpertAgile::CardColor.for(nil, 'tracker')
   end
 
-  # The palette is three things that have to agree: the names, what the picker
-  # and the cards paint, and what an admin reads. Adding a colour and forgetting
-  # one of them is the obvious way to break it, so all three are pinned here.
-  def test_every_palette_colour_is_painted_by_the_stylesheet
+  # The palette lives in the model, where the picker paints its swatches from
+  # it, and in the stylesheet, where the cards get their border. Nothing forces
+  # the two to agree, so this does: a colour that means one thing in the picker
+  # and another on the board is worse than a colour that is missing.
+  def test_the_cards_and_the_palette_carry_the_same_values
     css = File.read(File.expand_path('../../../assets/stylesheets/expert_agile.css', __FILE__))
 
-    # Matched as a rule rather than as an exact substring, so reformatting the
-    # stylesheet cannot fail this.
-    ExpertAgileColor::COLORS.each do |color|
-      name = Regexp.escape(color)
-      assert_match(/\.ea-card\.ea-color-#{name}\s*\{/, css,
-                   "#{color} has no card rule")
-      assert_match(/\.ea-color-swatch\.ea-color-#{name}\s*\{/, css,
-                   "#{color} has no swatch rule, so the picker shows it blank")
+    ExpertAgileColor::PALETTE.each do |color, hex|
+      rule = css[/\.ea-card\.ea-color-#{Regexp.escape(color)}\s*\{[^}]*\}/]
+      assert rule, "#{color} has no card rule"
+      assert_equal hex, rule[/border-left-color:\s*(#[0-9a-f]{6})/, 1],
+                   "#{color} is one colour in the picker and another on a card"
     end
   end
 
