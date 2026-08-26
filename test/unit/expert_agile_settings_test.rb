@@ -37,6 +37,10 @@ class ExpertAgileSettingsTest < ActiveSupport::TestCase
   # the core sprite therefore renders as nothing at all, which is how the
   # administration entry lost its icon.
   def test_every_menu_icon_is_in_the_sprite_the_plugin_ships
+    # Menu icons arrived with Redmine 6; on 5.x a MenuItem has no icon or plugin
+    # to ask about, which is also why the registration only sets them there.
+    skip 'menu icons need Redmine 6' if Redmine::VERSION::MAJOR < 6
+
     sprite = File.read(File.expand_path('../../../assets/images/icons.svg', __FILE__))
 
     [:admin_menu, :project_menu, :top_menu].each do |menu|
