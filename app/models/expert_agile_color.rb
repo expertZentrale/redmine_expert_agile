@@ -9,7 +9,13 @@ class ExpertAgileColor < ExpertAgileApplicationRecord
   # as CSS class suffixes, every one is contrast-checked against the card text
   # colour in expert_agile.css, and a closed set keeps boards legible when
   # several people colour things independently.
-  COLORS = %w(green blue turquoise light_green yellow orange red purple gray).freeze
+  # Ordered by hue, not by when each colour was added: the picker shows the
+  # palette in this order, and related shades sitting together is what makes a
+  # colour findable without reading its name.
+  COLORS = %w(
+    dark_green green light_green olive turquoise light_blue blue indigo purple
+    light_purple pink red salmon orange brown yellow slate gray
+  ).freeze
 
   # What the admin screen offers, keyed by the name that appears in the URL.
   # Resolving through this map is what stops `Object.const_get(params[...])`

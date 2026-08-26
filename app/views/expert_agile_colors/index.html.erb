@@ -23,13 +23,10 @@
         <tr>
           <td><%= h container.to_s %></td>
           <td>
-            <%= select_tag "colors[#{container.id}]",
-                           options_for_select(
-                             [[l(:label_none), '']] +
-                               ExpertAgileColor::COLORS.map { |c| [l("label_expert_agile_color_#{c}"), c] },
-                             @colors[container.id]),
-                           :class => 'ea-color-select' %>
-            <span class="ea-color-swatch ea-color-<%= @colors[container.id] %>"></span>
+            <%= render :partial => 'expert_agile_colors/picker',
+                       :locals => { :name => "colors[#{container.id}]",
+                                    :id_prefix => "colors_#{container.id}",
+                                    :selected => @colors[container.id] } %>
           </td>
         </tr>
       <% end %>

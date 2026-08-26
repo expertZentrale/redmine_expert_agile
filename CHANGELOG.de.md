@@ -12,6 +12,17 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 ## [Unreleased]
 
 ### Geaendert
+- **Kartenfarben werden aus der Palette selbst gewaehlt statt aus einer Liste von Farbnamen.**
+  Beide Stellen, an denen man eine vergibt — der Administrationsbildschirm und das Farbfeld am
+  Ticket —, boten ein Auswahlfeld mit "Gruen", "Hellgruen", "Tuerkis" an; ausgerechnet das, was man
+  beim Waehlen sehen muss, naemlich die Farbe, war nicht zu sehen. Beide zeigen jetzt die Palette
+  als Farbfelder, die aktuelle markiert, dazu ein durchgestrichenes Feld zum Loeschen. Darunter
+  sind es weiterhin Radiobuttons: Tastaturbedienung wie bisher, und abgeschickt wird dasselbe.
+- **Die Palette waechst von 9 auf 18 Farben** und ist nach Farbton sortiert statt danach, wann
+  welche dazukam — verwandte Toene stehen so beieinander. Die bisherigen neun behalten Namen und
+  Werte, und alles bereits Gefaerbte behaelt seine Farbe. Eine Ausnahme: Faerbt ein Board nach
+  Bearbeiter, wird die Farbe aus der Palette abgeleitet — diese Karten wechseln also die Farbe.
+  Gespeichert ist dafuer nichts, die Zuordnung war nie inhaltlich, nur stabil.
 - **Das Plugin hat einen nach ihm benannten Eintrag im Administrationsmenue.** Seine Einstellungen
   waren nur ueber Administration → Plugins → Konfiguration erreichbar, waehrend das Einzige, was
   das Plugin ins Administrationsmenue stellte, der Bildschirm fuer die Kartenfarben war — zwischen

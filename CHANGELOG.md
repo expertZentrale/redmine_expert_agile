@@ -12,6 +12,17 @@ notes from the section matching the pushed tag.
 ## [Unreleased]
 
 ### Changed
+- **Card colours are picked from the palette itself instead of from a list of colour names.** Both
+  places that assign one — the administration screen and the colour field on an issue — offered a
+  dropdown reading "Green", "Light green", "Turquoise", so the one thing you needed to see while
+  choosing, the colour, was the one thing not shown. They now show the palette as the colours
+  themselves, with the current one marked and a slashed swatch to clear it. Underneath they are
+  still radio buttons, so the keyboard works as before and what gets posted is unchanged.
+- **The palette has grown from 9 colours to 18** and is ordered by hue rather than by when each
+  colour was added, so related shades sit together. The nine that existed keep their names and
+  values, and anything already coloured keeps its colour. One exception: colouring a board by
+  assignee derives the colour from the palette, so those cards change colour — nothing is stored
+  for them, and the assignment was never meaningful, only stable.
 - **The plugin has one entry in the administration menu, named after itself.** Its settings were
   reachable only through Administration → Plugins → Configure, while the one thing the plugin did
   put in the administration menu was the card colour screen — listed among Redmine's own areas as
