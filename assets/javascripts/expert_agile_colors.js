@@ -32,7 +32,7 @@
        * before and after a save: a colour, or an empty box with a cross. */
       swatch.style.backgroundColor = hex || '#fff';
       swatch.style.color = hex ? '' : '#999';
-      swatch.innerHTML = hex ? '' : '&times;';
+      swatch.textContent = hex ? '' : '\u00d7';
     }
 
     var label = box.querySelector('[data-role="ea-color-current-name"]');
