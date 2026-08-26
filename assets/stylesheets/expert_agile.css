@@ -201,16 +201,29 @@
  * A closed, named palette rather than free hex entry. Every value is picked to
  * keep the card's dark text readable, so a board stays legible no matter who
  * assigned the colours. Applied to the card's left border and background tint.
+ *
+ * Ordered by hue rather than by when each was added: the picker lays the
+ * palette out in this order, and a run of related shades is what makes a
+ * colour findable at a glance.
  */
-.ea-card.ea-color-green       { border-left-color: #3c9c3c; background: #f2fbf2; }
-.ea-card.ea-color-light_green { border-left-color: #8dc63f; background: #f7fcef; }
-.ea-card.ea-color-turquoise   { border-left-color: #29a8a0; background: #f0fbfa; }
-.ea-card.ea-color-blue        { border-left-color: #3d7ec4; background: #f2f7fd; }
-.ea-card.ea-color-purple      { border-left-color: #8a5fbf; background: #f8f4fd; }
-.ea-card.ea-color-yellow      { border-left-color: #dcb800; background: #fffcef; }
-.ea-card.ea-color-orange      { border-left-color: #e08a1e; background: #fff8ef; }
-.ea-card.ea-color-red         { border-left-color: #cc3b3b; background: #fdf3f3; }
-.ea-card.ea-color-gray        { border-left-color: #8c8c8c; background: #f7f7f7; }
+.ea-card.ea-color-dark_green   { border-left-color: #2f7d55; background: #f0f8f4; }
+.ea-card.ea-color-green        { border-left-color: #3c9c3c; background: #f2fbf2; }
+.ea-card.ea-color-light_green  { border-left-color: #8dc63f; background: #f7fcef; }
+.ea-card.ea-color-olive        { border-left-color: #7f8c34; background: #f9faee; }
+.ea-card.ea-color-turquoise    { border-left-color: #29a8a0; background: #f0fbfa; }
+.ea-card.ea-color-light_blue   { border-left-color: #3fa5d8; background: #f1f9fd; }
+.ea-card.ea-color-blue         { border-left-color: #3d7ec4; background: #f2f7fd; }
+.ea-card.ea-color-indigo       { border-left-color: #4257b2; background: #f3f4fc; }
+.ea-card.ea-color-purple       { border-left-color: #8a5fbf; background: #f8f4fd; }
+.ea-card.ea-color-light_purple { border-left-color: #a98cd9; background: #faf7fe; }
+.ea-card.ea-color-pink         { border-left-color: #d1489b; background: #fdf2f9; }
+.ea-card.ea-color-red          { border-left-color: #cc3b3b; background: #fdf3f3; }
+.ea-card.ea-color-salmon       { border-left-color: #e0715e; background: #fef4f2; }
+.ea-card.ea-color-orange       { border-left-color: #e08a1e; background: #fff8ef; }
+.ea-card.ea-color-brown        { border-left-color: #9c6b42; background: #faf6f1; }
+.ea-card.ea-color-yellow       { border-left-color: #dcb800; background: #fffcef; }
+.ea-card.ea-color-slate        { border-left-color: #64748b; background: #f4f6f9; }
+.ea-card.ea-color-gray         { border-left-color: #8c8c8c; background: #f7f7f7; }
 
 .ea-color-swatch {
   display: inline-block;
@@ -221,15 +234,79 @@
   vertical-align: middle;
   margin-left: 6px;
 }
-.ea-color-swatch.ea-color-green       { background: #3c9c3c; }
-.ea-color-swatch.ea-color-light_green { background: #8dc63f; }
-.ea-color-swatch.ea-color-turquoise   { background: #29a8a0; }
-.ea-color-swatch.ea-color-blue        { background: #3d7ec4; }
-.ea-color-swatch.ea-color-purple      { background: #8a5fbf; }
-.ea-color-swatch.ea-color-yellow      { background: #dcb800; }
-.ea-color-swatch.ea-color-orange      { background: #e08a1e; }
-.ea-color-swatch.ea-color-red         { background: #cc3b3b; }
-.ea-color-swatch.ea-color-gray        { background: #8c8c8c; }
+.ea-color-swatch.ea-color-dark_green   { background: #2f7d55; }
+.ea-color-swatch.ea-color-green        { background: #3c9c3c; }
+.ea-color-swatch.ea-color-light_green  { background: #8dc63f; }
+.ea-color-swatch.ea-color-olive        { background: #7f8c34; }
+.ea-color-swatch.ea-color-turquoise    { background: #29a8a0; }
+.ea-color-swatch.ea-color-light_blue   { background: #3fa5d8; }
+.ea-color-swatch.ea-color-blue         { background: #3d7ec4; }
+.ea-color-swatch.ea-color-indigo       { background: #4257b2; }
+.ea-color-swatch.ea-color-purple       { background: #8a5fbf; }
+.ea-color-swatch.ea-color-light_purple { background: #a98cd9; }
+.ea-color-swatch.ea-color-pink         { background: #d1489b; }
+.ea-color-swatch.ea-color-red          { background: #cc3b3b; }
+.ea-color-swatch.ea-color-salmon       { background: #e0715e; }
+.ea-color-swatch.ea-color-orange       { background: #e08a1e; }
+.ea-color-swatch.ea-color-brown        { background: #9c6b42; }
+.ea-color-swatch.ea-color-yellow       { background: #dcb800; }
+.ea-color-swatch.ea-color-slate        { background: #64748b; }
+.ea-color-swatch.ea-color-gray         { background: #8c8c8c; }
+
+/* The picker itself, on the administration screen and on the issue form. A
+ * list of colour names cannot show what it is offering, so the palette is laid
+ * out as the colours themselves. The radio keeps doing the work — it stays in
+ * the DOM, keyboard-reachable and named — and only its box is hidden, so the
+ * group still behaves like a group of radio buttons.
+ *
+ * Ten swatches to a row: 10 x 18px plus 9 x 4px of gap. */
+.ea-color-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 216px;
+}
+
+.ea-color-option {
+  display: inline-flex;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ea-color-choice input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  margin: 0;
+}
+
+.ea-color-option .ea-color-swatch {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  margin-left: 0;
+}
+
+/* An inset white ring plus an outer dark one, so the mark reads on a light
+ * swatch as well as on a dark one. */
+.ea-color-option input:checked + .ea-color-swatch {
+  box-shadow: inset 0 0 0 2px #fff, 0 0 0 2px #333;
+}
+
+.ea-color-option input:focus-visible + .ea-color-swatch {
+  outline: 2px solid #3d7ec4;
+  outline-offset: 2px;
+}
+
+/* "No colour": a slash across an empty swatch. */
+.ea-color-swatch.ea-color-none {
+  background:
+    linear-gradient(to top right,
+                    transparent calc(50% - 1px), #b0b0b0 calc(50% - 1px),
+                    #b0b0b0 calc(50% + 1px), transparent calc(50% + 1px)),
+    #fff;
+}
 
 
 /* --- Charts ------------------------------------------------------------- */

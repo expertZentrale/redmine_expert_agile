@@ -166,14 +166,23 @@ en:
   label_expert_agile_manage_colors: Manage card colors
   text_expert_agile_manage_colors: Opens a separate screen; save this form first
   label_expert_agile_color: Color
+  label_expert_agile_color_dark_green: Dark green
   label_expert_agile_color_green: Green
   label_expert_agile_color_light_green: Light green
+  label_expert_agile_color_olive: Olive
   label_expert_agile_color_turquoise: Turquoise
+  label_expert_agile_color_light_blue: Light blue
   label_expert_agile_color_blue: Blue
+  label_expert_agile_color_indigo: Indigo
   label_expert_agile_color_purple: Purple
-  label_expert_agile_color_yellow: Yellow
-  label_expert_agile_color_orange: Orange
+  label_expert_agile_color_light_purple: Light purple
+  label_expert_agile_color_pink: Pink
   label_expert_agile_color_red: Red
+  label_expert_agile_color_salmon: Salmon
+  label_expert_agile_color_orange: Orange
+  label_expert_agile_color_brown: Brown
+  label_expert_agile_color_yellow: Yellow
+  label_expert_agile_color_slate: Slate
   label_expert_agile_color_gray: Gray
   label_expert_agile_color_base_issue_status: Status
   label_expert_agile_color_base_issue_priority: Priority

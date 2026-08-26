@@ -132,6 +132,32 @@ class ExpertAgileColorTest < ActiveSupport::TestCase
     assert_nil RedmineExpertAgile::CardColor.for(nil, 'tracker')
   end
 
+  # The palette is three things that have to agree: the names, what the picker
+  # and the cards paint, and what an admin reads. Adding a colour and forgetting
+  # one of them is the obvious way to break it, so all three are pinned here.
+  def test_every_palette_colour_is_painted_by_the_stylesheet
+    css = File.read(File.expand_path('../../../assets/stylesheets/expert_agile.css', __FILE__))
+
+    # Matched as a rule rather than as an exact substring, so reformatting the
+    # stylesheet cannot fail this.
+    ExpertAgileColor::COLORS.each do |color|
+      name = Regexp.escape(color)
+      assert_match(/\.ea-card\.ea-color-#{name}\s*\{/, css,
+                   "#{color} has no card rule")
+      assert_match(/\.ea-color-swatch\.ea-color-#{name}\s*\{/, css,
+                   "#{color} has no swatch rule, so the picker shows it blank")
+    end
+  end
+
+  def test_every_palette_colour_is_named_in_both_locales
+    %i[en de].each do |locale|
+      ExpertAgileColor::COLORS.each do |color|
+        key = "label_expert_agile_color_#{color}"
+        assert I18n.exists?(key, locale), "#{key} is missing from #{locale}.yml"
+      end
+    end
+  end
+
   def test_uncoloured_container_falls_back_to_a_stable_palette_entry
     # An unconfigured board still has to be readable. Without a fallback,
     # switching "colour by" to Tracker does nothing until an admin has coloured
