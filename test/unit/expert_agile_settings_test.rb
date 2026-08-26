@@ -28,8 +28,13 @@ class ExpertAgileSettingsTest < ActiveSupport::TestCase
                  "expected one administration entry, got #{entries.map(&:name).inspect}"
     # MenuItem#caption hands back the translated string, not the key.
     assert_equal I18n.t(:label_expert_agile), entries.first.caption
-    assert_equal({ :controller => 'settings', :action => 'plugin', :id => 'redmine_expert_agile' },
-                 entries.first.url)
+    # Compared field by field: rendering a menu puts the registered hash through
+    # url_for, which normalises :controller to "/settings" in place, so whether
+    # the leading slash is there depends on what ran before this test.
+    url = entries.first.url
+    assert_equal 'settings', url[:controller].to_s.delete_prefix('/')
+    assert_equal 'plugin', url[:action]
+    assert_equal 'redmine_expert_agile', url[:id]
   end
 
   # An icon asked for with `plugin:` is resolved against the sprite the plugin
