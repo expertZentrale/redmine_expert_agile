@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.2.3] - 2026-08-26
 
 ### Changed
 - **Card colours are picked from the palette itself instead of from a list of colour names.** Both
