@@ -9,6 +9,27 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Geaendert
+- **Das Plugin hat einen nach ihm benannten Eintrag im Administrationsmenue.** Seine Einstellungen
+  waren nur ueber Administration → Plugins → Konfiguration erreichbar, waehrend das Einzige, was
+  das Plugin ins Administrationsmenue stellte, der Bildschirm fuer die Kartenfarben war — zwischen
+  Redmines eigenen Bereichen als "Farben der Agile-Karten" gelistet, ohne Hinweis darauf, wozu er
+  gehoert oder wo der Rest des Plugins konfiguriert wird. Es gibt jetzt einen einzigen Eintrag
+  *expert Agile*, der zu den Einstellungen fuehrt — dieselbe Form, die das Helpdesk-Plugin
+  verwendet —, und die Kartenfarben erreicht man aus dem Farben-Abschnitt dieser Einstellungen.
+  Auf der Einstellungsseite selbst hat sich nichts verschoben, und der Farben-Bildschirm bleibt
+  unveraendert unter seiner bisherigen Adresse erreichbar.
+
+### Behoben
+- **Der Administrationseintrag des Plugins hatte unter Redmine 6 und neuer kein Symbol.** Er
+  forderte das Symbol "palette" aus dem eigenen Icon-Sprite des Plugins an, das dieses Plugin nie
+  mitgeliefert hat — und ein so angefordertes Symbol wird nicht in Redmines Kernsatz gesucht. Also
+  wurde nichts gezeichnet, und der Eintrag stand als einziger ohne Symbol zwischen den anderen.
+  Das Plugin liefert jetzt ein Sprite mit, und ein Test schlaegt fehl, sobald ein Menueeintrag ein
+  Symbol anfordert, das nicht darin enthalten ist.
+
 ## [0.2.2] - 2026-08-26
 
 ### Behoben

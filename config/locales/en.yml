@@ -163,6 +163,8 @@ en:
 
   # --- Colors ---------------------------------------------------------
   label_expert_agile_colors: Agile card colors
+  label_expert_agile_manage_colors: Manage card colors
+  text_expert_agile_manage_colors: Opens a separate screen; save this form first
   label_expert_agile_color: Color
   label_expert_agile_color_green: Green
   label_expert_agile_color_light_green: Light green

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <!--
+    Icon sprite for the administration menu.
+
+    Drawn in the style of Redmine's own core icons — outline, 24x24 viewBox,
+    with stroke width and colour coming from the .icon-svg class — so the entry
+    sits among the core ones without standing out.
+
+    Used by sprite_icon('expert-agile', plugin: 'redmine_expert_agile'). Redmine
+    resolves the `plugin:` option to plugin_assets/<plugin>/icons.svg, so a name
+    from the core sprite cannot be used together with it: this file has to carry
+    every symbol the plugin asks for.
+  -->
+
+  <!-- A board: three columns filled to different heights. -->
+  <symbol id="icon--expert-agile" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="4" width="5" height="16" rx="1"/>
+    <rect x="9.5" y="4" width="5" height="11" rx="1"/>
+    <rect x="16" y="4" width="5" height="7" rx="1"/>
+  </symbol>
+</svg>

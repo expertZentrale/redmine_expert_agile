@@ -62,6 +62,17 @@
     <%= hidden_field_tag 'settings[status_colors]', '0' %>
     <%= check_box_tag 'settings[status_colors]', '1', @settings['status_colors'].to_s == '1' %>
   </p>
+
+  <%# Which colour each tracker, priority, status and so on gets is a screen of
+      its own, reached from here rather than from a second entry in the
+      administration menu. It is a separate form, so the link leaves this one —
+      unsaved changes above would be lost. %>
+  <p>
+    <label><%= l(:label_expert_agile_colors) %></label>
+    <%= link_to l(:label_expert_agile_manage_colors),
+                expert_agile_colors_path(:container_type => 'tracker') %>
+    <em class="info"><%= l(:text_expert_agile_manage_colors) %></em>
+  </p>
 </fieldset>
 
 <fieldset class="box tabular">
