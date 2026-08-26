@@ -26,7 +26,8 @@
             <%= render :partial => 'expert_agile_colors/picker',
                        :locals => { :name => "colors[#{container.id}]",
                                     :id_prefix => "colors_#{container.id}",
-                                    :selected => @colors[container.id] } %>
+                                    :selected => @colors[container.id],
+                                    :group_label => container.to_s } %>
           </td>
         </tr>
       <% end %>

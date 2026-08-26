@@ -1,9 +1,11 @@
 <%# Per-issue card colour, shown only when the board is set to colour by issue. %>
 <p>
-  <%# No `for`: the control is a group of radio buttons, not a single field. %>
+  <%# No `for`: the control is a group of radio buttons, not a single field.
+      The group names itself instead, see the picker. %>
   <label><%= l(:label_expert_agile_color) %></label>
   <%= render :partial => 'expert_agile_colors/picker',
              :locals => { :name => 'issue[expert_agile_card_color]',
                           :id_prefix => 'issue_expert_agile_card_color',
-                          :selected => issue.expert_agile_card_color } %>
+                          :selected => issue.expert_agile_card_color,
+                          :group_label => l(:label_expert_agile_color) } %>
 </p>

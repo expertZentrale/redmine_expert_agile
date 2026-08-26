@@ -138,11 +138,14 @@ class ExpertAgileColorTest < ActiveSupport::TestCase
   def test_every_palette_colour_is_painted_by_the_stylesheet
     css = File.read(File.expand_path('../../../assets/stylesheets/expert_agile.css', __FILE__))
 
+    # Matched as a rule rather than as an exact substring, so reformatting the
+    # stylesheet cannot fail this.
     ExpertAgileColor::COLORS.each do |color|
-      assert_includes css, ".ea-card.ea-color-#{color} ",
-                      "#{color} has no card rule"
-      assert_includes css, ".ea-color-swatch.ea-color-#{color} ",
-                      "#{color} has no swatch rule, so the picker shows it blank"
+      name = Regexp.escape(color)
+      assert_match(/\.ea-card\.ea-color-#{name}\s*\{/, css,
+                   "#{color} has no card rule")
+      assert_match(/\.ea-color-swatch\.ea-color-#{name}\s*\{/, css,
+                   "#{color} has no swatch rule, so the picker shows it blank")
     end
   end
 

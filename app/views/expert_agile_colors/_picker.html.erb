@@ -2,8 +2,12 @@
     Radio buttons underneath, so the group stays keyboard-reachable and posts
     exactly what the select posted before: a palette name, or '' for no colour.
 
-    Locals: name (form field name), id_prefix (unique per group), selected. %>
-<div class="ea-color-choice">
+    The group carries its own accessible name: the <label> beside it has no
+    single control to point at, so it labels nothing on its own.
+
+    Locals: name (form field name), id_prefix (unique per group), selected,
+    group_label (what this group of swatches is the colour of). %>
+<div class="ea-color-choice" role="radiogroup" aria-label="<%= group_label %>">
   <label class="ea-color-option" title="<%= l(:label_none) %>">
     <%= radio_button_tag name, '', selected.blank?,
                          :id => "#{id_prefix}_none", :'aria-label' => l(:label_none) %>

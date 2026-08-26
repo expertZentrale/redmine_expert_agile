@@ -34,6 +34,17 @@ class ExpertAgileColorsControllerTest < Redmine::ControllerTest
     assert_select "input[type=radio][name=?][value='']", "colors[#{tracker.id}]"
   end
 
+  # The swatches carry no text, so without this the group is announced as a
+  # nameless set of radio buttons and the row it belongs to is lost.
+  def test_each_group_of_swatches_is_named_after_what_it_colours
+    get :index, :params => { :container_type => 'tracker' }
+
+    assert_response :success
+    Tracker.all.each do |tracker|
+      assert_select "div.ea-color-choice[role=radiogroup][aria-label=?]", tracker.to_s
+    end
+  end
+
   def test_index_marks_the_colour_a_container_already_has
     tracker = Tracker.first
     ExpertAgileColor.create!(:container => tracker, :color => 'indigo')
