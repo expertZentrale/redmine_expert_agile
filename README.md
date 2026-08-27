@@ -33,8 +33,8 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
   the same filters, card fields and saved queries as the board.
 - **Charts** — burndown, burnup, velocity, cumulative flow and cycle time, in issues, hours or
   story points.
-- **Colors** — cards coloured by tracker, priority, status, assignee, project, spent time, or
-  per issue.
+- **Colors** — cards coloured by tracker, priority, status, assignee, project or spent time,
+  from a fixed palette of 18 shades picked as swatches rather than by name.
 - **REST API** — read *and* write agile data (story points, sprint assignment) plus sprint CRUD.
 
 ### Design notes

@@ -205,7 +205,7 @@ RedmineExpertAgile::Patches::IssuePatch.apply!
 # Colour support goes only into the models that can actually be coloured.
 # RedmineUP mixes its equivalent into ActiveRecord::Base, i.e. every model in
 # the instance.
-[Issue, Project, Tracker, IssuePriority, IssueStatus].each do |model|
+[Project, Tracker, IssuePriority, IssueStatus].each do |model|
   model.include(RedmineExpertAgile::Colorable) unless model.included_modules.include?(RedmineExpertAgile::Colorable)
 end
 

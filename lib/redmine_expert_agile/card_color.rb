@@ -14,7 +14,6 @@ module RedmineExpertAgile
         when 'priority'   then colour_of(issue.priority, :fallback_for => :priority)
         when 'status'     then colour_of(issue.status)
         when 'project'    then colour_of(issue.project)
-        when 'issue'      then colour_of(issue, :fallback => false)
         when 'assignee'   then ExpertAgileColor.for_principal(issue.assigned_to)
         when 'spent_time' then ExpertAgileColor.for_spent_time(issue.estimated_hours, issue.spent_hours)
         end
@@ -50,7 +49,6 @@ module RedmineExpertAgile
           when 'priority' then issues.map(&:priority)
           when 'status'   then issues.map(&:status)
           when 'project'  then issues.map(&:project)
-          when 'issue'    then issues
           else return {}
           end
 

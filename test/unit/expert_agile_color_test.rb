@@ -58,8 +58,11 @@ class ExpertAgileColorTest < ActiveSupport::TestCase
     # The concern goes only into the models that can be coloured. Mixing it into
     # ActiveRecord::Base (what RedmineUP does) would give every model in the
     # instance an expert_agile_color association.
-    assert Issue.included_modules.include?(RedmineExpertAgile::Colorable)
     assert Tracker.included_modules.include?(RedmineExpertAgile::Colorable)
+    assert Project.included_modules.include?(RedmineExpertAgile::Colorable)
+    # Issue used to be in this list, back when a card could be coloured one
+    # issue at a time.
+    assert_not Issue.included_modules.include?(RedmineExpertAgile::Colorable)
     assert_not User.included_modules.include?(RedmineExpertAgile::Colorable)
     assert_not TimeEntry.included_modules.include?(RedmineExpertAgile::Colorable)
     assert_not ActiveRecord::Base.included_modules.include?(RedmineExpertAgile::Colorable)
@@ -103,28 +106,14 @@ class ExpertAgileColorTest < ActiveSupport::TestCase
     assert_equal 'blue', RedmineExpertAgile::CardColor.for(@issue, 'status')
   end
 
-  def test_card_color_per_issue
-    @issue.color = 'red'
-
-    assert_equal 'red', RedmineExpertAgile::CardColor.for(@issue, 'issue')
-  end
-
-  def test_color_set_on_a_new_record_is_persisted_after_save
-    # A new issue has no id yet, so the polymorphic row cannot be written until
-    # after_save.
-    issue = Issue.new(:project_id => 1, :tracker_id => 1, :subject => 'Coloured',
-                      :author_id => 1, :status_id => 1, :priority_id => 4)
-    issue.safe_attributes = { 'expert_agile_card_color' => 'purple' }
-
-    assert issue.save, issue.errors.full_messages.join(', ')
-    assert_equal 'purple', issue.reload.expert_agile_card_color
-  end
-
-  def test_color_is_assignable_through_safe_attributes_on_an_existing_issue
-    @issue.safe_attributes = { 'expert_agile_card_color' => 'blue' }
-    @issue.save!
-
-    assert_equal 'blue', @issue.reload.color
+  # Dropped on purpose, so the wiring cannot come back by accident: an issue is
+  # not something a board colours by, and no colour reaches it any more.
+  def test_an_issue_is_not_something_to_colour
+    assert_not_includes ExpertAgileColor::COLORABLE_CLASSES.values, 'Issue'
+    assert_not_includes ExpertAgileColor::CONTAINER_TYPES, 'Issue'
+    assert_not_includes RedmineExpertAgile::COLOR_BASES, 'issue'
+    assert_not Issue.new.respond_to?(:expert_agile_card_color)
+    assert_nil RedmineExpertAgile::CardColor.for(@issue, 'issue')
   end
 
   def test_card_color_none_and_missing_issue
@@ -173,15 +162,6 @@ class ExpertAgileColorTest < ActiveSupport::TestCase
     @issue.tracker.color = explicit
 
     assert_equal explicit, RedmineExpertAgile::CardColor.for(@issue, 'tracker')
-  end
-
-  def test_per_issue_colouring_has_no_fallback
-    # Colouring by issue means "only the ones I marked stand out"; a fallback
-    # would colour every card and defeat the point.
-    assert_nil RedmineExpertAgile::CardColor.for(@issue, 'issue')
-
-    @issue.color = 'red'
-    assert_equal 'red', RedmineExpertAgile::CardColor.for(@issue, 'issue')
   end
 
   def test_assignee_color_is_deterministic_and_from_the_palette

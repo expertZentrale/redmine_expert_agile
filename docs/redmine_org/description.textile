@@ -11,7 +11,7 @@ h3. Features
 * *Sprints* — a first-class entity with start and end dates, an open/active/closed lifecycle, and Version-style sharing across a project tree. Redmine versions remain usable for planning alongside sprints.
 * *Backlog planner* — drag issues into sprints or versions from a dedicated planning view, with the same filters and card fields as the board plus saved backlogs, behind its own project module.
 * *Charts* — burndown, burnup, cumulative flow, velocity and cycle time, in issues, hours or story points.
-* *Colours* — cards coloured by tracker, priority, status, project, assignee, spent time, or per issue, from a fixed palette of 18 shades picked as swatches rather than by name.
+* *Colours* — cards coloured by tracker, priority, status, project, assignee or spent time, from a fixed palette of 18 shades picked as swatches rather than by name. Deliberately by what an issue is, never one issue at a time.
 * *REST API* — read *and write* agile data (story points, sprint assignment), plus full sprint CRUD.
 
 h3. Design notes

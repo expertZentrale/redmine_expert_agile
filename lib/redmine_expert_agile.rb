@@ -11,7 +11,7 @@
 # Plain `def ... end` throughout: Redmine 5.x still runs on Ruby 2.7, where
 # endless method definitions are a syntax error and would break plugin loading.
 module RedmineExpertAgile
-  COLOR_BASES = %w(none tracker priority status assignee project issue spent_time).freeze
+  COLOR_BASES = %w(none tracker priority status assignee project spent_time).freeze
   ESTIMATE_UNITS = %w(hours story_points).freeze
 
   class << self
