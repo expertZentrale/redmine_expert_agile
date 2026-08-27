@@ -243,8 +243,15 @@ class ExpertAgileBoardsController < ApplicationController
     query
   end
 
+  # Read once per request: the check asks for it, and a refusal asks again to
+  # say what is open instead. Neither the issue nor the user changes in between,
+  # and the lookup walks the workflow table.
+  def allowed_statuses
+    @allowed_statuses ||= @issue.new_statuses_allowed_to(User.current)
+  end
+
   def status_allowed?(status_id)
-    @issue.new_statuses_allowed_to(User.current).map(&:id).include?(status_id)
+    allowed_statuses.map(&:id).include?(status_id)
   end
 
   # A refusal in the terms the workflow is written in — this tracker, from this
@@ -264,8 +271,7 @@ class ExpertAgileBoardsController < ApplicationController
   # into something to act on. The current status is dropped from the list:
   # Redmine includes it, and "you may move it to where it already is" is noise.
   def status_transition_hint
-    allowed = @issue.new_statuses_allowed_to(User.current)
-                    .reject { |status| status.id == @issue.status_id }
+    allowed = allowed_statuses.reject { |status| status.id == @issue.status_id }
 
     if allowed.any?
       l(:text_expert_agile_transitions_allowed,
