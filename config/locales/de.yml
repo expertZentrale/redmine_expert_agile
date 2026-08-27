@@ -55,7 +55,6 @@ de:
   label_expert_agile_color_base_status: Status
   label_expert_agile_color_base_assignee: Zugewiesen an
   label_expert_agile_color_base_project: Projekt
-  label_expert_agile_color_base_issue: Ticket
   label_expert_agile_color_base_spent_time: Aufgewendete Zeit
   label_expert_agile_status_colors: Spaltenkoepfe nach Status faerben
 

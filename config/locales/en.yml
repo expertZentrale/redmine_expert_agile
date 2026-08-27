@@ -55,7 +55,6 @@ en:
   label_expert_agile_color_base_status: Status
   label_expert_agile_color_base_assignee: Assignee
   label_expert_agile_color_base_project: Project
-  label_expert_agile_color_base_issue: Issue
   label_expert_agile_color_base_spent_time: Spent time
   label_expert_agile_status_colors: Color column headers by status
 

@@ -9,6 +9,21 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Removed
+- **Cards can no longer be coloured one issue at a time.** A board colours by what an issue *is* —
+  its tracker, status, priority, project, assignee, or how its spent time compares to the estimate
+  — and a colour set on a single issue is a note in a place nobody looks for one. The colour basis
+  *Issue* is gone from the settings, the *Issue* tab is gone from the card colour screen, and the
+  colour field is gone from the issue form. A migration deletes the rows that held those colours,
+  which nothing can reach any more.
+
+  The *Issue* tab was also the one screen in the plugin that could not survive a real
+  installation: it listed every issue in the instance, each with the full palette, so on the
+  installation this was raised from it would have rendered some 3.8 million form controls on one
+  page.
+
 ## [0.2.4] - 2026-08-27
 
 ### Fixed

@@ -52,31 +52,17 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     assert_response :success
   end
 
-  def test_issue_edit_form_renders_the_colour_picker
-    # Two ways this broke on this page and not on the colours screen: the
-    # picker's helper is not there unless the controller is given it, and
-    # nothing here pulls in the plugin's assets, so the swatches had no layout.
-    with_agile_settings('color_base' => 'issue') do
-      get :edit, :params => { :id => @issue.id }
+  # Cards are coloured by what an issue *is* — its tracker, status, priority,
+  # project, assignee — never one issue at a time. Nothing colour-shaped
+  # belongs on an issue page any more: no field, and none of the assets that
+  # used to be loaded for it on every issue page there is.
+  def test_issue_pages_carry_nothing_of_the_colour_picker
+    get :edit, :params => { :id => @issue.id }
 
-      assert_response :success
-      hex = ExpertAgileColor::PALETTE['indigo']
-      assert_select 'input[type=radio][name=?][value=indigo]', 'issue[expert_agile_card_color]'
-      assert_select 'span.ea-color-swatch[style*=?]', hex
-      assert_select 'head link[rel=stylesheet][href*=?]', 'expert_agile'
-      assert_select 'head script[src*=?]', 'expert_agile_colors'
-    end
-  end
-
-  def test_issue_pages_do_not_carry_the_colour_assets_when_nothing_colours_by_issue
-    # The head hook runs on every page there is, so it has to stay narrow.
-    with_agile_settings('color_base' => 'tracker') do
-      get :edit, :params => { :id => @issue.id }
-
-      assert_response :success
-      assert_select 'head link[rel=stylesheet][href*=?]', 'expert_agile', false
-      assert_select 'head script[src*=?]', 'expert_agile_colors', false
-    end
+    assert_response :success
+    assert_select 'div.ea-color-choice', false
+    assert_select 'head link[rel=stylesheet][href*=?]', 'expert_agile', false
+    assert_select 'head script[src*=?]', 'expert_agile_colors', false
   end
 
   def test_issue_edit_form_renders_with_sprints_enabled

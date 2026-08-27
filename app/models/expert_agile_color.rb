@@ -52,7 +52,6 @@ class ExpertAgileColor < ExpertAgileApplicationRecord
   # from being reachable at all — RedmineUP does exactly that const_get on user
   # input and relies on a later respond_to? check to limit the damage.
   COLORABLE_CLASSES = {
-    'issue' => 'Issue',
     'project' => 'Project',
     'tracker' => 'Tracker',
     'issue_priority' => 'IssuePriority',
@@ -63,7 +62,7 @@ class ExpertAgileColor < ExpertAgileApplicationRecord
   # subclass of Enumeration, and Rails polymorphic associations store the *base*
   # class name — so the stored type is 'Enumeration', not 'IssuePriority'.
   # Enumeration ids are unique across its subtypes, so this stays unambiguous.
-  CONTAINER_TYPES = %w(Issue Project Tracker Enumeration IssueStatus).freeze
+  CONTAINER_TYPES = %w(Project Tracker Enumeration IssueStatus).freeze
 
   belongs_to :container, :polymorphic => true
 

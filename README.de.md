@@ -36,8 +36,8 @@ Benoetigt **Redmine 5.0 oder neuer**. Lizenziert unter der **GPL-2.0-or-later**
   Board.
 - **Diagramme** — Burndown, Burnup, Velocity, kumulierter Fluss und Durchlaufzeit, wahlweise in
   Tickets, Stunden oder Story Points.
-- **Farben** — Karten eingefaerbt nach Tracker, Prioritaet, Status, Bearbeiter, Projekt,
-  aufgewendeter Zeit oder pro Ticket.
+- **Farben** — Karten eingefaerbt nach Tracker, Prioritaet, Status, Bearbeiter, Projekt oder
+  aufgewendeter Zeit, aus einer festen Palette von 18 Toenen, als Farbfelder statt ueber Namen.
 - **REST-API** — Agile-Daten (Story Points, Sprint-Zuordnung) lesen *und* schreiben, dazu
   Sprint-CRUD.
 

@@ -9,6 +9,22 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Entfernt
+- **Karten lassen sich nicht mehr einzeln pro Ticket einfaerben.** Ein Board faerbt danach, was ein
+  Ticket *ist* — Tracker, Status, Prioritaet, Projekt, Bearbeiter oder das Verhaeltnis von
+  aufgewendeter zu geschaetzter Zeit —, und eine an einem einzelnen Ticket gesetzte Farbe ist eine
+  Notiz an einer Stelle, an der niemand nach einer sucht. Die Farbbasis *Ticket* ist aus den
+  Einstellungen verschwunden, der Reiter *Ticket* vom Kartenfarben-Bildschirm und das Farbfeld aus
+  dem Ticketformular. Eine Migration loescht die Zeilen, die diese Farben hielten und die nichts
+  mehr erreichen kann.
+
+  Der Reiter *Ticket* war zugleich der einzige Bildschirm des Plugins, der einer echten
+  Installation nicht standhielt: er listete jedes Ticket der Instanz auf, jedes mit der ganzen
+  Palette — auf der Installation, aus der die Meldung kam, waeren das rund 3,8 Millionen
+  Formularelemente auf einer Seite gewesen.
+
 ## [0.2.4] - 2026-08-27
 
 ### Behoben
