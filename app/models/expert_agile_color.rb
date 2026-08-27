@@ -12,10 +12,40 @@ class ExpertAgileColor < ExpertAgileApplicationRecord
   # Ordered by hue, not by when each colour was added: the picker shows the
   # palette in this order, and related shades sitting together is what makes a
   # colour findable without reading its name.
-  COLORS = %w(
-    dark_green green light_green olive turquoise light_blue blue indigo purple
-    light_purple pink red salmon orange brown yellow slate gray
-  ).freeze
+  #
+  # The value is the accent the card's left border carries. It lives here rather
+  # than only in the stylesheet so the picker can paint its swatches inline: a
+  # swatch that needs a stylesheet to have a colour shows nothing at all on a
+  # page that does not load one, which is what the picker did on the two screens
+  # it appears on. expert_agile.css still carries the card rules, and a test
+  # pins the two to the same values.
+  PALETTE = {
+    'dark_green'   => '#2f7d55',
+    'green'        => '#3c9c3c',
+    'light_green'  => '#8dc63f',
+    'olive'        => '#7f8c34',
+    'turquoise'    => '#29a8a0',
+    'light_blue'   => '#3fa5d8',
+    'blue'         => '#3d7ec4',
+    'indigo'       => '#4257b2',
+    'purple'       => '#8a5fbf',
+    'light_purple' => '#a98cd9',
+    'pink'         => '#d1489b',
+    'red'          => '#cc3b3b',
+    'salmon'       => '#e0715e',
+    'orange'       => '#e08a1e',
+    'brown'        => '#9c6b42',
+    'yellow'       => '#dcb800',
+    'slate'        => '#64748b',
+    'gray'         => '#8c8c8c'
+  }.freeze
+
+  COLORS = PALETTE.keys.freeze
+
+  # The accent of a palette name, or nil for "no colour".
+  def self.hex(color)
+    PALETTE[color.to_s]
+  end
 
   # What the admin screen offers, keyed by the name that appears in the URL.
   # Resolving through this map is what stops `Object.const_get(params[...])`

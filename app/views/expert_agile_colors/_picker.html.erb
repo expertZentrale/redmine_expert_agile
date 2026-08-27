@@ -1,25 +1,50 @@
-<%# The palette as the colours themselves rather than as a list of their names.
-    Radio buttons underneath, so the group stays keyboard-reachable and posts
-    exactly what the select posted before: a palette name, or '' for no colour.
+<%# The palette as the colours themselves rather than as a list of their names,
+    with the current one spelled out beside it.
 
-    The group carries its own accessible name: the <label> beside it has no
-    single control to point at, so it labels nothing on its own.
+    Every swatch paints itself with an inline background: the two screens this
+    appears on are not board screens, so nothing guarantees the plugin's
+    stylesheet is there, and a swatch that gets its colour from a class shows as
+    an empty box when it is not. The stylesheet only lays the group out.
+
+    Radio buttons underneath, so the group stays keyboard-reachable and posts
+    what the select posted before: a palette name, or '' for no colour. The
+    group carries its own accessible name — the <label> beside it has no single
+    control to point at, so it labels nothing on its own.
 
     Locals: name (form field name), id_prefix (unique per group), selected,
     group_label (what this group of swatches is the colour of). %>
-<div class="ea-color-choice" role="radiogroup" aria-label="<%= group_label %>">
-  <label class="ea-color-option" title="<%= l(:label_none) %>">
-    <%= radio_button_tag name, '', selected.blank?,
-                         :id => "#{id_prefix}_none", :'aria-label' => l(:label_none) %>
-    <span class="ea-color-swatch ea-color-none"></span>
-  </label>
+<%
+  none_caption = l(:label_none)
+  current = ExpertAgileColor.hex(selected)
+  current_caption = current ? l("label_expert_agile_color_#{selected}") : none_caption
+%>
+<div class="ea-color-field">
+  <%# What is set right now, in words and in hex, so it can be read off the row
+      rather than inferred from which swatch carries the marker. %>
+  <span class="ea-color-current" data-role="ea-color-current">
+    <span class="ea-color-current-swatch" data-role="ea-color-current-swatch"
+          style="<%= expert_agile_swatch_style(current, 22) %>"><%= '&times;'.html_safe unless current %></span>
+    <span class="ea-color-current-name" data-role="ea-color-current-name"><%= current_caption %></span>
+    <span class="ea-color-current-hex" data-role="ea-color-current-hex"><%= current %></span>
+  </span>
 
-  <% ExpertAgileColor::COLORS.each do |color| %>
-    <% caption = l("label_expert_agile_color_#{color}") %>
-    <label class="ea-color-option" title="<%= caption %>">
-      <%= radio_button_tag name, color, selected.to_s == color,
-                           :id => "#{id_prefix}_#{color}", :'aria-label' => caption %>
-      <span class="ea-color-swatch ea-color-<%= color %>"></span>
+  <div class="ea-color-choice" role="radiogroup" aria-label="<%= group_label %>">
+    <label class="ea-color-option" title="<%= none_caption %>">
+      <%= radio_button_tag name, '', selected.blank?,
+                           :id => "#{id_prefix}_none", :'aria-label' => none_caption,
+                           :data => { :color_name => none_caption, :color_hex => '' } %>
+      <span class="ea-color-swatch" style="<%= expert_agile_swatch_style(nil, 20) %>">&times;</span>
     </label>
-  <% end %>
+
+    <% ExpertAgileColor::PALETTE.each do |color, hex| %>
+      <% caption = l("label_expert_agile_color_#{color}") %>
+      <label class="ea-color-option" title="<%= "#{caption} #{hex}" %>">
+        <%= radio_button_tag name, color, selected.to_s == color,
+                             :id => "#{id_prefix}_#{color}",
+                             :'aria-label' => "#{caption} #{hex}",
+                             :data => { :color_name => caption, :color_hex => hex } %>
+        <span class="ea-color-swatch" style="<%= expert_agile_swatch_style(hex, 20) %>"></span>
+      </label>
+    <% end %>
+  </div>
 </div>

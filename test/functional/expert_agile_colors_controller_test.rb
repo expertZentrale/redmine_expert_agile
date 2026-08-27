@@ -25,9 +25,12 @@ class ExpertAgileColorsControllerTest < Redmine::ControllerTest
 
     assert_response :success
     tracker = Tracker.first
-    ExpertAgileColor::COLORS.each do |color|
+    ExpertAgileColor::PALETTE.each do |color, hex|
       assert_select "input[type=radio][name=?][value=?]", "colors[#{tracker.id}]", color
-      assert_select "span.ea-color-swatch.ea-color-#{color}"
+      # Painted by the markup, not by a class: this screen is one of the two
+      # that showed the picker as bare radio buttons because nothing here
+      # guaranteed the stylesheet.
+      assert_select "span.ea-color-swatch[style*=?]", hex
     end
     # Empty value in the selector rather than as a substitution: a trailing
     # string argument is read as the expected element text, not as a message.
@@ -53,6 +56,30 @@ class ExpertAgileColorsControllerTest < Redmine::ControllerTest
 
     assert_response :success
     assert_select "input[type=radio][name=?][value=indigo][checked=checked]", "colors[#{tracker.id}]"
+  end
+
+  # What is set has to be readable off the row, not inferred from which of
+  # nineteen swatches carries the marker.
+  def test_index_spells_out_the_current_colour_with_its_hex
+    tracker = Tracker.first
+    ExpertAgileColor.create!(:container => tracker, :color => 'indigo')
+
+    get :index, :params => { :container_type => 'tracker' }
+
+    assert_response :success
+    assert_select 'span.ea-color-current-name', :text => I18n.t(:label_expert_agile_color_indigo)
+    assert_select 'span.ea-color-current-hex', :text => ExpertAgileColor::PALETTE['indigo']
+    assert_select 'span.ea-color-current-swatch[style*=?]', ExpertAgileColor::PALETTE['indigo']
+  end
+
+  # The screen used to render the picker with neither of these, which left it a
+  # column of unstyled radio buttons whose swatches had no colour at all.
+  def test_index_loads_the_plugin_assets
+    get :index, :params => { :container_type => 'tracker' }
+
+    assert_response :success
+    assert_select 'head link[rel=stylesheet][href*=?]', 'expert_agile'
+    assert_select 'head script[src*=?]', 'expert_agile_colors'
   end
 
   def test_update_stores_what_the_picker_posts
