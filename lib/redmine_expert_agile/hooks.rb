@@ -5,7 +5,7 @@
 # JSON island, so the plugin stays usable under a `script-src 'self'` policy.
 module RedmineExpertAgile
   class Hooks < Redmine::Hook::ViewListener
-    # Story point and card colour fields on the issue create/edit form.
+    # Story point and sprint fields on the issue create/edit form.
     def view_issues_form_details_bottom(context = {})
       issue = context[:issue]
       out = ''.html_safe
