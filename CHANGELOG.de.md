@@ -9,7 +9,7 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.3.1] - 2026-08-27
 
 ### Geaendert
 - **Ein vom Workflow abgelehnter Zug nennt jetzt, welchen Uebergang er abgelehnt hat und was

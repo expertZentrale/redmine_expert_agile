@@ -1,0 +1,13 @@
+h3. redmine_expert_agile 0.3.1 — 2026-08-27
+
+h4. Changed
+
+* *A move the workflow refuses now says which transition it refused, and what is open instead.* The board said "the workflow does not allow this status change", which leaves a user guessing whether they dropped the card in the wrong column, lack a permission, or hit a rule someone set deliberately — and leaves an administrator with nowhere to start looking, since a workflow is written per tracker, per role and per status pair and the message named none of them. It now names the tracker and both statuses, and lists the statuses that *are* open from where the card sits. Administrators also get a link into that tracker's workflow; nobody else is offered it, since nobody else can change one or open that page.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+The message is built by the board's own script, so a browser holding the previous one in cache keeps the old wording until it reloads the file.
+
+Note when trying it as an administrator: Redmine measures an administrator against every role at once, so a transition counts as allowed if any role has it. To see the everyday case — allowed for one colleague, refused for another — try it as a user with a single role.
