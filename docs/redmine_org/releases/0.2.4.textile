@@ -1,0 +1,18 @@
+h3. redmine_expert_agile 0.2.4 — 2026-08-27
+
+h4. Fixed
+
+* *The colour picker showed no colours.* 0.2.3 replaced the colour dropdowns with swatches, but neither screen that shows them loads the plugin's stylesheet — it is pulled in by the board, the backlog and the charts, and the card colour screen and the issue form are none of those. Without it the swatches were empty elements of no size and the radio buttons behind them were never hidden, so what was left was a row of radio buttons whose colours existed only in a hover title. Both screens now load the stylesheet, and each swatch carries its own colour, size and border inline, so it is a visible colour even on a page that fails to load a stylesheet at all.
+* *The colour field on an issue raised rather than rendered.* It is drawn by a plugin helper, and Redmine switches off Rails' automatic helper inclusion, so a helper is only available to the controller of the same name — not to Redmine's issues controller, where a hook renders the field.
+
+h4. Added
+
+* *The current colour is spelled out beside the palette*, as a swatch with the colour's name and its hex code, and it follows what you click rather than what was last saved.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+Anyone who installed 0.2.3 should take this one: on 0.2.3 the card colour screen cannot be used, and an issue form shows an error instead of the colour field where boards colour by issue.
+
+Both fixes are in the plugin's assets, so a browser holding the previous stylesheet in cache will keep the old behaviour until it reloads the file.

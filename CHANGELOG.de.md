@@ -9,7 +9,7 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.2.4] - 2026-08-27
 
 ### Behoben
 - **Die Farbauswahl zeigte keine Farben.** 0.2.3 ersetzte die Auswahlfelder durch Farbfelder, aber

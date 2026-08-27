@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.2.4] - 2026-08-27
 
 ### Fixed
 - **The colour picker showed no colours.** 0.2.3 replaced the colour dropdowns with swatches, but
