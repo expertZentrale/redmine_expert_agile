@@ -293,6 +293,21 @@
 }
 
 
+/* The refusal message: the headline is Redmine's own flash, with what the
+ * server could add underneath — which statuses are open from here, and for an
+ * administrator the way into the workflow that refused. */
+.ea-board-message-hint {
+  margin-top: 4px;
+  font-weight: normal;
+}
+
+.ea-board-message-link {
+  display: inline-block;
+  margin-top: 4px;
+  font-weight: normal;
+}
+
+
 /* --- Charts ------------------------------------------------------------- */
 .ea-chart-container { position: relative; height: 360px; margin-top: 10px; }
 

@@ -9,6 +9,19 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Geaendert
+- **Ein vom Workflow abgelehnter Zug nennt jetzt, welchen Uebergang er abgelehnt hat und was
+  stattdessen moeglich ist.** Das Board sagte "Der Workflow erlaubt diesen Statuswechsel nicht" —
+  damit raet ein Benutzer, ob er die Karte in der falschen Spalte abgelegt hat, ihm ein Recht
+  fehlt oder eine Regel greift, die jemand bewusst gesetzt hat; und ein Administrator weiss nicht,
+  wo er suchen soll. Die Meldung nennt jetzt den Tracker und beide Status, darunter listet das
+  Board die Status auf, die von der aktuellen Position aus *offen* sind. Administratoren bekommen
+  zusaetzlich einen Link direkt in den Workflow dieses Trackers; alle anderen nicht, denn nur sie
+  koennen ihn aendern und nur fuer sie oeffnet die Seite. Beide Zusaetze werden im Browser als
+  Elemente gebaut, nicht als Markup — nichts, was der Server schickt, wird als HTML ausgewertet.
+
 ## [0.3.0] - 2026-08-27
 
 ### Hinzugefuegt
