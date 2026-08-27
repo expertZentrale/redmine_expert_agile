@@ -54,7 +54,11 @@
     };
   }
 
-  function setMessage(text, isError) {
+  /* `details` carries what the server knows about a refusal beyond the headline:
+   * which statuses are open from here, and for an administrator a link into the
+   * workflow that refused. Both are built as elements rather than as markup, so
+   * nothing the server sends is ever parsed as HTML. */
+  function setMessage(text, isError, details) {
     var box = document.getElementById('ea-board-message');
     if (!box) {
       box = document.createElement('div');
@@ -63,8 +67,24 @@
       anchor.parentNode.insertBefore(box, anchor);
     }
     box.className = isError ? 'flash error' : 'flash notice';
+    /* Assigning textContent also drops whatever the last message appended. */
     box.textContent = text || '';
     box.style.display = text ? 'block' : 'none';
+    if (!text || !details) { return; }
+
+    if (details.hint) {
+      var hint = document.createElement('div');
+      hint.className = 'ea-board-message-hint';
+      hint.textContent = details.hint;
+      box.appendChild(hint);
+    }
+    if (details.link && details.link.url) {
+      var link = document.createElement('a');
+      link.className = 'ea-board-message-link';
+      link.href = details.link.url;
+      link.textContent = details.link.label || details.link.url;
+      box.appendChild(link);
+    }
   }
 
   /* One implementation drives both the board and the backlog planner. The two
@@ -143,7 +163,7 @@
    * as the board accepting a move it had just reported as refused. */
   function revertMove(payload, from) {
     restore(from);
-    setMessage(payload && payload.error ? payload.error : config.labels.moveFailed, true);
+    setMessage(payload && payload.error ? payload.error : config.labels.moveFailed, true, payload);
   }
 
   function updateColumns(columns) {

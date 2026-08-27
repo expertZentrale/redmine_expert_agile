@@ -436,6 +436,51 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert JSON.parse(response.body)['error'].present?
   end
 
+  # A refusal that says only "not allowed" leaves a user guessing whether they
+  # dropped the card in the wrong column, lack a permission, or hit a rule.
+  def test_a_refused_move_says_which_transition_the_workflow_refused
+    forbidden = forbidden_status_for(@issue)
+
+    put :update, :params => { :id => @issue.id, :status_id => forbidden.id }, :format => :js
+
+    assert_response :unprocessable_entity
+    error = JSON.parse(response.body)['error']
+    assert_includes error, @issue.tracker.name
+    assert_includes error, @issue.status.name
+    assert_includes error, forbidden.name
+  end
+
+  def test_a_refused_move_names_the_statuses_that_are_open
+    forbidden = forbidden_status_for(@issue)
+    open_now = @issue.new_statuses_allowed_to(User.find(2))
+                     .reject { |status| status.id == @issue.status_id }
+
+    put :update, :params => { :id => @issue.id, :status_id => forbidden.id }, :format => :js
+
+    assert_response :unprocessable_entity
+    hint = JSON.parse(response.body)['hint']
+    assert hint.present?, 'a refusal has to say what is possible instead'
+    open_now.each { |status| assert_includes hint, status.name }
+    assert_not_includes hint, forbidden.name
+  end
+
+  # Only an administrator can change a workflow, and only for them does the page
+  # open at all — offering it to anyone else is a dead end.
+  def test_the_workflow_link_is_offered_to_administrators_only
+    forbidden = forbidden_status_for(@issue)
+
+    put :update, :params => { :id => @issue.id, :status_id => forbidden.id }, :format => :js
+    assert_nil JSON.parse(response.body)['link']
+
+    @request.session[:user_id] = 1
+    put :update, :params => { :id => @issue.id, :status_id => forbidden.id }, :format => :js
+
+    link = JSON.parse(response.body)['link']
+    assert link.present?, 'an administrator gets a way into the workflow'
+    assert_includes link['url'], "tracker_id=#{@issue.tracker_id}"
+    assert link['label'].present?
+  end
+
   def test_update_reorders_within_a_column_without_changing_status
     others = 2.times.map do
       Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id)

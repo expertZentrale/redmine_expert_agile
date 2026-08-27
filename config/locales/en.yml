@@ -107,7 +107,10 @@ en:
   # --- Board ----------------------------------------------------------
   label_expert_agile_wip_limit: WIP limit
   text_expert_agile_wip_limit_exceeded: The WIP limit for this column is exceeded
-  error_expert_agile_status_transition_not_allowed: The workflow does not allow this status change
+  error_expert_agile_status_transition_not_allowed: "The workflow does not allow a %{tracker} to change from %{from} to %{to}"
+  text_expert_agile_transitions_allowed: "Open from %{from}: %{statuses}"
+  text_expert_agile_transitions_none: "No status change is open to you from %{from}"
+  label_expert_agile_edit_workflow: Edit this tracker's workflow
   error_expert_agile_move_failed: The move could not be saved
   error_expert_agile_issue_not_editable: You are not allowed to edit this issue
   label_expert_agile_swimlane_none: No swimlanes

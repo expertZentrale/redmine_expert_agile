@@ -45,8 +45,10 @@ class ExpertAgileBoardsController < ApplicationController
         # Enforced explicitly. RedmineUP infers rejection by checking whether
         # the attribute still changed after safe_attributes= ran, comparing with
         # to_i — so any non-numeric attribute compares 0 == 0 and always passes.
-        return render_move_error(l(:error_expert_agile_status_transition_not_allowed),
-                                 :unprocessable_entity)
+        return render_move_error(status_transition_error(target_status_id),
+                                 :unprocessable_entity,
+                                 :hint => status_transition_hint,
+                                 :link => workflow_link)
       end
     end
 
@@ -241,8 +243,57 @@ class ExpertAgileBoardsController < ApplicationController
     query
   end
 
+  # Read once per request: the check asks for it, and a refusal asks again to
+  # say what is open instead. Neither the issue nor the user changes in between,
+  # and the lookup walks the workflow table.
+  def allowed_statuses
+    @allowed_statuses ||= @issue.new_statuses_allowed_to(User.current)
+  end
+
   def status_allowed?(status_id)
-    @issue.new_statuses_allowed_to(User.current).map(&:id).include?(status_id)
+    allowed_statuses.map(&:id).include?(status_id)
+  end
+
+  # A refusal in the terms the workflow is written in — this tracker, from this
+  # status to that one. "Not allowed" on its own leaves a user guessing whether
+  # they dropped the card in the wrong column, lack a permission, or hit a rule,
+  # and leaves an administrator with nowhere to start looking.
+  def status_transition_error(target_status_id)
+    target = IssueStatus.find_by(:id => target_status_id)
+
+    l(:error_expert_agile_status_transition_not_allowed,
+      :tracker => @issue.tracker.name,
+      :from => @issue.status.name,
+      :to => target ? target.name : target_status_id)
+  end
+
+  # What the user *can* do from here, which is the part that turns the refusal
+  # into something to act on. The current status is dropped from the list:
+  # Redmine includes it, and "you may move it to where it already is" is noise.
+  def status_transition_hint
+    allowed = allowed_statuses.reject { |status| status.id == @issue.status_id }
+
+    if allowed.any?
+      l(:text_expert_agile_transitions_allowed,
+        :from => @issue.status.name, :statuses => allowed.map(&:name).join(', '))
+    else
+      l(:text_expert_agile_transitions_none, :from => @issue.status.name)
+    end
+  end
+
+  # Straight to the workflow of this tracker, for administrators only — they are
+  # the only ones who can change it and the only ones the page opens for. The
+  # role is a starting point, not a claim: a transition can be missing for one
+  # of several roles, and the page lets them switch.
+  def workflow_link
+    return nil unless User.current.admin?
+
+    role = User.current.roles_for_project(@issue.project).first || Role.givable.first
+    return nil if role.nil?
+
+    { :label => l(:label_expert_agile_edit_workflow),
+      :url => edit_workflows_path(:role_id => role.id, :tracker_id => @issue.tracker_id,
+                                  :used_statuses_only => '0') }
   end
 
   # Optional convenience: claim an unassigned card by moving it. Only when the
@@ -289,12 +340,15 @@ class ExpertAgileBoardsController < ApplicationController
   # A plain JSON contract. RedmineUP returns an HTML partial on success and a
   # JSON array on failure, both declared as format.html, and the client has to
   # sniff which it got.
-  def render_move_error(message, status)
-    @error_message = message
+  def render_move_error(message, status, hint: nil, link: nil)
+    @error_message = [message, hint].compact.join('. ')
     respond_to do |format|
-      format.js { render :json => { :error => message }, :status => status }
+      format.js do
+        render :json => { :error => message, :hint => hint, :link => link }.compact,
+               :status => status
+      end
       format.html do
-        flash[:error] = message
+        flash[:error] = @error_message
         redirect_back_or_default project_expert_agile_board_path(@issue.project)
       end
       format.api { render_api_errors(message) }

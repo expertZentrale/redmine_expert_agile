@@ -9,6 +9,19 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Changed
+- **A move the workflow refuses now says which transition it refused, and what is open instead.**
+  The board said "the workflow does not allow this status change", which leaves a user guessing
+  whether they dropped the card in the wrong column, lack a permission, or hit a rule someone set
+  deliberately — and leaves an administrator with nowhere to start looking. The message now names
+  the tracker and both statuses, and under it the board lists the statuses that *are* open from
+  where the card sits. Administrators also get a link straight into that tracker's workflow, which
+  is offered to nobody else: they are the only ones who can change it and the only ones the page
+  opens for. Both extras are built as elements in the browser, not as markup, so nothing the
+  server sends is parsed as HTML.
+
 ## [0.3.0] - 2026-08-27
 
 ### Added
