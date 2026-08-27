@@ -9,7 +9,12 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.3.0] - 2026-08-27
+
+### Hinzugefuegt
+- **Die aktuelle Farbe steht neben der Palette im Klartext**: als Farbfeld mit Namen und
+  Hex-Code, und sie folgt dem, was angeklickt wird, statt dem zuletzt Gespeicherten. Welches von
+  neunzehn Farbfeldern die Markierung traegt, ist nichts, woran man eine Tabelle ablesen sollte.
 
 ### Entfernt
 - **Karten lassen sich nicht mehr einzeln pro Ticket einfaerben.** Ein Board faerbt danach, was ein
@@ -25,8 +30,6 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Palette — auf der Installation, aus der die Meldung kam, waeren das rund 3,8 Millionen
   Formularelemente auf einer Seite gewesen.
 
-## [0.2.4] - 2026-08-27
-
 ### Behoben
 - **Die Farbauswahl zeigte keine Farben.** 0.2.3 ersetzte die Auswahlfelder durch Farbfelder, aber
   keiner der beiden Bildschirme, die sie zeigen, laedt das Stylesheet des Plugins — eingebunden
@@ -37,16 +40,12 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Farbnamen aus dem sichtbaren Text genommen, aus lesbar wurde also unbenutzbar. Beide Bildschirme
   laden das Stylesheet jetzt, und jedes Farbfeld traegt Farbe, Groesse und Rahmen inline bei sich —
   es ist damit auch auf einer Seite sichtbar, die gar kein Stylesheet laedt.
-- **Das Farbfeld am Ticket lief auf einen Fehler, statt zu rendern.** Die Farbfelder holen ihre
-  Darstellung aus einem Plugin-Helper, und Redmine schaltet Rails' automatische Helper-Einbindung
-  ab: ein Helper steht nur dem gleichnamigen Controller zur Verfuegung. Das Kartenfarbfeld wird
-  per Hook ins Ticketformular gerendert — im Ticket-Controller von Redmine —, wo der Helper nicht
-  registriert war.
-
-### Hinzugefuegt
-- **Die aktuelle Farbe steht neben der Palette im Klartext**: als Farbfeld mit Namen und
-  Hex-Code, und sie folgt dem, was angeklickt wird, statt dem zuletzt Gespeicherten. Welches von
-  neunzehn Farbfeldern die Markierung traegt, ist nichts, woran man eine Tabelle ablesen sollte.
+- **Unter 0.2.3 lief das Oeffnen eines Tickets auf einen Fehler, wo Boards nach Ticket faerbten.**
+  Das Farbfeld im Ticketformular wird von einem Plugin-Helper gezeichnet, und Redmine schaltet
+  Rails' automatische Helper-Einbindung ab: ein Helper erreicht nur den gleichnamigen Controller —
+  nicht Redmines Ticket-Controller, in dem ein Hook dieses Feld rendert. Erst behoben, dann mit dem
+  Rest der Ticketfarbe entfernt; geblieben ist davon, dass Ticketseiten bei jeder Einstellung
+  wieder funktionieren.
 
 ## [0.2.3] - 2026-08-26
 

@@ -9,7 +9,12 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.3.0] - 2026-08-27
+
+### Added
+- **The current colour is spelled out beside the palette**, as a swatch with the colour's name and
+  its hex code, and it follows what you click rather than what was last saved. Which of nineteen
+  swatches carries the marker is not something to read a table by.
 
 ### Removed
 - **Cards can no longer be coloured one issue at a time.** A board colours by what an issue *is* —
@@ -24,8 +29,6 @@ notes from the section matching the pushed tag.
   installation this was raised from it would have rendered some 3.8 million form controls on one
   page.
 
-## [0.2.4] - 2026-08-27
-
 ### Fixed
 - **The colour picker showed no colours.** 0.2.3 replaced the colour dropdowns with swatches, but
   neither screen that shows them loads the plugin's stylesheet — it is pulled in by the board, the
@@ -36,16 +39,12 @@ notes from the section matching the pushed tag.
   readable to unusable. Both screens now load the stylesheet, and each swatch carries its own
   colour, size and border inline, so it is a visible colour even on a page that fails to load a
   stylesheet at all.
-- **The colour field on an issue raised rather than rendered.** The picker takes its swatch styling
-  from a plugin helper, and Redmine switches off Rails' automatic helper inclusion, so a helper is
-  only available to the controller of the same name. The card colour field is rendered into the
-  issue form through a hook — in Redmine's own issues controller — where the helper was not
-  registered.
-
-### Added
-- **The current colour is spelled out beside the palette**, as a swatch with the colour's name and
-  its hex code, and it follows what you click rather than what was last saved. Which of nineteen
-  swatches carries the marker is not something to read a table by.
+- **On 0.2.3, opening an issue raised an error wherever boards coloured by issue.** The colour
+  field on the issue form is drawn by a plugin helper, and Redmine switches off Rails' automatic
+  helper inclusion, so a helper reaches only the controller of the same name — not Redmine's
+  issues controller, where a hook rendered that field. It was fixed first and then removed with
+  the rest of per-issue colouring, so what is left of it here is that issue pages work again on
+  any setting.
 
 ## [0.2.3] - 2026-08-26
 

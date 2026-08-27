@@ -1,0 +1,28 @@
+h3. redmine_expert_agile 0.3.0 — 2026-08-27
+
+h4. Removed
+
+* *Cards can no longer be coloured one issue at a time.* A board colours by what an issue is — its tracker, status, priority, project, assignee, or how its spent time compares to its estimate — and a colour set on a single issue is a note in a place nobody looks for one. The colour basis *Issue* is gone from the settings, the *Issue* tab from the card colour screen, and the colour field from the issue form. That tab was also the one screen here that could not survive a real installation: it listed every issue in the instance, each with the full palette.
+
+h4. Added
+
+* *The current colour is spelled out beside the palette*, as a swatch with the colour's name and its hex code, and it follows what you click rather than what was last saved.
+
+h4. Fixed
+
+* *The colour picker showed no colours.* 0.2.3 replaced the colour dropdowns with swatches, but neither screen that shows them loads the plugin's stylesheet — it is pulled in by the board, the backlog and the charts, and the card colour screen is none of those. Without it the swatches were empty elements of no size and the radio buttons behind them were never hidden, so what was left was a row of radio buttons whose colours existed only in a hover title. The screen now loads the stylesheet, and each swatch carries its own colour, size and border inline, so it is a visible colour even on a page that fails to load a stylesheet at all.
+* *On 0.2.3, opening an issue raised an error wherever boards coloured by issue.* The colour field on the issue form was drawn by a plugin helper that Redmine's own issues controller never had. Fixed first, then removed with the rest of per-issue colouring.
+
+h4. Upgrade notes
+
+One migration, which deletes the rows that held per-issue colours. Nothing else reads or writes them once this version is installed, and no other colour is touched:
+
+<pre>
+bundle exec rake redmine:plugins:migrate NAME=redmine_expert_agile RAILS_ENV=production
+</pre>
+
+Anyone running 0.2.3 should take this release: there the card colour screen cannot be used at all, and an issue form raises where boards colour by issue.
+
+Colour settings pointing at *Issue* fall back to no colouring, since that basis no longer exists. Colours assigned to trackers, priorities, statuses and projects are untouched.
+
+Both fixes are in the plugin's assets, so a browser holding the previous stylesheet in cache will keep the old behaviour until it reloads the file.
