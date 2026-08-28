@@ -12,12 +12,16 @@ class ExpertAgileQueriesController < ApplicationController
 
   helper :queries
   include QueriesHelper
+  # The saved-board form renders the board's own options panel, which needs the
+  # card-field and status pickers from the board's helper.
+  helper :expert_agile_boards
 
   # The new/edit templates are shared by all three variants, so where they post
   # is the controller's business rather than the template's. With the routes
   # hardcoded in the template, a chart or a backlog saved from its own screen
   # would POST to the board's controller and be stored as a board.
-  helper_method :query_collection_path, :query_member_path, :query_page_title
+  helper_method :query_collection_path, :query_member_path, :query_page_title,
+                :query_options_partial
 
   def index
     scope = saved_queries_scope
@@ -55,7 +59,16 @@ class ExpertAgileQueriesController < ApplicationController
     end
   end
 
-  def edit; end
+  # The board carries its options panel through to this form, so Edit opens the
+  # board as it is on screen rather than as it was last saved. Without this,
+  # every tweak made in the panel would be dropped the moment the user clicked
+  # Edit, and saving would write the old configuration straight back.
+  def edit
+    return unless params[:set_filter].present?
+
+    @query.build_from_params(params)
+    @query.apply_board_params(params)
+  end
 
   def update
     @query.attributes = query_attributes
@@ -93,6 +106,13 @@ class ExpertAgileQueriesController < ApplicationController
 
   def query_page_title
     l(:label_expert_agile_board_new)
+  end
+
+  # The options panel rendered inside the save form, so a saved view is edited
+  # with the same controls it was configured with. Charts have none of their
+  # own — see the form.
+  def query_options_partial
+    'expert_agile_boards/board_options'
   end
 
   def saved_queries_scope

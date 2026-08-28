@@ -1,6 +1,9 @@
-<%# Name and visibility of a saved board. The board's own configuration —
-    filters, columns, swimlanes, WIP limits — travels as hidden fields from the
-    options panel the user just used, so saving keeps exactly what they see. %>
+<%# Name, visibility and configuration of a saved board.
+
+    The configuration is edited here with the very panel the board itself uses,
+    so a saved board can be reconfigured from this form. It used to travel as
+    hidden fields, which meant the only thing this form could actually change
+    was the name and the visibility. %>
 <%= error_messages_for @query %>
 
 <div class="box tabular">
@@ -23,25 +26,38 @@
   <% end %>
 </div>
 
-<%# Carry the configuration through unchanged. %>
-<%= query_as_hidden_field_tags(@query) %>
-<%= hidden_field_tag 'color_base', @query.color_base %>
-<%= hidden_field_tag 'board_type', @query.board_type %>
-<%= hidden_field_tag 'show_avatar', @query.show_avatar? ? '1' : '0' %>
-<% @query.board_status_ids.each do |status_id| %>
-  <%= hidden_field_tag 'board_status_ids[]', status_id, :id => nil %>
-<% end %>
-<% @query.wip_limits.each do |status_id, bounds| %>
-  <%= hidden_field_tag "wip_limits[#{status_id}][]", bounds[0], :id => nil %>
-  <%= hidden_field_tag "wip_limits[#{status_id}][]", bounds[1], :id => nil %>
+<% if query_options_partial %>
+  <div id="query_form_with_buttons">
+    <div id="query_form_content">
+      <%= render :partial => query_options_partial, :locals => { :expanded => true } %>
+    </div>
+  </div>
+<% else %>
+  <%# Charts have no options panel of their own — the chart, its unit and its
+      date range are chosen on the charts page — so that configuration is
+      carried through unchanged. %>
+  <%= query_as_hidden_field_tags(@query) %>
+  <%= hidden_field_tag 'color_base', @query.color_base %>
+  <%= hidden_field_tag 'show_avatar', @query.show_avatar? ? '1' : '0' %>
+  <% @query.board_status_ids.each do |status_id| %>
+    <%= hidden_field_tag 'board_status_ids[]', status_id, :id => nil %>
+  <% end %>
+  <% @query.wip_limits.each do |status_id, bounds| %>
+    <%= hidden_field_tag "wip_limits[#{status_id}][]", bounds[0], :id => nil %>
+    <%= hidden_field_tag "wip_limits[#{status_id}][]", bounds[1], :id => nil %>
+  <% end %>
+  <% if @query.is_a?(ExpertAgileChartsQuery) %>
+    <%= hidden_field_tag 'chart', @query.chart %>
+    <%= hidden_field_tag 'chart_unit', @query.chart_unit %>
+    <%= hidden_field_tag 'interval', @query.interval %>
+    <%= hidden_field_tag 'date_from', @query.date_from %>
+    <%= hidden_field_tag 'date_to', @query.date_to %>
+  <% end %>
 <% end %>
 
-<% if @query.is_a?(ExpertAgileChartsQuery) %>
-  <%= hidden_field_tag 'chart', @query.chart %>
-  <%= hidden_field_tag 'chart_unit', @query.chart_unit %>
-  <%= hidden_field_tag 'interval', @query.interval %>
-  <%= hidden_field_tag 'date_from', @query.date_from %>
-  <%= hidden_field_tag 'date_to', @query.date_to %>
-<% elsif @query.is_a?(ExpertAgileBacklogQuery) %>
+<%# Not part of any panel: the board type has no control of its own, and the
+    backlog's container kind is chosen on the backlog page. %>
+<%= hidden_field_tag 'board_type', @query.board_type %>
+<% if @query.is_a?(ExpertAgileBacklogQuery) %>
   <%= hidden_field_tag 'container_type', @query.container_type %>
 <% end %>

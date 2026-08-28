@@ -103,6 +103,68 @@ class ExpertAgileQueriesControllerTest < Redmine::ControllerTest
            'a user without the manage permission must not create a public board'
   end
 
+  # The complaint that prompted this: the edit form could only rename a saved
+  # board, because its configuration was written out as hidden fields taken from
+  # the stored record. Filters and options now come from the same panel the
+  # board uses, so a saved board can actually be reconfigured.
+  def test_edit_renders_the_options_panel
+    post :create, :params => board_params
+    query = ExpertAgileQuery.order(:id).last
+
+    get :edit, :params => { :id => query.id }
+
+    assert_response :success
+    assert_select 'fieldset#filters'
+    assert_select 'fieldset#options'
+    assert_select 'input[name=?][value=?]', 'board_status_ids[]', @status_id.to_s
+  end
+
+  # Edit is reached by submitting the board's own form, so whatever the user has
+  # applied in the panel travels with it. Before, the link dropped every unsaved
+  # tweak and saving wrote the stored configuration straight back.
+  def test_edit_applies_the_configuration_carried_from_the_board
+    post :create, :params => board_params
+    query = ExpertAgileQuery.order(:id).last
+
+    get :edit, :params => { :id => query.id, :set_filter => '1',
+                            :color_base => 'tracker',
+                            :board_status_ids => [@status_id.to_s],
+                            :wip_limits => { @status_id.to_s => ['1', '3'] } }
+
+    assert_response :success
+    assert_select 'select#color_base option[value=?][selected=selected]', 'tracker'
+    assert_select 'input[name=?][value=?]', "wip_limits[#{@status_id}][]", '1'
+    assert_select 'input[name=?][value=?]', "wip_limits[#{@status_id}][]", '3'
+    # Nothing is written until the form is submitted.
+    assert_equal 'priority', ExpertAgileQuery.find(query.id).color_base
+  end
+
+  def test_edit_without_a_request_configuration_shows_the_stored_one
+    post :create, :params => board_params
+    query = ExpertAgileQuery.order(:id).last
+
+    get :edit, :params => { :id => query.id }
+
+    assert_select 'select#color_base option[value=?][selected=selected]', 'priority'
+    assert_select 'input[name=?][value=?]', "wip_limits[#{@status_id}][]", '2'
+    assert_select 'input[name=?][value=?]', "wip_limits[#{@status_id}][]", '5'
+  end
+
+  def test_update_changes_the_filters
+    post :create, :params => board_params
+    query = ExpertAgileQuery.order(:id).last
+
+    put :update, :params => { :id => query.id,
+                              :query => { :name => 'My board' },
+                              :f => ['status_id'],
+                              :op => { 'status_id' => 'o' },
+                              :c => %w(status priority) }
+
+    reloaded = ExpertAgileQuery.find(query.id)
+    assert_equal ['status_id'], reloaded.filters.keys
+    assert_equal 'o', reloaded.filters['status_id'][:operator]
+  end
+
   def test_editing_another_users_private_board_is_denied
     other = ExpertAgileQuery.create!(:name => 'Theirs', :project => @project,
                                      :user => User.find(3),

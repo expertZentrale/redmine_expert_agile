@@ -1,106 +1,31 @@
-<%# Board options panel.
-    Modelled on Redmine's queries/_query_form so it behaves the way every other
-    Redmine filter panel does — collapsible fieldsets, the same filter widget,
-    the same column picker. Filters, card fields, grouping and sorting are core
-    partials; the board-specific settings sit in their own fieldset below.
-
-    Note: Redmine's own filters partial emits an inline <script> block. The
-    board *content* — columns and cards, which are also re-injected after a
-    move — stays free of inline script; this panel inherits whatever core
-    does, because it is core's markup. %>
-
-<%= hidden_field_tag 'set_filter', '1' %>
-<%= hidden_field_tag 'type', @query.type, :disabled => true, :id => 'query_type' %>
+<%# Board options panel: the configuration controls plus the buttons that act on
+    them. The controls themselves live in `_board_options` because the
+    saved-board form renders the same ones. %>
 
 <div id="query_form_with_buttons" class="hide-when-print">
   <div id="query_form_content">
-
-    <fieldset id="filters" class="collapsible <%= @query.new_record? ? '' : 'collapsed' %>">
-      <legend onclick="toggleFieldset(this);" class="icon icon-<%= @query.new_record? ? 'expanded' : 'collapsed' %>">
-        <%= l(:label_filter_plural) %>
-      </legend>
-      <div style="<%= @query.new_record? ? '' : 'display: none;' %>">
-        <%= render :partial => 'queries/filters', :locals => { :query => @query } %>
-      </div>
-    </fieldset>
-
-    <fieldset id="options" class="collapsible collapsed">
-      <legend onclick="toggleFieldset(this);" class="icon icon-collapsed"><%= l(:label_options) %></legend>
-      <div class="hidden">
-        <%# One grid of three panels rather than three stacked fieldsets with a
-            400px dual-listbox in the middle. Everything a board is configured
-            with is visible at once. %>
-        <div class="ea-options-grid">
-
-          <section class="ea-options-panel">
-            <h4><%= l(:label_expert_agile_card_fields) %></h4>
-            <div class="ea-field-options">
-              <%= expert_agile_card_field_tags(@query) %>
-            </div>
-          </section>
-
-          <section class="ea-options-panel">
-            <h4><%= l(:label_expert_agile_appearance) %></h4>
-            <p class="ea-options-row">
-              <label for="group_by"><%= l(:label_expert_agile_swimlanes) %></label>
-              <%= group_by_column_select_tag(@query) %>
-            </p>
-            <p class="ea-options-row">
-              <label for="color_base"><%= l(:label_expert_agile_color_base) %></label>
-              <%= select_tag 'color_base',
-                             options_for_select(
-                               RedmineExpertAgile::COLOR_BASES.map { |b| [l("label_expert_agile_color_base_#{b}"), b] },
-                               @query.color_base) %>
-            </p>
-            <p class="ea-options-row">
-              <label for="show_avatar"><%= l(:label_expert_agile_show_avatar) %></label>
-              <span>
-                <%= hidden_field_tag 'show_avatar', '0' %>
-                <%= check_box_tag 'show_avatar', '1', @query.show_avatar? %>
-              </span>
-            </p>
-          </section>
-
-          <section class="ea-options-panel" id="ea-columns-options">
-            <h4><%= l(:label_expert_agile_columns_and_limits) %></h4>
-            <p class="ea-hint"><%= l(:text_expert_agile_board_statuses_hint) %></p>
-            <% selected = @query.board_statuses.map(&:id) %>
-            <% limits = @query.wip_limits %>
-            <%= hidden_field_tag 'board_status_ids[]', '' %>
-            <div class="ea-status-grid">
-              <span class="ea-status-grid-head"><%= l(:field_status) %></span>
-              <span class="ea-status-grid-head"><%= l(:label_expert_agile_wip_min) %></span>
-              <span class="ea-status-grid-head"><%= l(:label_expert_agile_wip_max) %></span>
-              <% expert_agile_selectable_statuses(@query).each do |status| %>
-                <label class="ea-status-name<%= ' ea-status-closed' if status.is_closed? %>">
-                  <%= check_box_tag 'board_status_ids[]', status.id,
-                                    selected.include?(status.id), :id => "ea_status_#{status.id}" %>
-                  <%= h status.name %>
-                </label>
-                <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][0],
-                                   :size => 2, :id => nil, :class => 'ea-wip-input' %>
-                <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][1],
-                                   :size => 2, :id => nil, :class => 'ea-wip-input' %>
-              <% end %>
-            </div>
-          </section>
-
-        </div>
-      </div>
-    </fieldset>
+    <%= render :partial => 'expert_agile_boards/board_options' %>
   </div>
 
   <p class="buttons hide-when-print">
     <%= submit_tag l(:button_apply), :class => 'icon icon-checked', :name => nil %>
     <%= link_to l(:button_clear), board_path_for(@project),
                 :class => 'icon icon-reload' %>
+    <%# Save and Edit are submits with a formaction, not links that rewrite the
+        form's action from an inline onclick. Both have to reach their target
+        carrying everything the user just configured, and the browser does
+        exactly that for free — no script, so the page still works under
+        `script-src 'self'`. Apply stays the first submit, so Enter in a filter
+        field still applies rather than saves. %>
     <% if @query.new_record? && User.current.allowed_to?(:add_expert_agile_queries, @project, :global => true) %>
-      <%= link_to l(:button_save), '#',
-                  :onclick => "$('#query_type').prop('disabled', false); " \
-                              "$('#ea_query_form').attr('action', '#{escape_javascript(new_board_path_for(@project))}').submit(); return false;",
-                  :class => 'icon icon-save' %>
+      <%= submit_tag l(:button_save), :name => nil, :class => 'icon icon-save',
+                     :formaction => new_board_path_for(@project) %>
     <% elsif @query.persisted? && @query.editable_by?(User.current) %>
-      <%= link_to l(:button_edit), edit_expert_agile_query_path(@query), :class => 'icon icon-edit' %>
+      <%# Carries the panel through to the edit form, so Edit opens the board as
+          it is on screen. A plain link would drop every unsaved tweak and the
+          user would be editing what was last saved instead. %>
+      <%= submit_tag l(:button_edit), :name => nil, :class => 'icon icon-edit',
+                     :formaction => edit_expert_agile_query_path(@query) %>
       <%= link_to l(:button_delete), expert_agile_query_path(@query),
                   :data => { :confirm => l(:text_are_you_sure) }, :method => :delete,
                   :class => 'icon icon-del' %>
