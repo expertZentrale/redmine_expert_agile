@@ -29,6 +29,20 @@ module ExpertAgileBacklogsHelper
     }.to_json
   end
 
+  # The planner has the same reach as the board — a project's backlog carries
+  # its subprojects' issues — so whether a card may be planned is a question
+  # about that card's own project. See the board helper's copy.
+  def expert_agile_planning_card_movable?(issue)
+    project = issue.project
+    return false if project.nil?
+
+    @expert_agile_plannable_projects ||= {}
+    @expert_agile_plannable_projects.fetch(project.id) do
+      @expert_agile_plannable_projects[project.id] =
+        User.current.allowed_to?(:manage_expert_agile_backlog, project)
+    end
+  end
+
   def backlog_path_for(project, options = {})
     project_expert_agile_backlog_path(project, options)
   end

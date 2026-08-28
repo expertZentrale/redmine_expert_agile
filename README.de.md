@@ -77,6 +77,18 @@ Fortschritt](docs/screenshots/de/01-board.png)
 Jedes Feld, nach dem die Abfrage gruppieren kann, wird zur Swimlane — dasselbe Board laesst sich
 so nach Bearbeiter, Tracker oder Prioritaet lesen.
 
+Ein Board traegt die Tickets seiner Unterprojekte, das globale Board traegt alles. Ob eine Karte
+gezogen werden darf, ist deshalb eine Frage an das Projekt der Karte, nicht an das Projekt, dessen
+Board angezeigt wird. Eine Karte aus einem Projekt, in dem Sie keine Karten verschieben duerfen,
+wird angezeigt, laesst sich aber nicht ziehen.
+
+Ein Board, das sich zu behalten lohnt, wird ueber das Optionsfeld gespeichert und ueber die
+Seitenleiste wieder geoeffnet. Beim Bearbeiten eines gespeicherten Boards oeffnet sich dasselbe
+Optionsfeld, mit dem es angelegt wurde: Filter, Kartenfelder, Swimlanes, Einfaerbung,
+Statusspalten und WIP-Grenzen lassen sich alle aendern. "Bearbeiten" nimmt ausserdem mit, was
+gerade angewandt ist — das Board oeffnet sich also so, wie es auf dem Bildschirm steht, und nicht
+so, wie es zuletzt gespeichert wurde.
+
 ![Dasselbe Board, in Swimlanes nach Bearbeiter gruppiert: ein beschriftetes Band je Teammitglied
 plus ein Band fuer nicht zugewiesene Tickets, jedes ueber alle fuenf Statusspalten](docs/screenshots/de/02-board-swimlanes.png)
 

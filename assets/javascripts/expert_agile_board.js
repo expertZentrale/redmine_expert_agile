@@ -236,6 +236,12 @@
 
   function makeDraggable(card) {
     if (!config.editable) { return; }
+    /* The board-wide flag answers "may this user move cards here at all". This
+     * one answers it per card, because a board carries more than one project:
+     * a parent's board carries its subprojects, the global board carries
+     * everything, and the permission lives with the issue. Without it, cards
+     * the server was always going to refuse were still offered for dragging. */
+    if (card.getAttribute('data-movable') === '0') { return; }
     card.setAttribute('draggable', 'true');
     card.addEventListener('dragstart', function (event) {
       dragged = card;

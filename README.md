@@ -70,6 +70,15 @@ id, tracker, subject, assignee, story points and percent done](docs/screenshots/
 Any field the query can group by becomes a swimlane, so the same board can be read per assignee,
 per tracker or per priority.
 
+A board carries its subprojects' issues, and the global board carries everything — so whether a
+card may be dragged is a question about that card's own project, not about the one whose board is
+on screen. A card from a project where you may not move cards is shown but not draggable.
+
+A board worth keeping is saved from the options panel and reopened from the sidebar. Editing a
+saved board opens the same panel it was created with, so its filters, card fields, swimlanes,
+colouring, status columns and WIP limits can all be changed — and Edit takes whatever is currently
+applied along with it, so it opens the board as it is on screen rather than as it was last saved.
+
 ![The same board grouped into swimlanes by assignee: one labelled band per team member plus a
 band for unassigned issues, each spanning all five status columns](docs/screenshots/en/02-board-swimlanes.png)
 

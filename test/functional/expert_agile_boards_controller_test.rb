@@ -567,6 +567,42 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert JSON.parse(response.body)['error'].present?
   end
 
+  # A board is not one project: a parent project's board carries its
+  # subprojects' issues, while the permission is checked where the issue lives.
+  # The board used to decide draggability once, from the project it is shown in,
+  # so a subproject card was offered for dragging and then bounced back with a
+  # refusal the user could not read. A subproject that has not enabled the agile
+  # module refuses even an administrator, because Redmine checks the module
+  # before it checks who is asking.
+  def subproject_without_the_agile_module
+    sub = Project.generate!(:parent_id => @project.id, :is_public => true)
+    sub.enabled_modules.where(:name => 'expert_agile').destroy_all
+    sub
+  end
+
+  def test_a_card_from_a_project_without_the_module_is_not_offered_for_dragging
+    sub = subproject_without_the_agile_module
+    stray = Issue.generate!(:project_id => sub.id, :status_id => @issue.status_id)
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    # A card the server will refuse must not be offered for dragging.
+    assert_select "#ea-card-#{@issue.id}[data-movable='1']"
+    assert_select "#ea-card-#{stray.id}[data-movable='0']"
+  end
+
+  def test_a_card_refused_because_of_its_own_project_names_that_project
+    sub = subproject_without_the_agile_module
+    stray = Issue.generate!(:project_id => sub.id, :status_id => @issue.status_id)
+
+    put :update, :params => { :id => stray.id, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :forbidden
+    assert_includes JSON.parse(response.body)['error'], sub.name,
+                    'the refusal has to say which project it is about'
+  end
+
   def test_update_reorders_within_a_column_without_changing_status
     others = 2.times.map do
       Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id)

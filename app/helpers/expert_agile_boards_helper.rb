@@ -106,6 +106,31 @@ module ExpertAgileBoardsHelper
   #
   # Block columns (description) are listed alongside the inline ones — on a card
   # that distinction does not exist.
+  # Whether the user may move this card at all.
+  #
+  # A board is not one project: a parent project's board carries its
+  # subprojects' issues, and the global board carries everything. The
+  # permission is checked where the issue lives, which is right — but the board
+  # used to decide draggability once, from the project the board itself is
+  # shown in, so every card on a parent's board was draggable and the
+  # subproject ones then bounced back with a refusal. A subproject that has not
+  # enabled the agile module refuses even an administrator, because Redmine
+  # checks the module before it checks who is asking.
+  #
+  # Memoised per project, not per card: a board can hold hundreds of cards from
+  # a handful of projects, and each `allowed_to?` walks that project's modules
+  # and the user's roles in it.
+  def expert_agile_card_movable?(issue)
+    project = issue.project
+    return false if project.nil?
+
+    @expert_agile_movable_projects ||= {}
+    @expert_agile_movable_projects.fetch(project.id) do
+      @expert_agile_movable_projects[project.id] =
+        User.current.allowed_to?(:edit_expert_agile_board, project)
+    end
+  end
+
   def expert_agile_card_field_tags(query)
     selected = query.columns.map(&:name)
     columns = (query.available_columns + query.available_block_columns).uniq(&:name)

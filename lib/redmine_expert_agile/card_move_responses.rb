@@ -49,8 +49,23 @@ module RedmineExpertAgile
     def render_403(options = {})
       return super unless request.format.js?
 
-      render_card_move_refusal(l(:error_expert_agile_move_not_permitted), :forbidden)
+      render_card_move_refusal(card_move_denied_message, :forbidden)
       false
+    end
+
+    # A board is not one project. A parent project's board carries its
+    # subprojects' issues and the global board carries everything, while the
+    # permission is checked where the issue lives — so "you may not move cards
+    # on this board" is the wrong sentence for a card from somewhere else: the
+    # user may, just not this one. Naming the project is what makes the refusal
+    # answerable, because the fix is in that project's settings — most often
+    # its agile module, which Redmine checks before it checks who is asking, so
+    # a subproject without it refuses administrators too.
+    def card_move_denied_message
+      project = @issue && @issue.project
+      return l(:error_expert_agile_move_not_permitted) if project.nil?
+
+      l(:error_expert_agile_move_not_permitted_in_project, :project => project.name)
     end
 
     # Reached when the card, its project or the saved board behind it is gone —

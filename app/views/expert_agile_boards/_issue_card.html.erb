@@ -5,7 +5,11 @@
 <div class="<%= expert_agile_card_classes(issue, @query) %>"
      id="ea-card-<%= issue.id %>"
      data-issue-id="<%= issue.id %>"
-     data-status-id="<%= issue.status_id %>">
+     data-status-id="<%= issue.status_id %>"
+     <%# A board can carry issues from projects the user may not move cards in.
+         The card says so itself, so the board never offers a drag that the
+         server is going to refuse. %>
+     data-movable="<%= expert_agile_card_movable?(issue) ? '1' : '0' %>">
 
   <div class="ea-card-header">
     <span class="ea-card-id"><%= link_to("##{issue.id}", issue_path(issue)) %></span>

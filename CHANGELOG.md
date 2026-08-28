@@ -9,6 +9,45 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [0.3.2] - 2026-08-28
+
+### Fixed
+- **A card from a subproject could not be moved on the parent project's board, and said only
+  "the move could not be saved".** A board is not one project: a parent project's board carries
+  its subprojects' issues and the global board carries everything, while the permission to move a
+  card is checked where that card lives. The board decided draggability once, from the project it
+  was being shown in, so every card on a parent's board was offered for dragging and the
+  subproject ones bounced straight back. A subproject that has not enabled the agile module
+  refuses even an administrator, because Redmine checks the module before it checks who is
+  asking — which is why the refusal survived a look at the roles, where nothing is wrong. Each
+  card now says for itself whether it may be moved, so one that would be refused is not offered,
+  and a refusal that happens anyway names the project to go and look at. The backlog planner
+  reaches into subprojects the same way and is fixed with it.
+- **"The move could not be saved" was the answer to five different questions.** That sentence is
+  the board's fallback for an answer it cannot read, and Redmine answers everything it refuses
+  with an empty body for every format but HTML — so a missing *Edit agile board* permission, a
+  session that had run out while the board sat open, a page whose CSRF token no longer matched,
+  a card that had been deleted, and any unexpected server error all reached the user as the same
+  sentence, none of them as the reason. It reads as a defect in the board every time, which is
+  exactly how it gets reported. Each of those now answers in the board's own shape and says which
+  one it is; anything unforeseen is logged in full and answered as such rather than left to
+  Rails' HTML error page. Two related holes closed with it: a move whose saved answer the board
+  then failed to display no longer puts the card back as though nothing had been written, and a
+  saved board deleted while the page naming it was still open no longer sinks the move — which
+  board is on screen only decides the cards a new rank is measured against. The backlog planner
+  had all of this too and is fixed with it.
+- **Editing a saved board could only rename it.** The edit form wrote the board's configuration
+  out as hidden fields taken from the stored record, so the only things it could actually change
+  were the name and the visibility — the filters, card fields, swimlanes, colouring, status
+  columns and WIP limits went in and came back out untouched. Worse, the way in made that
+  invisible: the board's Edit button was a plain link, so everything the user had just applied in
+  the options panel was dropped on the way, and saving wrote the old configuration straight back
+  over it. The form now renders the board's own options panel, so a saved board is edited with the
+  controls it was created with, and Edit carries the panel along, so it opens the board as it is
+  on screen rather than as it was last saved. The same applies to a saved backlog. Save and Edit
+  are now submit buttons with a `formaction` rather than a link that rewrites the form from an
+  inline handler, so the board page needs one less piece of inline script.
+
 ## [0.3.1] - 2026-08-27
 
 ### Changed

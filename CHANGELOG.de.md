@@ -9,6 +9,51 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [0.3.2] - 2026-08-28
+
+### Behoben
+- **Eine Karte aus einem Unterprojekt liess sich auf dem Board des Elternprojekts nicht
+  verschieben und meldete nur "Der Zug konnte nicht gespeichert werden".** Ein Board ist nicht
+  ein Projekt: Das Board eines Elternprojekts traegt die Tickets seiner Unterprojekte, das
+  globale Board traegt alles, waehrend die Berechtigung zum Verschieben dort geprueft wird, wo
+  die Karte liegt. Das Board entschied ueber die Ziehbarkeit einmal, anhand des Projekts, in dem
+  es angezeigt wurde — also war jede Karte auf dem Board des Elternprojekts ziehbar, und die aus
+  Unterprojekten sprangen sofort zurueck. Ein Unterprojekt ohne aktiviertes Agile-Modul weist
+  sogar Administratoren ab, weil Redmine das Modul prueft, bevor es prueft, wer fragt — deshalb
+  ueberlebte die Ablehnung einen Blick auf die Rollen, an denen nichts falsch ist. Jede Karte
+  sagt jetzt selbst, ob sie verschoben werden darf, eine Karte die abgelehnt wuerde, wird also
+  gar nicht erst angeboten, und eine dennoch auftretende Ablehnung nennt das Projekt, in das zu
+  schauen ist. Der Backlog-Planer greift genauso in Unterprojekte und ist mit behoben.
+- **"Der Zug konnte nicht gespeichert werden" war die Antwort auf fuenf verschiedene Fragen.**
+  Dieser Satz ist die Ersatzmeldung des Boards fuer eine Antwort, die es nicht lesen kann, und
+  Redmine beantwortet alles, was es ablehnt, fuer jedes Format ausser HTML mit einem leeren
+  Rumpf. Eine fehlende Berechtigung *Agile-Board bearbeiten*, eine Sitzung, die abgelaufen war,
+  waehrend das Board offen stand, eine Seite mit nicht mehr passendem CSRF-Token, eine geloeschte
+  Karte und jeder unerwartete Serverfehler kamen damit alle als derselbe Satz beim Benutzer an —
+  und keiner davon als der Grund. Das liest sich jedes Mal wie ein Fehler im Board, und genau so
+  wird es gemeldet. Jeder dieser Faelle antwortet jetzt in der Form des Boards und nennt sich
+  selbst; alles Unvorhergesehene wird vollstaendig protokolliert und ebenso beantwortet, statt
+  Rails' HTML-Fehlerseite zu ueberlassen. Zwei verwandte Luecken sind mit geschlossen: Ein Zug,
+  dessen gespeicherte Antwort das Board anschliessend nicht anzeigen konnte, legt die Karte nicht
+  mehr zurueck, als waere nichts geschrieben worden, und ein Board, das geloescht wurde, waehrend
+  die es nennende Seite noch offen war, laesst den Zug nicht mehr scheitern — welches Board auf
+  dem Bildschirm steht, entscheidet nur ueber die Karten, an denen ein neuer Rang gemessen wird.
+  Der Backlog-Planer hatte all das ebenfalls und ist mit behoben.
+- **Ein gespeichertes Board liess sich beim Bearbeiten nur umbenennen.** Das Bearbeitungsformular
+  schrieb die Konfiguration des Boards als versteckte Felder aus dem gespeicherten Datensatz
+  heraus. Aendern liessen sich damit nur Name und Sichtbarkeit — Filter, Kartenfelder,
+  Swimlanes, Einfaerbung, Statusspalten und WIP-Grenzen gingen unveraendert hinein und wieder
+  heraus. Schlimmer noch: der Weg dorthin machte das unsichtbar, denn die Schaltflaeche
+  "Bearbeiten" war ein einfacher Link. Alles, was gerade im Optionsfeld angewandt worden war,
+  ging dabei verloren, und das Speichern schrieb die alte Konfiguration direkt wieder darueber.
+  Das Formular zeigt jetzt das Optionsfeld des Boards selbst, ein gespeichertes Board wird also
+  mit denselben Bedienelementen bearbeitet, mit denen es angelegt wurde, und "Bearbeiten"
+  nimmt das Optionsfeld mit — es oeffnet das Board so, wie es auf dem Bildschirm steht, und
+  nicht so, wie es zuletzt gespeichert wurde. Fuer einen gespeicherten Backlog gilt dasselbe.
+  "Speichern" und "Bearbeiten" sind jetzt Absende-Schaltflaechen mit `formaction` statt eines
+  Links, der das Formular per Inline-Handler umschreibt; damit kommt die Board-Seite mit einem
+  Inline-Skript weniger aus.
+
 ## [0.3.1] - 2026-08-27
 
 ### Geaendert

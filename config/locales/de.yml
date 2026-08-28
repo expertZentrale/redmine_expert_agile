@@ -113,6 +113,7 @@ de:
   label_expert_agile_edit_workflow: Workflow dieses Trackers bearbeiten
   error_expert_agile_move_failed: Der Zug konnte nicht gespeichert werden
   error_expert_agile_move_not_permitted: Sie duerfen auf diesem Board keine Karten verschieben
+  error_expert_agile_move_not_permitted_in_project: "Sie duerfen Karten des Projekts %{project} nicht verschieben. Pruefen Sie dessen Agile-Modul und Berechtigungen"
   error_expert_agile_session_expired: Ihre Sitzung ist abgelaufen. Laden Sie die Seite neu und melden Sie sich erneut an
   error_expert_agile_move_target_gone: Diese Karte oder das Board, auf dem sie verschoben wurde, existiert nicht mehr. Laden Sie die Seite neu
   error_expert_agile_move_failed_unexpectedly: Der Zug ist unerwartet fehlgeschlagen. Einzelheiten stehen im Server-Log
