@@ -106,6 +106,31 @@ module ExpertAgileBoardsHelper
   #
   # Block columns (description) are listed alongside the inline ones — on a card
   # that distinction does not exist.
+  # Whether the user may move this card at all.
+  #
+  # A board is not one project: a parent project's board carries its
+  # subprojects' issues, and the global board carries everything. The
+  # permission is checked where the issue lives, which is right — but the board
+  # used to decide draggability once, from the project the board itself is
+  # shown in, so every card on a parent's board was draggable and the
+  # subproject ones then bounced back with a refusal. A subproject that has not
+  # enabled the agile module refuses even an administrator, because Redmine
+  # checks the module before it checks who is asking.
+  #
+  # Memoised per project, not per card: a board can hold hundreds of cards from
+  # a handful of projects, and each `allowed_to?` walks that project's modules
+  # and the user's roles in it.
+  def expert_agile_card_movable?(issue)
+    project = issue.project
+    return false if project.nil?
+
+    @expert_agile_movable_projects ||= {}
+    @expert_agile_movable_projects.fetch(project.id) do
+      @expert_agile_movable_projects[project.id] =
+        User.current.allowed_to?(:edit_expert_agile_board, project)
+    end
+  end
+
   def expert_agile_card_field_tags(query)
     selected = query.columns.map(&:name)
     columns = (query.available_columns + query.available_block_columns).uniq(&:name)
@@ -189,7 +214,14 @@ module ExpertAgileBoardsHelper
         :wipExceeded => l(:text_expert_agile_wip_limit_exceeded),
         # Only for a request that never came back with an answer. A move the
         # server refuses carries its own reason, which the board shows instead.
-        :moveFailed => l(:error_expert_agile_move_failed)
+        :moveFailed => l(:error_expert_agile_move_failed),
+        # Except when the refusal has no body to carry it: Redmine answers a
+        # missing permission and an expired session with an empty 403 / 401.
+        :notPermitted => l(:error_expert_agile_move_not_permitted),
+        :sessionExpired => l(:error_expert_agile_session_expired),
+        # For the one failure that is not a refusal: the server saved the move
+        # and the board could not show it.
+        :saveNotShown => l(:error_expert_agile_move_saved_but_not_shown)
       }
     }.to_json
   end

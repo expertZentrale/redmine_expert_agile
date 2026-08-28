@@ -112,6 +112,12 @@ en:
   text_expert_agile_transitions_none: "No status change is open to you from %{from}"
   label_expert_agile_edit_workflow: Edit this tracker's workflow
   error_expert_agile_move_failed: The move could not be saved
+  error_expert_agile_move_not_permitted: You are not allowed to move cards on this board
+  error_expert_agile_move_not_permitted_in_project: "You are not allowed to move cards of the project %{project}. Check its agile module and permissions"
+  error_expert_agile_session_expired: Your session has expired. Reload the page and sign in again
+  error_expert_agile_move_target_gone: This card, or the board it was moved on, no longer exists. Reload the page
+  error_expert_agile_move_failed_unexpectedly: The move failed unexpectedly. The details are in the server log
+  error_expert_agile_move_saved_but_not_shown: The move was saved, but the board could not be updated. Reload the page
   error_expert_agile_issue_not_editable: You are not allowed to edit this issue
   label_expert_agile_swimlane_none: No swimlanes
   label_expert_agile_swimlane_none_value: (none)

@@ -35,4 +35,11 @@ class ExpertAgileChartsQueriesController < ExpertAgileQueriesController
   def query_page_title
     l(:label_expert_agile_chart_new)
   end
+
+  # No panel: the chart, its unit and its date range are chosen on the charts
+  # page itself, and there is no filter panel there to reuse. The form carries
+  # the configuration through as hidden fields instead.
+  def query_options_partial
+    nil
+  end
 end

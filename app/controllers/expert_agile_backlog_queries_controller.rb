@@ -35,4 +35,8 @@ class ExpertAgileBacklogQueriesController < ExpertAgileQueriesController
   def query_page_title
     l(:label_expert_agile_backlog_new)
   end
+
+  def query_options_partial
+    'expert_agile_backlogs/backlog_options'
+  end
 end

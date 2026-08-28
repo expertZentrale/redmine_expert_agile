@@ -17,9 +17,30 @@ module ExpertAgileBacklogsHelper
       :projectId => project.id,
       :editable => User.current.allowed_to?(:manage_expert_agile_backlog, project),
       :labels => {
-        :moveFailed => l(:error_expert_agile_move_failed)
+        :moveFailed => l(:error_expert_agile_move_failed),
+        # A refusal with no body to carry its reason: Redmine answers a missing
+        # permission and an expired session with an empty 403 / 401.
+        :notPermitted => l(:error_expert_agile_move_not_permitted),
+        :sessionExpired => l(:error_expert_agile_session_expired),
+        # For the one failure that is not a refusal: the server saved the move
+        # and the board could not show it.
+        :saveNotShown => l(:error_expert_agile_move_saved_but_not_shown)
       }
     }.to_json
+  end
+
+  # The planner has the same reach as the board — a project's backlog carries
+  # its subprojects' issues — so whether a card may be planned is a question
+  # about that card's own project. See the board helper's copy.
+  def expert_agile_planning_card_movable?(issue)
+    project = issue.project
+    return false if project.nil?
+
+    @expert_agile_plannable_projects ||= {}
+    @expert_agile_plannable_projects.fetch(project.id) do
+      @expert_agile_plannable_projects[project.id] =
+        User.current.allowed_to?(:manage_expert_agile_backlog, project)
+    end
   end
 
   def backlog_path_for(project, options = {})

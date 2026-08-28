@@ -481,6 +481,128 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert link['label'].present?
   end
 
+  # Redmine answers a request it will not serve with an empty body for every
+  # format but HTML. The board reads every answer as JSON, so a refusal for lack
+  # of a permission used to arrive as the generic "the move could not be saved"
+  # and nothing else — indistinguishable from a bug, for the user and for
+  # whoever they report it to.
+  def test_a_move_refused_for_lack_of_permission_says_so
+    @role.remove_permission!(:edit_expert_agile_board)
+
+    put :update, :params => { :id => @issue.id, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :forbidden
+    assert response.body.present?, 'a refusal the board cannot read tells the user nothing'
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  # The same for the board's own refusals: an error with an empty message leaves
+  # the board falling back to its generic wording.
+  def test_every_refusal_carries_a_message
+    forbidden = forbidden_status_for(@issue)
+
+    put :update, :params => { :id => @issue.id, :status_id => forbidden.id }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  # Redmine answers everything it refuses with an empty body for every format
+  # but HTML, and the board reads every answer as JSON. Each of these used to
+  # arrive as the generic "the move could not be saved" and told the user
+  # nothing about which of them it was.
+  def test_a_stale_csrf_token_says_the_session_is_gone
+    ActionController::Base.allow_forgery_protection = true
+    @request.env['HTTP_X_CSRF_TOKEN'] = 'not-the-token'
+
+    put :update, :params => { :id => @issue.id, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert JSON.parse(response.body)['error'].present?,
+           'a rejected token must not arrive as an empty body'
+  ensure
+    ActionController::Base.allow_forgery_protection = false
+  end
+
+  def test_a_missing_issue_says_so_rather_than_answering_with_nothing
+    put :update, :params => { :id => 0, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :not_found
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  def test_an_issue_the_user_cannot_see_says_so
+    @request.session[:user_id] = 7
+    put :update, :params => { :id => @issue.id, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_includes [401, 403], response.status
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  # The page carries the board's id, and the board can be deleted while that
+  # page is still open. Which board is on screen only decides the cards the new
+  # rank is measured against, so it is no reason to refuse the move.
+  def test_a_move_survives_a_saved_board_that_has_been_deleted
+    query = ExpertAgileQuery.create!(:name => 'Gone', :project => @project,
+                                     :user => User.find(2),
+                                     :visibility => Query::VISIBILITY_PRIVATE)
+    id = query.id
+    query.destroy
+
+    put :update, :params => { :id => @issue.id, :query_id => id,
+                              :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :success
+  end
+
+  # Anything unforeseen still has to reach the user as something they can act
+  # on, not as Rails' HTML 500 page that the board cannot read.
+  def test_an_unexpected_failure_is_answered_in_the_boards_own_shape
+    ExpertAgileBoardsController.any_instance.stubs(:column_siblings)
+                               .raises(RuntimeError, 'boom')
+
+    put :update, :params => { :id => @issue.id, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :internal_server_error
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  # A board is not one project: a parent project's board carries its
+  # subprojects' issues, while the permission is checked where the issue lives.
+  # The board used to decide draggability once, from the project it is shown in,
+  # so a subproject card was offered for dragging and then bounced back with a
+  # refusal the user could not read. A subproject that has not enabled the agile
+  # module refuses even an administrator, because Redmine checks the module
+  # before it checks who is asking.
+  def subproject_without_the_agile_module
+    sub = Project.generate!(:parent_id => @project.id, :is_public => true)
+    sub.enabled_modules.where(:name => 'expert_agile').destroy_all
+    sub
+  end
+
+  def test_a_card_from_a_project_without_the_module_is_not_offered_for_dragging
+    sub = subproject_without_the_agile_module
+    stray = Issue.generate!(:project_id => sub.id, :status_id => @issue.status_id)
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    # A card the server will refuse must not be offered for dragging.
+    assert_select "#ea-card-#{@issue.id}[data-movable='1']"
+    assert_select "#ea-card-#{stray.id}[data-movable='0']"
+  end
+
+  def test_a_card_refused_because_of_its_own_project_names_that_project
+    sub = subproject_without_the_agile_module
+    stray = Issue.generate!(:project_id => sub.id, :status_id => @issue.status_id)
+
+    put :update, :params => { :id => stray.id, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :forbidden
+    assert_includes JSON.parse(response.body)['error'], sub.name,
+                    'the refusal has to say which project it is about'
+  end
+
   def test_update_reorders_within_a_column_without_changing_status
     others = 2.times.map do
       Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id)

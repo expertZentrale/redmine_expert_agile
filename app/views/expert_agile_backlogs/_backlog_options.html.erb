@@ -1,0 +1,67 @@
+<%# The backlog's configuration: filters, card fields and appearance.
+
+    The board's panel minus the parts a planner has no use for: no
+    status-column or WIP fieldset, because `planning_scope` deliberately
+    ignores where an issue sits in the workflow — an issue is planned or it is
+    not. Same ids as the board and as Redmine's own queries/_query_form, so the
+    core stylesheet and toggleFieldset apply unchanged.
+
+    Rendered both by the backlog's own options panel and by the saved-backlog
+    form, so a saved backlog is edited with the same controls it was created
+    with. The Apply/Clear/Save buttons stay with the caller.
+
+    Note: Redmine's own filters partial emits an inline <script> block. The
+    backlog *content* — lanes and cards, which are also re-injected after a
+    move — stays free of inline script; this panel inherits whatever core
+    does, because it is core's markup. %>
+
+<%= hidden_field_tag 'set_filter', '1' %>
+
+<%# On the page this configures, the filters open only for a new view and the
+    options always start folded, so the page leads with content rather than with
+    a filter table. The save form passes `expanded` to override both: there,
+    changing the configuration is the point of the page. %>
+<% expanded = local_assigns[:expanded] %>
+<% filters_expanded = expanded.nil? ? @query.new_record? : expanded %>
+<fieldset id="filters" class="collapsible <%= filters_expanded ? '' : 'collapsed' %>">
+  <legend onclick="toggleFieldset(this);" class="icon icon-<%= filters_expanded ? 'expanded' : 'collapsed' %>">
+    <%= l(:label_filter_plural) %>
+  </legend>
+  <div style="<%= filters_expanded ? '' : 'display: none;' %>">
+    <%= render :partial => 'queries/filters', :locals => { :query => @query } %>
+  </div>
+</fieldset>
+
+<fieldset id="options" class="collapsible <%= expanded ? '' : 'collapsed' %>">
+  <legend onclick="toggleFieldset(this);" class="icon icon-<%= expanded ? 'expanded' : 'collapsed' %>"><%= l(:label_options) %></legend>
+  <div class="<%= 'hidden' unless expanded %>">
+    <div class="ea-options-grid">
+
+      <section class="ea-options-panel">
+        <h4><%= l(:label_expert_agile_card_fields) %></h4>
+        <div class="ea-field-options">
+          <%= expert_agile_card_field_tags(@query) %>
+        </div>
+      </section>
+
+      <section class="ea-options-panel">
+        <h4><%= l(:label_expert_agile_appearance) %></h4>
+        <p class="ea-options-row">
+          <label for="color_base"><%= l(:label_expert_agile_color_base) %></label>
+          <%= select_tag 'color_base',
+                         options_for_select(
+                           RedmineExpertAgile::COLOR_BASES.map { |b| [l("label_expert_agile_color_base_#{b}"), b] },
+                           @query.color_base) %>
+        </p>
+        <p class="ea-options-row">
+          <label for="show_avatar"><%= l(:label_expert_agile_show_avatar) %></label>
+          <span>
+            <%= hidden_field_tag 'show_avatar', '0' %>
+            <%= check_box_tag 'show_avatar', '1', @query.show_avatar? %>
+          </span>
+        </p>
+      </section>
+
+    </div>
+  </div>
+</fieldset>

@@ -367,6 +367,52 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
 
   # --- Planning --------------------------------------------------------
 
+  # See the board's copy: Redmine's own refusal carries no body for a .js
+  # request, and the planner reads every answer as JSON.
+  def test_a_planning_move_refused_for_lack_of_permission_says_so
+    sprint = sprint!
+    @role.remove_permission!(:manage_expert_agile_backlog)
+
+    put :update, :params => { :project_id => @project.id, :id => @issue.id,
+                              :container_id => sprint.id }, :format => :js
+
+    assert_response :forbidden
+    assert response.body.present?, 'a refusal the planner cannot read tells the user nothing'
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  # A saved backlog can be deleted while the page naming it is still open. The
+  # move goes ahead on a fresh query — but which containers are being planned
+  # into travels with the request, and a fresh query defaults to sprints, so a
+  # move made on the version planner has to keep looking among versions.
+  def test_a_move_survives_a_saved_backlog_that_has_been_deleted
+    version = Version.generate!(:project => @project)
+    saved = ExpertAgileBacklogQuery.create!(:name => 'Gone', :project => @project,
+                                            :user => User.find(2),
+                                            :visibility => Query::VISIBILITY_PRIVATE)
+    id = saved.id
+    saved.destroy
+
+    put :update, :params => { :project_id => @project.id, :id => @issue.id,
+                              :query_id => id, :container_type => 'version',
+                              :container_id => version.id }, :format => :js
+
+    assert_response :success
+    assert_equal version.id, @issue.reload.fixed_version_id
+  end
+
+  # Only the move speaks the board's JSON dialect. These share the controller
+  # and can be asked for as js, so they must keep answering the way they did.
+  def test_a_refusal_outside_a_move_is_left_to_redmine
+    @role.remove_permission!(:view_expert_agile_backlog, :manage_expert_agile_backlog)
+
+    get :autocomplete, :params => { :project_id => @project.id, :q => 'x' }, :format => :js
+
+    assert_response :forbidden
+    assert response.body.blank?,
+           'only a card move may be answered in the card move shape'
+  end
+
   def test_update_plans_an_issue_into_a_sprint
     sprint = sprint!
 

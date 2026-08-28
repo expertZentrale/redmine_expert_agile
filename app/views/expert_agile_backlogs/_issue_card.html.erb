@@ -5,7 +5,9 @@
     #update re-renders exactly this one after a move. %>
 <div class="<%= expert_agile_card_classes(issue, @query) %> ea-backlog-card"
      id="ea-card-<%= issue.id %>"
-     data-issue-id="<%= issue.id %>">
+     data-issue-id="<%= issue.id %>"
+     <%# A backlog can carry issues from projects the user may not plan in. %>
+     data-movable="<%= expert_agile_planning_card_movable?(issue) ? '1' : '0' %>">
 
   <div class="ea-card-header">
     <span class="ea-card-id"><%= link_to("##{issue.id}", issue_path(issue)) %></span>

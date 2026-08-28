@@ -104,6 +104,11 @@
     if (config.queryId) { body.append('query_id', config.queryId); }
     if (config.containerType) { body.append('container_type', config.containerType); }
 
+    /* Set the moment the server says it saved, so a failure *after* that is not
+     * mistaken for a move that never happened. Putting the card back then would
+     * show the user the opposite of what the server holds. */
+    var saved = false;
+
     fetch(config.updateUrlTemplate.replace('__ID__', issueId), {
       method: 'PUT',
       credentials: 'same-origin',
@@ -118,12 +123,44 @@
       },
       body: body.toString()
     }).then(function (response) {
-      return response.json().then(function (payload) {
-        if (response.ok) { applyMove(payload); } else { revertMove(payload, from); }
+      if (response.ok) {
+        /* Set here, not after the body parses: by the time the server answers
+         * 200 it has written the move, so a body that will not parse is a
+         * display problem, not a move that never happened. */
+        saved = true;
+        return response.json().then(function (payload) { applyMove(payload); });
+      }
+      /* A refusal does not always carry a body. Redmine answers a request it
+       * will not serve with `head :forbidden` / `head :unauthorized` — no
+       * content at all — so parsing the answer as JSON threw and every such
+       * refusal reached the user as the bare "the move could not be saved",
+       * with nothing to act on. Read the body as text, use it only if it
+       * parses, and otherwise say what the status code means. */
+      return response.text().then(function (text) {
+        var payload = null;
+        try { payload = JSON.parse(text); } catch (e) { payload = null; }
+        if (!payload || !payload.error) { payload = { error: refusalMessage(response.status) }; }
+        revertMove(payload, from);
       });
     }).catch(function () {
+      /* Nothing came back at all — no network, a proxy that answered with its
+       * own page, a request the browser dropped. */
+      if (saved) {
+        setMessage(config.labels.saveNotShown, true);
+        return;
+      }
       revertMove({ error: config.labels.moveFailed }, from);
     });
+  }
+
+  /* What to say when the server refused without saying why. A move that fails
+   * for lack of a permission and one that fails because the session ran out
+   * look identical to the user otherwise, and only one of them is worth
+   * telling an administrator about. */
+  function refusalMessage(status) {
+    if (status === 401) { return config.labels.sessionExpired || config.labels.moveFailed; }
+    if (status === 403) { return config.labels.notPermitted || config.labels.moveFailed; }
+    return config.labels.moveFailed;
   }
 
   function applyMove(payload) {
@@ -200,6 +237,12 @@
 
   function makeDraggable(card) {
     if (!config.editable) { return; }
+    /* The board-wide flag answers "may this user move cards here at all". This
+     * one answers it per card, because a board carries more than one project:
+     * a parent's board carries its subprojects, the global board carries
+     * everything, and the permission lives with the issue. Without it, cards
+     * the server was always going to refuse were still offered for dragging. */
+    if (card.getAttribute('data-movable') === '0') { return; }
     card.setAttribute('draggable', 'true');
     card.addEventListener('dragstart', function (event) {
       dragged = card;
