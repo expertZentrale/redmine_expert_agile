@@ -124,10 +124,11 @@
       body: body.toString()
     }).then(function (response) {
       if (response.ok) {
-        return response.json().then(function (payload) {
-          saved = true;
-          applyMove(payload);
-        });
+        /* Set here, not after the body parses: by the time the server answers
+         * 200 it has written the move, so a body that will not parse is a
+         * display problem, not a move that never happened. */
+        saved = true;
+        return response.json().then(function (payload) { applyMove(payload); });
       }
       /* A refusal does not always carry a body. Redmine answers a request it
        * will not serve with `head :forbidden` / `head :unauthorized` — no

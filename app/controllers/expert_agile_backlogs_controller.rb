@@ -105,7 +105,13 @@ class ExpertAgileBacklogsController < ApplicationController
         raise ActiveRecord::RecordNotFound unless action_name == 'update'
 
         session.delete(SESSION_KEY)
-        return @query = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
+        fallback = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
+        # Which containers are being planned into travels with the request, and
+        # a fresh query defaults to sprints. Without carrying it, a move made
+        # on the version planner would look for its version among the sprints
+        # and be refused as a container that does not exist.
+        fallback.container_type = params[:container_type] if params[:container_type].present?
+        return @query = fallback
       end
 
       @query = saved

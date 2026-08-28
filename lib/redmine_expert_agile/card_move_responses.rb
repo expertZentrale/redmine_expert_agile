@@ -21,10 +21,20 @@ module RedmineExpertAgile
     # paths Redmine has for them — `deny_access` and friends land in the
     # overrides below.
     def self.included(base)
-      base.around_action :answer_card_move_failures_with_json
+      base.around_action :answer_card_move_failures_with_json, :only => MOVE_ACTIONS
     end
 
+    # The action that drags a card, in both controllers that include this. The
+    # others they carry — the backlog's `load_more` and `autocomplete`, the
+    # board's `issue_tooltip` — can be asked for as js too, and none of them
+    # answers in this shape, so none of them may be answered in it either.
+    MOVE_ACTIONS = [:update].freeze
+
     private
+
+    def card_move_request?
+      request.format.js? && MOVE_ACTIONS.include?(action_name.to_sym)
+    end
 
     # Anything unforeseen is still a refusal the user has to be told about. It
     # used to leave Rails to render its 500 page, which is HTML, so it arrived
@@ -37,7 +47,7 @@ module RedmineExpertAgile
       # Redmine has handlers for these two; let them run.
       raise
     rescue StandardError => e
-      raise unless request.format.js?
+      raise unless card_move_request?
       raise if performed?
 
       logger&.error("[expert_agile] #{e.class}: #{e.message}\n  " \
@@ -47,7 +57,7 @@ module RedmineExpertAgile
     end
 
     def render_403(options = {})
-      return super unless request.format.js?
+      return super unless card_move_request?
 
       render_card_move_refusal(card_move_denied_message, :forbidden)
       false
@@ -71,7 +81,7 @@ module RedmineExpertAgile
     # Reached when the card, its project or the saved board behind it is gone —
     # including a board deleted while the page that names it was still open.
     def render_404(options = {})
-      return super unless request.format.js?
+      return super unless card_move_request?
 
       render_card_move_refusal(l(:error_expert_agile_move_target_gone), :not_found)
       false
@@ -82,7 +92,7 @@ module RedmineExpertAgile
     # still looks signed in, so "the move could not be saved" reads as a broken
     # board rather than as "sign in again".
     def require_login
-      return super unless request.format.js?
+      return super unless card_move_request?
       return true if User.current.logged?
 
       render_card_move_refusal(l(:error_expert_agile_session_expired), :unauthorized)
@@ -94,7 +104,7 @@ module RedmineExpertAgile
     # that as a session it can no longer trust and signs the user out — kept
     # here, because only the empty 422 it renders is the problem.
     def handle_unverified_request
-      return super unless request.format.js?
+      return super unless card_move_request?
 
       cookies.delete(autologin_cookie_name)
       self.logged_user = nil
