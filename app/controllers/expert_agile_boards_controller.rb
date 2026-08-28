@@ -17,6 +17,8 @@ class ExpertAgileBoardsController < ApplicationController
   helper :projects
   helper :custom_fields
   include QueriesHelper
+  # Every refusal a dragged card can meet has to come back as JSON.
+  include RedmineExpertAgile::CardMoveResponses
 
   def index
     retrieve_board_query
@@ -52,7 +54,7 @@ class ExpertAgileBoardsController < ApplicationController
       end
     end
 
-    retrieve_board_query
+    retrieve_board_query_for_move
     siblings = column_siblings(target_status_id || @issue.status_id)
 
     Issue.transaction do
@@ -61,7 +63,13 @@ class ExpertAgileBoardsController < ApplicationController
       assign_to_current_user_if_configured(target_status_id)
 
       unless @issue.save
-        render_move_error(@issue.errors.full_messages.join(', '), :unprocessable_entity)
+        # A refusal with an empty message reads as no refusal at all: the board
+        # falls back to its generic wording and the user is told nothing. A
+        # validation that produced no message is rare but not impossible — a
+        # callback from another plugin can abort a save silently.
+        reason = @issue.errors.full_messages.join(', ')
+        reason = l(:error_expert_agile_move_failed) if reason.blank?
+        render_move_error(reason, :unprocessable_entity)
         raise ActiveRecord::Rollback
       end
 
@@ -157,6 +165,17 @@ class ExpertAgileBoardsController < ApplicationController
   # `issue.new_statuses_allowed_to` and the issue's own permissions. That is the
   # part RedmineUP gets wrong — there the session query decides which columns
   # exist for the move itself.
+  # The page carries the board's id, and the board can be deleted or turned
+  # private while that page is still open. Refusing the move over that would be
+  # answering the wrong question: which board is on screen only decides the
+  # cards the new rank is measured against, never whether the card may move.
+  def retrieve_board_query_for_move
+    retrieve_board_query
+  rescue ActiveRecord::RecordNotFound
+    session.delete(SESSION_KEY)
+    @query = ExpertAgileQuery.new(:name => '_', :project => @project)
+  end
+
   def retrieve_board_query
     if params[:query_id].present?
       @query = find_board_query(params[:query_id])
@@ -340,6 +359,11 @@ class ExpertAgileBoardsController < ApplicationController
   # A plain JSON contract. RedmineUP returns an HTML partial on success and a
   # JSON array on failure, both declared as format.html, and the client has to
   # sniff which it got.
+  # Where CardMoveResponses puts the refusals it takes over from Redmine.
+  def render_card_move_refusal(message, status)
+    render_move_error(message, status)
+  end
+
   def render_move_error(message, status, hint: nil, link: nil)
     @error_message = [message, hint].compact.join('. ')
     respond_to do |format|

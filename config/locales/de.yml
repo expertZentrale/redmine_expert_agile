@@ -112,6 +112,11 @@ de:
   text_expert_agile_transitions_none: "Von %{from} aus steht Ihnen kein Statuswechsel zur Verfuegung"
   label_expert_agile_edit_workflow: Workflow dieses Trackers bearbeiten
   error_expert_agile_move_failed: Der Zug konnte nicht gespeichert werden
+  error_expert_agile_move_not_permitted: Sie duerfen auf diesem Board keine Karten verschieben
+  error_expert_agile_session_expired: Ihre Sitzung ist abgelaufen. Laden Sie die Seite neu und melden Sie sich erneut an
+  error_expert_agile_move_target_gone: Diese Karte oder das Board, auf dem sie verschoben wurde, existiert nicht mehr. Laden Sie die Seite neu
+  error_expert_agile_move_failed_unexpectedly: Der Zug ist unerwartet fehlgeschlagen. Einzelheiten stehen im Server-Log
+  error_expert_agile_move_saved_but_not_shown: Der Zug wurde gespeichert, das Board konnte aber nicht aktualisiert werden. Laden Sie die Seite neu
   error_expert_agile_issue_not_editable: Sie duerfen dieses Ticket nicht bearbeiten
   label_expert_agile_swimlane_none: Keine Swimlanes
   label_expert_agile_swimlane_none_value: (ohne)

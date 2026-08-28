@@ -481,6 +481,92 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert link['label'].present?
   end
 
+  # Redmine answers a request it will not serve with an empty body for every
+  # format but HTML. The board reads every answer as JSON, so a refusal for lack
+  # of a permission used to arrive as the generic "the move could not be saved"
+  # and nothing else — indistinguishable from a bug, for the user and for
+  # whoever they report it to.
+  def test_a_move_refused_for_lack_of_permission_says_so
+    @role.remove_permission!(:edit_expert_agile_board)
+
+    put :update, :params => { :id => @issue.id, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :forbidden
+    assert response.body.present?, 'a refusal the board cannot read tells the user nothing'
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  # The same for the board's own refusals: an error with an empty message leaves
+  # the board falling back to its generic wording.
+  def test_every_refusal_carries_a_message
+    forbidden = forbidden_status_for(@issue)
+
+    put :update, :params => { :id => @issue.id, :status_id => forbidden.id }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  # Redmine answers everything it refuses with an empty body for every format
+  # but HTML, and the board reads every answer as JSON. Each of these used to
+  # arrive as the generic "the move could not be saved" and told the user
+  # nothing about which of them it was.
+  def test_a_stale_csrf_token_says_the_session_is_gone
+    ActionController::Base.allow_forgery_protection = true
+    @request.env['HTTP_X_CSRF_TOKEN'] = 'not-the-token'
+
+    put :update, :params => { :id => @issue.id, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert JSON.parse(response.body)['error'].present?,
+           'a rejected token must not arrive as an empty body'
+  ensure
+    ActionController::Base.allow_forgery_protection = false
+  end
+
+  def test_a_missing_issue_says_so_rather_than_answering_with_nothing
+    put :update, :params => { :id => 0, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :not_found
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  def test_an_issue_the_user_cannot_see_says_so
+    @request.session[:user_id] = 7
+    put :update, :params => { :id => @issue.id, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_includes [401, 403], response.status
+    assert JSON.parse(response.body)['error'].present?
+  end
+
+  # The page carries the board's id, and the board can be deleted while that
+  # page is still open. Which board is on screen only decides the cards the new
+  # rank is measured against, so it is no reason to refuse the move.
+  def test_a_move_survives_a_saved_board_that_has_been_deleted
+    query = ExpertAgileQuery.create!(:name => 'Gone', :project => @project,
+                                     :user => User.find(2),
+                                     :visibility => Query::VISIBILITY_PRIVATE)
+    id = query.id
+    query.destroy
+
+    put :update, :params => { :id => @issue.id, :query_id => id,
+                              :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :success
+  end
+
+  # Anything unforeseen still has to reach the user as something they can act
+  # on, not as Rails' HTML 500 page that the board cannot read.
+  def test_an_unexpected_failure_is_answered_in_the_boards_own_shape
+    ExpertAgileBoardsController.any_instance.stubs(:column_siblings)
+                               .raises(RuntimeError, 'boom')
+
+    put :update, :params => { :id => @issue.id, :prev_id => '', :next_id => '' }, :format => :js
+
+    assert_response :internal_server_error
+    assert JSON.parse(response.body)['error'].present?
+  end
+
   def test_update_reorders_within_a_column_without_changing_status
     others = 2.times.map do
       Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id)

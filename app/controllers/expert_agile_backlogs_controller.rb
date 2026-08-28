@@ -11,6 +11,8 @@ class ExpertAgileBacklogsController < ApplicationController
   helper :expert_agile_boards
   helper :issues
   include QueriesHelper
+  # Every refusal a dragged card can meet has to come back as JSON.
+  include RedmineExpertAgile::CardMoveResponses
 
   def index
     return render_error(:status => :unprocessable_entity) unless @query.valid?
@@ -39,7 +41,11 @@ class ExpertAgileBacklogsController < ApplicationController
       assign_container(target)
 
       unless @issue.save
-        render_planning_error(@issue.errors.full_messages.join(', '), :unprocessable_entity)
+        # An empty message reads as no refusal at all, because the planner falls
+        # back to its generic wording and the user is told nothing.
+        reason = @issue.errors.full_messages.join(', ')
+        reason = l(:error_expert_agile_move_failed) if reason.blank?
+        render_planning_error(reason, :unprocessable_entity)
         raise ActiveRecord::Rollback
       end
 
@@ -89,7 +95,20 @@ class ExpertAgileBacklogsController < ApplicationController
   # session state is a different query class.
   def retrieve_backlog_query
     if params[:query_id].present?
-      @query = find_backlog_query(params[:query_id])
+      saved = visible_backlog_query(params[:query_id])
+      if saved.nil?
+        # A saved backlog can be deleted or turned private while the page naming
+        # it is still open. On the planning screen that is worth a 404; for a
+        # move it is not, because which backlog is on screen only decides the
+        # cards the new rank is measured against, never whether the card may
+        # move at all.
+        raise ActiveRecord::RecordNotFound unless action_name == 'update'
+
+        session.delete(SESSION_KEY)
+        return @query = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
+      end
+
+      @query = saved
       @query.project = @project
       # A saved backlog can still be tweaked for this request without the change
       # being written back to it.
@@ -145,10 +164,6 @@ class ExpertAgileBacklogsController < ApplicationController
     scope = ExpertAgileBacklogQuery.only_backlogs.visible
     scope = scope.global_or_on_project(@project) if @project
     scope.find_by(:id => id)
-  end
-
-  def find_backlog_query(id)
-    visible_backlog_query(id) || raise(ActiveRecord::RecordNotFound)
   end
 
   def session_state_stale?
@@ -225,6 +240,11 @@ class ExpertAgileBacklogsController < ApplicationController
         :backlog => @query.totals_for(nil)
       }
     }
+  end
+
+  # Where CardMoveResponses puts the refusals it takes over from Redmine.
+  def render_card_move_refusal(message, status)
+    render_planning_error(message, status)
   end
 
   def render_planning_error(message, status)

@@ -17,7 +17,14 @@ module ExpertAgileBacklogsHelper
       :projectId => project.id,
       :editable => User.current.allowed_to?(:manage_expert_agile_backlog, project),
       :labels => {
-        :moveFailed => l(:error_expert_agile_move_failed)
+        :moveFailed => l(:error_expert_agile_move_failed),
+        # A refusal with no body to carry its reason: Redmine answers a missing
+        # permission and an expired session with an empty 403 / 401.
+        :notPermitted => l(:error_expert_agile_move_not_permitted),
+        :sessionExpired => l(:error_expert_agile_session_expired),
+        # For the one failure that is not a refusal: the server saved the move
+        # and the board could not show it.
+        :saveNotShown => l(:error_expert_agile_move_saved_but_not_shown)
       }
     }.to_json
   end

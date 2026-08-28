@@ -367,6 +367,20 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
 
   # --- Planning --------------------------------------------------------
 
+  # See the board's copy: Redmine's own refusal carries no body for a .js
+  # request, and the planner reads every answer as JSON.
+  def test_a_planning_move_refused_for_lack_of_permission_says_so
+    sprint = sprint!
+    @role.remove_permission!(:manage_expert_agile_backlog)
+
+    put :update, :params => { :project_id => @project.id, :id => @issue.id,
+                              :container_id => sprint.id }, :format => :js
+
+    assert_response :forbidden
+    assert response.body.present?, 'a refusal the planner cannot read tells the user nothing'
+    assert JSON.parse(response.body)['error'].present?
+  end
+
   def test_update_plans_an_issue_into_a_sprint
     sprint = sprint!
 

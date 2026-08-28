@@ -20,6 +20,7 @@ require File.expand_path('../lib/redmine_expert_agile/board_grid', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/board_positions', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/colorable', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/card_color', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/card_move_responses', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/journal_projection', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/charts/base', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/charts/burndown', __FILE__)
@@ -40,7 +41,7 @@ Redmine::Plugin.register :redmine_expert_agile do
   name 'Redmine expert Agile'
   author 'Dennis Buehring'
   description 'Agile boards, story points, sprints and charts for Redmine'
-  version '0.3.1'
+  version '0.3.2'
   requires_redmine :version_or_higher => '5.0'
   url 'https://github.com/expertZentrale/redmine_expert_agile'
 

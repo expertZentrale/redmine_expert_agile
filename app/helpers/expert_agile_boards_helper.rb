@@ -189,7 +189,14 @@ module ExpertAgileBoardsHelper
         :wipExceeded => l(:text_expert_agile_wip_limit_exceeded),
         # Only for a request that never came back with an answer. A move the
         # server refuses carries its own reason, which the board shows instead.
-        :moveFailed => l(:error_expert_agile_move_failed)
+        :moveFailed => l(:error_expert_agile_move_failed),
+        # Except when the refusal has no body to carry it: Redmine answers a
+        # missing permission and an expired session with an empty 403 / 401.
+        :notPermitted => l(:error_expert_agile_move_not_permitted),
+        :sessionExpired => l(:error_expert_agile_session_expired),
+        # For the one failure that is not a refusal: the server saved the move
+        # and the board could not show it.
+        :saveNotShown => l(:error_expert_agile_move_saved_but_not_shown)
       }
     }.to_json
   end
