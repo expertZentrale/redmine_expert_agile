@@ -15,6 +15,8 @@ fields**, so they are separate files here — don't merge them.
 | `description.textile` | the **Description** field — what the plugin is and does, current version |
 | `installation.textile` | the **Installation notes** field — requirements, install, permissions, configuration, upgrade |
 | `releases/<version>.textile` | the **Notes** field when registering that version |
+| `logo-100.png` | the plugin page **image upload** (the directory shows logos at 100×100) |
+| `logo.svg`, `logo-500.png` | source and large master of the logo — edit the SVG, re-export both PNGs |
 
 `docs/` is excluded from the release archives (`--exclude='docs'` in
 `.github/workflows/release.yml`), so none of this ships to users.
