@@ -9,6 +9,12 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Fixed
+- **`release.yml` accepted malformed tags.** The semver check allowed the optional suffix to begin
+  with `.`, so `v1.2.3.4` validated as semver, and accepted empty identifiers such as `1.2.3-a..b`.
+
 ## [0.3.2] - 2026-08-28
 
 ### Fixed
