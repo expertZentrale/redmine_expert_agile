@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.5.0] - 2026-09-23
 
 ### Changed
 - **Card colours can be any colour.** The colour screen uses a [Coloris](https://coloris.js.org/)
