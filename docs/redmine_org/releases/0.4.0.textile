@@ -1,0 +1,11 @@
+h3. redmine_expert_agile 0.4.0 — 2026-09-23
+
+h4. Added
+
+* *Sprint boards.* A board can now be narrowed to one sprint, from a new *Sprint* selector in its options panel or with @sprint_id=<id>@ in the board URL. *Active sprint* (@sprint_id=active@) follows whichever sprint is running, so a saved sprint board does not have to be re-pointed when the next iteration starts. Columns, counts and story-point totals then cover only that sprint's issues. The option was already accepted and saved before, but it never actually narrowed the board. Only sprints the project may plan into are accepted, closed ones included so a finished sprint can be reviewed. Any other id, or *Active sprint* while none is running, shows an empty board rather than every issue.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+A saved board without a sprint still shows every issue its filters match. A board that was saved while a @sprint_id@ was in its URL already stored that sprint, and from this release on it shows only that sprint. Clear the *Sprint* selector and save it again if that was not intended.
