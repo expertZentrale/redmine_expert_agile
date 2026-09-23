@@ -15,7 +15,7 @@ bundle exec rake redmine:plugins:migrate NAME=redmine_expert_agile RAILS_ENV=pro
 # Enable the *expert Agile* module per project under *Project settings → Modules*. Enable *expert Agile Backlog* as well if you want the backlog planner.
 # Grant the permissions your roles need under *Administration → Roles and permissions*.
 
-No additional gems are required. Chart.js ships with the plugin, so there is no dependency on any other plugin's assets.
+No additional gems are required. Chart.js and the Coloris colour picker ship with the plugin, so there is no dependency on any other plugin's assets.
 
 h3. Upgrading
 

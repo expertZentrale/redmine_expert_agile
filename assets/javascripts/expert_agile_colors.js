@@ -1,56 +1,40 @@
-/* Keeps the "current colour" field in step with the swatch you click.
+/* Turns the colour screen's hex fields into Coloris pickers.
  *
- * Without this the field only tells you what was saved, so picking a colour and
- * reading back what you picked would take a round trip to the server. Every
- * value it writes comes from the radio that was chosen, so the field cannot
- * drift from what the form will post.
- *
- * No configuration and no JSON island: the markup carries what is needed, and
- * the page works without this file — it just stops updating until saved.
+ * Everything the picker needs — the palette swatches and its labels in the
+ * user's language — comes from the data-ea-coloris attribute on the form, so
+ * the page carries no inline script. Without this file, or without Coloris,
+ * the fields stay plain hex inputs and the form still saves.
  */
 (function () {
   'use strict';
 
-  function field(radio) {
-    var node = radio.parentNode;
-    while (node && !(node.classList && node.classList.contains('ea-color-field'))) {
-      node = node.parentNode;
-    }
-    return node;
-  }
-
-  function update(radio) {
-    var box = field(radio);
-    if (!box) { return; }
-
-    var hex = radio.getAttribute('data-color-hex') || '';
-    var name = radio.getAttribute('data-color-name') || '';
-
-    var swatch = box.querySelector('[data-role="ea-color-current-swatch"]');
-    if (swatch) {
-      /* Written the way the server writes it, so the field looks the same
-       * before and after a save: a colour, or an empty box with a cross. */
-      swatch.style.backgroundColor = hex || '#fff';
-      swatch.style.color = hex ? '' : '#999';
-      swatch.textContent = hex ? '' : '\u00d7';
-    }
-
-    var label = box.querySelector('[data-role="ea-color-current-name"]');
-    if (label) { label.textContent = name; }
-
-    var code = box.querySelector('[data-role="ea-color-current-hex"]');
-    if (code) { code.textContent = hex; }
-  }
-
   function init() {
-    /* One listener for the whole document: the issue form renders its picker
-     * through a hook, and bulk screens render many, so binding per radio would
-     * mean rebinding whenever something re-renders. */
-    document.addEventListener('change', function (event) {
-      var target = event.target;
-      if (target && target.type === 'radio' && target.hasAttribute('data-color-hex')) {
-        update(target);
-      }
+    var host = document.querySelector('[data-ea-coloris]');
+    if (!host || typeof window.Coloris !== 'function') { return; }
+
+    var config;
+    try {
+      config = JSON.parse(host.getAttribute('data-ea-coloris'));
+    } catch (e) {
+      return;
+    }
+
+    window.Coloris({
+      el: '.ea-color-input',
+      theme: 'default',
+      themeMode: 'light',
+      format: 'hex',
+      formatToggle: false,
+      alpha: false,
+      // What an empty field opens on: a palette colour rather than Coloris'
+      // black, so a first click in the colour area lands somewhere usable.
+      defaultColor: config.defaultColor || '#3d7ec4',
+      swatches: config.swatches || [],
+      clearButton: true,
+      clearLabel: config.clearLabel,
+      closeButton: true,
+      closeLabel: config.closeLabel,
+      a11y: config.a11y
     });
   }
 

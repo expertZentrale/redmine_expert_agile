@@ -5,7 +5,7 @@
 module RedmineExpertAgile
   class CardColor
     class << self
-      # Returns a palette name (see ExpertAgileColor::COLORS) or nil.
+      # Returns a colour as #rrggbb, or nil.
       def for(issue, base)
         return nil if issue.nil?
 

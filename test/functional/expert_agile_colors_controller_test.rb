@@ -2,10 +2,10 @@ require File.expand_path('../../test_helper', __FILE__)
 
 # The administration screen for card colours.
 #
-# The point of the tests here is the form: it offers the palette as swatches
-# rather than as a list of colour names, and what it posts has to stay what the
-# controller reads — a palette name per container, or an empty value to clear
-# one.
+# The point of the tests here is the form: one hex field per container, which
+# Coloris turns into a picker offering the palette as swatches, and what it
+# posts has to stay what the controller reads — #rrggbb per container, or an
+# empty value to clear one.
 class ExpertAgileColorsControllerTest < Redmine::ControllerTest
   tests ExpertAgileColorsController
 
@@ -20,65 +20,58 @@ class ExpertAgileColorsControllerTest < Redmine::ControllerTest
     ExpertAgileColor.delete_all
   end
 
-  def test_index_offers_the_whole_palette_as_swatches
-    get :index, :params => { :container_type => 'tracker' }
-
-    assert_response :success
-    tracker = Tracker.first
-    ExpertAgileColor::PALETTE.each do |color, hex|
-      assert_select "input[type=radio][name=?][value=?]", "colors[#{tracker.id}]", color
-      # Painted by the markup, not by a class: this screen is one of the two
-      # that showed the picker as bare radio buttons because nothing here
-      # guaranteed the stylesheet.
-      assert_select "span.ea-color-swatch[style*=?]", hex
-    end
-    # Empty value in the selector rather than as a substitution: a trailing
-    # string argument is read as the expected element text, not as a message.
-    assert_select "input[type=radio][name=?][value='']", "colors[#{tracker.id}]"
-  end
-
-  # The swatches carry no text, so without this the group is announced as a
-  # nameless set of radio buttons and the row it belongs to is lost.
-  def test_each_group_of_swatches_is_named_after_what_it_colours
+  def test_index_renders_one_hex_field_per_container
     get :index, :params => { :container_type => 'tracker' }
 
     assert_response :success
     Tracker.all.each do |tracker|
-      assert_select "div.ea-color-choice[role=radiogroup][aria-label=?]", tracker.to_s
+      assert_select 'input.ea-color-input[type=text][name=?][id=?]',
+                    "colors[#{tracker.id}]", "colors_#{tracker.id}"
     end
   end
 
-  def test_index_marks_the_colour_a_container_already_has
-    tracker = Tracker.first
-    ExpertAgileColor.create!(:container => tracker, :color => 'indigo')
-
+  # The field carries no text of its own, so without this it is announced as a
+  # nameless input and the row it belongs to is lost.
+  def test_each_field_is_named_after_what_it_colours
     get :index, :params => { :container_type => 'tracker' }
 
     assert_response :success
-    assert_select "input[type=radio][name=?][value=indigo][checked=checked]", "colors[#{tracker.id}]"
+    Tracker.all.each do |tracker|
+      assert_select 'input.ea-color-input[aria-label$=?]', tracker.to_s
+    end
   end
 
-  # What is set has to be readable off the row, not inferred from which of
-  # nineteen swatches carries the marker.
-  def test_index_spells_out_the_current_colour_with_its_hex
+  def test_index_shows_the_colour_a_container_already_has
     tracker = Tracker.first
-    ExpertAgileColor.create!(:container => tracker, :color => 'indigo')
+    ExpertAgileColor.create!(:container => tracker, :color => '#123abc')
 
     get :index, :params => { :container_type => 'tracker' }
 
     assert_response :success
-    assert_select 'span.ea-color-current-name', :text => I18n.t(:label_expert_agile_color_indigo)
-    assert_select 'span.ea-color-current-hex', :text => ExpertAgileColor::PALETTE['indigo']
-    assert_select 'span.ea-color-current-swatch[style*=?]', ExpertAgileColor::PALETTE['indigo']
+    assert_select 'input.ea-color-input[name=?][value=?]', "colors[#{tracker.id}]", '#123abc'
   end
 
-  # The screen used to render the picker with neither of these, which left it a
-  # column of unstyled radio buttons whose swatches had no colour at all.
-  def test_index_loads_the_plugin_assets
+  # The picker is configured from a data attribute, not inline script: the
+  # palette as swatches, and its labels in the user's language.
+  def test_index_hands_the_palette_to_the_picker_as_swatches
     get :index, :params => { :container_type => 'tracker' }
 
     assert_response :success
+    form = css_select('form[data-ea-coloris]').first
+    assert form, 'the form must carry the picker configuration'
+    config = JSON.parse(form['data-ea-coloris'])
+    assert_equal ExpertAgileColor::SWATCHES, config['swatches']
+    assert config['clearLabel'].present?
+    assert config['a11y'].values.all?(&:present?), 'every picker label needs a translation'
+  end
+
+  def test_index_loads_coloris_and_the_plugin_assets
+    get :index, :params => { :container_type => 'tracker' }
+
+    assert_response :success
+    assert_select 'head link[rel=stylesheet][href*=?]', 'coloris.min'
     assert_select 'head link[rel=stylesheet][href*=?]', 'expert_agile'
+    assert_select 'head script[src*=?]', 'coloris.min'
     assert_select 'head script[src*=?]', 'expert_agile_colors'
   end
 
@@ -86,21 +79,38 @@ class ExpertAgileColorsControllerTest < Redmine::ControllerTest
     tracker = Tracker.first
 
     put :update, :params => { :container_type => 'tracker',
-                              :colors => { tracker.id.to_s => 'salmon' } }
+                              :colors => { tracker.id.to_s => '#E0715E' } }
 
     assert_redirected_to expert_agile_colors_path(:container_type => 'tracker')
-    assert_equal 'salmon', tracker.reload.color
+    assert_equal '#e0715e', tracker.reload.color
+    assert flash[:notice].present?
   end
 
   def test_update_clears_a_colour_when_none_is_picked
     tracker = Tracker.first
-    ExpertAgileColor.create!(:container => tracker, :color => 'salmon')
+    ExpertAgileColor.create!(:container => tracker, :color => '#e0715e')
 
     put :update, :params => { :container_type => 'tracker',
                               :colors => { tracker.id.to_s => '' } }
 
     assert_redirected_to expert_agile_colors_path(:container_type => 'tracker')
     assert_nil tracker.reload.color
+  end
+
+  # The field is free text under the picker: a typo must not be dropped
+  # silently, and must not cost the rows that were fine.
+  def test_update_names_an_invalid_colour_and_keeps_the_valid_ones
+    good, bad = Tracker.first(2)
+    ExpertAgileColor.create!(:container => bad, :color => '#3c9c3c')
+
+    put :update, :params => { :container_type => 'tracker',
+                              :colors => { good.id.to_s => '#123abc', bad.id.to_s => 'bleu' } }
+
+    assert_redirected_to expert_agile_colors_path(:container_type => 'tracker')
+    assert_equal '#123abc', good.reload.color
+    assert_equal '#3c9c3c', bad.reload.color, 'a refused colour leaves the old one in place'
+    assert_includes flash[:error], bad.to_s
+    assert_nil flash[:notice]
   end
 
   def test_index_requires_an_administrator

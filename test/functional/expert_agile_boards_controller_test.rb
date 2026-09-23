@@ -20,6 +20,7 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
 
   def teardown
     ExpertAgileData.delete_all
+    ExpertAgileColor.delete_all
   end
 
   # --- Rendering -------------------------------------------------------
@@ -227,12 +228,12 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
                              :group_by => 'priority' }
 
     assert_response :success
-    classes = css_select('tr.ea-swimlane-title').map do |row|
-      row['class'].to_s.split.detect { |c| c.start_with?('ea-lane-') }
+    accents = css_select('tr.ea-swimlane-title.ea-lane-colored').map do |row|
+      row['style'].to_s[/--ea-accent:\s*(#\h{6})/, 1]
     end.compact
-    assert classes.any?, 'lanes must carry an accent class'
-    if classes.size > 1
-      assert_operator classes.uniq.size, :>, 1,
+    assert accents.any?, 'lanes must carry an accent colour'
+    if accents.size > 1
+      assert_operator accents.uniq.size, :>, 1,
                       'adjacent lanes must not all share one colour'
     end
   end
@@ -242,7 +243,27 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
                              :color_base => 'priority' }
 
     assert_response :success
-    assert_select 'div.ea-card[class*=?]', 'ea-color-'
+    assert_select 'div.ea-card.ea-colored[style*=?]', '--ea-accent: #'
+    assert_select 'div.ea-card.ea-colored[style*=?]', '--ea-tint: #'
+  end
+
+  def test_a_freely_picked_colour_reaches_the_card
+    ExpertAgileColor.create!(:container => @issue.tracker, :color => '#123abc')
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :color_base => 'tracker' }
+
+    assert_response :success
+    assert_select "div.ea-card[data-issue-id='#{@issue.id}'][style*=?]", '--ea-accent: #123abc'
+  end
+
+  def test_an_uncoloured_board_carries_no_colour_markup
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :color_base => 'none' }
+
+    assert_response :success
+    assert_select 'div.ea-card.ea-colored', false
+    assert_select 'div.ea-card[style]', false
   end
 
   def test_card_fields_come_from_the_query_columns

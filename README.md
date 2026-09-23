@@ -33,8 +33,8 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
   the same filters, card fields and saved queries as the board.
 - **Charts** — burndown, burnup, velocity, cumulative flow and cycle time, in issues, hours or
   story points.
-- **Colors** — cards coloured by tracker, priority, status, assignee, project or spent time,
-  from a fixed palette of 18 shades picked as swatches rather than by name.
+- **Colors** — cards coloured by tracker, priority, status, assignee, project or spent time.
+  Any colour can be picked, with 18 palette shades offered as swatches.
 - **REST API** — read *and* write agile data (story points, sprint assignment) plus sprint CRUD.
 
 ### Design notes
@@ -138,10 +138,17 @@ five to a hundred and twenty-five issues](docs/screenshots/en/08-chart-cumulativ
 ### Colours
 
 Cards take their colour from their tracker, status, priority, assignee, project or spent-time
-ratio, or from a colour set on the issue itself. The mapping is administered centrally.
+ratio — from what an issue is, never one issue at a time. The mapping is administered centrally.
 
-![Card colours administration screen with tabs for issue, project, tracker, priority and status,
-listing each status beside a colour dropdown](docs/screenshots/en/09-card-colors.png)
+Each colour is picked with a [Coloris](https://coloris.js.org/) picker: a colour area, a hue
+slider and a hex field, with the plugin's 18 palette shades offered as swatches. Any colour works.
+A card shows it as its left border and a pale tint of it as its background, and the tint stays
+light enough to read the card's text on whatever was picked. Anything without a colour of its own
+(assignees, and trackers or statuses nobody has coloured yet) still gets a stable palette shade.
+
+![Card colours administration screen, Status tab: each status beside a hex field showing its
+colour, with the picker open on In Progress — colour area, hue slider, the hex value and eighteen
+palette swatches](docs/screenshots/en/09-card-colors.png)
 
 ### Configuration
 

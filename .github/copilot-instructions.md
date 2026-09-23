@@ -89,12 +89,14 @@ of the release commit:
 - `lib/redmine_expert_agile.rb` — namespace + typed settings readers (casting only).
 - Schema: `expert_agile_data` (per-issue `position` decimal, `story_points`, `sprint_id`),
   `expert_agile_sprints` (status 0/1/2, Version-style `sharing`), `expert_agile_colors`
-  (polymorphic).
+  (polymorphic, `color` stored as `#rrggbb`; the palette is only swatches and fallbacks, and a
+  coloured element carries `--ea-accent`/`--ea-tint` inline — never one CSS class per colour).
 - **Positions are fractional decimals computed server-side** from
   `{issue_id, target_status_id, prev_id, next_id}`; one row written per move.
   `RedmineExpertAgile::BoardPositions` rebalances when the gap shrinks.
 - `ExpertAgileQuery < Query` (STI); board settings live in the serialized `options` column.
   `ExpertAgileChartsQuery` stores `date_from`/`date_to` explicitly — never parse generated SQL.
 - Charts replay history with **one** `journal_details` query projected in a single pass,
-  `Rails.cache`d on a scope fingerprint. Chart.js is vendored under `assets/javascripts`.
+  `Rails.cache`d on a scope fingerprint. Chart.js and the Coloris colour picker are vendored
+  under `assets/`, unmodified (the Coloris CSS only gains a licence header).
 - Board update enforces workflow via `issue.new_statuses_allowed_to`. WIP limits are advisory.

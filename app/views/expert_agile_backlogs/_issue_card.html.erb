@@ -3,7 +3,7 @@
     both screens. It stays a partial of its own because a planning card carries
     no status column to drop into — hence no data-status-id — and because
     #update re-renders exactly this one after a move. %>
-<div class="<%= expert_agile_card_classes(issue, @query) %> ea-backlog-card"
+<div class="<%= expert_agile_card_classes(issue, @query) %> ea-backlog-card"<%= expert_agile_style_attribute(expert_agile_card_style(issue, @query)) %>
      id="ea-card-<%= issue.id %>"
      data-issue-id="<%= issue.id %>"
      <%# A backlog can carry issues from projects the user may not plan in. %>

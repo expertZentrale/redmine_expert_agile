@@ -38,7 +38,7 @@ Benoetigt **Redmine 5.0 oder neuer**. Lizenziert unter der **GPL-2.0-or-later**
 - **Diagramme** — Burndown, Burnup, Velocity, kumulierter Fluss und Durchlaufzeit, wahlweise in
   Tickets, Stunden oder Story Points.
 - **Farben** — Karten eingefaerbt nach Tracker, Prioritaet, Status, Bearbeiter, Projekt oder
-  aufgewendeter Zeit, aus einer festen Palette von 18 Toenen, als Farbfelder statt ueber Namen.
+  aufgewendeter Zeit. Jede Farbe ist waehlbar, 18 Palettentoene stehen als Farbfelder bereit.
 - **REST-API** — Agile-Daten (Story Points, Sprint-Zuordnung) lesen *und* schreiben, dazu
   Sprint-CRUD.
 
@@ -152,11 +152,19 @@ sechzig Tage von fuenf auf hundertfuenfundzwanzig Tickets anwachsen](docs/screen
 ### Farben
 
 Karten beziehen ihre Farbe aus Tracker, Status, Prioritaet, Bearbeiter, Projekt oder dem
-Verhaeltnis von geschaetztem zu gebuchtem Aufwand — oder aus einer Farbe am Ticket selbst. Die
-Zuordnung wird zentral verwaltet.
+Verhaeltnis von geschaetztem zu gebuchtem Aufwand — also daraus, was ein Ticket ist, nie aus
+einer Farbe am einzelnen Ticket. Die Zuordnung wird zentral verwaltet.
 
-![Verwaltungsseite fuer Kartenfarben mit Reitern fuer Ticket, Projekt, Tracker, Prioritaet und
-Status, die jeden Status neben einem Farb-Auswahlfeld auflistet](docs/screenshots/de/09-card-colors.png)
+Gewaehlt wird jede Farbe mit einem [Coloris](https://coloris.js.org/)-Farbwaehler: Farbflaeche,
+Farbton-Regler und Hex-Feld, dazu die 18 Palettentoene des Plugins als Farbfelder. Jede Farbe ist
+moeglich. Eine Karte zeigt sie als linken Rand und als blassen Farbton im Hintergrund; dieser
+bleibt bei jeder Wahl hell genug, dass der Kartentext lesbar bleibt. Was keine eigene Farbe hat
+(Bearbeiter sowie noch nicht eingefaerbte Tracker oder Status), bekommt weiterhin einen festen
+Palettenton.
+
+![Verwaltungsseite fuer Kartenfarben, Reiter Status: jeder Status neben einem Hex-Feld mit seiner
+Farbe, der Farbwaehler geoeffnet bei In Arbeit — Farbflaeche, Farbton-Regler, Hex-Wert und
+achtzehn Palettenfarben](docs/screenshots/de/09-card-colors.png)
 
 ### Konfiguration
 

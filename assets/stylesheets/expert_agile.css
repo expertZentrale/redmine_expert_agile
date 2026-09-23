@@ -197,99 +197,37 @@
 
 .ea-truncated { margin-bottom: 8px; }
 
-/* --- Card colour palette -------------------------------------------------
- * A closed, named palette rather than free hex entry. Every value is picked to
- * keep the card's dark text readable, so a board stays legible no matter who
- * assigned the colours. Applied to the card's left border and background tint.
- *
- * Ordered by hue rather than by when each was added: the picker lays the
- * palette out in this order, and a run of related shades is what makes a
- * colour findable at a glance.
+/* --- Card colour ------------------------------------------------------
+ * A coloured card carries its colour inline as two custom properties: the
+ * accent for its left border, and a pale tint of it for its background. The
+ * server computes the tint, and keeps it light whatever colour was picked, so
+ * the card's dark text stays readable. One rule for every colour — the colour
+ * itself is data, not a class name.
  */
-.ea-card.ea-color-dark_green   { border-left-color: #2f7d55; background: #f0f8f4; }
-.ea-card.ea-color-green        { border-left-color: #3c9c3c; background: #f2fbf2; }
-.ea-card.ea-color-light_green  { border-left-color: #8dc63f; background: #f7fcef; }
-.ea-card.ea-color-olive        { border-left-color: #7f8c34; background: #f9faee; }
-.ea-card.ea-color-turquoise    { border-left-color: #29a8a0; background: #f0fbfa; }
-.ea-card.ea-color-light_blue   { border-left-color: #3fa5d8; background: #f1f9fd; }
-.ea-card.ea-color-blue         { border-left-color: #3d7ec4; background: #f2f7fd; }
-.ea-card.ea-color-indigo       { border-left-color: #4257b2; background: #f3f4fc; }
-.ea-card.ea-color-purple       { border-left-color: #8a5fbf; background: #f8f4fd; }
-.ea-card.ea-color-light_purple { border-left-color: #a98cd9; background: #faf7fe; }
-.ea-card.ea-color-pink         { border-left-color: #d1489b; background: #fdf2f9; }
-.ea-card.ea-color-red          { border-left-color: #cc3b3b; background: #fdf3f3; }
-.ea-card.ea-color-salmon       { border-left-color: #e0715e; background: #fef4f2; }
-.ea-card.ea-color-orange       { border-left-color: #e08a1e; background: #fff8ef; }
-.ea-card.ea-color-brown        { border-left-color: #9c6b42; background: #faf6f1; }
-.ea-card.ea-color-yellow       { border-left-color: #dcb800; background: #fffcef; }
-.ea-card.ea-color-slate        { border-left-color: #64748b; background: #f4f6f9; }
-.ea-card.ea-color-gray         { border-left-color: #8c8c8c; background: #f7f7f7; }
-
-/* The picker, on the administration screen and on the issue form. A list of
- * colour names cannot show what it is offering, so the palette is laid out as
- * the colours themselves — painted inline by the markup, not from here, so a
- * page that misses this file still shows colours rather than empty boxes.
- *
- * The radio keeps doing the work: it stays in the DOM, keyboard-reachable and
- * named, and only its box is hidden. */
-.ea-color-field {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+.ea-card.ea-colored {
+  border-left-color: var(--ea-accent);
+  background: var(--ea-tint);
 }
 
-/* What is set right now, spelled out: swatch, name, hex. */
-.ea-color-current {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 150px;
-  padding: 3px 8px 3px 4px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background: #fff;
-}
+/* The colour field on the administration screen: Coloris draws the swatch
+ * beside the text input and opens the picker (coloris.min.css, vendored).
+ * These rules only size the input to a hex value and keep it monospaced, so a
+ * column of colours reads as one. */
+.ea-color-field .clr-field { display: inline-block; }
 
-.ea-color-current-name { font-weight: bold; }
-
-.ea-color-current-hex {
+.ea-color-field input.ea-color-input {
+  width: 9.5em;
+  padding-left: 32px;
   font-family: Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 0.9em;
-  color: #666;
 }
 
-/* Ten swatches to a row: 10 x 20px plus 9 x 4px of gap. */
-.ea-color-choice {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  max-width: 236px;
-}
-
-.ea-color-option {
-  display: inline-flex;
-  margin: 0;
-  cursor: pointer;
-}
-
-.ea-color-choice input[type="radio"] {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  margin: 0;
-}
-
-/* An inset white ring plus an outer dark one, so the mark reads on a light
- * swatch as well as on a dark one. */
-.ea-color-option input:checked + .ea-color-swatch {
-  box-shadow: inset 0 0 0 2px #fff, 0 0 0 2px #333;
-}
-
-.ea-color-option input:focus-visible + .ea-color-swatch {
-  outline: 2px solid #3d7ec4;
-  outline-offset: 2px;
+.ea-color-field .clr-field button {
+  width: 24px;
+  height: 18px;
+  left: 4px;
+  right: auto;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25);
 }
 
 
@@ -314,15 +252,7 @@
 /* Column headers tinted by status, so the stages of the workflow read at a
  * glance. Only the bottom border is coloured — a fully tinted header competes
  * with the cards for attention. */
-.ea-column-header.ea-status-green       { border-bottom-color: #3c9c3c; }
-.ea-column-header.ea-status-light_green { border-bottom-color: #8dc63f; }
-.ea-column-header.ea-status-turquoise   { border-bottom-color: #29a8a0; }
-.ea-column-header.ea-status-blue        { border-bottom-color: #3d7ec4; }
-.ea-column-header.ea-status-purple      { border-bottom-color: #8a5fbf; }
-.ea-column-header.ea-status-yellow      { border-bottom-color: #dcb800; }
-.ea-column-header.ea-status-orange      { border-bottom-color: #e08a1e; }
-.ea-column-header.ea-status-red         { border-bottom-color: #cc3b3b; }
-.ea-column-header.ea-status-gray        { border-bottom-color: #8c8c8c; }
+.ea-column-header.ea-status-colored { border-bottom-color: var(--ea-accent); }
 
 
 
@@ -385,15 +315,10 @@
 
 /* Per-lane accent. Only the band is tinted — tinting the cells as well would
  * fight with the card colours. */
-.ea-swimlane-title.ea-lane-green       th { border-left-color: #3c9c3c; background: #f1f9f1; }
-.ea-swimlane-title.ea-lane-light_green th { border-left-color: #8dc63f; background: #f6fbee; }
-.ea-swimlane-title.ea-lane-turquoise   th { border-left-color: #29a8a0; background: #eff9f8; }
-.ea-swimlane-title.ea-lane-blue        th { border-left-color: #3d7ec4; background: #eff5fc; }
-.ea-swimlane-title.ea-lane-purple      th { border-left-color: #8a5fbf; background: #f6f2fc; }
-.ea-swimlane-title.ea-lane-yellow      th { border-left-color: #dcb800; background: #fdfaec; }
-.ea-swimlane-title.ea-lane-orange      th { border-left-color: #e08a1e; background: #fdf6ec; }
-.ea-swimlane-title.ea-lane-red         th { border-left-color: #cc3b3b; background: #fcf1f1; }
-.ea-swimlane-title.ea-lane-gray        th { border-left-color: #8c8c8c; background: #f2f3f4; }
+.ea-swimlane-title.ea-lane-colored th {
+  border-left-color: var(--ea-accent);
+  background: var(--ea-tint);
+}
 
 .ea-card-description {
   margin: 4px 0 0;
@@ -636,12 +561,4 @@
 
 /* The lane carries the same accent class as a board swimlane, so a sprint
  * reads the same on both screens. */
-.ea-backlog-lane.ea-lane-green       .ea-backlog-lane-header { border-left-color: #3c9c3c; }
-.ea-backlog-lane.ea-lane-light_green .ea-backlog-lane-header { border-left-color: #8dc63f; }
-.ea-backlog-lane.ea-lane-turquoise   .ea-backlog-lane-header { border-left-color: #29a8a0; }
-.ea-backlog-lane.ea-lane-blue        .ea-backlog-lane-header { border-left-color: #3d7ec4; }
-.ea-backlog-lane.ea-lane-purple      .ea-backlog-lane-header { border-left-color: #8a5fbf; }
-.ea-backlog-lane.ea-lane-yellow      .ea-backlog-lane-header { border-left-color: #dcb800; }
-.ea-backlog-lane.ea-lane-orange      .ea-backlog-lane-header { border-left-color: #e08a1e; }
-.ea-backlog-lane.ea-lane-red         .ea-backlog-lane-header { border-left-color: #cc3b3b; }
-.ea-backlog-lane.ea-lane-gray        .ea-backlog-lane-header { border-left-color: #8c8c8c; }
+.ea-backlog-lane.ea-lane-colored .ea-backlog-lane-header { border-left-color: var(--ea-accent); }

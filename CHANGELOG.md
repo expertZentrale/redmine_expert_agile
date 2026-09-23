@@ -9,6 +9,20 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Changed
+- **Card colours can be any colour.** The colour screen uses a [Coloris](https://coloris.js.org/)
+  picker (vendored, MIT) instead of a grid of 18 radio swatches: a colour area, a hue slider and
+  a hex field, with the same 18 palette shades as swatches. Colours are stored as `#rrggbb`;
+  migration `005` converts every stored palette name to the hex it stood for, so existing boards
+  look the same. A card's background tint is now computed from its colour and kept light
+  whatever was picked, and cards, column headers, swimlanes and backlog lanes each take their
+  colour from one CSS rule instead of one per palette entry. A value that is not a colour is
+  refused by name and leaves the old colour in place, and the rest of the form is still saved.
+  Scripts that set a colour directly (`tracker.color = ...`) now pass hex (`#3d7ec4`); palette
+  names are rejected.
+
 ## [0.4.0] - 2026-09-23
 
 ### Added

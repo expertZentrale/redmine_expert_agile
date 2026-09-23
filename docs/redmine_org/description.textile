@@ -11,7 +11,7 @@ h3. Features
 * *Sprints* — a first-class entity with start and end dates, an open/active/closed lifecycle, and Version-style sharing across a project tree. Redmine versions remain usable for planning alongside sprints. A board can be narrowed to one sprint, or follow whichever sprint is active.
 * *Backlog planner* — drag issues into sprints or versions from a dedicated planning view, with the same filters and card fields as the board plus saved backlogs, behind its own project module.
 * *Charts* — burndown, burnup, cumulative flow, velocity and cycle time, in issues, hours or story points.
-* *Colours* — cards coloured by tracker, priority, status, project, assignee or spent time, from a fixed palette of 18 shades picked as swatches rather than by name. Deliberately by what an issue is, never one issue at a time.
+* *Colours* — cards coloured by tracker, priority, status, project, assignee or spent time. Any colour can be picked in a colour picker that offers 18 palette shades as swatches, and a card's background tint stays light enough to read on whatever was chosen. Deliberately by what an issue is, never one issue at a time.
 * *REST API* — read *and write* agile data (story points, sprint assignment), plus full sprint CRUD.
 
 h3. Design notes
@@ -27,7 +27,7 @@ h3. Requirements
 
 * Redmine 5.0 or newer (tested against 5.1, 6.0, 6.1 and 7.0)
 * Ruby 3.2+ / MySQL, MariaDB or PostgreSQL
-* No additional gems — Chart.js is vendored with the plugin
+* No additional gems — Chart.js and the Coloris colour picker are vendored with the plugin
 
 h3. Links
 

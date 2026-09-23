@@ -60,7 +60,8 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     get :edit, :params => { :id => @issue.id }
 
     assert_response :success
-    assert_select 'div.ea-color-choice', false
+    assert_select 'input.ea-color-input', false
+    assert_select 'head script[src*=?]', 'coloris', false
     assert_select 'head link[rel=stylesheet][href*=?]', 'expert_agile', false
     assert_select 'head script[src*=?]', 'expert_agile_colors', false
   end

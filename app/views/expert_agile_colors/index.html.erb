@@ -10,7 +10,7 @@
 </p>
 
 <%= form_tag update_expert_agile_colors_path(:container_type => params[:container_type]),
-              :method => :put do %>
+              :method => :put, :data => { :ea_coloris => expert_agile_coloris_config.to_json } do %>
   <table class="list">
     <thead>
       <tr>
@@ -25,7 +25,7 @@
           <td>
             <%= render :partial => 'expert_agile_colors/picker',
                        :locals => { :name => "colors[#{container.id}]",
-                                    :id_prefix => "colors_#{container.id}",
+                                    :id => "colors_#{container.id}",
                                     :selected => @colors[container.id],
                                     :group_label => container.to_s } %>
           </td>
@@ -38,8 +38,8 @@
 <% end %>
 
 <%# This screen is not a board screen, so nothing else pulls the plugin's assets
-    in. Without them the picker was a column of bare radio buttons. %>
+    in. Coloris is vendored and loaded here only. %>
 <% content_for :header_tags do %>
-  <%= stylesheet_link_tag 'expert_agile', :plugin => 'redmine_expert_agile' %>
-  <%= javascript_include_tag 'expert_agile_colors', :plugin => 'redmine_expert_agile' %>
+  <%= stylesheet_link_tag 'coloris.min', 'expert_agile', :plugin => 'redmine_expert_agile' %>
+  <%= javascript_include_tag 'coloris.min', 'expert_agile_colors', :plugin => 'redmine_expert_agile' %>
 <% end %>

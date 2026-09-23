@@ -177,23 +177,15 @@ de:
   label_expert_agile_manage_colors: Kartenfarben verwalten
   text_expert_agile_manage_colors: Oeffnet einen eigenen Bildschirm; dieses Formular vorher speichern
   label_expert_agile_color: Farbe
-  label_expert_agile_color_dark_green: Dunkelgruen
-  label_expert_agile_color_green: Gruen
-  label_expert_agile_color_light_green: Hellgruen
-  label_expert_agile_color_olive: Oliv
-  label_expert_agile_color_turquoise: Tuerkis
-  label_expert_agile_color_light_blue: Hellblau
-  label_expert_agile_color_blue: Blau
-  label_expert_agile_color_indigo: Indigo
-  label_expert_agile_color_purple: Violett
-  label_expert_agile_color_light_purple: Helllila
-  label_expert_agile_color_pink: Pink
-  label_expert_agile_color_red: Rot
-  label_expert_agile_color_salmon: Lachs
-  label_expert_agile_color_orange: Orange
-  label_expert_agile_color_brown: Braun
-  label_expert_agile_color_yellow: Gelb
-  label_expert_agile_color_slate: Schiefer
-  label_expert_agile_color_gray: Grau
+  label_expert_agile_color_clear: Keine Farbe
+  label_expert_agile_color_a11y_open: Farbauswahl oeffnen
+  label_expert_agile_color_a11y_marker: 'Saettigung: {s}. Helligkeit: {v}.'
+  label_expert_agile_color_a11y_hue: Farbton-Regler
+  label_expert_agile_color_a11y_alpha: Deckkraft-Regler
+  label_expert_agile_color_a11y_input: Feld fuer den Farbwert
+  label_expert_agile_color_a11y_format: Farbformat
+  label_expert_agile_color_a11y_swatch: Farbfeld
+  label_expert_agile_color_a11y_instruction: Auswahl fuer Saettigung und Helligkeit. Mit den Pfeiltasten auswaehlen.
+  error_expert_agile_color_invalid: 'Keine gueltige Farbe, unveraendert gelassen: %{names}. Einen Hex-Wert wie #3d7ec4 verwenden.'
   label_expert_agile_color_base_issue_status: Status
   label_expert_agile_color_base_issue_priority: Prioritaet

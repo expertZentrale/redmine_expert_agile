@@ -1,7 +1,7 @@
 <%# One planning lane: the unplanned backlog (container nil) or a container. %>
 <% totals = @query.totals_for(container) %>
 <% issues = container ? @query.issues_for(container) : @query.backlog_issues %>
-<div class="ea-backlog-lane <%= container ? expert_agile_swimlane_color_class(container) : 'ea-backlog-source' %>">
+<div class="ea-backlog-lane <%= container ? expert_agile_swimlane_color_class(container) : 'ea-backlog-source' %>"<%= expert_agile_style_attribute(expert_agile_swimlane_style(container)) if container %>>
   <h3 class="ea-backlog-lane-header" data-container-id="<%= container && container.id %>">
     <span class="ea-backlog-lane-title">
       <span class="ea-backlog-lane-name" title="<%= container ? h(container.to_s) : l(:label_expert_agile_backlog) %>">
