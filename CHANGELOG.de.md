@@ -11,6 +11,17 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ## [Unreleased]
 
+### Hinzugefügt
+- **Sprint-Boards.** Das Board lässt sich über die neue Auswahl *Sprint* in seinen Optionen
+  oder mit `sprint_id=<id>` in der URL auf einen Sprint eingrenzen; *Aktiver Sprint*
+  (`sprint_id=active`) folgt dem jeweils laufenden Sprint, sodass ein gespeichertes Sprint-Board
+  die nächste Iteration unverändert übersteht. Spalten, Zähler und Story-Point-Summen umfassen
+  dann nur die Tickets dieses Sprints. Die Option `sprint_id` wurde bisher schon angenommen und
+  gespeichert, grenzte das Board aber nie ein (#21).
+  Aufgelöst werden nur Sprints, in die das Projekt planen darf — geschlossene eingeschlossen,
+  damit ein beendeter Sprint nachträglich angesehen werden kann; jede andere ID, oder *Aktiver
+  Sprint* ohne laufenden Sprint, zeigt ein leeres Board, statt alle Tickets als Sprint auszugeben.
+
 ### Behoben
 - **`release.yml` akzeptierte fehlerhafte Tags.** Die Semver-Prüfung erlaubte dem optionalen
   Suffix, mit `.` zu beginnen, womit `v1.2.3.4` als gültig durchging, und ließ leere Bezeichner

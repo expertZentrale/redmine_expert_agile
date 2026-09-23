@@ -383,6 +383,31 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select '#sidebar a', { :text => 'A chart', :count => 0 }
   end
 
+  def test_index_is_narrowed_to_the_sprint_in_the_url
+    sprint = ExpertAgileSprint.create!(:project => @project, :name => 'Sprint A',
+                                       :start_date => Date.new(2026, 1, 1),
+                                       :end_date => Date.new(2026, 1, 14))
+    data = @issue.expert_agile_data || @issue.build_expert_agile_data
+    data.sprint_id = sprint.id
+    data.save!
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :sprint_id => sprint.id }
+
+    assert_response :success
+    assert_select 'div.ea-card', 1
+    assert_select "div.ea-card[data-issue-id='#{@issue.id}']"
+    assert_select 'select#sprint_id option[selected][value=?]', sprint.id.to_s
+  end
+
+  def test_index_survives_a_sprint_id_sent_as_an_array
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :sprint_id => ['41'] }
+
+    assert_response :success
+    assert_select 'div.ea-card', 0
+  end
+
   def test_index_requires_the_view_permission
     @role.remove_permission!(:view_expert_agile_board)
 

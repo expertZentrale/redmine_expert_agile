@@ -219,4 +219,159 @@ class ExpertAgileQueryTest < ActiveSupport::TestCase
 
     assert issues.all? { |issue| issue.tracker_id == lane.id && issue.status_id == status_id }
   end
+
+  # --- Sprint filter ----------------------------------------------------
+
+  def make_sprint(project, name, attributes = {})
+    ExpertAgileSprint.create!({ :project => project, :name => name,
+                                :start_date => Date.new(2026, 1, 1),
+                                :end_date => Date.new(2026, 1, 14) }.merge(attributes))
+  end
+
+  def plan(issue, sprint)
+    data = issue.expert_agile_data || issue.build_expert_agile_data
+    data.sprint_id = sprint.id
+    data.save!
+  end
+
+  def open_board
+    @query.board_status_ids = IssueStatus.where(:is_closed => false).pluck(:id)
+    @query
+  end
+
+  def test_sprint_id_round_trips_ids_and_the_active_mode
+    @query.apply_board_params(:sprint_id => '41')
+    assert_equal 41, @query.sprint_id
+
+    @query.apply_board_params(:sprint_id => 'active')
+    assert_equal ExpertAgileQuery::SPRINT_ACTIVE, @query.sprint_id
+    assert @query.follows_active_sprint?
+
+    @query.apply_board_params(:sprint_id => '')
+    assert_nil @query.sprint_id
+  end
+
+  def test_a_malformed_sprint_id_narrows_to_nothing_instead_of_raising
+    sprint = make_sprint(@project, 'Sprint A')
+    plan(Issue.find(1), sprint)
+
+    open_board.apply_board_params(:sprint_id => [sprint.id.to_s])
+
+    assert_nil @query.board_sprint
+    assert_empty @query.board_scope.to_a
+  end
+
+  def test_board_without_a_sprint_shows_every_issue
+    sprint = make_sprint(@project, 'Sprint A')
+    plan(Issue.find(1), sprint)
+
+    ids = open_board.board_scope.pluck(:id)
+
+    assert_includes ids, 1
+    assert_includes ids, 2
+  end
+
+  def test_board_is_narrowed_to_the_selected_sprint
+    sprint = make_sprint(@project, 'Sprint A')
+    plan(Issue.find(1), sprint)
+
+    open_board.sprint_id = sprint.id
+
+    assert_equal [1], @query.board_scope.pluck(:id)
+    assert_equal [1], @query.issue_board.values.flatten.map(&:id)
+  end
+
+  def test_column_counts_follow_the_sprint
+    sprint = make_sprint(@project, 'Sprint A')
+    plan(Issue.find(1), sprint)
+    open_board.sprint_id = sprint.id
+
+    status_id = Issue.find(1).status_id
+    column = @query.board_columns.detect { |c| c.id == status_id }
+
+    assert_equal 1, column.issue_count
+    assert_equal 1, @query.board_columns.sum(&:issue_count)
+  end
+
+  def test_active_mode_follows_the_running_sprint
+    make_sprint(@project, 'Planned')
+    running = make_sprint(@project, 'Running', :status => ExpertAgileSprint::STATUS_ACTIVE,
+                                               :start_date => Date.new(2026, 2, 1),
+                                               :end_date => Date.new(2026, 2, 14))
+    plan(Issue.find(2), running)
+
+    open_board.sprint_id = 'active'
+
+    assert_equal running, @query.board_sprint
+    assert_equal [2], @query.board_scope.pluck(:id)
+  end
+
+  def test_active_mode_prefers_the_projects_own_sprint_over_a_shared_one
+    # Project 3 is a subproject of project 1; hierarchy sharing reaches up to it.
+    shared = make_sprint(Project.find(3), 'Shared', :status => ExpertAgileSprint::STATUS_ACTIVE,
+                                                    :sharing => ExpertAgileSprint::SHARING_HIERARCHY)
+    own = make_sprint(@project, 'Own', :status => ExpertAgileSprint::STATUS_ACTIVE,
+                                       :start_date => Date.new(2026, 2, 1),
+                                       :end_date => Date.new(2026, 2, 14))
+    assert_includes @project.shared_expert_agile_sprints.active.to_a, shared,
+                    'the shared sprint must be a candidate, or the test proves nothing'
+
+    open_board.sprint_id = 'active'
+
+    assert_equal own, @query.board_sprint
+  end
+
+  def test_column_totals_follow_the_sprint
+    sprint = make_sprint(@project, 'Sprint A')
+    planned = Issue.find(1)
+    other = Issue.find(2)
+    planned.update_columns(:estimated_hours => 3.0)
+    other.update_columns(:estimated_hours => 7.0)
+    plan(planned, sprint)
+    planned.expert_agile_data.update!(:story_points => 3)
+    other.create_expert_agile_data!(:story_points => 5)
+
+    open_board.sprint_id = sprint.id
+
+    assert_equal 3, @query.board_columns.sum { |c| c.story_points.to_i }
+    assert_equal 3.0, @query.board_columns.sum { |c| c.estimated_hours.to_f }
+  end
+
+  def test_active_mode_without_a_running_sprint_shows_nothing
+    sprint = make_sprint(@project, 'Planned')
+    plan(Issue.find(1), sprint)
+
+    open_board.sprint_id = 'active'
+
+    assert_nil @query.board_sprint
+    assert_empty @query.board_scope.to_a
+  end
+
+  def test_a_sprint_of_an_unrelated_project_does_not_resolve
+    foreign = make_sprint(Project.find(2), 'Foreign')
+    plan(Issue.find(4), foreign)
+
+    open_board.sprint_id = foreign.id
+
+    assert_nil @query.board_sprint
+    assert_empty @query.board_scope.to_a,
+                 'an unresolvable sprint must not widen the board to every issue'
+  end
+
+  def test_available_board_sprints_include_closed_ones
+    make_sprint(@project, 'Done', :status => ExpertAgileSprint::STATUS_CLOSED)
+
+    assert_includes @query.available_board_sprints.map(&:name), 'Done'
+  end
+
+  def test_the_sprint_survives_save_and_the_session_round_trip
+    sprint = make_sprint(@project, 'Sprint A')
+    @query.sprint_id = sprint.id
+    @query.save!
+    assert_equal sprint.id, ExpertAgileQuery.find(@query.id).sprint_id
+
+    restored = ExpertAgileQuery.new(:name => '_', :project => @project)
+    restored.restore_board_options(@query.board_session_options)
+    assert_equal sprint.id, restored.sprint_id
+  end
 end

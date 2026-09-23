@@ -131,6 +131,23 @@ module ExpertAgileBoardsHelper
     end
   end
 
+  # Options for the board's sprint selector: every issue, the running sprint,
+  # then each sprint the project may plan into with its status. A selected
+  # sprint that no longer resolves stays listed, so the select does not quietly
+  # snap back to "all issues" while the board shows none.
+  def expert_agile_board_sprint_options(query, sprints)
+    options = [[l(:label_expert_agile_sprint_all_issues), ''],
+               [l(:label_expert_agile_sprint_active_mode), ExpertAgileQuery::SPRINT_ACTIVE]]
+    options += sprints.map do |sprint|
+      ["#{sprint.name} (#{l("label_expert_agile_sprint_status_#{sprint.status_name}")})", sprint.id]
+    end
+    selected = query.sprint_id
+    if selected.is_a?(Integer) && sprints.none? { |sprint| sprint.id == selected }
+      options << [l(:label_expert_agile_sprint_unavailable), selected]
+    end
+    options_for_select(options, selected.to_s)
+  end
+
   def expert_agile_card_field_tags(query)
     selected = query.columns.map(&:name)
     columns = (query.available_columns + query.available_block_columns).uniq(&:name)

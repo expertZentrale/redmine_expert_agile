@@ -30,7 +30,8 @@ Benoetigt **Redmine 5.0 oder neuer**. Lizenziert unter der **GPL-2.0-or-later**
   Spalte und Filter in der Ticketliste verfuegbar.
 - **Sprints** — eine eigenstaendige Entitaet mit Start- und Enddatum, Lebenszyklus
   offen/aktiv/geschlossen und Freigabe ueber den Projektbaum wie bei Versionen.
-  Redmine-Versionen bleiben parallel zur Planung nutzbar.
+  Redmine-Versionen bleiben parallel zur Planung nutzbar. Ein Board laesst sich auf einen Sprint
+  eingrenzen oder folgt automatisch dem aktiven Sprint.
 - **Backlog-Planer** — Tickets in einer eigenen Planungsansicht per Drag & Drop Sprints oder
   Versionen zuordnen, mit denselben Filtern, Kartenfeldern und gespeicherten Abfragen wie das
   Board.
@@ -107,6 +108,14 @@ den Projekteinstellungen verwaltet werden. Ein Projekt fuehrt genau einen aktive
 
 ![Reiter Sprints in den Projekteinstellungen mit fuenf Sprints samt Status, Start- und Enddatum:
 einer aktiv, einer offen und drei abgeschlossen](docs/screenshots/de/04-sprints.png)
+
+Zum Sprint-Board wird ein Board ueber die Auswahl **Sprint** in seinen Optionen: entweder ein
+bestimmter Sprint oder *Aktiver Sprint (automatisch)*, der dem jeweils laufenden Sprint folgt, sodass
+ein gespeichertes Sprint-Board zu Beginn der naechsten Iteration nicht umgestellt werden muss.
+Spalten, Zaehler und Summen umfassen dann nur die Tickets dieses Sprints. Das funktioniert auch
+per Link — `…/expert_agile/board?set_filter=1&sprint_id=41` oder `sprint_id=active`. Angenommen
+werden nur Sprints, in die das Projekt planen darf; jede andere ID, oder *Aktiver Sprint* ohne
+laufenden Sprint, zeigt ein leeres Board statt aller Tickets.
 
 ### Backlog-Planer
 

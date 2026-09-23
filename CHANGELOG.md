@@ -11,6 +11,16 @@ notes from the section matching the pushed tag.
 
 ## [Unreleased]
 
+### Added
+- **Sprint boards.** The board can be narrowed to one sprint from a new *Sprint* selector in its
+  options panel, or with `sprint_id=<id>` in the URL; *Active sprint* (`sprint_id=active`) follows
+  whichever sprint is running, so a saved sprint board survives the next iteration unchanged.
+  Columns, counts and story-point totals cover only that sprint's issues. The `sprint_id` option
+  was already accepted and saved, but never narrowed the board (#21).
+  Only sprints the project may plan into resolve — closed ones included, so a finished sprint
+  can be reviewed; any other id, or *Active sprint* while none is running, shows an empty board
+  rather than passing every issue off as the sprint.
+
 ### Fixed
 - **`release.yml` accepted malformed tags.** The semver check allowed the optional suffix to begin
   with `.`, so `v1.2.3.4` validated as semver, and accepted empty identifiers such as `1.2.3-a..b`.

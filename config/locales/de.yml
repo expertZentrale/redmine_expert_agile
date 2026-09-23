@@ -95,6 +95,9 @@ de:
   label_expert_agile_sprint_status_open: Offen
   label_expert_agile_sprint_status_active: Aktiv
   label_expert_agile_sprint_status_closed: Geschlossen
+  label_expert_agile_sprint_all_issues: Alle Tickets
+  label_expert_agile_sprint_active_mode: Aktiver Sprint (automatisch)
+  label_expert_agile_sprint_unavailable: (Sprint nicht verfügbar)
   label_expert_agile_sprint_sharing_none: Nicht geteilt
   label_expert_agile_sprint_sharing_descendants: Mit Unterprojekten
   label_expert_agile_sprint_sharing_hierarchy: Mit Projekthierarchie
