@@ -1,0 +1,11 @@
+h3. redmine_expert_agile 0.5.0 — 2026-09-23
+
+h4. Changed
+
+* *Card colours can be any colour.* The card colour screen now has a proper colour picker ("Coloris":https://coloris.js.org/, shipped with the plugin): a colour area, a hue slider and a hex field, with the plugin's 18 palette shades offered as swatches and a *No color* button. Before, a colour could only be one of those 18 shades. A card shows its colour as the left border and a pale tint of it as the background, and the tint stays light enough to read the card's text on whatever was picked. Column headers, swimlanes and backlog lanes follow the same colours. A value that is not a colour is refused by name and keeps the old colour, while the rest of the form is still saved.
+
+h4. Upgrade notes
+
+Run the plugin migrations: @bundle exec rake redmine:plugins:migrate NAME=redmine_expert_agile RAILS_ENV=production@. Migration 005 converts every stored card colour from its palette name to the matching hex value, so boards look the same after the upgrade. Rolling back maps colours that are still palette shades back to their names and removes any other colours.
+
+Scripts or console snippets that set a colour by name (@tracker.color = 'blue'@) must now pass a hex value such as @#3d7ec4@. There is no REST endpoint for colours, so API clients are unaffected.
