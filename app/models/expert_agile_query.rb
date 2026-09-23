@@ -201,7 +201,11 @@ class ExpertAgileQuery < IssueQuery
 
   def sprint_id=(value)
     remove_instance_variable(:@board_sprint) if defined?(@board_sprint)
-    options[:sprint_id] = value.to_s == SPRINT_ACTIVE ? SPRINT_ACTIVE : (value.presence && value.to_i)
+    # Normalised to a string first: a crafted `sprint_id[]=41` arrives as an
+    # Array, which has no to_i. Anything that is not an id becomes 0, which
+    # resolves to no sprint and so to an empty board, like any other bad id.
+    value = value.to_s.strip
+    options[:sprint_id] = value == SPRINT_ACTIVE ? SPRINT_ACTIVE : (value.presence && value.to_i)
   end
 
   def follows_active_sprint?

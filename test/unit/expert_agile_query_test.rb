@@ -251,6 +251,16 @@ class ExpertAgileQueryTest < ActiveSupport::TestCase
     assert_nil @query.sprint_id
   end
 
+  def test_a_malformed_sprint_id_narrows_to_nothing_instead_of_raising
+    sprint = make_sprint(@project, 'Sprint A')
+    plan(Issue.find(1), sprint)
+
+    open_board.apply_board_params(:sprint_id => [sprint.id.to_s])
+
+    assert_nil @query.board_sprint
+    assert_empty @query.board_scope.to_a
+  end
+
   def test_board_without_a_sprint_shows_every_issue
     sprint = make_sprint(@project, 'Sprint A')
     plan(Issue.find(1), sprint)
