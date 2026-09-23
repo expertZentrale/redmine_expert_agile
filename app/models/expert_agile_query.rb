@@ -21,6 +21,9 @@ class ExpertAgileQuery < IssueQuery
 
   BOARD_TYPES = %w(kanban scrum).freeze
 
+  # Stored in place of a sprint id to follow the running sprint.
+  SPRINT_ACTIVE = 'active'.freeze
+
   # Card fields we render ourselves and therefore never repeat in the generic
   # attribute list at the bottom of a card.
   SPECIAL_CARD_COLUMNS = %i(id project tracker status subject assigned_to done_ratio
@@ -186,12 +189,48 @@ class ExpertAgileQuery < IssueQuery
     self
   end
 
+  # The sprint the board is narrowed to: nil for every issue, a sprint id, or
+  # SPRINT_ACTIVE to follow whichever sprint is running — so a saved sprint
+  # board never has to be re-pointed at the start of each iteration.
   def sprint_id
-    options[:sprint_id].presence && options[:sprint_id].to_i
+    value = options[:sprint_id]
+    return SPRINT_ACTIVE if value.to_s == SPRINT_ACTIVE
+
+    value.presence && value.to_i
   end
 
   def sprint_id=(value)
-    options[:sprint_id] = value.presence && value.to_i
+    remove_instance_variable(:@board_sprint) if defined?(@board_sprint)
+    options[:sprint_id] = value.to_s == SPRINT_ACTIVE ? SPRINT_ACTIVE : (value.presence && value.to_i)
+  end
+
+  def follows_active_sprint?
+    sprint_id == SPRINT_ACTIVE
+  end
+
+  # Sprints the board may be narrowed to: the ones this project may plan into,
+  # closed ones included so a finished sprint can still be reviewed.
+  def available_board_sprints
+    board_sprint_candidates.sorted.to_a
+  end
+
+  # The sprint the board actually shows, or nil.
+  #
+  # An id is resolved against the sprints this project may plan into, never
+  # looked up bare: a crafted or stale id (a sprint of an unrelated project, a
+  # deleted one) resolves to nil. In
+  # active mode the project's own running sprint wins over one shared from
+  # elsewhere in the tree, since each project runs its own.
+  def board_sprint
+    return @board_sprint if defined?(@board_sprint)
+
+    @board_sprint =
+      if follows_active_sprint?
+        active = board_sprint_candidates.active
+        (project && active.find_by(:project_id => project.id)) || active.sorted.first
+      elsif sprint_id
+        board_sprint_candidates.find_by(:id => sprint_id)
+      end
   end
 
   def backlog_enabled?
@@ -232,7 +271,7 @@ class ExpertAgileQuery < IssueQuery
 
   # The issues considered by this board, before column/swimlane bucketing.
   def board_scope
-    base_scope
+    sprint_filtered(base_scope)
       .eager_load(:status, :project, :assigned_to, :tracker, :priority, :fixed_version,
                   :expert_agile_data)
       .where(:status_id => board_columns.map(&:id))
@@ -285,6 +324,25 @@ class ExpertAgileQuery < IssueQuery
 
   private
 
+  # Narrows a scope to the board's sprint. A subquery rather than a join, so it
+  # composes with the scopes that already join agile data under an alias.
+  #
+  # A sprint that was asked for but does not resolve — a stale or crafted id,
+  # or active mode while no sprint is running — narrows to nothing: silently
+  # widening to every issue would pass the whole backlog off as the sprint.
+  def sprint_filtered(scope)
+    return scope unless sprint_id
+
+    sprint = board_sprint
+    return scope.none if sprint.nil?
+
+    scope.where(:id => ExpertAgileData.where(:sprint_id => sprint.id).select(:issue_id))
+  end
+
+  def board_sprint_candidates
+    project ? project.shared_expert_agile_sprints : ExpertAgileSprint.none
+  end
+
   def default_board_statuses
     scope = project ? project.rolled_up_statuses : IssueStatus.sorted
     statuses = scope.reject(&:is_closed?)
@@ -301,7 +359,7 @@ class ExpertAgileQuery < IssueQuery
   # base_scope already joins :status and :project, so grouping needs no extra
   # join — status_id is a column on issues itself.
   def grouped_issue_count(select_sql = nil)
-    scope = base_scope.reorder(nil).group("#{Issue.table_name}.status_id")
+    scope = sprint_filtered(base_scope).reorder(nil).group("#{Issue.table_name}.status_id")
     select_sql ? scope.sum(select_sql) : scope.count
   end
 
@@ -315,7 +373,7 @@ class ExpertAgileQuery < IssueQuery
 
   def story_points_by_status
     @story_points_by_status ||=
-      base_scope.reorder(nil)
+      sprint_filtered(base_scope).reorder(nil)
                 .joins("LEFT OUTER JOIN #{ExpertAgileData.table_name} ead " \
                        "ON ead.issue_id = #{Issue.table_name}.id")
                 .group("#{Issue.table_name}.status_id")

@@ -70,6 +70,13 @@
             <%= check_box_tag 'show_avatar', '1', @query.show_avatar? %>
           </span>
         </p>
+        <% sprints = @query.available_board_sprints %>
+        <% if sprints.any? || @query.sprint_id %>
+          <p class="ea-options-row">
+            <label for="sprint_id"><%= l(:label_expert_agile_sprint) %></label>
+            <%= select_tag 'sprint_id', expert_agile_board_sprint_options(@query, sprints) %>
+          </p>
+        <% end %>
       </section>
 
       <section class="ea-options-panel" id="ea-columns-options">

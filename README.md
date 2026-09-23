@@ -28,7 +28,7 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
   by default), restrictable to selected trackers, available as an issue list column and filter.
 - **Sprints** — a first-class entity with start and end dates, an open/active/closed lifecycle,
   and Version-style sharing across a project tree. Redmine versions remain usable for planning
-  alongside sprints.
+  alongside sprints. A board can be narrowed to one sprint, or follow whichever sprint is active.
 - **Backlog planner** — drag issues into sprints or versions from a dedicated planning view, with
   the same filters, card fields and saved queries as the board.
 - **Charts** — burndown, burnup, velocity, cumulative flow and cycle time, in issues, hours or
@@ -97,6 +97,13 @@ project settings. A project runs one active sprint at a time.
 
 ![Sprints tab in the project settings listing five sprints with their status, start and due date:
 one active, one open and three closed](docs/screenshots/en/04-sprints.png)
+
+A board becomes a sprint board through the **Sprint** selector in its options panel: pick one
+sprint, or *Active sprint* to follow whichever sprint is running, so a saved sprint board never
+has to be re-pointed when the next iteration starts. Columns, counts and totals then cover only
+that sprint's issues. The same works from a link — `…/expert_agile/board?set_filter=1&sprint_id=41`
+or `sprint_id=active`. Only sprints the project may plan into are accepted; any other id, or
+*Active sprint* while none is running, shows an empty board rather than every issue.
 
 ### Backlog planner
 
