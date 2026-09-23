@@ -296,6 +296,37 @@ class ExpertAgileQueryTest < ActiveSupport::TestCase
     assert_equal [2], @query.board_scope.pluck(:id)
   end
 
+  def test_active_mode_prefers_the_projects_own_sprint_over_a_shared_one
+    # Project 3 is a subproject of project 1; hierarchy sharing reaches up to it.
+    shared = make_sprint(Project.find(3), 'Shared', :status => ExpertAgileSprint::STATUS_ACTIVE,
+                                                    :sharing => ExpertAgileSprint::SHARING_HIERARCHY)
+    own = make_sprint(@project, 'Own', :status => ExpertAgileSprint::STATUS_ACTIVE,
+                                       :start_date => Date.new(2026, 2, 1),
+                                       :end_date => Date.new(2026, 2, 14))
+    assert_includes @project.shared_expert_agile_sprints.active.to_a, shared,
+                    'the shared sprint must be a candidate, or the test proves nothing'
+
+    open_board.sprint_id = 'active'
+
+    assert_equal own, @query.board_sprint
+  end
+
+  def test_column_totals_follow_the_sprint
+    sprint = make_sprint(@project, 'Sprint A')
+    planned = Issue.find(1)
+    other = Issue.find(2)
+    planned.update_columns(:estimated_hours => 3.0)
+    other.update_columns(:estimated_hours => 7.0)
+    plan(planned, sprint)
+    planned.expert_agile_data.update!(:story_points => 3)
+    other.create_expert_agile_data!(:story_points => 5)
+
+    open_board.sprint_id = sprint.id
+
+    assert_equal 3, @query.board_columns.sum { |c| c.story_points.to_i }
+    assert_equal 3.0, @query.board_columns.sum { |c| c.estimated_hours.to_f }
+  end
+
   def test_active_mode_without_a_running_sprint_shows_nothing
     sprint = make_sprint(@project, 'Planned')
     plan(Issue.find(1), sprint)
