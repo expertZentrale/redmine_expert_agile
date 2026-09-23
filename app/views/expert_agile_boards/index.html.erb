@@ -23,7 +23,7 @@
       <% expert_agile_header_rows(@board_columns).each do |row| %>
         <tr>
           <% row.each do |cell| %>
-            <th class="ea-column-header <%= cell[:column] && cell[:column].wip_css_class %> <%= expert_agile_status_color_class(cell[:column]) %>"
+            <th class="ea-column-header <%= cell[:column] && cell[:column].wip_css_class %> <%= expert_agile_status_color_class(cell[:column]) %>"<%= expert_agile_style_attribute(expert_agile_status_style(cell[:column])) %>
                 colspan="<%= cell[:colspan] %>"
                 rowspan="<%= cell[:rowspan] %>"
                 <% if cell[:column] %>data-column-id="<%= cell[:column].id %>"<% end %>>
@@ -49,7 +49,7 @@
               beneath it. A narrow label cell on the left does not read as a
               lane — the eye has nothing tying the row together across the
               columns. %>
-          <tr class="ea-swimlane-title <%= expert_agile_swimlane_color_class(swimlane) %>">
+          <tr class="ea-swimlane-title <%= expert_agile_swimlane_color_class(swimlane) %>"<%= expert_agile_style_attribute(expert_agile_swimlane_style(swimlane)) %>>
             <th colspan="<%= @board_columns.size %>">
               <span class="ea-swimlane-name">
                 <%= swimlane.nil? ? l(:label_expert_agile_swimlane_none_value) : h(swimlane.to_s) %>
@@ -67,7 +67,7 @@
               </span>
             </th>
           </tr>
-          <tr class="ea-swimlane <%= expert_agile_swimlane_color_class(swimlane) %>">
+          <tr class="ea-swimlane <%= expert_agile_swimlane_color_class(swimlane) %>"<%= expert_agile_style_attribute(expert_agile_swimlane_style(swimlane)) %>>
             <%= render :partial => 'expert_agile_boards/cells',
                        :locals => { :swimlane => swimlane } %>
           </tr>

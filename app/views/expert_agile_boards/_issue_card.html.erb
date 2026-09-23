@@ -2,7 +2,7 @@
     RedmineUP's equivalent carries six separate inline <script> blocks and is
     re-injected over AJAX and WebSocket as raw html_safe, which makes any
     meaningful content security policy impossible. %>
-<div class="<%= expert_agile_card_classes(issue, @query) %>"
+<div class="<%= expert_agile_card_classes(issue, @query) %>"<%= expert_agile_style_attribute(expert_agile_card_style(issue, @query)) %>
      id="ea-card-<%= issue.id %>"
      data-issue-id="<%= issue.id %>"
      data-status-id="<%= issue.status_id %>"

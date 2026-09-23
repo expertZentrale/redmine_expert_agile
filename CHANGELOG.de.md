@@ -9,6 +9,21 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Geändert
+- **Kartenfarben können jede Farbe sein.** Die Farbseite nutzt einen
+  [Coloris](https://coloris.js.org/)-Farbwähler (mitgeliefert, MIT) statt eines Rasters aus 18
+  Farbfeldern: Farbfläche, Farbton-Regler und Hex-Feld, dazu dieselben 18 Palettentöne als
+  Farbfelder. Farben werden als `#rrggbb` gespeichert; Migration `005` wandelt jeden gespeicherten
+  Palettennamen in seinen Hex-Wert um, bestehende Boards sehen also gleich aus. Der Hintergrund
+  einer Karte wird jetzt aus ihrer Farbe berechnet und bleibt bei jeder Wahl hell, und Karten,
+  Spaltenköpfe, Swimlanes und Backlog-Spuren beziehen ihre Farbe aus je einer CSS-Regel statt
+  aus einer pro Palettenfarbe. Ein Wert, der keine Farbe ist, wird mit Namen abgelehnt und lässt
+  die bisherige Farbe stehen; der Rest des Formulars wird trotzdem gespeichert. Skripte, die eine
+  Farbe direkt setzen (`tracker.color = ...`), übergeben jetzt Hex (`#3d7ec4`); Palettennamen
+  werden abgelehnt.
+
 ## [0.4.0] - 2026-09-23
 
 ### Hinzugefügt

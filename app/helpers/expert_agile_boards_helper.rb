@@ -35,8 +35,22 @@ module ExpertAgileBoardsHelper
     classes << 'ea-card-closed' if issue.closed?
     classes << 'ea-card-overdue' if issue.overdue?
     classes << 'ea-card-private' if issue.is_private?
-    classes << expert_agile_color_class(issue, query)
+    classes << 'ea-colored' if expert_agile_card_color(issue, query)
     classes.compact.join(' ')
+  end
+
+  # A ` style="..."` attribute for inline colour variables, or nothing, so an
+  # uncoloured element carries no empty attribute. Rails 6.1 (Redmine 5.0) has
+  # no tag.attributes, hence the hand-built one.
+  def expert_agile_style_attribute(css)
+    return nil if css.blank?
+
+    " style=\"#{ERB::Util.html_escape(css)}\"".html_safe
+  end
+
+  # The inline colour of one card, or nil when the board is not coloured.
+  def expert_agile_card_style(issue, query)
+    ExpertAgileColor.css_variables(expert_agile_card_color(issue, query), ExpertAgileColor::CARD_TINT)
   end
 
   # Statuses offerable as board columns: everything the project's workflows can
@@ -166,14 +180,18 @@ module ExpertAgileBoardsHelper
   #
   # A lane that carries its own colour — a tracker, priority or status the
   # administrator has coloured — uses it, so the lane matches its cards.
-  # Anything else gets a stable palette entry derived from its id.
+  # Anything else gets a stable palette colour derived from its id.
   def expert_agile_swimlane_color_class(swimlane)
-    return 'ea-lane-gray' if swimlane.nil?
-
-    colour = RedmineExpertAgile::CardColor.for_container(swimlane)
-    colour.present? ? "ea-lane-#{colour}" : 'ea-lane-gray'
+    'ea-lane-colored'
   end
 
+  # The lane's colour as inline custom properties. A lane with nothing to take
+  # a colour from gets the palette's gray, so it still reads as a band.
+  def expert_agile_swimlane_style(swimlane)
+    colour = swimlane && RedmineExpertAgile::CardColor.for_container(swimlane)
+    ExpertAgileColor.css_variables(colour || ExpertAgileColor::PALETTE['gray'],
+                                   ExpertAgileColor::LANE_TINT)
+  end
   # Saved boards (or charts) visible to the current user in this scope.
   #
   # Filtered to the exact STI type: ExpertAgileChartsQuery and
@@ -197,24 +215,28 @@ module ExpertAgileBoardsHelper
     project ? new_project_expert_agile_query_path(project) : new_expert_agile_query_path
   end
 
-  # Palette class for a column header, so the board reads as a set of stages at
+  # Colour of a column header, so the board reads as a set of stages at
   # a glance. Only applied when the setting is on and the cell is a leaf.
   def expert_agile_status_color_class(column)
-    return nil unless column && RedmineExpertAgile.status_colors?
-
-    color = RedmineExpertAgile::CardColor.for_status(column.status)
-    color.present? ? "ea-status-#{color}" : nil
+    expert_agile_status_color(column) ? 'ea-status-colored' : nil
   end
 
-  # Palette class for one card, or nil when the board is not coloured.
-  def expert_agile_color_class(issue, query)
+  def expert_agile_status_style(column)
+    ExpertAgileColor.css_variables(expert_agile_status_color(column), ExpertAgileColor::CARD_TINT)
+  end
+
+  def expert_agile_status_color(column)
+    return nil unless column && RedmineExpertAgile.status_colors?
+
+    RedmineExpertAgile::CardColor.for_status(column.status)
+  end
+  # Colour of one card as #rrggbb, or nil when the board is not coloured.
+  def expert_agile_card_color(issue, query)
     base = query && query.color_base
     return nil if base.blank? || base == 'none'
 
-    color = RedmineExpertAgile::CardColor.for(issue, base)
-    color.present? ? "ea-color-#{color}" : nil
+    RedmineExpertAgile::CardColor.for(issue, base)
   end
-
   # The data the board script needs, emitted as a JSON island rather than
   # inline JavaScript so the board works under `script-src 'self'`.
   def expert_agile_board_data(query, project)

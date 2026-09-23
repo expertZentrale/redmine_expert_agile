@@ -178,7 +178,11 @@ fallback values, because the defaults live in `init.rb`.
   Unique index on `issue_id`.
 - `expert_agile_sprints` — `name`, `description`, `status` (0 open / 1 active / 2 closed),
   `start_date`, `end_date`, `sharing` (Version-style: 0 none … 4 system).
-- `expert_agile_colors` — polymorphic `container` + `color`, one composite index.
+- `expert_agile_colors` — polymorphic `container` + `color` (`#rrggbb`, validated and normalised
+  by `ExpertAgileColor.normalize`), one composite index. `ExpertAgileColor::PALETTE` is only the
+  picker's swatches and the source of every fallback colour, not a constraint on what is stored.
+  A coloured element carries `--ea-accent`/`--ea-tint` inline and one CSS rule reads them — never
+  add a CSS class per colour.
 
 ### Positions
 `position` is a **decimal**, not a dense integer. The client reports
@@ -201,7 +205,10 @@ History is reconstructed by **one** query over `journal_details`, projected in a
 a per-issue timeline, then walked once per date bucket — `O(journals)`, not
 `O(dates × issues × journals)`. Results are cached in `Rails.cache` keyed on a scope fingerprint;
 past dates are immutable. Chart.js is **vendored** under `assets/javascripts`, never taken from
-another plugin's asset directory.
+another plugin's asset directory. The same goes for the Coloris colour picker
+(`assets/javascripts/coloris.min.js` + `assets/stylesheets/coloris.min.css`, MIT, v0.25.0
+unmodified — the CSS only gains the licence header its dist file lacks),
+configured from a `data-ea-coloris` attribute by `expert_agile_colors.js`.
 
 ### Workflow enforcement
 The board update calls `issue.new_statuses_allowed_to(User.current)` explicitly and returns a

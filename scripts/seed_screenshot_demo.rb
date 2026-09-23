@@ -685,12 +685,14 @@ end
 # and statuses, which the teardown would then have to guess at.
 { 'story' => 'blue', 'bug' => 'red', 'task' => 'green' }.each do |key, color|
   ExpertAgileColor.find_or_initialize_by(:container_type => 'Tracker',
-                                         :container_id => trackers[key].id).update!(:color => color)
+                                         :container_id => trackers[key].id)
+                  .update!(:color => ExpertAgileColor::PALETTE.fetch(color))
 end
 { 'backlog' => 'gray', 'todo' => 'blue', 'progress' => 'orange', 'review' => 'purple',
   'test' => 'yellow', 'done' => 'green' }.each do |key, color|
   ExpertAgileColor.find_or_initialize_by(:container_type => 'IssueStatus',
-                                         :container_id => statuses[key].id).update!(:color => color)
+                                         :container_id => statuses[key].id)
+                  .update!(:color => ExpertAgileColor::PALETTE.fetch(color))
 end
 
 # --- saved boards and charts -----------------------------------------------------
