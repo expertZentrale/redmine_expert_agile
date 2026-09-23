@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.4.0] - 2026-09-23
 
 ### Added
 - **Sprint boards.** The board can be narrowed to one sprint from a new *Sprint* selector in its
