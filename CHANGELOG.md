@@ -17,9 +17,10 @@ notes from the section matching the pushed tag.
   lane's counts, and a move in another lane turned them back to the total. The server rebuilt the
   board for the moved card's own project instead of the board it was dragged on, and because that
   looked like a different board, the move also replaced the board kept in the session with a
-  default one. The board now tells the server which board the card sits on (only a visible
-  project that contains the card is accepted), the counts are taken over that board, and a move
-  never writes the session board. Permissions are still checked on the card's own project.
+  default one. The board now tells the server which board the card sits on, the counts are taken
+  over that board, and a move never writes the session board. Only a board the user may open is
+  accepted: a project that contains the card and grants the board permission, or the global board
+  with the board permission granted globally. Permissions are still checked on the card's own project.
 
 ## [0.5.1] - 2026-09-24
 

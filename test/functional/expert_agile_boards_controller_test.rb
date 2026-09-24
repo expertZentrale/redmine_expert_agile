@@ -740,6 +740,33 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_equal expected.issue_count, reported_count(@issue.status_id)
   end
 
+  # The global board is gated on a global permission; a move must not hand its
+  # counts to a user who could not open it.
+  def test_an_empty_board_project_needs_the_global_board_permission
+    # Moving cards needs only the edit permission; opening the global board
+    # needs the view permission globally. Without it, the empty id must not
+    # hand out the global board's counts.
+    Role.all.each { |role| role.remove_permission!(:view_expert_agile_board) }
+    assert_not User.find(2).allowed_to?(:view_expert_agile_board, nil, :global => true)
+
+    # Counted as the user making the move: visibility decides what a board holds.
+    User.current = User.find(2)
+    count = lambda do |project|
+      ExpertAgileQuery.new(:name => '_', :project => project)
+                      .board_columns.detect { |c| c.id == @issue.status_id }.issue_count
+    end
+    project_count = count.call(@project)
+    global_count = count.call(nil)
+    User.current = nil
+    assert_not_equal project_count, global_count, 'the fixtures must tell the two boards apart'
+
+    put :update, :params => { :id => @issue.id, :prev_id => '', :next_id => '',
+                              :board_project_id => '' }, :format => :js
+
+    assert_response :success
+    assert_equal project_count, reported_count(@issue.status_id)
+  end
+
   def test_update_reorders_within_a_column_without_changing_status
     others = 2.times.map do
       Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id)

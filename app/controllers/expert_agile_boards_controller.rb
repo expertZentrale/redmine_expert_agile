@@ -187,15 +187,23 @@ class ExpertAgileBoardsController < ApplicationController
   end
 
   # The project whose board the card was dragged on, as the board script
-  # reports it — or nil for the global board. Only a visible project that
-  # actually contains the card is taken; anything else falls back to the
-  # card's own project, which is what the board did before it said.
+  # reports it — or nil for the global board. Taken only when the user may open
+  # that board: the global one needs the board permission globally, exactly as
+  # its page does, and a project board needs it in a project that contains the
+  # card. Anything else falls back to the card's own project, which is what the
+  # board did before it said — so the parameter can never widen what the
+  # counts are taken over beyond a board the user could load anyway.
   def board_project_for_move
     return @project unless params.key?(:board_project_id)
-    return nil if params[:board_project_id].blank?
+
+    if params[:board_project_id].blank?
+      return User.current.allowed_to?(:view_expert_agile_board, nil, :global => true) ? nil : @project
+    end
 
     board = Project.visible.find_by(:id => params[:board_project_id].to_s)
-    board && @issue.project.is_or_is_descendant_of?(board) ? board : @project
+    return @project unless board && @issue.project.is_or_is_descendant_of?(board)
+
+    User.current.allowed_to?(:view_expert_agile_board, board) ? board : @project
   end
 
   # The project the board is for. For a page that is the project in the URL;
@@ -221,7 +229,7 @@ class ExpertAgileBoardsController < ApplicationController
       @query.apply_board_params(params)
       store_board_session_state if persist
     else
-      @query = restore_board_from_session
+      @query = restore_board_from_session(:persist => persist)
     end
     @query
   end
@@ -267,7 +275,7 @@ class ExpertAgileBoardsController < ApplicationController
     }
   end
 
-  def restore_board_from_session
+  def restore_board_from_session(persist: true)
     state = session[SESSION_KEY]
     if state[:id]
       saved = visible_board_query(state[:id])
@@ -276,8 +284,9 @@ class ExpertAgileBoardsController < ApplicationController
         return saved
       end
       # Deleted since, or no longer visible to this user; fall through to a
-      # fresh one rather than showing a board they may no longer open.
-      session[SESSION_KEY] = nil
+      # fresh one rather than showing a board they may no longer open. Only a
+      # page load forgets it: a move reads the session and never writes it.
+      session[SESSION_KEY] = nil if persist
       return ExpertAgileQuery.new(:name => '_', :project => board_project)
     end
 

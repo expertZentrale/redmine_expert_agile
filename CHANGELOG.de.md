@@ -18,9 +18,10 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   die Gesamtzahl. Der Server baute das Board für das Projekt der gezogenen Karte statt für das
   Board, auf dem sie gezogen wurde, und weil das wie ein anderes Board aussah, ersetzte der Zug
   auch das in der Sitzung gespeicherte Board durch ein Standard-Board. Das Board teilt dem Server
-  jetzt mit, auf welchem Board die Karte liegt (angenommen wird nur ein sichtbares Projekt, das die
-  Karte enthält), die Zahlen beziehen sich auf dieses Board, und ein Zug schreibt das
-  Sitzungs-Board nie. Berechtigungen werden weiterhin am Projekt der Karte geprüft.
+  jetzt mit, auf welchem Board die Karte liegt, die Zahlen beziehen sich auf dieses Board, und ein
+  Zug schreibt das Sitzungs-Board nie. Angenommen wird nur ein Board, das der Nutzer öffnen darf:
+  ein Projekt, das die Karte enthält und die Board-Berechtigung gewährt, oder das globale Board mit
+  global gewährter Board-Berechtigung. Berechtigungen werden weiterhin am Projekt der Karte geprüft.
 
 ## [0.5.1] - 2026-09-24
 
