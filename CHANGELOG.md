@@ -9,6 +9,17 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Fixed
+- **Cached charts ignored the viewer's language and the status names.** The chart cache key covered
+  the issues and the query, but not what a chart is rendered with. Within the cache window
+  (`chart_cache_minutes`, 60 by default) a German viewer got the English chart an English viewer had
+  just loaded — titles, axes and series names — and a renamed or reordered status kept its old band
+  in the cumulative flow until the entry expired. The key now also covers the locale, the viewer's
+  today (measured lines stop there), the *Exclude weekends from the ideal line* and *Show future
+  data on charts* settings, and a fingerprint of the issue statuses.
+
 ## [0.5.0] - 2026-09-23
 
 ### Changed

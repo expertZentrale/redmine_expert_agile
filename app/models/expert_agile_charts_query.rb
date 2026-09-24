@@ -94,7 +94,12 @@ class ExpertAgileChartsQuery < ExpertAgileQuery
   end
 
   # Past chart data cannot change, so it is worth caching. The fingerprint
-  # covers everything that could alter the result.
+  # covers everything that could alter the result — not only the issues, but
+  # what the chart is rendered with: titles and series names are translated,
+  # cumulative flow draws one band per status by name and position, measured
+  # lines stop at the viewer's today, and two settings reshape the lines.
+  # Without those, a German viewer got the English chart an English viewer had
+  # just cached, and a renamed status kept its old name until expiry.
   def cache_key
     scope = chart_scope
     [
@@ -102,11 +107,21 @@ class ExpertAgileChartsQuery < ExpertAgileQuery
       date_from.to_s, date_to.to_s,
       scope.count,
       scope.maximum(:updated_on).to_i,
-      project_id, id
+      project_id, id,
+      I18n.locale, User.current.today.to_s,
+      RedmineExpertAgile.exclude_weekends? ? 1 : 0,
+      RedmineExpertAgile.chart_future_data? ? 1 : 0,
+      statuses_fingerprint
     ].join('/')
   end
 
   private
+
+  # IssueStatus has no timestamps, so a rename or reorder is only visible in
+  # the rows themselves. One small query; the instance has a handful of rows.
+  def statuses_fingerprint
+    Digest::SHA256.hexdigest(IssueStatus.sorted.pluck(:id, :name, :is_closed).to_json)[0, 16]
+  end
 
   def parse_date(value)
     return nil if value.blank?

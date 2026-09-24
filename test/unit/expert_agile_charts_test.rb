@@ -321,4 +321,35 @@ class ExpertAgileChartsTest < ActiveSupport::TestCase
     assert_not_equal before, ExpertAgileChartsQuery.new(:name => '_', :project => @project)
                                                    .tap { |q| q.chart = 'burndown' }.cache_key
   end
+
+  def test_cache_key_changes_with_the_locale
+    query = ExpertAgileChartsQuery.new(:name => '_', :project => @project)
+    query.chart = 'cumulative_flow'
+
+    english = I18n.with_locale(:en) { query.cache_key }
+    german  = I18n.with_locale(:de) { query.cache_key }
+
+    assert_not_equal english, german, 'chart titles and series names are translated'
+  end
+
+  def test_cache_key_changes_when_a_status_is_renamed
+    query = ExpertAgileChartsQuery.new(:name => '_', :project => @project)
+    query.chart = 'cumulative_flow'
+    before = query.cache_key
+
+    IssueStatus.sorted.first.update!(:name => 'Renamed for the chart')
+
+    assert_not_equal before, query.cache_key, 'cumulative flow names its bands after the statuses'
+  end
+
+  def test_cache_key_changes_with_the_chart_settings
+    query = ExpertAgileChartsQuery.new(:name => '_', :project => @project)
+    query.chart = 'burndown'
+
+    plain    = with_agile_settings('exclude_weekends' => '0', 'chart_future_data' => '0') { query.cache_key }
+    weekends = with_agile_settings('exclude_weekends' => '1', 'chart_future_data' => '0') { query.cache_key }
+    future   = with_agile_settings('exclude_weekends' => '0', 'chart_future_data' => '1') { query.cache_key }
+
+    assert_equal 3, [plain, weekends, future].uniq.size
+  end
 end
