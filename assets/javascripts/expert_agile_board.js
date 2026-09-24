@@ -102,6 +102,12 @@
     body.append('prev_id', around.prev);
     body.append('next_id', around.next);
     if (config.queryId) { body.append('query_id', config.queryId); }
+    /* Which board the card sits on. On a parent project's board the card can
+     * belong to a subproject, and the counts the server answers with have to
+     * be the board's, not that subproject's. Empty means the global board. */
+    if (config.mode === 'board') {
+      body.append('board_project_id', config.projectId === null || config.projectId === undefined ? '' : config.projectId);
+    }
     if (config.containerType) { body.append('container_type', config.containerType); }
 
     /* Set the moment the server says it saved, so a failure *after* that is not

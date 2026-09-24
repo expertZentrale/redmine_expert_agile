@@ -170,31 +170,66 @@ class ExpertAgileBoardsController < ApplicationController
   # private while that page is still open. Refusing the move over that would be
   # answering the wrong question: which board is on screen only decides the
   # cards the new rank is measured against, never whether the card may move.
+  #
+  # The board is rebuilt for the project it is shown in, not for the card's
+  # own project: on a parent project's board, grouped into swimlanes by
+  # project, a subproject card used to rebuild the board for that subproject
+  # alone. Every column count the move answered with was then that one lane's,
+  # and because the session board belonged to another project, the move also
+  # replaced it with a default board — which the next move from another lane
+  # swapped back, so the header flipped between a lane's count and the total.
+  # A move never writes the session board: it only reads the one on screen.
   def retrieve_board_query_for_move
-    retrieve_board_query
+    @board_project = board_project_for_move
+    retrieve_board_query(:persist => false)
   rescue ActiveRecord::RecordNotFound
-    session.delete(SESSION_KEY)
-    @query = ExpertAgileQuery.new(:name => '_', :project => @project)
+    @query = ExpertAgileQuery.new(:name => '_', :project => board_project)
   end
 
-  def retrieve_board_query
+  # The project whose board the card was dragged on, as the board script
+  # reports it — or nil for the global board. Taken only when the user may open
+  # that board: the global one needs the board permission globally, exactly as
+  # its page does, and a project board needs it in a project that contains the
+  # card. Anything else falls back to the card's own project, which is what the
+  # board did before it said — so the parameter can never widen what the
+  # counts are taken over beyond a board the user could load anyway.
+  def board_project_for_move
+    return @project unless params.key?(:board_project_id)
+
+    if params[:board_project_id].blank?
+      return User.current.allowed_to?(:view_expert_agile_board, nil, :global => true) ? nil : @project
+    end
+
+    board = Project.visible.find_by(:id => params[:board_project_id].to_s)
+    return @project unless board && @issue.project.is_or_is_descendant_of?(board)
+
+    User.current.allowed_to?(:view_expert_agile_board, board) ? board : @project
+  end
+
+  # The project the board is for. For a page that is the project in the URL;
+  # for a move it is the board the card was dragged on.
+  def board_project
+    defined?(@board_project) ? @board_project : @project
+  end
+
+  def retrieve_board_query(persist: true)
     if params[:query_id].present?
       @query = find_board_query(params[:query_id])
-      @query.project = @project
+      @query.project = board_project
       # A saved board can still be tweaked for this request without the change
       # being written back to it.
       if params[:set_filter].present?
         @query.build_from_params(params)
         @query.apply_board_params(params)
       end
-      session[SESSION_KEY] = { :id => @query.id, :project_id => @query.project_id }
+      session[SESSION_KEY] = { :id => @query.id, :project_id => @query.project_id } if persist
     elsif params[:set_filter].present? || session_state_stale?
-      @query = ExpertAgileQuery.new(:name => '_', :project => @project)
+      @query = ExpertAgileQuery.new(:name => '_', :project => board_project)
       @query.build_from_params(params)
       @query.apply_board_params(params)
-      store_board_session_state
+      store_board_session_state if persist
     else
-      @query = restore_board_from_session
+      @query = restore_board_from_session(:persist => persist)
     end
     @query
   end
@@ -213,7 +248,7 @@ class ExpertAgileBoardsController < ApplicationController
   # no backlog or charts permission could otherwise resolve one by id.
   def visible_board_query(id)
     scope = ExpertAgileQuery.only_boards.visible
-    scope = scope.global_or_on_project(@project) if @project
+    scope = scope.global_or_on_project(board_project) if board_project
     scope.find_by(:id => id)
   end
 
@@ -223,7 +258,7 @@ class ExpertAgileBoardsController < ApplicationController
 
   def session_state_stale?
     state = session[SESSION_KEY]
-    state.nil? || state[:project_id] != (@project ? @project.id : nil)
+    state.nil? || state[:project_id] != (board_project ? board_project.id : nil)
   end
 
   # Only what is needed to rebuild the board, not the whole options blob.
@@ -240,21 +275,22 @@ class ExpertAgileBoardsController < ApplicationController
     }
   end
 
-  def restore_board_from_session
+  def restore_board_from_session(persist: true)
     state = session[SESSION_KEY]
     if state[:id]
       saved = visible_board_query(state[:id])
       if saved
-        saved.project = @project
+        saved.project = board_project
         return saved
       end
       # Deleted since, or no longer visible to this user; fall through to a
-      # fresh one rather than showing a board they may no longer open.
-      session[SESSION_KEY] = nil
-      return ExpertAgileQuery.new(:name => '_', :project => @project)
+      # fresh one rather than showing a board they may no longer open. Only a
+      # page load forgets it: a move reads the session and never writes it.
+      session[SESSION_KEY] = nil if persist
+      return ExpertAgileQuery.new(:name => '_', :project => board_project)
     end
 
-    query = ExpertAgileQuery.new(:name => '_', :project => @project)
+    query = ExpertAgileQuery.new(:name => '_', :project => board_project)
     query.filters = state[:filters] || {}
     query.group_by = state[:group_by]
     query.column_names = state[:column_names]
