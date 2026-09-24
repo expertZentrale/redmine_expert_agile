@@ -28,7 +28,10 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Cumulative Flow sein altes Band, bis der Eintrag ablief. Der Schlüssel umfasst jetzt auch die
   Sprache, das Heute des Nutzers (dort enden die gemessenen Linien), die Einstellungen *Wochenenden
   aus der Ideallinie ausnehmen* und *Zukünftige Daten in Diagrammen anzeigen* sowie einen
-  Fingerabdruck der Ticketstatus.
+  Fingerabdruck der Ticketstatus. Weil der Eintrag zwischen Nutzern geteilt wird, deckt er außerdem
+  genau die für den Nutzer sichtbaren Tickets und seine Zeitzone ab: Zwei Nutzer mit gleich vielen,
+  aber unterschiedlich berechtigten Tickets bekommen nicht mehr das Diagramm des anderen, und
+  Journale landen für jede Zeitzone am richtigen Tag.
 
 ## [0.5.0] - 2026-09-23
 

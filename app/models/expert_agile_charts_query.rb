@@ -100,15 +100,21 @@ class ExpertAgileChartsQuery < ExpertAgileQuery
   # lines stop at the viewer's today, and two settings reshape the lines.
   # Without those, a German viewer got the English chart an English viewer had
   # just cached, and a renamed status kept its old name until expiry.
+  #
+  # The entry is shared between viewers, so it must also say *which* issues it
+  # was built from: the scope goes through Issue.visible, and two users can see
+  # the same number of issues with the same latest update while seeing different
+  # ones. And journals are bucketed into days in the viewer's time zone, so the
+  # same issues give a different series in Berlin than in New York.
   def cache_key
     scope = chart_scope
     [
       'expert_agile_chart', chart, chart_unit, interval,
       date_from.to_s, date_to.to_s,
-      scope.count,
+      visible_issues_fingerprint(scope),
       scope.maximum(:updated_on).to_i,
       project_id, id,
-      I18n.locale, User.current.today.to_s,
+      I18n.locale, User.current.today.to_s, viewer_time_zone,
       RedmineExpertAgile.exclude_weekends? ? 1 : 0,
       RedmineExpertAgile.chart_future_data? ? 1 : 0,
       statuses_fingerprint
@@ -116,6 +122,21 @@ class ExpertAgileChartsQuery < ExpertAgileQuery
   end
 
   private
+
+  # A digest of the exact issue ids the viewer's scope yields. Plucking ids is
+  # one indexed query and far cheaper than the chart a miss would build, which
+  # loads every one of those issues in full.
+  def visible_issues_fingerprint(scope)
+    ids = scope.reorder(nil).distinct.pluck(:id).sort
+    "#{ids.size}:#{Digest::SHA256.hexdigest(ids.join(','))[0, 16]}"
+  end
+
+  # The zone JournalProjection buckets days in: the user's own, or the
+  # instance default when they have none (User#time_to_date's fallback).
+  def viewer_time_zone
+    zone = User.current.respond_to?(:time_zone) && User.current.time_zone
+    (zone || Time.zone).name
+  end
 
   # IssueStatus has no timestamps, so a rename or reorder is only visible in
   # the rows themselves. One small query; the instance has a handful of rows.

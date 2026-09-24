@@ -25,7 +25,10 @@ notes from the section matching the pushed tag.
   just loaded — titles, axes and series names — and a renamed or reordered status kept its old band
   in the cumulative flow until the entry expired. The key now also covers the locale, the viewer's
   today (measured lines stop there), the *Exclude weekends from the ideal line* and *Show future
-  data on charts* settings, and a fingerprint of the issue statuses.
+  data on charts* settings, and a fingerprint of the issue statuses. Because the entry is shared
+  between viewers, it also covers exactly which issues the viewer may see and the viewer's time
+  zone: two users with the same issue count but different permissions no longer get each other's
+  chart, and journals are bucketed into the right days for each zone.
 
 ## [0.5.0] - 2026-09-23
 
