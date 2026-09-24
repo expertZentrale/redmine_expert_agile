@@ -283,6 +283,18 @@ class ExpertAgileQuery < IssueQuery
 
   # --- Columns of the board ------------------------------------------
 
+  # The aggregates are memoised because one page build asks for them several
+  # times. A move invalidates them, and it does so before the move is written:
+  # board_scope asks board_columns for the status ids it filters on, so merely
+  # building the siblings scope fills the memo with the pre-move numbers.
+  # Whoever writes an issue through this query drops them afterwards.
+  def reset_board_aggregates!
+    @board_columns = nil
+    @issue_count_by_status = nil
+    @estimated_hours_by_status = nil
+    @story_points_by_status = nil
+  end
+
   def board_columns
     @board_columns ||= begin
       counts = issue_count_by_status

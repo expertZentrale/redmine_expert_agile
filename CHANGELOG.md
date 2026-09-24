@@ -12,6 +12,13 @@ notes from the section matching the pushed tag.
 ## [Unreleased]
 
 ### Fixed
+- **Column counts after a move were the counts from before it.** `board_scope` asks
+  `board_columns` for the status ids it filters on, and `update` builds the siblings scope
+  through `board_scope` before it saves the issue, so `@board_columns` was already memoised
+  with the pre-move aggregates by the time `move_payload` read it back. Every cross-column
+  drag reported the board as it stood one move ago: counts, estimated-hours and story-point
+  totals, and `over_wip_limit`, so a column could be drawn inside its WIP limit while it was
+  already over it. The aggregates are now dropped after the issue is saved.
 - **Cached charts ignored the viewer's language and the status names.** The chart cache key covered
   the issues and the query, but not what a chart is rendered with. Within the cache window
   (`chart_cache_minutes`, 60 by default) a German viewer got the English chart an English viewer had

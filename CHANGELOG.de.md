@@ -12,6 +12,14 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 ## [Unreleased]
 
 ### Behoben
+- **Die Spaltenzahlen nach einem Zug waren die von davor.** `board_scope` fragt
+  `board_columns` nach den Status-IDs, nach denen es filtert, und `update` baut den
+  Geschwister-Scope ueber `board_scope` auf, bevor das Ticket gespeichert wird. Damit war
+  `@board_columns` bereits mit den Werten von vor dem Zug gefuellt, als `move_payload` sie
+  gelesen hat. Jeder Zug ueber Spaltengrenzen meldete das Board im Stand des vorherigen
+  Zuges: Kartenzahl, Stunden- und Story-Point-Summen sowie `over_wip_limit`, eine Spalte
+  konnte also innerhalb ihrer WIP-Grenze erscheinen, obwohl sie bereits darueber lag. Die
+  Werte werden jetzt nach dem Speichern verworfen.
 - **Zwischengespeicherte Diagramme ignorierten die Sprache und die Statusnamen.** Der
   Cache-Schlüssel der Diagramme umfasste die Tickets und die Abfrage, aber nicht das, womit ein
   Diagramm dargestellt wird. Innerhalb der Cache-Dauer (`chart_cache_minutes`, standardmäßig 60)
