@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.5.1] - 2026-09-24
 
 ### Fixed
 - **Column counts after a move were the counts from before it.** `board_scope` asks
@@ -18,7 +18,8 @@ notes from the section matching the pushed tag.
   with the pre-move aggregates by the time `move_payload` read it back. Every cross-column
   drag reported the board as it stood one move ago: counts, estimated-hours and story-point
   totals, and `over_wip_limit`, so a column could be drawn inside its WIP limit while it was
-  already over it. The aggregates are now dropped after the issue is saved.
+  already over it. The aggregates are now dropped after the issue is saved. (#28, thanks
+  @idevchris)
 - **Cached charts ignored the viewer's language and the status names.** The chart cache key covered
   the issues and the query, but not what a chart is rendered with. Within the cache window
   (`chart_cache_minutes`, 60 by default) a German viewer got the English chart an English viewer had
@@ -28,7 +29,7 @@ notes from the section matching the pushed tag.
   data on charts* settings, and a fingerprint of the issue statuses. Because the entry is shared
   between viewers, it also covers exactly which issues the viewer may see and the viewer's time
   zone: two users with the same issue count but different permissions no longer get each other's
-  chart, and journals are bucketed into the right days for each zone.
+  chart, and journals are bucketed into the right days for each zone. (#27)
 
 ## [0.5.0] - 2026-09-23
 

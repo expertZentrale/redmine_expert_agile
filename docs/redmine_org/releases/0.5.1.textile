@@ -1,0 +1,12 @@
+h3. redmine_expert_agile 0.5.1 — 2026-09-24
+
+h4. Fixed
+
+* *After a card was moved to another column, the column counts showed the board as it was one move earlier.* The move itself was saved correctly, but the numbers in the column headers — card count, estimated hours, story points and the WIP-limit warning — were read before the save. So a column could look inside its WIP limit while it was already over it. They now reflect the move just made. Thanks to "idevchris":https://github.com/idevchris for the report and the fix.
+* *Cached charts could be shown to the wrong viewer.* Charts are cached for a while (60 minutes by default) and the cache is shared, but the cache key did not cover everything a chart depends on. A German viewer could get the English chart someone else had just loaded, and a renamed status kept its old name in the cumulative flow until the cache expired. Two viewers who could see different issues, or who worked in different time zones, could get each other's chart. The cache now tells apart the language, the viewer's date and time zone, exactly which issues the viewer may see, the chart settings and the status names.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+Charts cached by 0.5.0 are simply not reused: they expire on their own within the cache duration.

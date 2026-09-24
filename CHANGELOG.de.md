@@ -9,7 +9,7 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.5.1] - 2026-09-24
 
 ### Behoben
 - **Die Spaltenzahlen nach einem Zug waren die von davor.** `board_scope` fragt
@@ -19,7 +19,7 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   gelesen hat. Jeder Zug ueber Spaltengrenzen meldete das Board im Stand des vorherigen
   Zuges: Kartenzahl, Stunden- und Story-Point-Summen sowie `over_wip_limit`, eine Spalte
   konnte also innerhalb ihrer WIP-Grenze erscheinen, obwohl sie bereits darueber lag. Die
-  Werte werden jetzt nach dem Speichern verworfen.
+  Werte werden jetzt nach dem Speichern verworfen. (#28, danke an @idevchris)
 - **Zwischengespeicherte Diagramme ignorierten die Sprache und die Statusnamen.** Der
   Cache-Schlüssel der Diagramme umfasste die Tickets und die Abfrage, aber nicht das, womit ein
   Diagramm dargestellt wird. Innerhalb der Cache-Dauer (`chart_cache_minutes`, standardmäßig 60)
@@ -31,7 +31,7 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Fingerabdruck der Ticketstatus. Weil der Eintrag zwischen Nutzern geteilt wird, deckt er außerdem
   genau die für den Nutzer sichtbaren Tickets und seine Zeitzone ab: Zwei Nutzer mit gleich vielen,
   aber unterschiedlich berechtigten Tickets bekommen nicht mehr das Diagramm des anderen, und
-  Journale landen für jede Zeitzone am richtigen Tag.
+  Journale landen für jede Zeitzone am richtigen Tag. (#27)
 
 ## [0.5.0] - 2026-09-23
 
