@@ -99,7 +99,7 @@ Story Points sind eine Spalte der plugineigenen Tabelle, kein benutzerdefinierte
 Ticketformular bietet sie als feste Skala an, direkt neben dem Sprint des Tickets.
 
 ![Ticketformular mit Redmines eigenen Attributfeldern und darunter zwei Feldern des Plugins: ein
-Auswahlfeld Story Points mit dem Wert 5 und ein Auswahlfeld Sprint mit Sprint 24](docs/screenshots/de/05-story-points.png)
+Auswahlfeld Story Points mit dem Wert 2 und ein Auswahlfeld Sprint mit Sprint 24](docs/screenshots/de/05-story-points.png)
 
 ### Sprints
 
@@ -116,6 +116,10 @@ Spalten, Zaehler und Summen umfassen dann nur die Tickets dieses Sprints. Das fu
 per Link — `…/expert_agile/board?set_filter=1&sprint_id=41` oder `sprint_id=active`. Angenommen
 werden nur Sprints, in die das Projekt planen darf; jede andere ID, oder *Aktiver Sprint* ohne
 laufenden Sprint, zeigt ein leeres Board statt aller Tickets.
+
+![Geoeffnete Board-Optionen ueber dem Sprint-Board: Kartenfelder, Darstellung mit der
+Sprint-Auswahl "Aktiver Sprint (automatisch)" und die Statusspalten mit ihren
+WIP-Limits](docs/screenshots/de/11-sprint-board.png)
 
 ### Backlog-Planer
 
@@ -139,9 +143,9 @@ der Kopfzeile](docs/screenshots/de/03-backlog.png)
 Burndown und Burnup rekonstruieren den Ticketverlauf aus den Journalen. Gemessene Linien enden am
 heutigen Tag, die Ideallinie laeuft bis zum Ende des Zeitraums.
 
-![Burndown-Diagramm ueber einen Sprint in Story Points: die Restlinie faellt von 200 Punkten und
-endet heute, darunter eine gestrichelte graue Ideallinie, die zum Sprintende auf null laeuft. Die
-Seitenleiste listet die gespeicherten Diagramme und die Sprints des Projekts](docs/screenshots/de/06-chart-burndown.png)
+![Burndown-Diagramm ueber einen Sprint in Story Points: die Restlinie faellt von rund 165 Punkten
+und endet heute, darunter eine gestrichelte graue Ideallinie, die zum Sprintende auf null
+laeuft](docs/screenshots/de/06-chart-burndown.png)
 
 ![Velocity-Diagramm als gruppierte Balken je Woche, das erstellte gegen abgeschlossene Tickets der
 letzten sechzig Tage stellt](docs/screenshots/de/07-chart-velocity.png)

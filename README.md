@@ -88,7 +88,7 @@ Story points are a column of the plugin's own table, not a custom field, and are
 fixed scale on the issue form next to the sprint the issue belongs to.
 
 ![Issue form showing Redmine's own attribute fields above two fields added by the plugin: a Story
-points dropdown set to 5 and a Sprint dropdown set to Sprint 24](docs/screenshots/en/05-story-points.png)
+points dropdown set to 2 and a Sprint dropdown set to Sprint 24](docs/screenshots/en/05-story-points.png)
 
 ### Sprints
 
@@ -104,6 +104,10 @@ has to be re-pointed when the next iteration starts. Columns, counts and totals 
 that sprint's issues. The same works from a link — `…/expert_agile/board?set_filter=1&sprint_id=41`
 or `sprint_id=active`. Only sprints the project may plan into are accepted; any other id, or
 *Active sprint* while none is running, shows an empty board rather than every issue.
+
+![Board options opened above the sprint board: card fields, appearance settings with the Sprint
+selector set to "Active sprint (follows automatically)", and the status columns with their WIP
+limits](docs/screenshots/en/11-sprint-board.png)
 
 ### Backlog planner
 
@@ -125,9 +129,9 @@ days remaining](docs/screenshots/en/03-backlog.png)
 Burndown and burnup replay the issue history from the journals. Measured lines stop at today; the
 ideal line runs to the end of the range.
 
-![Burndown chart over a sprint in story points: the remaining line descends from 200 points and
-stops at today, above a dashed grey ideal line falling to zero at the sprint end. The sidebar
-lists the saved charts and the project's sprints](docs/screenshots/en/06-chart-burndown.png)
+![Burndown chart over a sprint in story points: the remaining line descends from about 165 points
+and stops at today, above a dashed grey ideal line falling to zero at the sprint
+end](docs/screenshots/en/06-chart-burndown.png)
 
 ![Velocity chart as grouped bars per week, comparing issues created against issues closed over
 the last sixty days](docs/screenshots/en/07-chart-velocity.png)
