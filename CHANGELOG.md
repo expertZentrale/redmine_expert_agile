@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.5.2] - 2026-09-24
 
 ### Fixed
 - **On a parent project's board, moving a subproject card showed that subproject's counts.** With
@@ -20,7 +20,7 @@ notes from the section matching the pushed tag.
   default one. The board now tells the server which board the card sits on, the counts are taken
   over that board, and a move never writes the session board. Only a board the user may open is
   accepted: a project that contains the card and grants the board permission, or the global board
-  with the board permission granted globally. Permissions are still checked on the card's own project.
+  with the board permission granted globally. (#30) Permissions are still checked on the card's own project.
 
 ## [0.5.1] - 2026-09-24
 

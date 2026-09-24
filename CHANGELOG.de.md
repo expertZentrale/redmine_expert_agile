@@ -9,7 +9,7 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.5.2] - 2026-09-24
 
 ### Behoben
 - **Auf dem Board eines übergeordneten Projekts zeigte ein Zug einer Unterprojekt-Karte dessen
@@ -21,7 +21,7 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   jetzt mit, auf welchem Board die Karte liegt, die Zahlen beziehen sich auf dieses Board, und ein
   Zug schreibt das Sitzungs-Board nie. Angenommen wird nur ein Board, das der Nutzer öffnen darf:
   ein Projekt, das die Karte enthält und die Board-Berechtigung gewährt, oder das globale Board mit
-  global gewährter Board-Berechtigung. Berechtigungen werden weiterhin am Projekt der Karte geprüft.
+  global gewährter Board-Berechtigung. (#30) Berechtigungen werden weiterhin am Projekt der Karte geprüft.
 
 ## [0.5.1] - 2026-09-24
 
