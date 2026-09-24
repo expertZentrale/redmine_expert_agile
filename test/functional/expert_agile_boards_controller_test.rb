@@ -470,6 +470,33 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert payload['columns'].is_a?(Array)
   end
 
+  def test_update_returns_counts_taken_after_the_move
+    target = allowed_status_for(@issue)
+    skip 'workflow offers no other status' if target.nil?
+    origin = @issue.status_id
+
+    query = ExpertAgileQuery.new(:name => 'Board', :project => @project)
+    query.board_status_ids = [origin, target.id]
+    query.visibility = Query::VISIBILITY_PUBLIC
+    query.save!
+
+    put :update, :params => { :id => @issue.id, :status_id => target.id,
+                              :query_id => query.id }, :format => :js
+
+    assert_response :success
+    columns = JSON.parse(response.body)['columns']
+
+    # Compared against a board built after the request, so the assertion does
+    # not depend on how many issues the fixtures put in either column.
+    fresh = ExpertAgileQuery.find(query.id)
+    fresh.project = @project
+    fresh.board_columns.each do |expected|
+      reported = columns.detect { |c| c['id'] == expected.id }
+      assert_equal expected.issue_count, reported['issue_count'],
+                   "column #{expected.name} reports the board after the move"
+    end
+  end
+
   def test_update_rejects_a_status_the_workflow_forbids
     forbidden = forbidden_status_for(@issue)
     original = @issue.status_id

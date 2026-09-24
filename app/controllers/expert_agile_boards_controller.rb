@@ -85,6 +85,7 @@ class ExpertAgileBoardsController < ApplicationController
     return if performed?
 
     @issue.reload
+    @query.reset_board_aggregates!
     respond_to do |format|
       # Deliberately format.js, not format.json, even though the body is JSON.
       # Redmine's find_current_user ignores the session for api_request? — which
