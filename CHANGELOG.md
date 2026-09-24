@@ -19,6 +19,16 @@ notes from the section matching the pushed tag.
   drag reported the board as it stood one move ago: counts, estimated-hours and story-point
   totals, and `over_wip_limit`, so a column could be drawn inside its WIP limit while it was
   already over it. The aggregates are now dropped after the issue is saved.
+- **Cached charts ignored the viewer's language and the status names.** The chart cache key covered
+  the issues and the query, but not what a chart is rendered with. Within the cache window
+  (`chart_cache_minutes`, 60 by default) a German viewer got the English chart an English viewer had
+  just loaded — titles, axes and series names — and a renamed or reordered status kept its old band
+  in the cumulative flow until the entry expired. The key now also covers the locale, the viewer's
+  today (measured lines stop there), the *Exclude weekends from the ideal line* and *Show future
+  data on charts* settings, and a fingerprint of the issue statuses. Because the entry is shared
+  between viewers, it also covers exactly which issues the viewer may see and the viewer's time
+  zone: two users with the same issue count but different permissions no longer get each other's
+  chart, and journals are bucketed into the right days for each zone.
 
 ## [0.5.0] - 2026-09-23
 

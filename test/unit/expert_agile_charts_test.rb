@@ -321,4 +321,70 @@ class ExpertAgileChartsTest < ActiveSupport::TestCase
     assert_not_equal before, ExpertAgileChartsQuery.new(:name => '_', :project => @project)
                                                    .tap { |q| q.chart = 'burndown' }.cache_key
   end
+
+  # Same count, same latest update, different issues: the key must still differ,
+  # or a viewer who may not see an issue gets a chart built from it.
+  def test_cache_key_distinguishes_viewers_who_see_different_issues
+    first = issue_on(@from)
+    second = issue_on(@from)
+    [first, second].each { |i| i.update_columns(:updated_on => at(@from)) }
+    query = ExpertAgileChartsQuery.new(:name => '_', :project => @project)
+    query.chart = 'burndown'
+
+    only_first = query.send(:visible_issues_fingerprint, Issue.where(:id => first.id))
+    only_second = query.send(:visible_issues_fingerprint, Issue.where(:id => second.id))
+
+    assert_not_equal only_first, only_second
+    assert only_first.start_with?('1:'), 'the fingerprint still carries the count'
+  end
+
+  def test_cache_key_changes_with_the_viewers_time_zone
+    query = ExpertAgileChartsQuery.new(:name => '_', :project => @project)
+    query.chart = 'burndown'
+    user = User.current
+
+    # User#time_zone is memoised on the record, so each zone gets a freshly
+    # loaded user — as each request does.
+    user.pref.update!(:time_zone => 'Berlin')
+    User.current = User.find(user.id)
+    berlin = query.cache_key
+    user.pref.update!(:time_zone => 'Pacific Time (US & Canada)')
+    User.current = User.find(user.id)
+    pacific = query.cache_key
+
+    assert_not_equal berlin, pacific
+  ensure
+    user.pref.update!(:time_zone => nil) if user
+  end
+
+  def test_cache_key_changes_with_the_locale
+    query = ExpertAgileChartsQuery.new(:name => '_', :project => @project)
+    query.chart = 'cumulative_flow'
+
+    english = I18n.with_locale(:en) { query.cache_key }
+    german  = I18n.with_locale(:de) { query.cache_key }
+
+    assert_not_equal english, german, 'chart titles and series names are translated'
+  end
+
+  def test_cache_key_changes_when_a_status_is_renamed
+    query = ExpertAgileChartsQuery.new(:name => '_', :project => @project)
+    query.chart = 'cumulative_flow'
+    before = query.cache_key
+
+    IssueStatus.sorted.first.update!(:name => 'Renamed for the chart')
+
+    assert_not_equal before, query.cache_key, 'cumulative flow names its bands after the statuses'
+  end
+
+  def test_cache_key_changes_with_the_chart_settings
+    query = ExpertAgileChartsQuery.new(:name => '_', :project => @project)
+    query.chart = 'burndown'
+
+    plain    = with_agile_settings('exclude_weekends' => '0', 'chart_future_data' => '0') { query.cache_key }
+    weekends = with_agile_settings('exclude_weekends' => '1', 'chart_future_data' => '0') { query.cache_key }
+    future   = with_agile_settings('exclude_weekends' => '0', 'chart_future_data' => '1') { query.cache_key }
+
+    assert_equal 3, [plain, weekends, future].uniq.size
+  end
 end

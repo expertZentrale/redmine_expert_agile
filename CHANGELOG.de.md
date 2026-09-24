@@ -20,6 +20,18 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Zuges: Kartenzahl, Stunden- und Story-Point-Summen sowie `over_wip_limit`, eine Spalte
   konnte also innerhalb ihrer WIP-Grenze erscheinen, obwohl sie bereits darueber lag. Die
   Werte werden jetzt nach dem Speichern verworfen.
+- **Zwischengespeicherte Diagramme ignorierten die Sprache und die Statusnamen.** Der
+  Cache-Schlüssel der Diagramme umfasste die Tickets und die Abfrage, aber nicht das, womit ein
+  Diagramm dargestellt wird. Innerhalb der Cache-Dauer (`chart_cache_minutes`, standardmäßig 60)
+  bekam ein deutscher Nutzer das englische Diagramm, das ein englischer gerade geladen hatte —
+  Titel, Achsen und Reihennamen —, und ein umbenannter oder umsortierter Status behielt im
+  Cumulative Flow sein altes Band, bis der Eintrag ablief. Der Schlüssel umfasst jetzt auch die
+  Sprache, das Heute des Nutzers (dort enden die gemessenen Linien), die Einstellungen *Wochenenden
+  aus der Ideallinie ausnehmen* und *Zukünftige Daten in Diagrammen anzeigen* sowie einen
+  Fingerabdruck der Ticketstatus. Weil der Eintrag zwischen Nutzern geteilt wird, deckt er außerdem
+  genau die für den Nutzer sichtbaren Tickets und seine Zeitzone ab: Zwei Nutzer mit gleich vielen,
+  aber unterschiedlich berechtigten Tickets bekommen nicht mehr das Diagramm des anderen, und
+  Journale landen für jede Zeitzone am richtigen Tag.
 
 ## [0.5.0] - 2026-09-23
 
