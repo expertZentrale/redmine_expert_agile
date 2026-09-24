@@ -9,6 +9,18 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Fixed
+- **On a parent project's board, moving a subproject card showed that subproject's counts.** With
+  swimlanes by project, a move inside a subproject's lane turned the column headers into that
+  lane's counts, and a move in another lane turned them back to the total. The server rebuilt the
+  board for the moved card's own project instead of the board it was dragged on, and because that
+  looked like a different board, the move also replaced the board kept in the session with a
+  default one. The board now tells the server which board the card sits on (only a visible
+  project that contains the card is accepted), the counts are taken over that board, and a move
+  never writes the session board. Permissions are still checked on the card's own project.
+
 ## [0.5.1] - 2026-09-24
 
 ### Fixed

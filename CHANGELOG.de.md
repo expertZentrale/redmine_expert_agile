@@ -9,6 +9,19 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Behoben
+- **Auf dem Board eines übergeordneten Projekts zeigte ein Zug einer Unterprojekt-Karte dessen
+  Zahlen.** Mit Swimlanes nach Projekt wurden die Spaltenköpfe nach einem Zug in der Spur eines
+  Unterprojekts zu den Zahlen dieser Spur, und ein Zug in einer anderen Spur setzte sie wieder auf
+  die Gesamtzahl. Der Server baute das Board für das Projekt der gezogenen Karte statt für das
+  Board, auf dem sie gezogen wurde, und weil das wie ein anderes Board aussah, ersetzte der Zug
+  auch das in der Sitzung gespeicherte Board durch ein Standard-Board. Das Board teilt dem Server
+  jetzt mit, auf welchem Board die Karte liegt (angenommen wird nur ein sichtbares Projekt, das die
+  Karte enthält), die Zahlen beziehen sich auf dieses Board, und ein Zug schreibt das
+  Sitzungs-Board nie. Berechtigungen werden weiterhin am Projekt der Karte geprüft.
+
 ## [0.5.1] - 2026-09-24
 
 ### Behoben
