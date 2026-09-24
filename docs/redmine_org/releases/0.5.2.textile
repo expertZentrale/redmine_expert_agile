@@ -1,0 +1,11 @@
+h3. redmine_expert_agile 0.5.2 — 2026-09-24
+
+h4. Fixed
+
+* *On a parent project's board, moving a subproject card showed only that subproject's counts.* With swimlanes by project, moving a card inside a subproject's lane changed the column headers to that lane's numbers, and a move in another lane changed them back to the total. The move rebuilt the board for the card's own project instead of the board it was dragged on, and in doing so also replaced the board kept in the session. The column headers now always show the board you are looking at, and moving a card no longer changes the board's saved state. Permissions are still checked on the card's own project, and the board a move reports on must be one the user is allowed to open.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+The board script changed, so users with the board open should reload the page once after the upgrade. Until they do, their moves behave as in 0.5.1.
