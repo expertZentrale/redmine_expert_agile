@@ -82,6 +82,27 @@ class ExpertAgileStoryPointsTest < ActiveSupport::TestCase
     assert_equal 5, parent.reload.total_story_points.to_i
   end
 
+  # As core's total_estimated_hours: a subtask the reader cannot see must not
+  # show up in the total, or the parent reveals how much work is hidden below.
+  def test_total_story_points_counts_only_subtasks_the_reader_can_see
+    parent = @issue
+    hidden = Issue.generate!(:project_id => parent.project_id, :parent_issue_id => parent.id,
+                             :is_private => true)
+    parent.reload
+    parent.story_points = 2
+    parent.save!
+    hidden.story_points = 13
+    hidden.save!
+    reader = User.anonymous
+    assert parent.visible?(reader)
+    assert_not hidden.visible?(reader)
+
+    User.current = reader
+    assert_equal 2, parent.reload.total_story_points.to_i
+    User.current = User.find(1)
+    assert_equal 15, parent.reload.total_story_points.to_i, 'an administrator sees it all'
+  end
+
   def test_total_story_points_is_nil_when_nothing_is_estimated
     # nil and 0 must stay distinguishable: "not estimated" is not "estimated as
     # zero", and SUM over no rows is NULL rather than 0.
