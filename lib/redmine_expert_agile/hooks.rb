@@ -23,16 +23,23 @@ module RedmineExpertAgile
     end
 
     # Renders the sprint id stored in a journal detail as the sprint's name.
+    #
+    # Only a sprint the reader could see anyway is named; any other stays a
+    # bare id. A journal can carry a sprint the issue's project was never meant
+    # to plan into (written before that was validated), and naming it here
+    # would hand the sprint names of every project in the instance to anyone
+    # able to read the issue.
     def helper_issues_show_detail_after_setting(context = {})
       detail = context[:detail]
       return unless detail && detail.prop_key == 'expert_agile_sprint_id'
 
       context[:detail].instance_variable_set(:@expert_agile_labelled, true)
+      issue = detail.journal && detail.journal.journalized
       %i(old_value value).each do |field|
         id = detail.send(field)
         next if id.blank?
 
-        sprint = ExpertAgileSprint.find_by(:id => id)
+        sprint = nameable_sprint(id, issue)
         detail.send("#{field}=", sprint ? sprint.name : id)
       end
       nil
@@ -58,6 +65,18 @@ module RedmineExpertAgile
     end
 
     private
+
+    # A sprint shared with the issue's project is offered on that issue's form,
+    # so its name is no secret to the reader; any other is named only when its
+    # own project lets the reader see the board.
+    def nameable_sprint(id, issue)
+      sprint = ExpertAgileSprint.find_by(:id => id)
+      return nil if sprint.nil?
+      return sprint if issue.is_a?(Issue) && sprint.shared_with?(issue.project)
+      return sprint if ExpertAgileSprint.visible.where(:id => sprint.id).exists?
+
+      nil
+    end
 
     def story_points_visible?(issue)
       agile_issue?(issue) && issue.story_points_available?

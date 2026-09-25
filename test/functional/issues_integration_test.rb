@@ -119,4 +119,78 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     get :index, :params => { :project_id => @project.id }
     assert_response :success
   end
+
+  # --- Sprints of other projects --------------------------------------
+
+  # The form offers only the sprints this project may plan into, but the value
+  # is whatever the request says. A crafted id of another project's sprint used
+  # to be saved, and the issue history then printed that sprint's name, so any
+  # sprint name in the instance could be read by walking the ids.
+  def test_update_refuses_a_sprint_of_an_unrelated_project
+    foreign = foreign_sprint
+
+    put :update, :params => {
+      :id => @issue.id,
+      :issue => { :expert_agile_data_attributes => { :sprint_id => foreign.id.to_s } }
+    }
+
+    assert_response :success # the form again, with the error
+    assert_select '#errorExplanation'
+    assert_nil ExpertAgileData.where(:issue_id => @issue.id).pick(:sprint_id)
+  end
+
+  def test_update_accepts_a_sprint_of_the_issues_project
+    own = ExpertAgileSprint.create!(:project => @project, :name => 'Own sprint',
+                                    :start_date => Date.new(2026, 1, 1),
+                                    :end_date => Date.new(2026, 1, 14))
+
+    put :update, :params => {
+      :id => @issue.id,
+      :issue => { :expert_agile_data_attributes => { :sprint_id => own.id.to_s } }
+    }
+
+    assert_response :redirect
+    assert_equal own.id, ExpertAgileData.where(:issue_id => @issue.id).pick(:sprint_id)
+  end
+
+  # Journals written before the validation may still point at a sprint the
+  # reader has no business knowing about. The history names it only when the
+  # reader could see it anyway, and shows the bare id otherwise.
+  def test_history_does_not_name_a_sprint_the_reader_cannot_see
+    foreign = foreign_sprint
+    journal_sprint_change(foreign)
+
+    get :show, :params => { :id => @issue.id }
+
+    assert_response :success
+    assert_not_includes response.body, foreign.name
+  end
+
+  def test_history_names_a_sprint_of_the_issues_project
+    own = ExpertAgileSprint.create!(:project => @project, :name => 'Own sprint',
+                                    :start_date => Date.new(2026, 1, 1),
+                                    :end_date => Date.new(2026, 1, 14))
+    journal_sprint_change(own)
+
+    get :show, :params => { :id => @issue.id }
+
+    assert_response :success
+    assert_includes response.body, own.name
+  end
+
+  private
+
+  # A sprint of project 2, which user 2 cannot see a board of and which shares
+  # nothing with project 1.
+  def foreign_sprint
+    ExpertAgileSprint.create!(:project => Project.find(2), :name => 'Confidential sprint',
+                              :start_date => Date.new(2026, 1, 1),
+                              :end_date => Date.new(2026, 1, 14))
+  end
+
+  def journal_sprint_change(sprint)
+    journal = Journal.create!(:journalized => @issue, :user => User.find(1), :notes => 'Planned')
+    JournalDetail.create!(:journal => journal, :property => 'attr',
+                          :prop_key => 'expert_agile_sprint_id', :value => sprint.id.to_s)
+  end
 end

@@ -245,4 +245,66 @@ class ExpertAgileSprintTest < ActiveSupport::TestCase
     assert_not_nil detail, 'the sprint change must be journalled'
     assert_equal sprint.id.to_s, detail.value.to_s
   end
+
+  # --- Which sprints an issue may be planned into ------------------------
+
+  def test_an_issue_may_be_planned_into_a_sprint_of_its_own_project
+    sprint = build_sprint
+    sprint.save!
+    issue = Issue.generate!(:project_id => @project.id)
+
+    issue.expert_agile_data!.sprint_id = sprint.id
+
+    assert issue.save, issue.errors.full_messages.join(', ')
+    assert_equal sprint.id, issue.reload.expert_agile_data.sprint_id
+  end
+
+  def test_an_issue_may_be_planned_into_a_sprint_shared_with_its_project
+    sprint = build_sprint(:project => Project.find(2), :sharing => ExpertAgileSprint::SHARING_SYSTEM)
+    sprint.save!
+    issue = Issue.generate!(:project_id => @project.id)
+
+    issue.expert_agile_data!.sprint_id = sprint.id
+
+    assert issue.save, issue.errors.full_messages.join(', ')
+  end
+
+  # The issue form, bulk edit and the issue REST API write sprint_id through
+  # nested attributes, which no plugin controller sees. The model is therefore
+  # the only place a sprint of an unrelated project can be refused.
+  def test_an_issue_cannot_be_planned_into_a_sprint_of_an_unrelated_project
+    foreign = build_sprint(:project => Project.find(2))
+    foreign.save!
+    issue = Issue.generate!(:project_id => @project.id)
+
+    issue.safe_attributes = { 'expert_agile_data_attributes' => { 'sprint_id' => foreign.id.to_s } }
+
+    assert_not issue.save
+    assert_nil ExpertAgileData.find_by(:issue_id => issue.id)
+  end
+
+  def test_a_sprint_that_stopped_being_shared_does_not_block_other_changes
+    sprint = build_sprint(:project => Project.find(2), :sharing => ExpertAgileSprint::SHARING_SYSTEM)
+    sprint.save!
+    issue = Issue.generate!(:project_id => @project.id)
+    issue.expert_agile_data!.sprint_id = sprint.id
+    issue.save!
+    sprint.update!(:sharing => ExpertAgileSprint::SHARING_NONE)
+
+    issue.reload.expert_agile_data.story_points = 3
+
+    assert issue.save, issue.errors.full_messages.join(', ')
+  end
+
+  def test_a_sprint_can_always_be_cleared
+    foreign = build_sprint(:project => Project.find(2))
+    foreign.save!
+    issue = Issue.generate!(:project_id => @project.id)
+    # Written before the validation existed.
+    ExpertAgileData.new(:issue => issue, :sprint_id => foreign.id).save!(:validate => false)
+
+    issue.reload.expert_agile_data.sprint_id = nil
+
+    assert issue.save, issue.errors.full_messages.join(', ')
+  end
 end
