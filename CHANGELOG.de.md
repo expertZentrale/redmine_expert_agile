@@ -9,6 +9,20 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Sicherheit
+- **Jeder Sprint-Verwalter konnte einen Sprint mit allen Projekten der Instanz teilen.** Die
+  Freigabe wurde übernommen, wie sie ankam. Ein Projektmitglied, das „Mit allen Projekten“ wählte,
+  brachte Name und Zeitraum des Sprints ins Ticketformular, in die Sprint-Auswahl des Boards und in
+  den Backlog-Planer jedes Projekts, auch vor die externen Nutzer anderer Kunden, und jedes Projekt
+  konnte in den Sprint planen. Die Freigabe folgt jetzt den Regeln, die Redmine für Versionen
+  anwendet: mit allen Projekten nur für Administratoren, mit Projektbaum oder Hierarchie nur für
+  Nutzer, die im Root-Projekt Sprints verwalten. Das Formular bietet nur an, was der Nutzer wählen
+  darf, die REST-API lehnt den Rest ab. Ein von einem Administrator geteilter Sprint bleibt für die
+  Sprint-Verwalter des Projekts bearbeitbar. Bereits weiter geteilte Sprints bleiben unverändert;
+  ein Administrator sollte sie prüfen.
+
 ## [0.5.2] - 2026-09-24
 
 ### Behoben
