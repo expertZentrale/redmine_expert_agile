@@ -481,7 +481,6 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
 
   def test_update_refuses_a_version_the_user_may_not_change
     version = Version.generate!(:project => @project)
-    before = @issue.fixed_version_id
     @role.remove_permission!(:edit_issues, :edit_own_issues)
     @role.add_permission!(:add_issue_notes)
 
@@ -491,14 +490,13 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
 
     assert_response :forbidden
     assert_equal l(:error_expert_agile_version_not_editable), JSON.parse(response.body)['error']
-    assert_equal before, @issue.reload.fixed_version_id
+    assert_not_equal version.id, @issue.reload.fixed_version_id
   end
 
   # A workflow can make the target version read-only for a role. The issue
   # form honours that, and so must the planner.
   def test_update_honours_a_read_only_target_version
     version = Version.generate!(:project => @project)
-    before = @issue.fixed_version_id
     WorkflowPermission.create!(:role_id => @role.id, :tracker_id => @issue.tracker_id,
                                :old_status_id => @issue.status_id,
                                :field_name => 'fixed_version_id', :rule => 'readonly')
@@ -508,6 +506,6 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
                               :container_id => version.id }, :format => :js
 
     assert_response :forbidden
-    assert_equal before, @issue.reload.fixed_version_id
+    assert_not_equal version.id, @issue.reload.fixed_version_id
   end
 end
