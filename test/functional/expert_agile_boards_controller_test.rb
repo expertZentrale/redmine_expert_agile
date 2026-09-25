@@ -825,6 +825,74 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert JSON.parse(response.body)['error'].present?
   end
 
+  # --- What a move may change --------------------------------------------
+
+  # The workflow alone is not the whole rule: it also counts roles that may
+  # only add issues, so a role with add_issues and add_issue_notes but no edit
+  # permission is offered transitions. The issue form still refuses that role
+  # a status change, and so must the board.
+  def test_update_refuses_a_status_change_without_the_edit_permission
+    @role.remove_permission!(:edit_issues, :edit_own_issues)
+    @role.add_permission!(:add_issues, :add_issue_notes)
+    target = allowed_status_for(@issue)
+    skip 'workflow offers no other status' if target.nil?
+    original = @issue.status_id
+
+    put :update, :params => { :id => @issue.id, :status_id => target.id }, :format => :js
+
+    assert_response :forbidden
+    assert_equal l(:error_expert_agile_status_not_editable), JSON.parse(response.body)['error']
+    assert_equal original, @issue.reload.status_id
+  end
+
+  # Reordering inside a column changes the board rank only, never a field of
+  # the issue, so it stays open to anyone who may move cards on the board.
+  def test_a_user_who_may_only_add_notes_can_still_reorder_a_column
+    @role.remove_permission!(:edit_issues, :edit_own_issues)
+    @role.add_permission!(:add_issue_notes)
+
+    put :update, :params => { :id => @issue.id }, :format => :js
+
+    assert_response :success
+    assert_not_nil @issue.reload.expert_agile_data.position
+  end
+
+  def test_auto_assign_claims_an_unassigned_card
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :assigned_to_id => nil)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    with_agile_settings('auto_assign_on_move' => '1') do
+      put :update, :params => { :id => issue.id, :status_id => target.id }, :format => :js
+    end
+
+    assert_response :success
+    assert_equal 2, issue.reload.assigned_to_id
+  end
+
+  # A workflow can make the assignee read-only for a role. The issue form
+  # honours that, so claiming a card by moving it must not get round it.
+  def test_auto_assign_honours_a_read_only_assignee
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :assigned_to_id => nil)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+    [issue.status_id, target.id].each do |status_id|
+      WorkflowPermission.create!(:role_id => @role.id, :tracker_id => issue.tracker_id,
+                                 :old_status_id => status_id,
+                                 :field_name => 'assigned_to_id', :rule => 'readonly')
+    end
+
+    with_agile_settings('auto_assign_on_move' => '1') do
+      put :update, :params => { :id => issue.id, :status_id => target.id }, :format => :js
+    end
+
+    assert_response :success
+    assert_equal target.id, issue.reload.status_id, 'the move itself still happens'
+    assert_nil issue.assigned_to_id
+  end
+
   # --- WIP limits ------------------------------------------------------
 
   def test_wip_limit_does_not_block_a_move
