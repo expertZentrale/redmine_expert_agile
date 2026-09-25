@@ -9,6 +9,16 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Sicherheit
+- **Story-Point-Summen zählten Tickets mit, die der Leser nicht sehen durfte.** Die Summe auf der
+  Seite eines übergeordneten Tickets addierte alle Unteraufgaben, auch private und solche in
+  Projekten ohne Zugriff, und die Differenz zu den eigenen Punkten zeigte, wie viel Arbeit dort
+  verborgen lag. Ebenso meldete die Sprint-REST-API `issue_count` und `story_points` über alle
+  Tickets eines geteilten Sprints, gleich aus welchem Projekt. Beide zählen jetzt nur Tickets, die
+  der Leser sehen darf, wie Redmine es bei der Summe des geschätzten Aufwands macht.
+
 ## [0.5.2] - 2026-09-24
 
 ### Behoben

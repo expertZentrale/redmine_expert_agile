@@ -9,6 +9,16 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Security
+- **Story point totals counted issues the reader could not see.** The total on a parent issue's
+  page summed every subtask, including private ones and ones in projects the reader has no access
+  to, so the difference to the parent's own points showed how much work was hidden there. The
+  sprint REST API likewise reported `issue_count` and `story_points` over every issue in a shared
+  sprint, whichever project it belonged to. Both now count only issues the reader may see, as
+  Redmine does for the estimated time total.
+
 ## [0.5.2] - 2026-09-24
 
 ### Fixed
