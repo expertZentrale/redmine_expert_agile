@@ -9,6 +9,19 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Security
+- **Any sprint manager could share a sprint with every project in the instance.** The sprint's
+  sharing was accepted as sent, so one project member picking "With all projects" put the sprint's
+  name and dates into the issue form, the board's sprint picker and the backlog planner of every
+  project, in front of external users of other customers too, and let every project plan into it.
+  Sharing now follows the rules Redmine applies to versions: with all projects only for
+  administrators, with the project tree or hierarchy only for users who manage sprints in the root
+  project. The form offers only what the user may choose, and the REST API refuses the rest. A
+  sprint an administrator has shared stays editable for the project's sprint managers. Sprints
+  that are already shared wider than this stay as they are; an administrator should review them.
+
 ## [0.5.2] - 2026-09-24
 
 ### Fixed

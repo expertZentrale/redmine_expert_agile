@@ -11,6 +11,6 @@
   </p>
   <p>
     <%= f.select :sharing,
-                 ExpertAgileSprint::SHARINGS.map { |value, key| [l("label_expert_agile_sprint_sharing_#{key}"), value] } %>
+                 @sprint.allowed_sharings.map { |value| [l("label_expert_agile_sprint_sharing_#{ExpertAgileSprint::SHARINGS[value]}"), value] } %>
   </p>
 </div>

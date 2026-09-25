@@ -62,6 +62,41 @@ class ExpertAgileSprint < ExpertAgileApplicationRecord
 
   safe_attributes 'name', 'description', 'start_date', 'end_date', 'status', 'sharing'
 
+  validate :sharing_allowed_to_setter, :if => :will_save_change_to_sharing?
+
+  # Remembers who set the attributes, so the sharing can be checked against
+  # that user when the sprint is saved. The same pattern as Issue's
+  # @attributes_set_by: a sprint written from the console or a migration has
+  # no such user and is left alone.
+  def safe_attributes=(attrs, user = User.current)
+    @sharing_set_by = user
+    super
+  end
+
+  # The sharings `user` may give this sprint, with Version#allowed_sharings'
+  # rules: system-wide only for administrators, the tree or the hierarchy
+  # only for someone who manages sprints in the root project. A sprint's name
+  # and dates are shown to every project it is shared with, including to
+  # external users of other customers, so letting any project member pick
+  # "all projects" exposed them instance-wide with one click.
+  #
+  # The stored value always stays allowed, so a sprint an administrator has
+  # shared can still be edited by the project's own sprint managers.
+  def allowed_sharings(user = User.current)
+    SHARINGS.keys.select do |value|
+      next true if persisted? && value == sharing_in_database
+
+      case value
+      when SHARING_SYSTEM
+        user.admin?
+      when SHARING_TREE, SHARING_HIERARCHY
+        project.nil? || user.allowed_to?(:manage_expert_agile_sprints, project.root)
+      else
+        true
+      end
+    end
+  end
+
   def status_name
     STATUSES[status]
   end
@@ -148,6 +183,13 @@ class ExpertAgileSprint < ExpertAgileApplicationRecord
     scope = self.class.where(:project_id => project_id, :status => STATUS_ACTIVE)
     scope = scope.where.not(:id => id) if persisted?
     scope.update_all(:status => STATUS_OPEN)
+  end
+
+  def sharing_allowed_to_setter
+    return if @sharing_set_by.nil?
+    return if allowed_sharings(@sharing_set_by).include?(sharing)
+
+    errors.add(:sharing, :inclusion)
   end
 
   def end_date_after_start_date
