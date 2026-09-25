@@ -9,6 +9,18 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Sicherheit
+- **Der Backlog-Planer ließ Tickets umplanen, die der Nutzer nicht ändern durfte.** Die
+  Planungsberechtigung wurde nur am Projekt aus der URL geprüft, das verschobene Ticket konnte aber
+  jedes sichtbare sein. Planungsrechte in einem Projekt reichten, um Tickets jedes anderen Projekts
+  aus ihrem Sprint oder ihrer Zielversion zu nehmen. Der Zug schrieb das Feld zudem direkt und ließ
+  jeden zu, der Notizen hinzufügen darf, an Bearbeitungsrecht und schreibgeschützten
+  Workflow-Feldern vorbei. Ein Zug braucht jetzt die Planungsberechtigung im Projekt des Tickets und
+  dasselbe Recht, Sprint oder Zielversion zu ändern, das auch das Ticketformular verlangt,
+  schreibgeschützte Felder eingeschlossen.
+
 ## [0.5.2] - 2026-09-24
 
 ### Behoben
