@@ -9,6 +9,17 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Security
+- **The backlog planner let a user re-plan issues they were not allowed to change.** The planning
+  permission was checked on the project in the URL only, while the moved issue could be any
+  visible one. Planning rights in one project were enough to take issues of any other project out
+  of their sprint or target version. The move also wrote the field directly and accepted anyone
+  who may add notes, bypassing both the edit permission and read-only fields from the workflow.
+  A move now needs the planning permission in the issue's own project and the same right to
+  change the sprint or target version that the issue form requires, read-only fields included.
+
 ## [0.5.2] - 2026-09-24
 
 ### Fixed

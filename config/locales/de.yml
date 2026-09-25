@@ -122,6 +122,8 @@ de:
   error_expert_agile_move_failed_unexpectedly: Der Zug ist unerwartet fehlgeschlagen. Einzelheiten stehen im Server-Log
   error_expert_agile_move_saved_but_not_shown: Der Zug wurde gespeichert, das Board konnte aber nicht aktualisiert werden. Laden Sie die Seite neu
   error_expert_agile_issue_not_editable: Sie duerfen dieses Ticket nicht bearbeiten
+  error_expert_agile_version_not_editable: Sie duerfen die Zielversion dieses Tickets nicht aendern
+  error_expert_agile_sprint_not_editable: Sie duerfen den Sprint dieses Tickets nicht aendern
   label_expert_agile_swimlane_none: Keine Swimlanes
   label_expert_agile_swimlane_none_value: (ohne)
   label_expert_agile_board_truncated: Es werden nur die ersten %{count} Tickets angezeigt
