@@ -17,7 +17,7 @@ notes from the section matching the pushed tag.
   The workflow also counts roles that may merely add issues, so a role with `add_issues` and
   `add_issue_notes` but no edit permission could close any visible issue by dragging it, which the
   issue form refuses. A status change on the board now also needs the right to change the status
-  that the issue form requires. With "Assign to me on move" switched on, the claim now respects
+  that the issue form requires. With "Assign to me when moving a card" switched on, the claim now respects
   that right and a read-only assignee from the workflow as well. Reordering cards within a column
   is unchanged.
 
