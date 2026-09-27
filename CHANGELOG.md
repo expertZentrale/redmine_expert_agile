@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.5.5] - 2026-09-27
 
 ### Security
 - **Planning an issue into a sprint needs the planning permission everywhere.** The backlog
@@ -24,7 +24,7 @@ notes from the section matching the pushed tag.
   issues of other projects are planned into can no longer be deleted, as Redmine refuses to delete
   a version that is still in use.
 - **Velocity and cycle time loaded every visible issue.** They are now held to the chart item limit
-  like the other charts.
+  like the other charts. (#41)
 
 ## [0.5.4] - 2026-09-27
 

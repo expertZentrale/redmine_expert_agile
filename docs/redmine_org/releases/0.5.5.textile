@@ -1,0 +1,18 @@
+h3. redmine_expert_agile 0.5.5 — 2026-09-27
+
+A security release that tightens who may plan issues into sprints. Please read the upgrade notes: roles that set sprints on the issue form may need a permission they did not need before.
+
+h4. Fixed
+
+* *Planning an issue into a sprint now needs the planning permission everywhere.* The backlog planner already required _Manage backlog_. The sprint field on the issue form, bulk edit, the issue REST API and the agile data endpoint accepted a sprint from anyone who may edit the issue. They now require the same permission, and the issue form only shows the sprint field to users who have it.
+* *An open issue could be planned into a closed sprint,* which changed that sprint's burndown and velocity after the fact. Only open or active sprints are accepted now.
+* *Deleting a shared sprint silently removed issues of other projects from it.* A sprint that issues of other projects are planned into can no longer be deleted, just as Redmine refuses to delete a version that is still in use.
+* *The velocity and cycle time charts loaded every visible issue.* They are now limited like the other charts (setting _Chart item limit_).
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+After the upgrade, only roles with _Manage backlog_ (module _expert Agile Backlog_) can set or change an issue's sprint. That applies on the issue form, in bulk edit, through the REST API and in the backlog planner. If some of your roles planned sprints through the issue form without that permission, grant it to them under _Administration → Roles and permissions_. Story points are not affected.
+
+Very large velocity or cycle time charts that exceeded _Chart item limit_ now show the "too many items" message instead of drawing. Narrow their filters, or raise the limit in the plugin settings.
