@@ -1,0 +1,19 @@
+h3. redmine_expert_agile 0.5.4 — 2026-09-27
+
+A security release, following an audit of the plugin for more of the problems fixed in 0.5.3. Upgrading is recommended.
+
+h4. Fixed
+
+* *The REST agile data endpoint let a user who may only add notes change story points and sprints.* @PUT /issues/:id/expert_agile_data@ skipped the permission check, and it worked even with the agile module disabled. It now needs _Edit agile board_ in the issue's project and the same right to change these fields as the issue form. A sprint change made through it now appears in the issue history. Reading the data (@GET@) now needs _View agile board_.
+* *A saved chart of another user could be opened by its id.* Private and role-restricted charts opened with their name, filters and date range. Charts now follow the same visibility rules as boards and backlogs.
+* *Anyone allowed to manage public views in one project could publish a global board, chart or backlog.* A global view is listed in every project, so publishing one is now reserved to administrators, as in Redmine itself.
+* *A single chart request could compute millions of data points.* The chart's date range is now limited to three years.
+* *An issue moved to another project kept a sprint the new project cannot use.* The issue was invisible in that sprint's backlog and prevented the sprint from being closed. The sprint is now removed when the issue moves, as Redmine does with the target version, and the history records it.
+* *Sprints of archived projects were still offered and accepted.* They no longer are, as with versions in Redmine.
+* Smaller fixes: a card's position on the board is only computed from issues the user can see, @%@ and @_@ in the backlog search are no longer wildcards, too large story point values give a validation error instead of a server error, and sprint names in notification mails are shown correctly.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+REST clients that write agile data (@PUT /issues/:id/expert_agile_data@) now need a user whose role has _Edit agile board_ and _Edit issues_ in the issue's project, and the agile module must be enabled there. Clients that only read it need _View agile board_. Check the roles of any API users before upgrading.

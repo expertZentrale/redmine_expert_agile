@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.5.4] - 2026-09-27
 
 ### Security
 - **The REST agile data endpoint let a user who may only add notes change story points and
@@ -34,7 +34,7 @@ notes from the section matching the pushed tag.
 - Smaller hardening: move neighbours and the rank fallback consider visible issues only, `%` and `_`
   in the backlog search are literal, story points beyond the column's range are a validation error
   instead of a server error, and a sprint name in a notification mail's text part is no longer
-  looked up a second time.
+  looked up a second time. (#39)
 
 ## [0.5.3] - 2026-09-27
 
