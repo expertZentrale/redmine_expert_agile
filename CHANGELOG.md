@@ -12,6 +12,16 @@ notes from the section matching the pushed tag.
 ## [Unreleased]
 
 ### Security
+- **Any sprint of any project could be written onto an issue, and its name then read from the
+  issue history.** The issue form, bulk edit and the issue REST API set the sprint through nested
+  `expert_agile_data_attributes`, which accepted any sprint id. A user allowed to edit issues in
+  one project could put a sprint of an unrelated, invisible project on their own issue and read
+  that sprint's name in the history, so walking the ids revealed every sprint name in the
+  instance. The same request also parked issues in other projects' sprints, which then could no
+  longer be closed. A sprint is now accepted only if it belongs to the issue's project or is
+  shared with it, the set the backlog planner and the agile data endpoint already used. The
+  history names a sprint only when the reader could see it anyway, and shows the bare id
+  otherwise, which also covers journals written before this fix.
 - **The backlog planner let a user re-plan issues they were not allowed to change.** The planning
   permission was checked on the project in the URL only, while the moved issue could be any
   visible one. Planning rights in one project were enough to take issues of any other project out

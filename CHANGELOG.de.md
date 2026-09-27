@@ -12,6 +12,17 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 ## [Unreleased]
 
 ### Sicherheit
+- **Jeder Sprint jedes Projekts ließ sich an ein Ticket schreiben, und sein Name dann aus der
+  Ticket-Historie lesen.** Ticketformular, Sammelbearbeitung und die Ticket-REST-API setzen den
+  Sprint über verschachtelte `expert_agile_data_attributes`, und die nahmen jede Sprint-ID an. Wer
+  in einem Projekt Tickets bearbeiten durfte, konnte einen Sprint eines fremden, unsichtbaren
+  Projekts an ein eigenes Ticket hängen und dessen Namen in der Historie lesen. Über die IDs lief
+  so jeder Sprint-Name der Instanz offen. Dieselbe Anfrage legte auch Tickets in Sprints anderer
+  Projekte ab, die sich danach nicht mehr schließen ließen. Angenommen wird jetzt nur ein Sprint
+  des Ticket-Projekts oder ein mit ihm geteilter, also die Menge, die Backlog-Planer und der
+  Agile-Data-Endpunkt schon verwendeten. Die Historie nennt einen Sprint nur noch, wenn der Leser
+  ihn ohnehin sehen darf, sonst steht dort die bloße ID. Das gilt auch für Journale, die vor
+  dieser Korrektur geschrieben wurden.
 - **Der Backlog-Planer ließ Tickets umplanen, die der Nutzer nicht ändern durfte.** Die
   Planungsberechtigung wurde nur am Projekt aus der URL geprüft, das verschobene Ticket konnte aber
   jedes sichtbare sein. Planungsrechte in einem Projekt reichten, um Tickets jedes anderen Projekts
