@@ -23,8 +23,23 @@ class ExpertAgileBacklogsController < ApplicationController
   end
 
   def update
-    unless @issue.editable?
-      return render_planning_error(l(:error_expert_agile_issue_not_editable), :forbidden)
+    # `authorize` has only checked the project in the URL. The issue can be any
+    # visible one, from a subproject or from an unrelated project, so the
+    # planning permission is checked again where the issue lives: the same
+    # question the planner already asks to decide whether a card is draggable.
+    unless User.current.allowed_to?(:manage_expert_agile_backlog, @issue.project)
+      return render_planning_error(
+        l(:error_expert_agile_move_not_permitted_in_project, :project => @issue.project.name),
+        :forbidden
+      )
+    end
+
+    # Planning writes one field, so it is held to the rule for that field
+    # rather than to `editable?`, which is already true for a user who may only
+    # add notes. The rule is the issue form's: `safe_attribute?` requires the
+    # right to edit the issue and honours read-only fields from the workflow.
+    unless planning_field_writable?
+      return render_planning_error(planning_field_refusal, :forbidden)
     end
 
     target = @query.container_for(params[:container_id])
@@ -218,6 +233,22 @@ class ExpertAgileBacklogsController < ApplicationController
     raise ::Unauthorized unless @issue.visible?
   rescue ActiveRecord::RecordNotFound
     render_404
+  end
+
+  # The field a planning move writes: the sprint rides on the agile data row,
+  # which the issue form sets through nested attributes, the version is the
+  # issue's own fixed_version_id.
+  def planning_field
+    @query.sprints? ? 'expert_agile_data_attributes' : 'fixed_version_id'
+  end
+
+  def planning_field_writable?
+    @issue.safe_attribute?(planning_field, User.current)
+  end
+
+  def planning_field_refusal
+    key = @query.sprints? ? :error_expert_agile_sprint_not_editable : :error_expert_agile_version_not_editable
+    l(key)
   end
 
   def assign_container(target)

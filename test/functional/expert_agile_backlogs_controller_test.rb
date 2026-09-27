@@ -445,4 +445,88 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_response :unprocessable_entity
     assert_nil ExpertAgileData.find_by(:issue_id => @issue.id)&.sprint_id
   end
+
+  # --- Who may plan which issue ------------------------------------------
+
+  # The permission used to be checked on the project in the URL only, while the
+  # issue could be any visible one. Planning permission in one project was then
+  # enough to take issues of every other project out of their sprints.
+  def test_update_refuses_an_issue_of_a_project_without_the_planning_permission
+    other = Issue.find(4) # project 2, visible to user 2, no backlog module
+    their_sprint = sprint!(:project => other.project, :name => 'Their sprint')
+    ExpertAgileData.create!(:issue_id => other.id, :sprint_id => their_sprint.id)
+
+    put :update, :params => { :project_id => @project.id, :id => other.id,
+                              :container_id => '' }, :format => :js
+
+    assert_response :forbidden
+    assert_includes JSON.parse(response.body)['error'], other.project.name
+    assert_equal their_sprint.id, other.reload.expert_agile_data.sprint_id
+  end
+
+  # `editable?` is already true for someone who may only add notes. Planning
+  # changes a field, so it needs what the issue form needs to change it.
+  def test_update_refuses_a_user_who_may_only_add_notes
+    sprint = sprint!
+    @role.remove_permission!(:edit_issues, :edit_own_issues)
+    @role.add_permission!(:add_issue_notes)
+
+    put :update, :params => { :project_id => @project.id, :id => @issue.id,
+                              :container_id => sprint.id }, :format => :js
+
+    assert_response :forbidden
+    assert_equal l(:error_expert_agile_sprint_not_editable), JSON.parse(response.body)['error']
+    assert_nil ExpertAgileData.find_by(:issue_id => @issue.id)&.sprint_id
+  end
+
+  def test_update_refuses_a_version_the_user_may_not_change
+    version = Version.generate!(:project => @project)
+    @role.remove_permission!(:edit_issues, :edit_own_issues)
+    @role.add_permission!(:add_issue_notes)
+
+    put :update, :params => { :project_id => @project.id, :id => @issue.id,
+                              :container_type => 'version',
+                              :container_id => version.id }, :format => :js
+
+    assert_response :forbidden
+    assert_equal l(:error_expert_agile_version_not_editable), JSON.parse(response.body)['error']
+    assert_not_equal version.id, @issue.reload.fixed_version_id
+  end
+
+  # The version comes from the backlog's project, the issue can live in any
+  # project the user may plan in. A version the issue's own project cannot use
+  # must still be refused: Issue validates fixed_version against its
+  # assignable_versions, and the planner must surface that, not bypass it.
+  def test_update_refuses_a_version_the_issues_project_cannot_use
+    elsewhere = Project.generate!(:is_public => true)
+    elsewhere.enable_module!(:expert_agile_backlog)
+    Member.create!(:project => elsewhere, :principal => User.find(2), :role_ids => [@role.id])
+    stranger = Issue.generate!(:project => elsewhere)
+    local_only = Version.generate!(:project => @project, :sharing => 'none')
+    assert_not_includes stranger.assignable_versions, local_only
+
+    put :update, :params => { :project_id => @project.id, :id => stranger.id,
+                              :container_type => 'version',
+                              :container_id => local_only.id }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert JSON.parse(response.body)['error'].present?
+    assert_nil stranger.reload.fixed_version_id
+  end
+
+  # A workflow can make the target version read-only for a role. The issue
+  # form honours that, and so must the planner.
+  def test_update_honours_a_read_only_target_version
+    version = Version.generate!(:project => @project)
+    WorkflowPermission.create!(:role_id => @role.id, :tracker_id => @issue.tracker_id,
+                               :old_status_id => @issue.status_id,
+                               :field_name => 'fixed_version_id', :rule => 'readonly')
+
+    put :update, :params => { :project_id => @project.id, :id => @issue.id,
+                              :container_type => 'version',
+                              :container_id => version.id }, :format => :js
+
+    assert_response :forbidden
+    assert_not_equal version.id, @issue.reload.fixed_version_id
+  end
 end
