@@ -871,6 +871,21 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_equal 2, issue.reload.assigned_to_id
   end
 
+  # The board posts the drop column as status_id on every move, so a reorder
+  # inside a column carries the card's own status. That is not a status change
+  # and must not claim the card.
+  def test_auto_assign_does_not_claim_a_card_that_was_only_reordered
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :assigned_to_id => nil)
+
+    with_agile_settings('auto_assign_on_move' => '1') do
+      put :update, :params => { :id => issue.id, :status_id => issue.status_id }, :format => :js
+    end
+
+    assert_response :success
+    assert_nil issue.reload.assigned_to_id
+  end
+
   # A workflow can make the assignee read-only for a role. The issue form
   # honours that, so claiming a card by moving it must not get round it.
   def test_auto_assign_honours_a_read_only_assignee
