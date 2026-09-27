@@ -104,7 +104,8 @@ Redmine::Plugin.register :redmine_expert_agile do
                  :expert_agile_queries => [:index] },
                :read => true
     permission :edit_expert_agile_board,
-               { :expert_agile_boards => [:update, :create_issue, :edit_issue, :update_issue] },
+               { :expert_agile_boards => [:update, :create_issue, :edit_issue, :update_issue,
+                                          :update_agile_data] },
                :require => :member
     # Every variant of the query controller — board, chart and backlog — or
     # saving that kind is refused: find_optional_project authorises the

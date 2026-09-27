@@ -62,11 +62,24 @@ class ExpertAgileApiTest < Redmine::IntegrationTest
 
   # Visibility follows the issue, which is the right model: in a public project
   # anonymous may already read the issue, so reading its agile data is not a
-  # leak. The check that matters is the private case below.
+  # leak once the anonymous role may also view the board. The check that
+  # matters is the private case below.
   def test_agile_data_visibility_follows_the_issue
+    Role.anonymous.add_permission!(:view_expert_agile_board)
+
     get "/issues/#{@issue.id}/expert_agile_data.json"
 
     assert_response :success, 'project 1 is public in the fixtures'
+  end
+
+  # The agile data of an issue is board data: seeing the issue is not enough
+  # when the role may not view the board.
+  def test_agile_data_is_not_readable_anonymously_without_the_board_permission
+    Role.anonymous.remove_permission!(:view_expert_agile_board)
+
+    get "/issues/#{@issue.id}/expert_agile_data.json"
+
+    assert_includes [401, 403], response.status
   end
 
   def test_agile_data_is_not_readable_anonymously_in_a_private_project
@@ -138,6 +151,66 @@ class ExpertAgileApiTest < Redmine::IntegrationTest
         :headers => auth.merge('Content-Type' => 'application/json')
 
     assert_response :forbidden
+  end
+
+  # `editable?` is true for anyone who may add notes; the issue form needs the
+  # edit permission for these fields, and so must the REST endpoint.
+  def test_put_agile_data_denied_to_a_user_who_may_only_add_notes
+    @role.remove_permission!(:edit_issues, :edit_own_issues)
+    @role.add_permission!(:add_issue_notes)
+    assert @issue.editable?(@user), 'the setup must leave the issue editable in the loose sense'
+
+    put "/issues/#{@issue.id}/expert_agile_data.json",
+        :params => { :expert_agile_data => { :story_points => 8, :sprint_id => sprint!.id } }.to_json,
+        :headers => auth.merge('Content-Type' => 'application/json')
+
+    assert_response :forbidden
+    assert_nil ExpertAgileData.find_by(:issue_id => @issue.id)
+  end
+
+  def test_put_agile_data_needs_the_board_permission
+    @role.remove_permission!(:edit_expert_agile_board)
+
+    put "/issues/#{@issue.id}/expert_agile_data.json",
+        :params => { :expert_agile_data => { :story_points => 8 } }.to_json,
+        :headers => auth.merge('Content-Type' => 'application/json')
+
+    assert_response :forbidden
+  end
+
+  def test_put_agile_data_needs_the_agile_module
+    @project.disable_module!(:expert_agile)
+
+    put "/issues/#{@issue.id}/expert_agile_data.json",
+        :params => { :expert_agile_data => { :story_points => 8 } }.to_json,
+        :headers => auth.merge('Content-Type' => 'application/json')
+
+    assert_response :forbidden
+  end
+
+  def test_get_agile_data_needs_the_board_permission
+    @role.remove_permission!(:view_expert_agile_board)
+
+    get "/issues/#{@issue.id}/expert_agile_data.json", :headers => auth
+
+    assert_response :forbidden
+  end
+
+  # A sprint change through the REST endpoint used to be written without a
+  # journal, so it left no trace in the issue history.
+  def test_put_agile_data_records_the_sprint_change_in_the_history
+    sprint = sprint!
+
+    assert_difference 'Journal.count', 1 do
+      put "/issues/#{@issue.id}/expert_agile_data.json",
+          :params => { :expert_agile_data => { :sprint_id => sprint.id } }.to_json,
+          :headers => auth.merge('Content-Type' => 'application/json')
+    end
+
+    assert_response :no_content
+    detail = JournalDetail.where(:prop_key => 'expert_agile_sprint_id').order(:id).last
+    assert_equal sprint.id.to_s, detail.value
+    assert_equal @user, detail.journal.user
   end
 
   # --- Sprints -----------------------------------------------------------

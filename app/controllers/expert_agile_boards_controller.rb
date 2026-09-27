@@ -5,8 +5,11 @@ class ExpertAgileBoardsController < ApplicationController
   before_action :find_project_by_project_id, :only => [:index, :create_issue]
   before_action :find_issue_for_board, :only => [:update, :edit_issue, :update_issue,
                                                  :issue_tooltip, :agile_data, :update_agile_data]
-  before_action :authorize, :except => [:index, :edit_issue, :update_issue,
-                                        :agile_data, :update_agile_data]
+  # Every action but the board page is authorised against the issue's own
+  # project (find_issue_for_board sets it). The REST endpoints used to be
+  # exempt, which left reading and writing agile data to Issue#visible? and
+  # #editable? alone — and editable? is true for anyone who may add notes.
+  before_action :authorize, :except => [:index]
   before_action :authorize_global, :only => [:index]
 
   accept_api_auth :agile_data, :update_agile_data
@@ -123,10 +126,13 @@ class ExpertAgileBoardsController < ApplicationController
   # assignment can only be set through nested attributes on the issue endpoint.
   # This makes it a first-class operation.
   def update_agile_data
-    return head :forbidden unless @issue.editable?
+    # The same rule the issue form applies to these fields: `editable?` is
+    # already true for a user who may only add notes.
+    return head :forbidden unless @issue.safe_attribute?('expert_agile_data_attributes', User.current)
 
     attributes = params[:expert_agile_data] || {}
-    data = @issue.expert_agile_data || @issue.build_expert_agile_data
+    @issue.init_journal(User.current)
+    data = @issue.expert_agile_data!
 
     if attributes.key?(:sprint_id) && attributes[:sprint_id].present?
       # Resolve against the sprints this issue's project may actually plan
@@ -141,10 +147,12 @@ class ExpertAgileBoardsController < ApplicationController
 
     data.story_points = attributes[:story_points].presence if attributes.key?(:story_points)
 
-    if data.save
+    # Saved through the issue, as the backlog planner does, so the sprint
+    # change lands in the issue's history instead of being written silently.
+    if @issue.save
       respond_to { |format| format.api { render_api_ok } }
     else
-      respond_to { |format| format.api { render_validation_errors(data) } }
+      respond_to { |format| format.api { render_validation_errors(@issue) } }
     end
   end
 
