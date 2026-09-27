@@ -40,6 +40,16 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   „Beim Verschieben mir zuweisen“ beachtet die Zuweisung dieses Recht ebenso wie einen im Workflow
   schreibgeschützten Bearbeiter und weist eine Karte nicht mehr zu, die nur innerhalb ihrer Spalte
   umsortiert wurde. Das Umsortieren innerhalb einer Spalte bleibt sonst unverändert.
+- **Jeder Sprint-Verwalter konnte einen Sprint mit allen Projekten der Instanz teilen.** Die
+  Freigabe wurde übernommen, wie sie ankam. Ein Projektmitglied, das „Mit allen Projekten“ wählte,
+  brachte Name und Zeitraum des Sprints ins Ticketformular, in die Sprint-Auswahl des Boards und in
+  den Backlog-Planer jedes Projekts, auch vor die externen Nutzer anderer Kunden, und jedes Projekt
+  konnte in den Sprint planen. Die Freigabe folgt jetzt den Regeln, die Redmine für Versionen
+  anwendet: mit allen Projekten nur für Administratoren, mit Projektbaum oder Hierarchie nur für
+  Nutzer, die im Root-Projekt Sprints verwalten. Das Formular bietet nur an, was der Nutzer wählen
+  darf, die REST-API lehnt den Rest ab. Ein von einem Administrator geteilter Sprint bleibt für die
+  Sprint-Verwalter des Projekts bearbeitbar. Bereits weiter geteilte Sprints bleiben unverändert;
+  ein Administrator sollte sie prüfen.
 - **Story-Point-Summen zählten Tickets mit, die der Leser nicht sehen durfte.** Die Summe auf der
   Seite eines übergeordneten Tickets addierte alle Unteraufgaben, auch private und solche in
   Projekten ohne Zugriff, und die Differenz zu den eigenen Punkten zeigte, wie viel Arbeit dort

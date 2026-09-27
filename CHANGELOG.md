@@ -38,6 +38,15 @@ notes from the section matching the pushed tag.
   that right and a read-only assignee from the workflow as well, and it no longer claims a card
   that was only reordered within its column. Reordering cards within a column is otherwise
   unchanged.
+- **Any sprint manager could share a sprint with every project in the instance.** The sprint's
+  sharing was accepted as sent, so one project member picking "With all projects" put the sprint's
+  name and dates into the issue form, the board's sprint picker and the backlog planner of every
+  project, in front of external users of other customers too, and let every project plan into it.
+  Sharing now follows the rules Redmine applies to versions: with all projects only for
+  administrators, with the project tree or hierarchy only for users who manage sprints in the root
+  project. The form offers only what the user may choose, and the REST API refuses the rest. A
+  sprint an administrator has shared stays editable for the project's sprint managers. Sprints
+  that are already shared wider than this stay as they are; an administrator should review them.
 - **Story point totals counted issues the reader could not see.** The total on a parent issue's
   page summed every subtask, including private ones and ones in projects the reader has no access
   to, so the difference to the parent's own points showed how much work was hidden there. The
