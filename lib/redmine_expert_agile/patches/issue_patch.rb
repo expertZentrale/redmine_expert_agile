@@ -36,6 +36,12 @@ module RedmineExpertAgile
             )
           }
 
+          # Core clears a fixed_version the new project cannot use when an issue
+          # moves (Issue#project=); nothing did the same for the sprint, so a
+          # moved issue stayed in a sprint its project never shares — invisible
+          # to that sprint's backlog, yet blocking it from being closed.
+          before_save :expert_agile_drop_unshared_sprint, :if => :will_save_change_to_project_id?
+
           safe_attributes 'expert_agile_data_attributes',
                           :if => lambda { |issue, user|
                             issue.new_record? || user.allowed_to?(:edit_issues, issue.project)
@@ -47,6 +53,14 @@ module RedmineExpertAgile
       # whether it exists yet.
       def expert_agile_data!
         expert_agile_data || build_expert_agile_data
+      end
+
+      def expert_agile_drop_unshared_sprint
+        data = expert_agile_data
+        return if data.nil? || data.sprint_id.nil? || project.nil?
+        return if project.shared_expert_agile_sprints.where(:id => data.sprint_id).exists?
+
+        data.sprint_id = nil
       end
 
       def story_points

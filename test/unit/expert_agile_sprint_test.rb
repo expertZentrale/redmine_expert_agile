@@ -307,4 +307,82 @@ class ExpertAgileSprintTest < ActiveSupport::TestCase
 
     assert issue.save, issue.errors.full_messages.join(', ')
   end
+
+  # --- Moving an issue, archived projects, bounds ----------------------
+
+  # Core clears a version the new project cannot use when an issue moves; the
+  # sprint has to follow, or the issue sits in a sprint its project never
+  # shares, invisible to that sprint's backlog and blocking it from closing.
+  def test_moving_an_issue_drops_a_sprint_its_new_project_cannot_use
+    sprint = build_sprint
+    sprint.save!
+    issue = Issue.generate!(:project_id => @project.id)
+    issue.expert_agile_data!.sprint_id = sprint.id
+    issue.save!
+
+    issue.reload
+    issue.init_journal(User.current)
+    issue.project = Project.find(2)
+    assert issue.save, issue.errors.full_messages.join(', ')
+
+    assert_nil issue.reload.expert_agile_data.sprint_id
+    detail = JournalDetail.where(:prop_key => 'expert_agile_sprint_id').order(:id).last
+    assert_equal sprint.id.to_s, detail.old_value, 'the history says the sprint was dropped'
+  end
+
+  def test_moving_an_issue_keeps_a_sprint_shared_with_its_new_project
+    sprint = build_sprint(:sharing => ExpertAgileSprint::SHARING_SYSTEM)
+    sprint.save!
+    issue = Issue.generate!(:project_id => @project.id)
+    issue.expert_agile_data!.sprint_id = sprint.id
+    issue.save!
+
+    issue.reload.project = Project.find(2)
+    issue.save!
+
+    assert_equal sprint.id, issue.reload.expert_agile_data.sprint_id
+  end
+
+  # As core's shared_versions: an archived project shares nothing.
+  def test_an_archived_projects_sprints_are_not_shared
+    other = Project.find(2)
+    sprint = build_sprint(:project => other, :sharing => ExpertAgileSprint::SHARING_SYSTEM)
+    sprint.save!
+    assert_includes @project.shared_expert_agile_sprints.to_a, sprint
+
+    other.update_column(:status, Project::STATUS_ARCHIVED)
+
+    assert_not_includes @project.shared_expert_agile_sprints.to_a, sprint
+  end
+
+  # The column is a 4-byte integer; a larger value used to reach the database
+  # and fail there with a 500 instead of a validation error.
+  def test_story_points_beyond_the_column_are_a_validation_error
+    issue = Issue.generate!(:project_id => @project.id)
+    data = issue.expert_agile_data!
+    data.story_points = 2**31
+
+    assert_not data.valid?
+    assert data.errors[:story_points].any?
+  end
+
+  # A notification mail renders the same detail objects for its HTML and its
+  # text part. The label used to be substituted twice, and the second lookup
+  # cast the name "12 Sprint" to the id 12.
+  def test_the_history_label_survives_a_second_rendering
+    other = build_sprint(:name => 'Other', :start_date => Date.new(2026, 3, 1),
+                         :end_date => Date.new(2026, 3, 14))
+    other.save!
+    numbered = build_sprint(:name => "#{other.id} Sprint")
+    numbered.save!
+    issue = Issue.generate!(:project_id => @project.id)
+    journal = Journal.create!(:journalized => issue, :user => User.current)
+    detail = JournalDetail.new(:journal => journal, :property => 'attr',
+                               :prop_key => 'expert_agile_sprint_id', :value => numbered.id.to_s)
+
+    2.times { RedmineExpertAgile::Hooks.instance.helper_issues_show_detail_after_setting(:detail => detail) }
+
+    assert_equal numbered.name, detail.value
+  end
 end
+
