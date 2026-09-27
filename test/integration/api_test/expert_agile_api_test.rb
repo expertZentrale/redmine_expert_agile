@@ -197,6 +197,110 @@ class ExpertAgileApiTest < Redmine::IntegrationTest
     assert_equal 'Renamed', sprint.reload.name
   end
 
+  # --- Who may share a sprint how widely ----------------------------------
+
+  # A system-wide sprint shows its name and dates in every project of the
+  # instance. Core keeps that step for administrators on versions, and so
+  # does the sprint.
+  def test_a_project_member_cannot_share_a_sprint_with_every_project
+    assert_no_difference 'ExpertAgileSprint.count' do
+      post "/projects/#{@project.id}/expert_agile_sprints.json",
+           :params => { :expert_agile_sprint => { :name => 'Everywhere',
+                                                  :start_date => '2026-04-01',
+                                                  :end_date => '2026-04-14',
+                                                  :sharing => ExpertAgileSprint::SHARING_SYSTEM } }.to_json,
+           :headers => auth.merge('Content-Type' => 'application/json')
+    end
+
+    assert_response :unprocessable_entity
+  end
+
+  def test_a_project_member_cannot_widen_an_existing_sprint_to_every_project
+    sprint = sprint!
+
+    put "/projects/#{@project.id}/expert_agile_sprints/#{sprint.id}.json",
+        :params => { :expert_agile_sprint => { :sharing => ExpertAgileSprint::SHARING_SYSTEM } }.to_json,
+        :headers => auth.merge('Content-Type' => 'application/json')
+
+    assert_response :unprocessable_entity
+    assert_equal ExpertAgileSprint::SHARING_NONE, sprint.reload.sharing
+  end
+
+  def test_an_administrator_can_share_a_sprint_with_every_project
+    admin = User.find(1)
+
+    post "/projects/#{@project.id}/expert_agile_sprints.json",
+         :params => { :expert_agile_sprint => { :name => 'Everywhere',
+                                                :start_date => '2026-04-01',
+                                                :end_date => '2026-04-14',
+                                                :sharing => ExpertAgileSprint::SHARING_SYSTEM } }.to_json,
+         :headers => { 'X-Redmine-API-Key' => admin.api_key, 'Content-Type' => 'application/json' }
+
+    assert_response :created
+    assert_equal ExpertAgileSprint::SHARING_SYSTEM, ExpertAgileSprint.find_by(:name => 'Everywhere').sharing
+  end
+
+  # Once an administrator has shared a sprint, the project's own sprint
+  # managers must still be able to rename or reschedule it.
+  def test_a_sprint_shared_by_an_administrator_stays_editable_for_the_project
+    sprint = sprint!(:sharing => ExpertAgileSprint::SHARING_SYSTEM)
+
+    put "/projects/#{@project.id}/expert_agile_sprints/#{sprint.id}.json",
+        :params => { :expert_agile_sprint => { :name => 'Renamed',
+                                               :sharing => ExpertAgileSprint::SHARING_SYSTEM } }.to_json,
+        :headers => auth.merge('Content-Type' => 'application/json')
+
+    assert_response :no_content
+    assert_equal 'Renamed', sprint.reload.name
+  end
+
+  # Sharing with the whole tree reaches sibling projects, so it needs the
+  # sprint permission in the root project, as versions need manage_versions.
+  def test_sharing_with_the_tree_needs_the_permission_in_the_root_project
+    child = Project.find(5) # private subproject of project 1, user 2 is a member
+    child.enable_module!(:expert_agile)
+    @project.disable_module!(:expert_agile)
+
+    post "/projects/#{child.id}/expert_agile_sprints.json",
+         :params => { :expert_agile_sprint => { :name => 'Tree wide',
+                                                :start_date => '2026-04-01',
+                                                :end_date => '2026-04-14',
+                                                :sharing => ExpertAgileSprint::SHARING_TREE } }.to_json,
+         :headers => auth.merge('Content-Type' => 'application/json')
+    assert_response :unprocessable_entity
+
+    @project.reload.enable_module!(:expert_agile)
+    post "/projects/#{child.id}/expert_agile_sprints.json",
+         :params => { :expert_agile_sprint => { :name => 'Tree wide',
+                                                :start_date => '2026-04-01',
+                                                :end_date => '2026-04-14',
+                                                :sharing => ExpertAgileSprint::SHARING_TREE } }.to_json,
+         :headers => auth.merge('Content-Type' => 'application/json')
+    assert_response :created
+  end
+
+  def test_the_form_offers_only_the_sharings_the_user_may_set
+    log_user('jsmith', 'jsmith')
+
+    get "/projects/#{@project.id}/expert_agile_sprints/new"
+
+    assert_response :success
+    select = 'select[name=?] option[value=?]'
+    assert_select select, 'expert_agile_sprint[sharing]', ExpertAgileSprint::SHARING_SYSTEM.to_s, false
+    assert_select select, 'expert_agile_sprint[sharing]', ExpertAgileSprint::SHARING_DESCENDANTS.to_s
+  end
+
+  def test_sharing_with_subprojects_needs_no_further_permission
+    post "/projects/#{@project.id}/expert_agile_sprints.json",
+         :params => { :expert_agile_sprint => { :name => 'Down the tree',
+                                                :start_date => '2026-04-01',
+                                                :end_date => '2026-04-14',
+                                                :sharing => ExpertAgileSprint::SHARING_DESCENDANTS } }.to_json,
+         :headers => auth.merge('Content-Type' => 'application/json')
+
+    assert_response :created
+  end
+
   def test_delete_sprint
     sprint = sprint!
 
