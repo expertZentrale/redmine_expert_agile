@@ -493,6 +493,27 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_not_equal version.id, @issue.reload.fixed_version_id
   end
 
+  # The version comes from the backlog's project, the issue can live in any
+  # project the user may plan in. A version the issue's own project cannot use
+  # must still be refused: Issue validates fixed_version against its
+  # assignable_versions, and the planner must surface that, not bypass it.
+  def test_update_refuses_a_version_the_issues_project_cannot_use
+    elsewhere = Project.generate!(:is_public => true)
+    elsewhere.enable_module!(:expert_agile_backlog)
+    Member.create!(:project => elsewhere, :principal => User.find(2), :role_ids => [@role.id])
+    stranger = Issue.generate!(:project => elsewhere)
+    local_only = Version.generate!(:project => @project, :sharing => 'none')
+    assert_not_includes stranger.assignable_versions, local_only
+
+    put :update, :params => { :project_id => @project.id, :id => stranger.id,
+                              :container_type => 'version',
+                              :container_id => local_only.id }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert JSON.parse(response.body)['error'].present?
+    assert_nil stranger.reload.fixed_version_id
+  end
+
   # A workflow can make the target version read-only for a role. The issue
   # form honours that, and so must the planner.
   def test_update_honours_a_read_only_target_version
