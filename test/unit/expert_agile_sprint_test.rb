@@ -353,6 +353,8 @@ class ExpertAgileSprintTest < ActiveSupport::TestCase
     other.update_column(:status, Project::STATUS_ARCHIVED)
 
     assert_not_includes @project.shared_expert_agile_sprints.to_a, sprint
+    assert_not sprint.reload.shared_with?(@project),
+               'shared_with? must agree with shared_expert_agile_sprints'
   end
 
   # The column is a 4-byte integer; a larger value used to reach the database

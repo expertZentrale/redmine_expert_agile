@@ -139,7 +139,10 @@ class ExpertAgileQueriesControllerTest < Redmine::ControllerTest
       :query => { :name => 'Everywhere', :visibility => Query::VISIBILITY_PUBLIC.to_s }
     )
 
-    assert_not ExpertAgileQuery.find_by!(:name => 'Everywhere').is_private?
+    created = ExpertAgileQuery.find_by(:name => 'Everywhere')
+    refusal = css_select('#errorExplanation, .flash.error').map(&:text).join(' ').squish
+    assert created, "the board was not saved (#{response.status}): #{refusal}"
+    assert_not created.is_private?
   end
 
   # The complaint that prompted this: the edit form could only rename a saved
