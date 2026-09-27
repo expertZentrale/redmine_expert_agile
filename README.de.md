@@ -213,7 +213,8 @@ Zwei erwaehnenswerte:
 - **Maximale Tickets pro Board** (Standard 500) begrenzt, wie viele Tickets eine Board-Ansicht
   laedt.
 - **Maximale Tickets pro Diagramm** (Standard 1000) und **Diagramm-Cache** (Standard 60 Minuten)
-  begrenzen den Aufwand der historienauswertenden Diagramme.
+  begrenzen den Aufwand jedes Diagramms. Ein Diagramm über mehr Tickets als die Grenze zeigt einen
+  Hinweis, statt gezeichnet zu werden.
 
 ## Berechtigungen
 
