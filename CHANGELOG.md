@@ -9,6 +9,23 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Security
+- **Planning an issue into a sprint needs the planning permission everywhere.** The backlog
+  planner requires *Manage backlog*, but the issue form, bulk edit, the issue REST API and the agile
+  data endpoint accepted a sprint from anyone who may edit the issue. They now require the same
+  permission, and the issue form no longer offers the sprint field without it. The nested agile
+  attributes accept only story points and the sprint, so the board rank can no longer be written
+  through them.
+- **An open issue could be planned into a closed sprint**, rewriting that sprint's burndown and
+  velocity after the fact. Only open or active sprints are accepted now.
+- **Deleting a shared sprint silently removed issues of other projects from it.** A sprint that
+  issues of other projects are planned into can no longer be deleted, as Redmine refuses to delete
+  a version that is still in use.
+- **Velocity and cycle time loaded every visible issue.** They are now held to the chart item limit
+  like the other charts.
+
 ## [0.5.4] - 2026-09-27
 
 ### Security

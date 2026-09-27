@@ -228,7 +228,7 @@ Pro Rolle unter *Administration → Rollen und Rechte* vergeben.
 | expert Agile | Agile-Diagramme ansehen | Diagrammseite oeffnen |
 | expert Agile | Sprints verwalten | Sprints anlegen, bearbeiten und schliessen |
 | expert Agile Backlog | Backlog ansehen | Backlog-Planer oeffnen |
-| expert Agile Backlog | Backlog verwalten | Tickets Sprints und Versionen zuordnen |
+| expert Agile Backlog | Backlog verwalten | Tickets Sprints und Versionen zuordnen, auch das Sprintfeld im Ticketformular |
 
 ## Entwicklung
 

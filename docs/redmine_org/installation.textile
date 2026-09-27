@@ -31,7 +31,7 @@ h3. Permissions
 | expert Agile | View agile charts | Open the charts page |
 | expert Agile | Manage sprints | Create, edit and close sprints |
 | expert Agile Backlog | View backlog | Open the backlog planner, filter it, open a saved backlog |
-| expert Agile Backlog | Manage backlog | Plan issues into sprints and versions |
+| expert Agile Backlog | Manage backlog | Plan issues into sprints and versions, also the sprint field on the issue form |
 
 Saving a backlog uses the two board permissions above, which belong to the *expert Agile* module. A project that enables *expert Agile Backlog* on its own can therefore filter its backlog but not save one — enable both modules if saved backlogs are wanted.
 
