@@ -42,6 +42,26 @@ module RedmineExpertAgile
           # to that sprint's backlog, yet blocking it from being closed.
           before_save :expert_agile_drop_unshared_sprint, :if => :will_save_change_to_project_id?
 
+          # Defined on Issue itself, not in this module: accepts_nested_attributes_for
+          # generates the writer in a module included after this one, which
+          # would otherwise shadow it; `super` reaches that generated writer.
+          #
+          # When a user sets the attributes (Issue#safe_attributes= records who),
+          # only the two agile fields a form offers get through, and the sprint
+          # only for someone who may plan it — the backlog planner's permission.
+          # Without this the nested hash reached every column of the row (the
+          # board rank included), and anyone who may edit issues could plan them
+          # into sprints the planner would refuse them.
+          def expert_agile_data_attributes=(attributes)
+            user = @attributes_set_by
+            if user
+              attributes = attributes.respond_to?(:to_unsafe_h) ? attributes.to_unsafe_h : attributes.to_h
+              attributes = attributes.stringify_keys.slice(*RedmineExpertAgile::Patches::IssuePatch::AGILE_FORM_FIELDS)
+              attributes.delete('sprint_id') unless expert_agile_sprint_editable_by?(user)
+            end
+            super(attributes)
+          end
+
           safe_attributes 'expert_agile_data_attributes',
                           :if => lambda { |issue, user|
                             issue.new_record? || user.allowed_to?(:edit_issues, issue.project)
@@ -51,8 +71,16 @@ module RedmineExpertAgile
 
       # The association row is created on demand, so callers never have to care
       # whether it exists yet.
+      AGILE_FORM_FIELDS = %w(story_points sprint_id).freeze
+
       def expert_agile_data!
         expert_agile_data || build_expert_agile_data
+      end
+
+      # Planning an issue into a sprint is the backlog planner's permission,
+      # wherever the sprint is set from.
+      def expert_agile_sprint_editable_by?(user = User.current)
+        project.present? && user.allowed_to?(:manage_expert_agile_backlog, project)
       end
 
       def expert_agile_drop_unshared_sprint

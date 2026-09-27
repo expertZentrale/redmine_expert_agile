@@ -17,7 +17,7 @@ class ExpertAgileApiTest < Redmine::IntegrationTest
     @project.enable_module!(:expert_agile_backlog)
     @role = Role.find(1)
     @role.add_permission!(:view_expert_agile_board, :edit_expert_agile_board,
-                          :manage_expert_agile_sprints)
+                          :manage_expert_agile_sprints, :manage_expert_agile_backlog)
     @user = User.find(2)
     @user.api_key
     @issue = Issue.find(1)
@@ -400,6 +400,33 @@ class ExpertAgileApiTest < Redmine::IntegrationTest
     end
 
     assert_response :no_content
+  end
+
+  # Deleting a shared sprint used to un-plan the issues of every project it was
+  # shared with, silently. Core refuses to delete a version still in use.
+  def test_a_sprint_used_by_another_project_is_not_deleted
+    sprint = sprint!(:sharing => ExpertAgileSprint::SHARING_SYSTEM)
+    elsewhere = Issue.find(4) # project 2
+    ExpertAgileData.create!(:issue_id => elsewhere.id, :sprint_id => sprint.id)
+
+    assert_no_difference 'ExpertAgileSprint.count' do
+      delete "/projects/#{@project.id}/expert_agile_sprints/#{sprint.id}.json", :headers => auth
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal sprint.id, elsewhere.reload.expert_agile_data.sprint_id
+  end
+
+  def test_a_sprint_used_only_by_its_own_project_is_deleted
+    sprint = sprint!
+    ExpertAgileData.create!(:issue_id => @issue.id, :sprint_id => sprint.id)
+
+    assert_difference 'ExpertAgileSprint.count', -1 do
+      delete "/projects/#{@project.id}/expert_agile_sprints/#{sprint.id}.json", :headers => auth
+    end
+
+    assert_response :no_content
+    assert_nil @issue.reload.expert_agile_data.sprint_id
   end
 
   def test_sprints_denied_without_permission

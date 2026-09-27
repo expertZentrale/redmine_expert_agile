@@ -69,7 +69,17 @@ class ExpertAgileSprintsController < ApplicationController
   end
 
   def destroy
-    @sprint.destroy
+    unless @sprint.destroy
+      respond_to do |format|
+        format.html do
+          flash[:error] = @sprint.errors.full_messages.join(', ')
+          redirect_to project_expert_agile_sprints_path(@project)
+        end
+        format.api { render_validation_errors(@sprint) }
+      end
+      return
+    end
+
     respond_to do |format|
       format.html do
         flash[:notice] = l(:notice_successful_delete)

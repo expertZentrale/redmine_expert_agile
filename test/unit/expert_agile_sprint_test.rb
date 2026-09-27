@@ -273,6 +273,7 @@ class ExpertAgileSprintTest < ActiveSupport::TestCase
   # nested attributes, which no plugin controller sees. The model is therefore
   # the only place a sprint of an unrelated project can be refused.
   def test_an_issue_cannot_be_planned_into_a_sprint_of_an_unrelated_project
+    @project.enable_module!(:expert_agile_backlog) # so the setter may plan at all
     foreign = build_sprint(:project => Project.find(2))
     foreign.save!
     issue = Issue.generate!(:project_id => @project.id)
@@ -385,6 +386,62 @@ class ExpertAgileSprintTest < ActiveSupport::TestCase
     2.times { RedmineExpertAgile::Hooks.instance.helper_issues_show_detail_after_setting(:detail => detail) }
 
     assert_equal numbered.name, detail.value
+  end
+
+  # --- Who may plan through the issue form ------------------------------
+
+  # The planner needs its planning permission; setting the sprint through the
+  # issue form, bulk edit or the issue REST API must need it as well.
+  def test_the_sprint_is_dropped_for_a_user_who_may_not_plan
+    @project.enable_module!(:expert_agile_backlog)
+    sprint = build_sprint
+    sprint.save!
+    issue = Issue.generate!(:project_id => @project.id)
+    editor = User.find(2) # may edit issues in project 1, no planning permission
+    Role.find(1).remove_permission!(:manage_expert_agile_backlog)
+    assert_not editor.allowed_to?(:manage_expert_agile_backlog, @project)
+
+    issue.send(:safe_attributes=, { 'expert_agile_data_attributes' => { 'sprint_id' => sprint.id.to_s,
+                                                                      'story_points' => '5' } }, editor)
+    issue.save!
+
+    assert_nil issue.reload.expert_agile_data.sprint_id
+    assert_equal 5, issue.story_points, 'story points follow the edit permission, not the planning one'
+  end
+
+  def test_the_sprint_is_kept_for_a_user_who_may_plan
+    @project.enable_module!(:expert_agile_backlog)
+    Role.find(1).add_permission!(:manage_expert_agile_backlog)
+    sprint = build_sprint
+    sprint.save!
+    issue = Issue.generate!(:project_id => @project.id)
+
+    issue.send(:safe_attributes=, { 'expert_agile_data_attributes' => { 'sprint_id' => sprint.id.to_s } }, User.find(2))
+    issue.save!
+
+    assert_equal sprint.id, issue.reload.expert_agile_data.sprint_id
+  end
+
+  # The nested hash used to reach every column of the agile row.
+  def test_the_nested_attributes_carry_only_the_form_fields
+    issue = Issue.generate!(:project_id => @project.id)
+
+    issue.send(:safe_attributes=, { 'expert_agile_data_attributes' => { 'story_points' => '3',
+                                                                      'position' => '1' } }, User.find(1))
+    issue.save!
+
+    assert_nil issue.reload.expert_agile_data.position, 'the board rank is not a form field'
+  end
+
+  def test_an_issue_cannot_be_planned_into_a_closed_sprint
+    closed = build_sprint(:status => ExpertAgileSprint::STATUS_CLOSED)
+    closed.save!
+    issue = Issue.generate!(:project_id => @project.id)
+
+    issue.expert_agile_data!.sprint_id = closed.id
+
+    assert_not issue.save
+    assert_nil ExpertAgileData.find_by(:issue_id => issue.id)
   end
 end
 

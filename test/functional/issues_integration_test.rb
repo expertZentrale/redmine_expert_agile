@@ -18,8 +18,9 @@ class IssuesIntegrationTest < Redmine::ControllerTest
   def setup
     @project = Project.find(1)
     @project.enable_module!(:expert_agile)
+    @project.enable_module!(:expert_agile_backlog)
     Role.find(1).add_permission!(:view_expert_agile_board, :edit_expert_agile_board,
-                                 :manage_expert_agile_sprints)
+                                 :manage_expert_agile_sprints, :manage_expert_agile_backlog)
     @issue = Issue.find(1)
     @request.session[:user_id] = 2
   end
