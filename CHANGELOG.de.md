@@ -9,7 +9,7 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.5.3] - 2026-09-27
 
 ### Sicherheit
 - **Jeder Sprint jedes Projekts ließ sich an ein Ticket schreiben, und sein Name dann aus der
@@ -22,7 +22,8 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   des Ticket-Projekts oder ein mit ihm geteilter, also die Menge, die Backlog-Planer und der
   Agile-Data-Endpunkt schon verwendeten. Die Historie nennt einen Sprint nur noch, wenn der Leser
   ihn ohnehin sehen darf, sonst steht dort die bloße ID. Das gilt auch für Journale, die vor
-  dieser Korrektur geschrieben wurden.
+  dieser Korrektur geschrieben wurden. (#32, danke an @idevchris)
+
 - **Der Backlog-Planer ließ Tickets umplanen, die der Nutzer nicht ändern durfte.** Die
   Planungsberechtigung wurde nur am Projekt aus der URL geprüft, das verschobene Ticket konnte aber
   jedes sichtbare sein. Planungsrechte in einem Projekt reichten, um Tickets jedes anderen Projekts
@@ -30,7 +31,8 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   jeden zu, der Notizen hinzufügen darf, an Bearbeitungsrecht und schreibgeschützten
   Workflow-Feldern vorbei. Ein Zug braucht jetzt die Planungsberechtigung im Projekt des Tickets und
   dasselbe Recht, Sprint oder Zielversion zu ändern, das auch das Ticketformular verlangt,
-  schreibgeschützte Felder eingeschlossen.
+  schreibgeschützte Felder eingeschlossen. (#33, danke an @idevchris)
+
 - **Ein Kartenzug änderte den Status von Tickets, die der Nutzer nicht bearbeiten durfte.** Das
   Board ließ jeden zu, der Notizen hinzufügen darf, und prüfte den Zielstatus nur gegen den
   Workflow. Der Workflow berücksichtigt aber auch Rollen, die nur Tickets anlegen dürfen. Eine
@@ -39,7 +41,8 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   braucht jetzt zusätzlich dasselbe Recht wie im Ticketformular. Mit eingeschalteter Einstellung
   „Beim Verschieben mir zuweisen“ beachtet die Zuweisung dieses Recht ebenso wie einen im Workflow
   schreibgeschützten Bearbeiter und weist eine Karte nicht mehr zu, die nur innerhalb ihrer Spalte
-  umsortiert wurde. Das Umsortieren innerhalb einer Spalte bleibt sonst unverändert.
+  umsortiert wurde. Das Umsortieren innerhalb einer Spalte bleibt sonst unverändert. (#34, danke an @idevchris)
+
 - **Jeder Sprint-Verwalter konnte einen Sprint mit allen Projekten der Instanz teilen.** Die
   Freigabe wurde übernommen, wie sie ankam. Ein Projektmitglied, das „Mit allen Projekten“ wählte,
   brachte Name und Zeitraum des Sprints ins Ticketformular, in die Sprint-Auswahl des Boards und in
@@ -49,13 +52,14 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Nutzer, die im Root-Projekt Sprints verwalten. Das Formular bietet nur an, was der Nutzer wählen
   darf, die REST-API lehnt den Rest ab. Ein von einem Administrator geteilter Sprint bleibt für die
   Sprint-Verwalter des Projekts bearbeitbar. Bereits weiter geteilte Sprints bleiben unverändert;
-  ein Administrator sollte sie prüfen.
+  ein Administrator sollte sie prüfen. (#35, danke an @idevchris)
+
 - **Story-Point-Summen zählten Tickets mit, die der Leser nicht sehen durfte.** Die Summe auf der
   Seite eines übergeordneten Tickets addierte alle Unteraufgaben, auch private und solche in
   Projekten ohne Zugriff, und die Differenz zu den eigenen Punkten zeigte, wie viel Arbeit dort
   verborgen lag. Ebenso meldete die Sprint-REST-API `issue_count` und `story_points` über alle
   Tickets eines geteilten Sprints, gleich aus welchem Projekt. Beide zählen jetzt nur Tickets, die
-  der Leser sehen darf, wie Redmine es bei der Summe des geschätzten Aufwands macht.
+  der Leser sehen darf, wie Redmine es bei der Summe des geschätzten Aufwands macht. (#36, danke an @idevchris)
 
 ## [0.5.2] - 2026-09-24
 

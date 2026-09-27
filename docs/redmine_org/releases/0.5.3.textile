@@ -1,0 +1,21 @@
+h3. redmine_expert_agile 0.5.3 — 2026-09-27
+
+A security release. All five fixes were reported and contributed by "idevchris":https://github.com/idevchris. Upgrading is recommended.
+
+h4. Security
+
+* *Any sprint of any project could be put on an issue, and its name then read from the issue history.* The issue form, bulk edit and the issue REST API accepted any sprint id. An issue can now only be planned into a sprint of its own project or one shared with it. The history names a sprint only if the reader could see it anyway, and this also applies to history written before this fix.
+* *The backlog planner let users re-plan issues they were not allowed to change.* Planning rights in one project were enough to move issues of other projects out of their sprint or version, and adding notes was enough to change the field. A planning move now needs the planning permission in the issue's own project and the same right to change the sprint or target version that the issue form requires, including read-only fields from the workflow.
+* *Moving a card on the board could change the status of issues the user was not allowed to edit.* A role that may only add issues and notes could close any visible issue by dragging it. A status change on the board now needs the same right as in the issue form. "Assign to me when moving a card" also respects that right and a read-only assignee, and it no longer claims a card that was only reordered within its column.
+* *Any sprint manager could share a sprint with every project in the instance.* Sharing now follows Redmine's rules for versions: "With all projects" only for administrators, and the project tree or hierarchy only for users who manage sprints in the root project.
+* *Story point totals counted issues the reader could not see.* The total on a parent issue, and the sprint totals in the REST API, now count only issues the reader may see, as Redmine does for estimated time.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+Three of these fixes tighten who may do what, so some users may notice a refusal where a move used to go through:
+
+* Changing an issue's status on the board, or its sprint or target version in the backlog planner, now needs the same right as the issue form: _Edit issues_, or _Edit own issues_ for the user's own issues. Changing the sprint is the exception and needs _Edit issues_, as the sprint field on the issue form already did. Adding notes alone is no longer enough for any of these.
+* Planning an issue in the backlog needs the planning permission in the issue's own project, not only in the project whose backlog is open.
+* Only administrators can share a sprint with all projects. Sprints that are already shared more widely than the new rules allow stay as they are. An administrator should review them under each project's _Sprints_ settings.

@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.5.3] - 2026-09-27
 
 ### Security
 - **Any sprint of any project could be written onto an issue, and its name then read from the
@@ -21,14 +21,16 @@ notes from the section matching the pushed tag.
   longer be closed. A sprint is now accepted only if it belongs to the issue's project or is
   shared with it, the set the backlog planner and the agile data endpoint already used. The
   history names a sprint only when the reader could see it anyway, and shows the bare id
-  otherwise, which also covers journals written before this fix.
+  otherwise, which also covers journals written before this fix. (#32, thanks @idevchris)
+
 - **The backlog planner let a user re-plan issues they were not allowed to change.** The planning
   permission was checked on the project in the URL only, while the moved issue could be any
   visible one. Planning rights in one project were enough to take issues of any other project out
   of their sprint or target version. The move also wrote the field directly and accepted anyone
   who may add notes, bypassing both the edit permission and read-only fields from the workflow.
   A move now needs the planning permission in the issue's own project and the same right to
-  change the sprint or target version that the issue form requires, read-only fields included.
+  change the sprint or target version that the issue form requires, read-only fields included. (#33, thanks @idevchris)
+
 - **Moving a card changed the status of issues the user was not allowed to edit.** The board
   accepted any user who may add notes, and checked the target status against the workflow only.
   The workflow also counts roles that may merely add issues, so a role with `add_issues` and
@@ -37,7 +39,8 @@ notes from the section matching the pushed tag.
   that the issue form requires. With "Assign to me when moving a card" switched on, the claim now respects
   that right and a read-only assignee from the workflow as well, and it no longer claims a card
   that was only reordered within its column. Reordering cards within a column is otherwise
-  unchanged.
+  unchanged. (#34, thanks @idevchris)
+
 - **Any sprint manager could share a sprint with every project in the instance.** The sprint's
   sharing was accepted as sent, so one project member picking "With all projects" put the sprint's
   name and dates into the issue form, the board's sprint picker and the backlog planner of every
@@ -46,13 +49,14 @@ notes from the section matching the pushed tag.
   administrators, with the project tree or hierarchy only for users who manage sprints in the root
   project. The form offers only what the user may choose, and the REST API refuses the rest. A
   sprint an administrator has shared stays editable for the project's sprint managers. Sprints
-  that are already shared wider than this stay as they are; an administrator should review them.
+  that are already shared wider than this stay as they are; an administrator should review them. (#35, thanks @idevchris)
+
 - **Story point totals counted issues the reader could not see.** The total on a parent issue's
   page summed every subtask, including private ones and ones in projects the reader has no access
   to, so the difference to the parent's own points showed how much work was hidden there. The
   sprint REST API likewise reported `issue_count` and `story_points` over every issue in a shared
   sprint, whichever project it belonged to. Both now count only issues the reader may see, as
-  Redmine does for the estimated time total.
+  Redmine does for the estimated time total. (#36, thanks @idevchris)
 
 ## [0.5.2] - 2026-09-24
 
