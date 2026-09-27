@@ -80,15 +80,15 @@ class ExpertAgileChartsQuery < ExpertAgileQuery
     base_scope.eager_load(:status, :expert_agile_data)
   end
 
-  # Whether this chart would exceed the item cap. Only the journal-replaying
-  # charts are bounded; the counting ones are cheap at any size.
+  # Whether this chart would exceed the item cap. Every chart is bounded: the
+  # replaying ones walk each issue per bucket, and the counting ones (velocity,
+  # cycle time) still load every issue in full, which on the global charts
+  # page is every issue the viewer can see.
   #
   # RedmineUP's equivalent guard tests chart keys ('work_burndown',
   # 'hours_velocity') that no longer exist in their registry, so the cap it
   # advertises never actually fires.
   def too_many_items?
-    return false unless RedmineExpertAgile::Charts::Registry.replays_history?(chart)
-
     chart_scope.count > RedmineExpertAgile.chart_items_limit
   end
 

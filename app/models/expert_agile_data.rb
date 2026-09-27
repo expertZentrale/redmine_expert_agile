@@ -43,7 +43,10 @@ class ExpertAgileData < ExpertAgileApplicationRecord
     return if sprint_id.nil?
 
     project = issue && issue.project
-    return if project && project.shared_expert_agile_sprints.where(:id => sprint_id).exists?
+    # Open or active only: a closed sprint is finished, and planning an open
+    # issue into it would rewrite its burndown and velocity after the fact —
+    # and break the rule that a closed sprint holds no open issues.
+    return if project && project.shared_expert_agile_sprints.available.where(:id => sprint_id).exists?
 
     errors.add(:sprint_id, :inclusion)
   end

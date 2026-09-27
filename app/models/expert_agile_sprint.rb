@@ -64,6 +64,10 @@ class ExpertAgileSprint < ExpertAgileApplicationRecord
 
   validate :sharing_allowed_to_setter, :if => :will_save_change_to_sharing?
 
+  # Prepended so it runs before the `dependent: :nullify` above: that would
+  # otherwise un-plan the issues first.
+  before_destroy :keep_issues_of_other_projects, :prepend => true
+
   # Remembers who set the attributes, so the sharing can be checked against
   # that user when the sprint is saved. The same pattern as Issue's
   # @attributes_set_by: a sprint written from the console or a migration has
@@ -186,6 +190,21 @@ class ExpertAgileSprint < ExpertAgileApplicationRecord
     scope = self.class.where(:project_id => project_id, :status => STATUS_ACTIVE)
     scope = scope.where.not(:id => id) if persisted?
     scope.update_all(:status => STATUS_OPEN)
+  end
+
+  # Issues of other projects planned into this sprint. Deleting it would take
+  # them out of their plan without a trace, in projects the deleting user may
+  # have no rights in — core refuses to delete a version that is still in use
+  # for the same reason.
+  def planned_in_other_projects?
+    issues.where.not(:project_id => project_id).exists?
+  end
+
+  def keep_issues_of_other_projects
+    return unless planned_in_other_projects?
+
+    errors.add(:base, l(:error_expert_agile_sprint_used_by_other_projects))
+    throw(:abort)
   end
 
   def sharing_allowed_to_setter

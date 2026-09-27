@@ -106,6 +106,7 @@ en:
   error_expert_agile_sprint_dates_order: End date must not be before the start date
   error_expert_agile_sprint_dates_overlap: Overlaps another sprint in this project
   error_expert_agile_sprint_has_open_issues: Cannot be closed while it still has open issues
+  error_expert_agile_sprint_used_by_other_projects: Cannot be deleted while issues of other projects are planned into it
 
   # --- Board ----------------------------------------------------------
   label_expert_agile_wip_limit: WIP limit

@@ -9,6 +9,23 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Sicherheit
+- **Das Einplanen eines Tickets in einen Sprint verlangt überall die Planungsberechtigung.** Der
+  Backlog-Planer verlangt *Backlog verwalten*, Ticketformular, Sammelbearbeitung, Ticket-REST-API
+  und der Agile-Data-Endpunkt nahmen einen Sprint aber von jedem an, der das Ticket bearbeiten darf.
+  Sie verlangen jetzt dieselbe Berechtigung, und das Ticketformular bietet das Sprintfeld ohne sie
+  nicht mehr an. Die verschachtelten Agile-Attribute nehmen nur noch Story Points und Sprint an,
+  der Board-Rang lässt sich darüber nicht mehr schreiben.
+- **Ein offenes Ticket ließ sich in einen geschlossenen Sprint einplanen** und veränderte dessen
+  Burndown und Velocity nachträglich. Angenommen werden jetzt nur offene oder aktive Sprints.
+- **Das Löschen eines geteilten Sprints nahm Tickets anderer Projekte stillschweigend heraus.** Ein
+  Sprint, in den Tickets anderer Projekte eingeplant sind, lässt sich nicht mehr löschen, so wie
+  Redmine das Löschen einer noch verwendeten Version verweigert.
+- **Velocity und Durchlaufzeit luden alle sichtbaren Tickets.** Sie unterliegen jetzt wie die
+  übrigen Diagramme der Obergrenze für Diagramm-Einträge.
+
 ## [0.5.4] - 2026-09-27
 
 ### Sicherheit

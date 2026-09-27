@@ -210,7 +210,7 @@ Granted per role under *Administration → Roles and permissions*.
 | expert Agile | View agile charts | Open the charts page |
 | expert Agile | Manage sprints | Create, edit and close sprints |
 | expert Agile Backlog | View backlog | Open the backlog planner |
-| expert Agile Backlog | Manage backlog | Plan issues into sprints and versions |
+| expert Agile Backlog | Manage backlog | Plan issues into sprints and versions, also the sprint field on the issue form |
 
 ## Development
 

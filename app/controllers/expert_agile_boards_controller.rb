@@ -131,6 +131,11 @@ class ExpertAgileBoardsController < ApplicationController
     return head :forbidden unless @issue.safe_attribute?('expert_agile_data_attributes', User.current)
 
     attributes = params[:expert_agile_data] || {}
+    # Planning into a sprint is the backlog planner's permission, here too.
+    if attributes.key?(:sprint_id) && !@issue.expert_agile_sprint_editable_by?(User.current)
+      return head :forbidden
+    end
+
     @issue.init_journal(User.current)
     data = @issue.expert_agile_data!
 

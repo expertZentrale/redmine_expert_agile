@@ -91,6 +91,8 @@ module RedmineExpertAgile
     def sprint_visible?(issue)
       return false unless agile_issue?(issue)
       return false unless RedmineExpertAgile.sprints_on?
+      # Offered only to someone who may plan: the form would drop it otherwise.
+      return false unless issue.expert_agile_sprint_editable_by?(User.current)
 
       issue.project.shared_expert_agile_sprints.available.exists?
     end

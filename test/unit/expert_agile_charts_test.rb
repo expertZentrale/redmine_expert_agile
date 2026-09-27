@@ -298,16 +298,17 @@ class ExpertAgileChartsTest < ActiveSupport::TestCase
     assert_equal RedmineExpertAgile.default_chart, query.chart
   end
 
-  def test_item_cap_applies_only_to_history_replaying_charts
+  # Every chart loads its issues in full, so every chart is capped: the
+  # counting ones used to be exempt and loaded every visible issue.
+  def test_item_cap_applies_to_every_chart
     query = ExpertAgileChartsQuery.new(:name => '_', :project => @project)
     issue_on(@from)
 
     with_agile_settings('chart_items_limit' => '0') do
-      query.chart = 'burndown'
-      assert query.too_many_items?, 'a replaying chart is capped'
-
-      query.chart = 'velocity'
-      assert_not query.too_many_items?, 'a counting chart is not capped'
+      %w(burndown burnup cumulative_flow velocity cycle_time).each do |chart|
+        query.chart = chart
+        assert query.too_many_items?, "#{chart} must be capped"
+      end
     end
   end
 
