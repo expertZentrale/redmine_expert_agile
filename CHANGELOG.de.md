@@ -12,6 +12,34 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 ## [Unreleased]
 
 ### Sicherheit
+- **Jeder Sprint jedes Projekts ließ sich an ein Ticket schreiben, und sein Name dann aus der
+  Ticket-Historie lesen.** Ticketformular, Sammelbearbeitung und die Ticket-REST-API setzen den
+  Sprint über verschachtelte `expert_agile_data_attributes`, und die nahmen jede Sprint-ID an. Wer
+  in einem Projekt Tickets bearbeiten durfte, konnte einen Sprint eines fremden, unsichtbaren
+  Projekts an ein eigenes Ticket hängen und dessen Namen in der Historie lesen. Über die IDs lief
+  so jeder Sprint-Name der Instanz offen. Dieselbe Anfrage legte auch Tickets in Sprints anderer
+  Projekte ab, die sich danach nicht mehr schließen ließen. Angenommen wird jetzt nur ein Sprint
+  des Ticket-Projekts oder ein mit ihm geteilter, also die Menge, die Backlog-Planer und der
+  Agile-Data-Endpunkt schon verwendeten. Die Historie nennt einen Sprint nur noch, wenn der Leser
+  ihn ohnehin sehen darf, sonst steht dort die bloße ID. Das gilt auch für Journale, die vor
+  dieser Korrektur geschrieben wurden.
+- **Der Backlog-Planer ließ Tickets umplanen, die der Nutzer nicht ändern durfte.** Die
+  Planungsberechtigung wurde nur am Projekt aus der URL geprüft, das verschobene Ticket konnte aber
+  jedes sichtbare sein. Planungsrechte in einem Projekt reichten, um Tickets jedes anderen Projekts
+  aus ihrem Sprint oder ihrer Zielversion zu nehmen. Der Zug schrieb das Feld zudem direkt und ließ
+  jeden zu, der Notizen hinzufügen darf, an Bearbeitungsrecht und schreibgeschützten
+  Workflow-Feldern vorbei. Ein Zug braucht jetzt die Planungsberechtigung im Projekt des Tickets und
+  dasselbe Recht, Sprint oder Zielversion zu ändern, das auch das Ticketformular verlangt,
+  schreibgeschützte Felder eingeschlossen.
+- **Ein Kartenzug änderte den Status von Tickets, die der Nutzer nicht bearbeiten durfte.** Das
+  Board ließ jeden zu, der Notizen hinzufügen darf, und prüfte den Zielstatus nur gegen den
+  Workflow. Der Workflow berücksichtigt aber auch Rollen, die nur Tickets anlegen dürfen. Eine
+  Rolle mit `add_issues` und `add_issue_notes` ohne Bearbeitungsrecht konnte so jedes sichtbare
+  Ticket per Ziehen schließen, was das Ticketformular verweigert. Ein Statuswechsel auf dem Board
+  braucht jetzt zusätzlich dasselbe Recht wie im Ticketformular. Mit eingeschalteter Einstellung
+  „Beim Verschieben mir zuweisen“ beachtet die Zuweisung dieses Recht ebenso wie einen im Workflow
+  schreibgeschützten Bearbeiter und weist eine Karte nicht mehr zu, die nur innerhalb ihrer Spalte
+  umsortiert wurde. Das Umsortieren innerhalb einer Spalte bleibt sonst unverändert.
 - **Jeder Sprint-Verwalter konnte einen Sprint mit allen Projekten der Instanz teilen.** Die
   Freigabe wurde übernommen, wie sie ankam. Ein Projektmitglied, das „Mit allen Projekten“ wählte,
   brachte Name und Zeitraum des Sprints ins Ticketformular, in die Sprint-Auswahl des Boards und in

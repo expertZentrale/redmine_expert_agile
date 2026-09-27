@@ -43,6 +43,14 @@ class ExpertAgileBoardsController < ApplicationController
 
     target_status_id = params[:status_id].presence && params[:status_id].to_i
     if target_status_id && target_status_id != @issue.status_id
+      # `editable?` above only says the user may touch the issue at all, which
+      # adding notes is enough for, and the workflow below also counts roles
+      # that may merely add issues. The issue form additionally requires the
+      # right to edit the issue before it lets a status change through, so a
+      # move has to as well.
+      unless @issue.safe_attribute?('status_id', User.current)
+        return render_move_error(l(:error_expert_agile_status_not_editable), :forbidden)
+      end
       unless status_allowed?(target_status_id)
         # Enforced explicitly. RedmineUP infers rejection by checking whether
         # the attribute still changed after safe_attributes= ran, comparing with
@@ -356,8 +364,14 @@ class ExpertAgileBoardsController < ApplicationController
   # status actually changes, and never overrides an existing assignee.
   def assign_to_current_user_if_configured(target_status_id)
     return unless RedmineExpertAgile.auto_assign_on_move?
-    return unless target_status_id
+    # The board posts the drop column as status_id on every move, a reorder
+    # inside the same column included, so the posted value alone does not say
+    # the status changed. The status is set just before this runs.
+    return unless target_status_id && @issue.status_id_changed?
     return if @issue.assigned_to_id.present?
+    # The issue form's rule for the field: the right to edit the issue, and the
+    # assignee not made read-only by the workflow for this user.
+    return unless @issue.safe_attribute?('assigned_to_id', User.current)
     return unless @issue.assignable_users.include?(User.current)
 
     @issue.assigned_to_id = User.current.id
