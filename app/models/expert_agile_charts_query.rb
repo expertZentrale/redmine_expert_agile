@@ -38,8 +38,16 @@ class ExpertAgileChartsQuery < ExpertAgileQuery
   # filter for `\d{4}-\d{2}-\d{2}` — so any change to Redmine's sql_for_field
   # output silently breaks every chart. There is no reason for the range to be
   # anything other than what it is: two dates.
+  # The longest range one chart covers. The x axis has a bucket per interval
+  # step and every history chart replays each issue per bucket, so an
+  # unbounded range let a single request (the charts permission is a read
+  # permission, grantable to anonymous) compute millions of buckets. Three
+  # years of days is far beyond any sprint or release chart.
+  MAX_RANGE_DAYS = 3 * 366
+
   def date_from
-    parse_date(options[:date_from]) || default_date_from
+    from = parse_date(options[:date_from]) || default_date_from
+    [from, date_to - MAX_RANGE_DAYS].max
   end
 
   def date_from=(value)
