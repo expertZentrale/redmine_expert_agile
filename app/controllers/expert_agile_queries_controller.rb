@@ -75,10 +75,12 @@ class ExpertAgileQueriesController < ApplicationController
     @query.build_from_params(params)
     @query.apply_board_params(params)
 
-    if @query.save
+    # The same rule as create: an update must not be the way round it.
+    if save_allowed? && @query.save
       flash[:notice] = l(:notice_successful_update)
       redirect_to board_path(:query_id => @query.id)
     else
+      @query.errors.add(:base, l(:error_expert_agile_board_not_saveable)) unless save_allowed?
       render :action => 'edit', :layout => 'base'
     end
   end
@@ -134,11 +136,19 @@ class ExpertAgileQueriesController < ApplicationController
     permitted = {}
     permitted[:name] = attrs[:name] if attrs.key?(:name)
     permitted[:description] = attrs[:description] if attrs.key?(:description)
-    if attrs.key?(:visibility) &&
-       User.current.allowed_to?(:manage_public_expert_agile_queries, @project, :global => true)
-      permitted[:visibility] = attrs[:visibility]
-    end
+    permitted[:visibility] = attrs[:visibility] if attrs.key?(:visibility) && may_publish?
     permitted
+  end
+
+  # Who may make a saved view visible to others. On a project that needs the
+  # permission there; a global view is listed in every project of the
+  # instance, and core keeps publishing one for administrators. `:global =>
+  # true` used to answer this for a global view, which is true for anyone who
+  # holds the permission in any single project.
+  def may_publish?
+    return User.current.admin? if @project.nil?
+
+    User.current.allowed_to?(:manage_public_expert_agile_queries, @project)
   end
 
   # A private board only needs the "save boards" permission; a public one needs
@@ -147,7 +157,7 @@ class ExpertAgileQueriesController < ApplicationController
     if @query.is_private?
       User.current.allowed_to?(:add_expert_agile_queries, @project, :global => @project.nil?)
     else
-      User.current.allowed_to?(:manage_public_expert_agile_queries, @project, :global => @project.nil?)
+      may_publish?
     end
   end
 
