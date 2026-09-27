@@ -165,8 +165,11 @@ class ExpertAgileSprint < ExpertAgileApplicationRecord
     end
   end
 
+  # An archived project shares nothing, the same rule as
+  # Project#shared_expert_agile_sprints, so the two answers never disagree.
   def shared_with?(other_project)
     return false if other_project.nil?
+    return false if project && project.archived?
 
     shared_projects.where(:id => other_project.id).exists?
   end

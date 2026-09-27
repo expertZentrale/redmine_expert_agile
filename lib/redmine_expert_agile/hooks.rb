@@ -32,6 +32,10 @@ module RedmineExpertAgile
     def helper_issues_show_detail_after_setting(context = {})
       detail = context[:detail]
       return unless detail && detail.prop_key == 'expert_agile_sprint_id'
+      # A notification mail renders the same detail objects for its HTML and
+      # its text part. The second pass would look the already substituted name
+      # up as an id — and "12 Sprint" casts to 12.
+      return if detail.instance_variable_get(:@expert_agile_labelled)
 
       context[:detail].instance_variable_set(:@expert_agile_labelled, true)
       issue = detail.journal && detail.journal.journalized

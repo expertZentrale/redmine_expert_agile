@@ -163,6 +163,18 @@ class ExpertAgileBacklogQueryTest < ActiveSupport::TestCase
     assert_not_includes query.backlog_issues('nothing matches this').map(&:id), issue.id
   end
 
+  # A search for "%" or "_" used to match every issue: they reached LIKE as
+  # wildcards.
+  def test_search_wildcards_are_literal_characters
+    query = query_for('sprint')
+    plain = Issue.generate!(:project_id => @project.id, :subject => 'Plain subject')
+    percent = Issue.generate!(:project_id => @project.id, :subject => 'Done 100% of it')
+
+    assert_not_includes query.backlog_issues('%').map(&:id), plain.id
+    assert_includes query.backlog_issues('%').map(&:id), percent.id
+    assert_not_includes query.backlog_issues('_').map(&:id), plain.id
+  end
+
   # --- Container resolution ---------------------------------------------
 
   def test_container_for_resolves_only_available_containers

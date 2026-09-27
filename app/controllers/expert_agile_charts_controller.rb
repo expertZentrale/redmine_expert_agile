@@ -43,17 +43,27 @@ class ExpertAgileChartsController < ApplicationController
     end
   end
 
+  # Through `visible`, as the board and the backlog resolve theirs: without it
+  # any private or role-restricted chart of another user opened by id, with
+  # its name, filters and date range. `only_charts` pins the STI type, so the
+  # charts permission never resolves a board or a backlog.
+  def visible_charts_query(id)
+    scope = ExpertAgileChartsQuery.only_charts.visible
+    scope = @project ? scope.global_or_on_project(@project) : scope.where(:project_id => nil)
+    scope.find(id)
+  end
+
   def build_query
     @query = if params[:query_id].present?
-               scope = ExpertAgileChartsQuery.where(:project_id => nil)
-               scope = scope.or(ExpertAgileChartsQuery.where(:project_id => @project)) if @project
-               scope.find(params[:query_id])
+               visible_charts_query(params[:query_id])
              else
                ExpertAgileChartsQuery.new(:name => '_', :project => @project)
              end
     @query.project = @project
     apply_chart_params
     @query
+  rescue ActiveRecord::RecordNotFound
+    render_404
   end
 
   def apply_chart_params

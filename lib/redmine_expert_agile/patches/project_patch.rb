@@ -28,7 +28,11 @@ module RedmineExpertAgile
         # Project is an awesome_nested_set with lft/rgt and no root_id column,
         # so "same tree" is the root's nested-set span.
         tree_root = root
-        ExpertAgileSprint.joins(:project).where(
+        # Sprints of archived projects are left out, as core's shared_versions
+        # leaves out their versions: they are neither offered nor accepted.
+        ExpertAgileSprint.joins(:project)
+                         .where.not(:projects => { :status => Project::STATUS_ARCHIVED })
+                         .where(
           "#{table}.project_id = :project_id" \
           " OR #{table}.sharing = :system" \
           " OR (#{table}.sharing = :tree" \

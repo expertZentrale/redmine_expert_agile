@@ -103,6 +103,50 @@ class ExpertAgileQueriesControllerTest < Redmine::ControllerTest
            'a user without the manage permission must not create a public board'
   end
 
+  # A global board is listed in every project of the instance. Holding the
+  # manage permission in one project used to be enough to publish one, because
+  # the check asked `:global => true`; core keeps that for administrators.
+  def test_a_non_admin_cannot_publish_a_global_board
+    assert User.find(2).allowed_to?(:manage_public_expert_agile_queries, @project),
+           'the user may publish boards in their own project'
+
+    # No project_id key at all, as the global save form sends it: an empty one
+    # becomes a blank project filter in Redmine < 7 and fails validation.
+    post :create, :params => board_params(
+      :query => { :name => 'Everywhere', :visibility => Query::VISIBILITY_PUBLIC.to_s }
+    ).except(:project_id)
+
+    created = ExpertAgileQuery.where(:name => 'Everywhere').first
+    assert created.nil? || created.is_private?, 'a global board may only be published by an administrator'
+  end
+
+  def test_an_owner_cannot_publish_their_global_board_by_editing_it
+    board = ExpertAgileQuery.create!(:name => 'Mine', :user => User.find(2), :project => nil,
+                                     :visibility => Query::VISIBILITY_PRIVATE)
+
+    put :update, :params => board_params(
+      :id => board.id,
+      :query => { :name => 'Mine', :visibility => Query::VISIBILITY_PUBLIC.to_s }
+    ).except(:project_id)
+
+    assert board.reload.is_private?
+  end
+
+  def test_an_administrator_can_publish_a_global_board
+    @request.session[:user_id] = 1
+
+    # No project_id key at all, as the global save form sends it: an empty one
+    # becomes a blank project filter in Redmine < 7 and fails validation.
+    post :create, :params => board_params(
+      :query => { :name => 'Everywhere', :visibility => Query::VISIBILITY_PUBLIC.to_s }
+    ).except(:project_id)
+
+    created = ExpertAgileQuery.find_by(:name => 'Everywhere')
+    refusal = css_select('#errorExplanation, .flash.error').map(&:text).join(' ').squish
+    assert created, "the board was not saved (#{response.status}): #{refusal}"
+    assert_not created.is_private?
+  end
+
   # The complaint that prompted this: the edit form could only rename a saved
   # board, because its configuration was written out as hidden fields taken from
   # the stored record. Filters and options now come from the same panel the

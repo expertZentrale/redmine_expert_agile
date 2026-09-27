@@ -259,10 +259,11 @@ class ExpertAgileBacklogsController < ApplicationController
     end
   end
 
+  # As on the board: only a visible neighbour counts.
   def planning_issue(id)
     return nil if id.blank?
 
-    Issue.where(:id => id).first
+    Issue.visible.where(:id => id).first
   end
 
   def planning_payload(target)

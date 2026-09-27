@@ -12,7 +12,8 @@ class ExpertAgileData < ExpertAgileApplicationRecord
 
   validates :issue_id, :presence => true, :uniqueness => true
   validates :story_points,
-            :numericality => { :only_integer => true, :greater_than_or_equal_to => 0, :allow_nil => true }
+            :numericality => { :only_integer => true, :greater_than_or_equal_to => 0,
+                               :less_than => 2**31, :allow_nil => true }
   # Enforced here rather than in each controller, because the issue form, the
   # bulk edit and the issue REST API all write sprint_id through nested
   # attributes and never pass through a controller of this plugin. Without it
