@@ -22,6 +22,13 @@ notes from the section matching the pushed tag.
   shared with it, the set the backlog planner and the agile data endpoint already used. The
   history names a sprint only when the reader could see it anyway, and shows the bare id
   otherwise, which also covers journals written before this fix.
+- **The backlog planner let a user re-plan issues they were not allowed to change.** The planning
+  permission was checked on the project in the URL only, while the moved issue could be any
+  visible one. Planning rights in one project were enough to take issues of any other project out
+  of their sprint or target version. The move also wrote the field directly and accepted anyone
+  who may add notes, bypassing both the edit permission and read-only fields from the workflow.
+  A move now needs the planning permission in the issue's own project and the same right to
+  change the sprint or target version that the issue form requires, read-only fields included.
 - **Moving a card changed the status of issues the user was not allowed to edit.** The board
   accepted any user who may add notes, and checked the target status against the workflow only.
   The workflow also counts roles that may merely add issues, so a role with `add_issues` and
