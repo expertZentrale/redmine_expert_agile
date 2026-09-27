@@ -9,6 +9,33 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Security
+- **The REST agile data endpoint let a user who may only add notes change story points and
+  sprints.** `PUT /issues/:id/expert_agile_data` was exempt from the permission check and gated
+  only on `Issue#editable?`, which is true for anyone who may add notes, and it worked even with
+  the agile module disabled. It now needs *Edit agile board* in the issue's project and the same
+  right to change these fields as the issue form, and it saves through the issue, so a sprint
+  change appears in the history. `GET` now needs *View agile board*.
+- **A saved chart of another user opened by its id.** The charts page looked up `query_id` without
+  checking visibility, so private and role-restricted charts opened with their name, filters and
+  date range. It now resolves them like boards and backlogs do.
+- **Anyone with the permission to manage public views in one project could publish a global board,
+  chart or backlog.** A global view is listed in every project; publishing one is now reserved to
+  administrators, as in core, and editing a view is held to the same rule as creating one.
+- **One chart request could compute millions of daily buckets.** The date range had no bound; it is
+  now capped at three years.
+- **An issue moved to another project kept a sprint the new project cannot use.** It stayed
+  invisible to that sprint's backlog and kept the sprint from being closed. The sprint is now
+  dropped on the move, as core does for the target version, and the history records it.
+- **Sprints of archived projects were still offered and accepted**, as core's shared versions are
+  not.
+- Smaller hardening: move neighbours and the rank fallback consider visible issues only, `%` and `_`
+  in the backlog search are literal, story points beyond the column's range are a validation error
+  instead of a server error, and a sprint name in a notification mail's text part is no longer
+  looked up a second time.
+
 ## [0.5.3] - 2026-09-27
 
 ### Security

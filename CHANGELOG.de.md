@@ -9,6 +9,37 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Sicherheit
+- **Der REST-Endpunkt für Agile-Daten ließ Nutzer, die nur Notizen hinzufügen dürfen, Story Points
+  und Sprints ändern.** `PUT /issues/:id/expert_agile_data` war von der Berechtigungsprüfung
+  ausgenommen und prüfte nur `Issue#editable?`, das schon mit dem Recht zum Hinzufügen von Notizen
+  zutrifft, und funktionierte auch bei abgeschaltetem Agile-Modul. Er verlangt jetzt *Agile-Board
+  bearbeiten* im Projekt des Tickets und dasselbe Recht an diesen Feldern wie das Ticketformular,
+  und er speichert über das Ticket, sodass ein Sprintwechsel in der Historie erscheint. `GET`
+  verlangt jetzt *Agile-Board ansehen*.
+- **Ein gespeichertes Diagramm eines anderen Nutzers ließ sich über seine ID öffnen.** Die
+  Diagrammseite suchte `query_id` ohne Sichtbarkeitsprüfung, private und auf Rollen beschränkte
+  Diagramme öffneten sich mit Name, Filtern und Zeitraum. Sie werden jetzt wie Boards und Backlogs
+  aufgelöst.
+- **Wer in einem Projekt öffentliche Ansichten verwalten durfte, konnte ein globales Board,
+  Diagramm oder Backlog veröffentlichen.** Eine globale Ansicht erscheint in jedem Projekt; das
+  Veröffentlichen ist jetzt wie im Kern Administratoren vorbehalten, und das Bearbeiten einer
+  Ansicht unterliegt derselben Regel wie das Anlegen.
+- **Eine einzige Diagrammanfrage konnte Millionen Tageswerte berechnen.** Der Zeitraum war
+  unbegrenzt; er ist jetzt auf drei Jahre beschränkt.
+- **Ein in ein anderes Projekt verschobenes Ticket behielt einen Sprint, den das neue Projekt nicht
+  verwenden darf.** Es blieb für den Backlog dieses Sprints unsichtbar und verhinderte, dass der
+  Sprint geschlossen werden konnte. Der Sprint wird jetzt beim Verschieben entfernt, wie es der
+  Kern für die Zielversion tut, und die Historie vermerkt das.
+- **Sprints archivierter Projekte wurden weiterhin angeboten und angenommen**, anders als geteilte
+  Versionen im Kern.
+- Kleinere Härtungen: Nachbarkarten eines Zugs und die Rang-Rückfallebene berücksichtigen nur
+  sichtbare Tickets, `%` und `_` in der Backlog-Suche gelten wörtlich, Story Points jenseits des
+  Spaltenbereichs sind ein Validierungsfehler statt eines Serverfehlers, und ein Sprintname im
+  Textteil einer Benachrichtigungsmail wird nicht mehr ein zweites Mal nachgeschlagen.
+
 ## [0.5.3] - 2026-09-27
 
 ### Sicherheit
