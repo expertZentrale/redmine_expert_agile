@@ -23,6 +23,14 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Agile-Data-Endpunkt schon verwendeten. Die Historie nennt einen Sprint nur noch, wenn der Leser
   ihn ohnehin sehen darf, sonst steht dort die bloße ID. Das gilt auch für Journale, die vor
   dieser Korrektur geschrieben wurden.
+- **Der Backlog-Planer ließ Tickets umplanen, die der Nutzer nicht ändern durfte.** Die
+  Planungsberechtigung wurde nur am Projekt aus der URL geprüft, das verschobene Ticket konnte aber
+  jedes sichtbare sein. Planungsrechte in einem Projekt reichten, um Tickets jedes anderen Projekts
+  aus ihrem Sprint oder ihrer Zielversion zu nehmen. Der Zug schrieb das Feld zudem direkt und ließ
+  jeden zu, der Notizen hinzufügen darf, an Bearbeitungsrecht und schreibgeschützten
+  Workflow-Feldern vorbei. Ein Zug braucht jetzt die Planungsberechtigung im Projekt des Tickets und
+  dasselbe Recht, Sprint oder Zielversion zu ändern, das auch das Ticketformular verlangt,
+  schreibgeschützte Felder eingeschlossen.
 
 ## [0.5.2] - 2026-09-24
 
