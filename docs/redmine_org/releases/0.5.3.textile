@@ -2,7 +2,7 @@ h3. redmine_expert_agile 0.5.3 — 2026-09-27
 
 A security release. All five fixes were reported and contributed by "idevchris":https://github.com/idevchris. Upgrading is recommended.
 
-h4. Security
+h4. Fixed
 
 * *Any sprint of any project could be put on an issue, and its name then read from the issue history.* The issue form, bulk edit and the issue REST API accepted any sprint id. An issue can now only be planned into a sprint of its own project or one shared with it. The history names a sprint only if the reader could see it anyway, and this also applies to history written before this fix.
 * *The backlog planner let users re-plan issues they were not allowed to change.* Planning rights in one project were enough to move issues of other projects out of their sprint or version, and adding notes was enough to change the field. A planning move now needs the planning permission in the issue's own project and the same right to change the sprint or target version that the issue form requires, including read-only fields from the workflow.
