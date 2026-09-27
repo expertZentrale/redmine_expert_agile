@@ -60,11 +60,16 @@ module RedmineExpertAgile
       # Story points of this issue plus every descendant, which is what a parent
       # card should show. Returns nil when nothing in the subtree is estimated,
       # so the UI can distinguish "no estimate" from "estimated as zero".
-      def total_story_points
+      #
+      # Only descendants `user` may see are counted, as core does for
+      # total_estimated_hours. A subtask can be private or live in a project
+      # the reader has no access to, and a total that includes it tells them
+      # how much work is hidden there.
+      def total_story_points(user = User.current)
         # SUM over zero rows is NULL, so `pick` distinguishes "nothing in this
         # subtree is estimated" (nil) from "the subtree sums to 0" in a single
         # query. `sum` would flatten both to 0.
-        ExpertAgileData.where(:issue_id => self_and_descendants.select(:id))
+        ExpertAgileData.where(:issue_id => self_and_descendants.visible(user).select(:id))
                        .pick(Arel.sql('SUM(story_points)'))
       end
 

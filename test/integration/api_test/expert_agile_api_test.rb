@@ -164,6 +164,24 @@ class ExpertAgileApiTest < Redmine::IntegrationTest
     assert_equal 'open', body['status']
   end
 
+  # A shared sprint holds issues of other projects. The totals must count only
+  # the ones the caller can see, or they report on projects outside their reach.
+  def test_show_sprint_counts_only_issues_the_caller_can_see
+    sprint = sprint!(:sharing => ExpertAgileSprint::SHARING_SYSTEM)
+    elsewhere = Project.generate!(:is_public => false) # user 2 is no member
+    hidden = Issue.generate!(:project => elsewhere)
+    assert_not hidden.visible?(@user)
+    ExpertAgileData.create!(:issue_id => @issue.id, :sprint_id => sprint.id, :story_points => 3)
+    ExpertAgileData.create!(:issue_id => hidden.id, :sprint_id => sprint.id, :story_points => 40)
+
+    get "/projects/#{@project.id}/expert_agile_sprints/#{sprint.id}.json", :headers => auth
+
+    assert_response :success
+    body = JSON.parse(response.body)['expert_agile_sprint']
+    assert_equal 1, body['issue_count']
+    assert_equal 3, body['story_points']
+  end
+
   def test_create_sprint
     assert_difference 'ExpertAgileSprint.count', 1 do
       post "/projects/#{@project.id}/expert_agile_sprints.json",
