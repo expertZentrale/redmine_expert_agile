@@ -195,7 +195,7 @@ Two worth knowing:
 
 - **Board item limit** (default 500) caps how many issues one board render loads.
 - **Chart item limit** (default 1000) and **chart cache duration** (default 60 minutes) bound the
-  cost of the history-replaying charts.
+  cost of every chart. A chart over more issues than the limit says so instead of drawing.
 
 ## Permissions
 

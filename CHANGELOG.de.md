@@ -9,7 +9,7 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.5.5] - 2026-09-27
 
 ### Sicherheit
 - **Das Einplanen eines Tickets in einen Sprint verlangt überall die Planungsberechtigung.** Der
@@ -24,7 +24,7 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Sprint, in den Tickets anderer Projekte eingeplant sind, lässt sich nicht mehr löschen, so wie
   Redmine das Löschen einer noch verwendeten Version verweigert.
 - **Velocity und Durchlaufzeit luden alle sichtbaren Tickets.** Sie unterliegen jetzt wie die
-  übrigen Diagramme der Obergrenze für Diagramm-Einträge.
+  übrigen Diagramme der Obergrenze für Diagramm-Einträge. (#41)
 
 ## [0.5.4] - 2026-09-27
 
