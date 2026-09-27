@@ -29,6 +29,15 @@ notes from the section matching the pushed tag.
   who may add notes, bypassing both the edit permission and read-only fields from the workflow.
   A move now needs the planning permission in the issue's own project and the same right to
   change the sprint or target version that the issue form requires, read-only fields included.
+- **Moving a card changed the status of issues the user was not allowed to edit.** The board
+  accepted any user who may add notes, and checked the target status against the workflow only.
+  The workflow also counts roles that may merely add issues, so a role with `add_issues` and
+  `add_issue_notes` but no edit permission could close any visible issue by dragging it, which the
+  issue form refuses. A status change on the board now also needs the right to change the status
+  that the issue form requires. With "Assign to me when moving a card" switched on, the claim now respects
+  that right and a read-only assignee from the workflow as well, and it no longer claims a card
+  that was only reordered within its column. Reordering cards within a column is otherwise
+  unchanged.
 
 ## [0.5.2] - 2026-09-24
 

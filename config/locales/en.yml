@@ -124,6 +124,7 @@ en:
   error_expert_agile_issue_not_editable: You are not allowed to edit this issue
   error_expert_agile_version_not_editable: You are not allowed to change the target version of this issue
   error_expert_agile_sprint_not_editable: You are not allowed to change the sprint of this issue
+  error_expert_agile_status_not_editable: You are not allowed to change the status of this issue
   label_expert_agile_swimlane_none: No swimlanes
   label_expert_agile_swimlane_none_value: (none)
   label_expert_agile_board_truncated: Only the first %{count} issues are shown

@@ -31,6 +31,15 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Workflow-Feldern vorbei. Ein Zug braucht jetzt die Planungsberechtigung im Projekt des Tickets und
   dasselbe Recht, Sprint oder Zielversion zu ändern, das auch das Ticketformular verlangt,
   schreibgeschützte Felder eingeschlossen.
+- **Ein Kartenzug änderte den Status von Tickets, die der Nutzer nicht bearbeiten durfte.** Das
+  Board ließ jeden zu, der Notizen hinzufügen darf, und prüfte den Zielstatus nur gegen den
+  Workflow. Der Workflow berücksichtigt aber auch Rollen, die nur Tickets anlegen dürfen. Eine
+  Rolle mit `add_issues` und `add_issue_notes` ohne Bearbeitungsrecht konnte so jedes sichtbare
+  Ticket per Ziehen schließen, was das Ticketformular verweigert. Ein Statuswechsel auf dem Board
+  braucht jetzt zusätzlich dasselbe Recht wie im Ticketformular. Mit eingeschalteter Einstellung
+  „Beim Verschieben mir zuweisen“ beachtet die Zuweisung dieses Recht ebenso wie einen im Workflow
+  schreibgeschützten Bearbeiter und weist eine Karte nicht mehr zu, die nur innerhalb ihrer Spalte
+  umsortiert wurde. Das Umsortieren innerhalb einer Spalte bleibt sonst unverändert.
 
 ## [0.5.2] - 2026-09-24
 
