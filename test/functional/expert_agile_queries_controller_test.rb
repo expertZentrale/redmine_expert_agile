@@ -110,10 +110,11 @@ class ExpertAgileQueriesControllerTest < Redmine::ControllerTest
     assert User.find(2).allowed_to?(:manage_public_expert_agile_queries, @project),
            'the user may publish boards in their own project'
 
+    # No project_id key at all, as the global save form sends it: an empty one
+    # becomes a blank project filter in Redmine < 7 and fails validation.
     post :create, :params => board_params(
-      :project_id => nil,
       :query => { :name => 'Everywhere', :visibility => Query::VISIBILITY_PUBLIC.to_s }
-    )
+    ).except(:project_id)
 
     created = ExpertAgileQuery.where(:name => 'Everywhere').first
     assert created.nil? || created.is_private?, 'a global board may only be published by an administrator'
@@ -124,9 +125,9 @@ class ExpertAgileQueriesControllerTest < Redmine::ControllerTest
                                      :visibility => Query::VISIBILITY_PRIVATE)
 
     put :update, :params => board_params(
-      :id => board.id, :project_id => nil,
+      :id => board.id,
       :query => { :name => 'Mine', :visibility => Query::VISIBILITY_PUBLIC.to_s }
-    )
+    ).except(:project_id)
 
     assert board.reload.is_private?
   end
@@ -134,10 +135,11 @@ class ExpertAgileQueriesControllerTest < Redmine::ControllerTest
   def test_an_administrator_can_publish_a_global_board
     @request.session[:user_id] = 1
 
+    # No project_id key at all, as the global save form sends it: an empty one
+    # becomes a blank project filter in Redmine < 7 and fails validation.
     post :create, :params => board_params(
-      :project_id => nil,
       :query => { :name => 'Everywhere', :visibility => Query::VISIBILITY_PUBLIC.to_s }
-    )
+    ).except(:project_id)
 
     created = ExpertAgileQuery.find_by(:name => 'Everywhere')
     refusal = css_select('#errorExplanation, .flash.error').map(&:text).join(' ').squish
