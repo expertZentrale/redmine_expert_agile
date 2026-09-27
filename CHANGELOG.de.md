@@ -9,7 +9,7 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.5.4] - 2026-09-27
 
 ### Sicherheit
 - **Der REST-Endpunkt für Agile-Daten ließ Nutzer, die nur Notizen hinzufügen dürfen, Story Points
@@ -38,7 +38,7 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 - Kleinere Härtungen: Nachbarkarten eines Zugs und die Rang-Rückfallebene berücksichtigen nur
   sichtbare Tickets, `%` und `_` in der Backlog-Suche gelten wörtlich, Story Points jenseits des
   Spaltenbereichs sind ein Validierungsfehler statt eines Serverfehlers, und ein Sprintname im
-  Textteil einer Benachrichtigungsmail wird nicht mehr ein zweites Mal nachgeschlagen.
+  Textteil einer Benachrichtigungsmail wird nicht mehr ein zweites Mal nachgeschlagen. (#39)
 
 ## [0.5.3] - 2026-09-27
 
