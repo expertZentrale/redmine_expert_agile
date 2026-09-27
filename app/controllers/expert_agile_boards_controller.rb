@@ -393,13 +393,17 @@ class ExpertAgileBoardsController < ApplicationController
           .where.not(:id => @issue.id)
           .sorted_by_rank
   rescue StandardError
-    Issue.where(:status_id => status_id, :project_id => @issue.project_id).sorted_by_rank
+    # Visible issues only: a rebalance writes the rank of every sibling.
+    Issue.visible.where(:status_id => status_id, :project_id => @issue.project_id).sorted_by_rank
   end
 
+  # A neighbour the client names. Only a visible one counts: the rank is
+  # computed from its position, which must not be taken from an issue the user
+  # cannot see.
   def board_issue(id)
     return nil if id.blank?
 
-    Issue.where(:id => id).first
+    Issue.visible.where(:id => id).first
   end
 
   # The moved card plus fresh column aggregates, so the board can swap one card

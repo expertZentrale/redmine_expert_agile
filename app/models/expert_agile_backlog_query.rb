@@ -105,7 +105,9 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
     if term.to_s =~ /\A#?(\d+)\z/
       scope.where(:id => Regexp.last_match(1))
     else
-      scope.where("LOWER(#{Issue.table_name}.subject) LIKE ?", "%#{term.to_s.downcase}%")
+      # % and _ in the term are literal characters, not wildcards.
+      pattern = "%#{Issue.sanitize_sql_like(term.to_s.downcase)}%"
+      scope.where("LOWER(#{Issue.table_name}.subject) LIKE ?", pattern)
     end
   end
 

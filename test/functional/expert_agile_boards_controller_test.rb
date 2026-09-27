@@ -767,6 +767,28 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_equal project_count, reported_count(@issue.status_id)
   end
 
+  # The rank is computed from the neighbours the client names. An issue the
+  # user cannot see must not be one of them.
+  def test_a_neighbour_the_user_cannot_see_is_ignored
+    hidden = 2.times.map do |n|
+      Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id,
+                      :is_private => true, :author_id => 1, :assigned_to_id => nil,
+                      :subject => "Hidden #{n}")
+    end
+    @role.update!(:issues_visibility => 'default')
+    @role.remove_permission!(:view_private_issues)
+    hidden.each { |issue| assert_not issue.visible?(User.find(2)), 'the setup must hide the neighbours' }
+    ExpertAgileData.create!(:issue_id => hidden[0].id, :position => 1000)
+    ExpertAgileData.create!(:issue_id => hidden[1].id, :position => 1002)
+
+    put :update, :params => { :id => @issue.id, :prev_id => hidden[0].id,
+                              :next_id => hidden[1].id }, :format => :js
+
+    assert_response :success
+    assert_not_equal BigDecimal('1001'), @issue.reload.expert_agile_data.position,
+                     'the rank must not be the midpoint of two issues the user cannot see'
+  end
+
   def test_update_reorders_within_a_column_without_changing_status
     others = 2.times.map do
       Issue.generate!(:project_id => @project.id, :status_id => @issue.status_id)
