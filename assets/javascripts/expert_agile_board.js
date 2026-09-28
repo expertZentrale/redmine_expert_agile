@@ -18,6 +18,9 @@
    * it stood in front of. Kept so a move the server refuses can be put back
    * exactly there. */
   var origin = null;
+  /* Status columns the dragged card may be dropped into, read from the card
+   * at dragstart; null when the card carries no such list. */
+  var allowedTargets = null;
 
   function readConfig() {
     var island = document.getElementById('ea-board-data');
@@ -254,13 +257,123 @@
       dragged = card;
       var next = card.nextElementSibling;
       origin = { cardId: card.id, parent: card.parentNode, nextId: next ? next.id : null };
+      allowedTargets = allowedStatusIds(card);
       card.classList.add('ea-dragging');
+      markDropTargets(card);
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', card.getAttribute('data-issue-id'));
     });
     card.addEventListener('dragend', function () {
       card.classList.remove('ea-dragging');
+      clearDropTargets();
+      /* No drop took it: the drag was cancelled with Escape or let go
+       * outside the board. dragover has meanwhile carried the card through
+       * every cell it crossed, so without this it stayed wherever the pointer
+       * last was — drawn in a column it never moved to, no request sent,
+       * nothing said, and back in its old place on the next reload. */
+      if (dragged === card) {
+        restore(origin);
+        dragged = null;
+        origin = null;
+        allowedTargets = null;
+      }
     });
+  }
+
+  /* Where the workflow lets the card go: ids of the status columns it may
+   * be dropped into, its own included. The server works this out per card
+   * with the calls it enforces moves with. null means the card carries no
+   * such list — the backlog planner — and nothing is gated or marked. */
+  function allowedStatusIds(card) {
+    var value = card.getAttribute('data-allowed-status-ids');
+    if (value === null) { return null; }
+    return value === '' ? [] : value.split(',');
+  }
+
+  function dropAllowed(cell) {
+    if (!allowedTargets) { return true; }
+    return allowedTargets.indexOf(cell.getAttribute('data-column-id')) !== -1;
+  }
+
+  function boardRoot() {
+    return document.getElementById('ea-board');
+  }
+
+  /* Marks every column allowed or blocked for the card just picked up, cells
+   * and headers alike, so a move the workflow forbids is visibly impossible
+   * before the drop instead of being refused after it. Per column, identical
+   * in every swimlane: only the status decides. */
+  function markDropTargets(card) {
+    var root = boardRoot();
+    if (!root || !allowedTargets) { return; }
+    var own = card.getAttribute('data-status-id');
+    root.classList.add('ea-drag-active');
+    var targets = root.querySelectorAll('.ea-cell[data-column-id], .ea-column-header[data-column-id]');
+    Array.prototype.forEach.call(targets, function (node) {
+      var id = node.getAttribute('data-column-id');
+      var allowed = allowedTargets.indexOf(id) !== -1;
+      node.classList.add(allowed ? 'ea-drop-allowed' : 'ea-drop-blocked');
+      if (id === own) { node.classList.add('ea-drop-origin'); }
+      if (node.classList.contains('ea-column-header')) {
+        node.setAttribute('data-ea-title', node.getAttribute('title') || '');
+        node.setAttribute('title', allowed ? config.labels.dropAllowed : config.labels.dropBlocked);
+      }
+    });
+  }
+
+  function clearDropTargets() {
+    var root = boardRoot();
+    if (!root) { return; }
+    root.classList.remove('ea-drag-active');
+    var marked = root.querySelectorAll('.ea-drop-allowed, .ea-drop-blocked');
+    Array.prototype.forEach.call(marked, function (node) {
+      node.classList.remove('ea-drop-allowed', 'ea-drop-blocked', 'ea-drop-origin');
+      if (node.hasAttribute('data-ea-title')) {
+        var title = node.getAttribute('data-ea-title');
+        if (title) { node.setAttribute('title', title); } else { node.removeAttribute('title'); }
+        node.removeAttribute('data-ea-title');
+      }
+    });
+  }
+
+  function columnName(statusId) {
+    var match = (config.columns || []).filter(function (column) {
+      return String(column.id) === String(statusId);
+    })[0];
+    return match ? match.name : String(statusId);
+  }
+
+  function fill(template, values) {
+    return String(template || '').replace(/%\{(\w+)\}/g, function (all, key) {
+      return values.hasOwnProperty(key) ? values[key] : all;
+    });
+  }
+
+  /* A drop onto a blocked column, should one get through anyway. Said in the
+   * words the server would have used, without asking it: the answer is
+   * already known. */
+  function refuseBlockedDrop(card, cell, from, allowed) {
+    var own = card.getAttribute('data-status-id');
+    var tracker = card.querySelector('.ea-card-tracker');
+    var open = (allowed || []).filter(function (id) { return id !== own; }).map(columnName);
+    var hint = open.length ?
+      fill(config.labels.transitionsAllowed, { from: columnName(own), statuses: open.join(', ') }) :
+      fill(config.labels.transitionsNone, { from: columnName(own) });
+    revertMove({
+      error: fill(config.labels.transitionBlocked, {
+        tracker: tracker ? tracker.textContent : '',
+        from: columnName(own),
+        to: columnName(cell.getAttribute('data-column-id'))
+      }),
+      hint: hint
+    }, from);
+  }
+
+  /* Whether the card still stands where it was picked up. */
+  function atOrigin(card) {
+    if (!origin) { return true; }
+    var next = card.nextElementSibling;
+    return card.parentNode === origin.parent && (next ? next.id : null) === origin.nextId;
   }
 
   /* Insert before whichever card the pointer is above, so the drop position is
@@ -278,6 +391,15 @@
     var container = cell.querySelector('.ea-cell-issues') || cell;
     cell.addEventListener('dragover', function (event) {
       if (!dragged) { return; }
+      /* Not accepting the dragover is what makes the browser show "no drop"
+       * and never fire drop here. The card goes back where it came from
+       * rather than hanging in the last cell it crossed, so what is drawn is
+       * always a place it may actually go. */
+      if (!dropAllowed(cell)) {
+        event.dataTransfer.dropEffect = 'none';
+        if (!atOrigin(dragged)) { restore(origin); }
+        return;
+      }
       event.preventDefault();
       event.dataTransfer.dropEffect = 'move';
       cell.classList.add('ea-cell-hover');
@@ -297,8 +419,16 @@
       if (!dragged) { return; }
       var card = dragged;
       var from = origin;
+      var allowed = allowedTargets;
+      var permitted = dropAllowed(cell);
       dragged = null;
       origin = null;
+      allowedTargets = null;
+      clearDropTargets();
+      if (!permitted) {
+        refuseBlockedDrop(card, cell, from, allowed);
+        return;
+      }
       submitMove(card, cell, from);
     });
   }

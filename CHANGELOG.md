@@ -11,8 +11,21 @@ notes from the section matching the pushed tag.
 
 ## [Unreleased]
 
+### Added
+
+- **The board shows where a card may go before it is dropped.** Picking a card up marks every
+  column allowed (green) or blocked (striped) for that card, from the same workflow check the
+  server enforces moves with: tracker, status, the user's roles, author- and assignee-only
+  transitions, open subtasks and blocking issues. A blocked column does not accept the drop.
+
 ### Fixed
 
+- **A cancelled drag left the card in the wrong column.** Pressing Escape or letting go outside
+  the board left the card wherever the pointer last was, with no request sent, until the next
+  reload. The card now goes back to where it was picked up.
+- **A status change another plugin undid was reported as saved.** A move whose save passed but
+  whose status did not reach the database answered with success, and the card jumped back on the
+  next reload. The move is now refused with a message naming both statuses.
 - **Swimlanes are offered for record fields only.** Grouping a board by % done, a date (start,
   due, created, updated, closed) or the private flag answered with HTTP 500. None of those is a
   lane a team works in or a value a card should be dragged into, so they are no longer offered;

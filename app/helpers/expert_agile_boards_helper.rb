@@ -145,6 +145,20 @@ module ExpertAgileBoardsHelper
     end
   end
 
+  # Status columns the card may be dropped into, as "3,5,7" for the card's
+  # data attribute, or nil for a card the board does not offer for dragging.
+  # See RedmineExpertAgile::MoveTargets. On the board page every card is asked,
+  # so everything they read is loaded once for the whole board; a move answer
+  # renders only the moved card.
+  def expert_agile_allowed_status_ids(issue, query)
+    return nil unless query && expert_agile_card_movable?(issue)
+
+    @expert_agile_move_targets ||=
+      RedmineExpertAgile::MoveTargets.new(User.current, query.board_columns.map(&:id))
+                                     .preload(query.board_issues_loaded? ? query.board_issues : [issue])
+    @expert_agile_move_targets.status_ids_for(issue).join(',')
+  end
+
   # Options for the board's sprint selector: every issue, the running sprint,
   # then each sprint the project may plan into with its status. A selected
   # sprint that no longer resolves stays listed, so the select does not quietly
@@ -260,7 +274,17 @@ module ExpertAgileBoardsHelper
         :sessionExpired => l(:error_expert_agile_session_expired),
         # For the one failure that is not a refusal: the server saved the move
         # and the board could not show it.
-        :saveNotShown => l(:error_expert_agile_move_saved_but_not_shown)
+        :saveNotShown => l(:error_expert_agile_move_saved_but_not_shown),
+        # Titles of the column markers shown while a card is being dragged.
+        :dropAllowed => l(:text_expert_agile_drop_allowed),
+        :dropBlocked => l(:text_expert_agile_drop_blocked),
+        # The server's own refusal wording with its placeholders left in, for
+        # a drop onto a blocked column the board refuses without asking.
+        :transitionBlocked => l(:error_expert_agile_status_transition_not_allowed,
+                                :tracker => '%{tracker}', :from => '%{from}', :to => '%{to}'),
+        :transitionsAllowed => l(:text_expert_agile_transitions_allowed,
+                                 :from => '%{from}', :statuses => '%{statuses}'),
+        :transitionsNone => l(:text_expert_agile_transitions_none, :from => '%{from}')
       }
     }.to_json
   end

@@ -11,8 +11,23 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **Das Board zeigt vor dem Ablegen, wohin eine Karte darf.** Beim Aufnehmen einer Karte wird
+  jede Spalte fuer diese Karte als erlaubt (gruen) oder gesperrt (schraffiert) markiert — aus
+  derselben Workflow-Pruefung, mit der der Server Zuege durchsetzt: Tracker, Status, Rollen des
+  Benutzers, Uebergaenge nur fuer Autor oder Bearbeiter, offene Unteraufgaben und blockierende
+  Tickets. Eine gesperrte Spalte nimmt die Karte nicht an.
+
 ### Behoben
 
+- **Ein abgebrochenes Ziehen liess die Karte in der falschen Spalte stehen.** Escape oder Loslassen
+  ausserhalb des Boards liess die Karte dort, wo der Zeiger zuletzt war — ohne Anfrage, bis zum
+  naechsten Neuladen. Die Karte kehrt jetzt an ihren Ausgangsplatz zurueck.
+- **Ein Statuswechsel, den ein anderes Plugin rueckgaengig machte, galt als gespeichert.** Ein Zug,
+  dessen Speichern gelang, dessen Status aber nicht in der Datenbank ankam, meldete Erfolg, und die
+  Karte sprang beim naechsten Neuladen zurueck. Der Zug wird jetzt mit einer Meldung abgelehnt, die
+  beide Status nennt.
 - **Swimlanes werden nur noch fuer Datensatz-Felder angeboten.** Ein Board nach % erledigt, einem
   Datum (Beginn, Abgabe, Anlage, Aenderung, Abschluss) oder dem Privat-Merkmal zu gruppieren
   lieferte HTTP 500. Keines davon ist eine Bahn, in der ein Team arbeitet, oder ein Wert, auf den
