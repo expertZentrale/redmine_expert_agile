@@ -62,6 +62,14 @@ Columns are issue statuses and cards are dragged between them. Statuses sharing 
 `Dev: Review` and `Dev: Test` — are merged under one header, and a column over its WIP limit
 flags itself.
 
+Picking a card up marks every column at once: green where the workflow lets that card go,
+striped where it does not. The answer is per card — tracker, current status, your roles, whether
+you are its author or assignee, open subtasks and blocking issues all count — and it is the same
+check the server enforces the move with, so a column marked allowed is never refused for workflow
+reasons. A blocked column does not accept the drop at all, and a drag that is cancelled puts the
+card back where it was. What the workflow cannot know in advance, such as a field it requires in
+the new status, is still refused after the drop, with the reason.
+
 ![Agile board with five status columns: To do, In Progress, a merged Dev header spanning the
 Review and Test sub-columns, and Done. Each column header carries its card count and WIP limit,
 Review is highlighted for holding five cards against a limit of four, and the cards show issue

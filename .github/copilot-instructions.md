@@ -100,3 +100,10 @@ of the release commit:
   `Rails.cache`d on a scope fingerprint. Chart.js and the Coloris colour picker are vendored
   under `assets/`, unmodified (the Coloris CSS only gains a licence header).
 - Board update enforces workflow via `issue.new_statuses_allowed_to`. WIP limits are advisory.
+- After saving a move the board update re-reads the status from the database and refuses the move
+  if a callback put the old one back; a 200 must mean the card stays where it was dropped.
+- The drop preview (`RedmineExpertAgile::MoveTargets` -> `data-allowed-status-ids` on each card) uses
+  the same calls the update enforces with (`editable?`, `safe_attribute?('status_id')`,
+  `new_statuses_allowed_to`), memoised per project/tracker/status/author/assignee/closable/reopenable.
+  Never reimplement workflow rules client-side; the server stays authoritative. Swimlane drops are
+  not covered by it (issue #37).

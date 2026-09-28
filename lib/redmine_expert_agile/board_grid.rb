@@ -22,6 +22,12 @@ module RedmineExpertAgile
       end
     end
 
+    # Whether the board's issues are already in memory. Lets a caller that
+    # needs one card — a move answer — avoid loading the whole board for it.
+    def board_issues_loaded?
+      !@board_issues.nil?
+    end
+
     # Whether the board hit its item cap, so the view can say so instead of
     # silently showing a partial board.
     def truncated?

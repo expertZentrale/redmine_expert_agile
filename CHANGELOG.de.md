@@ -9,6 +9,26 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Hinzugefuegt
+
+- **Das Board zeigt vor dem Ablegen, wohin eine Karte darf.** Beim Aufnehmen einer Karte wird
+  jede Spalte fuer diese Karte als erlaubt (gruen) oder gesperrt (schraffiert) markiert — aus
+  derselben Workflow-Pruefung, mit der der Server Zuege durchsetzt: Tracker, Status, Rollen des
+  Benutzers, Uebergaenge nur fuer Autor oder Bearbeiter, offene Unteraufgaben und blockierende
+  Tickets. Eine gesperrte Spalte nimmt die Karte nicht an.
+
+### Behoben
+
+- **Ein abgebrochenes Ziehen liess die Karte in der falschen Spalte stehen.** Escape oder Loslassen
+  ausserhalb des Boards liess die Karte dort, wo der Zeiger zuletzt war — ohne Anfrage, bis zum
+  naechsten Neuladen. Die Karte kehrt jetzt an ihren Ausgangsplatz zurueck.
+- **Ein Statuswechsel, den ein anderes Plugin rueckgaengig machte, galt als gespeichert.** Ein Zug,
+  dessen Speichern gelang, dessen Status aber nicht in der Datenbank ankam, meldete Erfolg, und die
+  Karte sprang beim naechsten Neuladen zurueck. Der Zug wird jetzt mit einer Meldung abgelehnt, die
+  beide Status nennt.
+
 ## [0.5.5] - 2026-09-27
 
 ### Sicherheit
