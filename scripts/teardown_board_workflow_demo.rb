@@ -69,24 +69,41 @@ status_ids = (backup['status_ids'] || {}).values
 role_ids = (backup['role_ids'] || {}).values
 rule_ids = Array(backup['workflow_rule_ids'])
 
-# Trackers, statuses, roles and workflow rules are one set: a tracker kept
-# without its statuses and roles has no workflow left. So if an issue outside
-# the demo projects still uses a demo tracker or status, none of them is
-# touched; the backup row stays, and the teardown can be run again once
-# those issues are moved or deleted.
-# The same goes for workflow rules the seed did not write: destroying a
-# tracker or status deletes every rule on it, so a rule someone added that
-# uses a demo tracker or status would go too.
-outside = Issue.where(:tracker_id => tracker_ids).or(Issue.where(:status_id => status_ids)).pluck(:id)
-foreign_rules = WorkflowRule.where(:tracker_id => tracker_ids)
-                            .or(WorkflowRule.where(:old_status_id => status_ids))
-                            .or(WorkflowRule.where(:new_status_id => status_ids))
-                            .where.not(:id => rule_ids).pluck(:id)
-if outside.any? || foreign_rules.any?
-  say "WARNING: issues outside the demo projects use demo trackers or statuses: #{outside.inspect}" if outside.any?
-  say "WARNING: workflow rules this seed did not write use demo trackers or statuses: #{foreign_rules.inspect}" if foreign_rules.any?
+# The global rows are removed all together or not at all. Each of them can
+# have been put to use after the seed ran — and destroying it would take that
+# use with it: a tracker's rules and project settings, a role's rules, a
+# group's assignments, a user's memberships and authorship. The demo projects
+# are gone by now, so every reference still found is somebody else's. If
+# there is any, nothing global is touched and the backup row stays, so the
+# teardown can be run again once those references are removed.
+user_ids = Array(backup['user_ids'])
+group_ids = Array(backup['group_id'])
+principal_ids = user_ids + group_ids
+outside = {
+  'issues using a demo tracker or status' =>
+    Issue.where(:tracker_id => tracker_ids).or(Issue.where(:status_id => status_ids)).pluck(:id),
+  'workflow rules the seed did not write' =>
+    WorkflowRule.where(:tracker_id => tracker_ids)
+                .or(WorkflowRule.where(:old_status_id => status_ids))
+                .or(WorkflowRule.where(:new_status_id => status_ids))
+                .or(WorkflowRule.where(:role_id => role_ids))
+                .where.not(:id => rule_ids).pluck(:id),
+  'projects a demo tracker is enabled in' =>
+    Project.joins(:trackers).where(:trackers => { :id => tracker_ids }).distinct.pluck(:identifier),
+  'memberships of demo roles, users or the group' =>
+    Member.joins(:member_roles).where(:member_roles => { :role_id => role_ids }).distinct.pluck(:id) |
+      Member.where(:user_id => principal_ids).pluck(:id),
+  'issues written by or assigned to a demo account or the group' =>
+    Issue.where(:author_id => user_ids).or(Issue.where(:assigned_to_id => principal_ids)).pluck(:id),
+  'journals written by a demo account' => Journal.where(:user_id => user_ids).pluck(:id),
+  'group members the seed did not add' =>
+    User.where(:id => Group.where(:id => group_ids).flat_map(&:user_ids) - user_ids).pluck(:login)
+}.reject { |_, found| found.empty? }
+
+if outside.any?
+  outside.each { |what, found| say "WARNING: #{what}: #{found.first(20).inspect}#{found.size > 20 ? ' …' : ''}" }
   say 'global rows (trackers, statuses, roles, workflow rules, users, group, settings) left untouched; ' \
-      'remove those and run the teardown again'
+      'remove those references and run the teardown again'
   exit
 end
 
@@ -94,31 +111,9 @@ say "workflow rules: #{WorkflowRule.where(:id => rule_ids).delete_all}"
 Tracker.where(:id => tracker_ids).each(&:destroy)
 IssueStatus.where(:id => status_ids).each(&:destroy)
 say "trackers and statuses removed"
-
-# Destroying a role deletes every workflow rule it has, and destroying a group
-# unassigns every issue assigned to it and drops its memberships. Both are kept
-# if they are used anywhere the seed did not put them; the demo projects, with
-# their issues and memberships, are gone by now.
-Role.where(:id => role_ids).each do |role|
-  foreign = WorkflowRule.where(:role_id => role.id).where.not(:id => rule_ids).count
-  if role.members.any? || foreign.positive?
-    say "WARNING: role #{role.name} kept: #{role.members.count} memberships, #{foreign} workflow rules " \
-        'the seed did not write'
-  else
-    role.destroy
-  end
-end
-
-Group.where(:id => backup['group_id']).each do |group|
-  assigned = Issue.where(:assigned_to_id => group.id).count
-  if assigned.positive? || group.memberships.any?
-    say "WARNING: group #{group.name} kept: assigned to #{assigned} issues, " \
-        "member of #{group.memberships.count} projects"
-  else
-    group.destroy
-  end
-end
-User.where(:id => Array(backup['user_ids'])).each(&:destroy)
+Role.where(:id => role_ids).each(&:destroy)
+Group.where(:id => group_ids).each(&:destroy)
+User.where(:id => user_ids).each(&:destroy)
 say "roles, group and users removed"
 
 (backup['settings'] || {}).each do |name, value|

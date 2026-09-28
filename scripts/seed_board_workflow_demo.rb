@@ -190,6 +190,13 @@ if group.nil?
 
   group = Group.new(:lastname => GROUP_NAME)
 end
+# Reusing the group resets its members; somebody added by hand since the last
+# run would be dropped without a word, so that stops the seed instead.
+strangers = group.users.reject { |user| Array(backup['user_ids']).include?(user.id) }
+if strangers.any?
+  abort "refusing to reset the group #{GROUP_NAME.inspect}: it has members this script did not add " \
+        "(#{strangers.map(&:login).join(', ')}). Remove them first."
+end
 group.users = GROUP_MEMBERS.map { |login| people[login] }
 group.save!
 backup['group_id'] = group.id
