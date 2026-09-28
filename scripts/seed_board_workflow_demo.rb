@@ -215,6 +215,9 @@ STATUSES.each do |key, (name, closed)|
     status = IssueStatus.create!(:name => name, :is_closed => closed)
   end
   status_ids[key] = status.id
+  # Recorded as soon as it exists: a later abort must not strand it.
+  backup['status_ids'] = status_ids
+  save_backup!(backup)
 end
 # Board columns follow Redmine's status order: keep workflow order, at the end.
 base_position = IssueStatus.where.not(:id => status_ids.values).maximum(:position).to_i
@@ -233,6 +236,9 @@ TRACKERS.each do |key, name|
     tracker = Tracker.create!(:name => name, :default_status_id => statuses['triage'].id)
   end
   tracker_ids[key] = tracker.id
+  # Recorded as soon as it exists: a later abort must not strand it.
+  backup['tracker_ids'] = tracker_ids
+  save_backup!(backup)
 end
 trackers = tracker_ids.transform_values { |id| Tracker.find(id) }
 
@@ -250,6 +256,9 @@ ROLES.each do |key, (name, permissions)|
   role.issues_visibility = 'all'
   role.save!
   role_ids[key] = role.id
+  # Recorded as soon as it exists: a later abort must not strand it.
+  backup['role_ids'] = role_ids
+  save_backup!(backup)
 end
 roles = role_ids.transform_values { |id| Role.find(id) }
 
