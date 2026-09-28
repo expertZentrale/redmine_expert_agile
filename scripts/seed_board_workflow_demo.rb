@@ -142,18 +142,26 @@ end
 
 password = ENV['DEMO_PASSWORD'].presence || SecureRandom.alphanumeric(20)
 
-# A pre-existing account is only reused when its mail proves it is ours: this
-# script overwrites passwords and the admin flag.
-def demo_account!(login, mail)
+# Read first: it is the only proof of what an earlier run created. Anything
+# with a demo name that is not recorded here belongs to someone else.
+backup = load_backup
+backup ||= { 'settings' => GLOBAL_SETTING_NAMES.index_with { |name| raw_setting(name) } }
+
+# This script overwrites passwords and the admin flag, and the teardown
+# deletes the accounts, so a pre-existing account is reused only when an
+# earlier run of this script created it. A matching login and mail prove
+# nothing: both are predictable.
+def demo_account!(login, mail, known_ids)
   existing = User.find_by(:login => login)
   return User.new(:login => login, :mail => mail) if existing.nil?
-  return existing if existing.mail == mail
+  return existing if known_ids.include?(existing.id)
 
-  abort "refusing to reuse the account '#{login}': it exists with mail #{existing.mail}, not #{mail}."
+  abort "refusing to reuse the account '#{login}' (##{existing.id}): it was not created by this " \
+        'script. Rename or remove that account first.'
 end
 
-def demo_user!(login, firstname, lastname, password, admin: false)
-  user = demo_account!(login, "#{login}@example.com")
+def demo_user!(login, firstname, lastname, password, backup, admin: false)
+  user = demo_account!(login, "#{login}@example.com", Array(backup['user_ids']))
   user.firstname = firstname
   user.lastname = lastname
   user.language = 'en'
@@ -163,18 +171,18 @@ def demo_user!(login, firstname, lastname, password, admin: false)
   user.password = password
   user.password_confirmation = password
   user.save!
+  # Recorded at once: a later account refused below must not leave this one
+  # behind as an account no run can prove it created.
+  backup['user_ids'] = Array(backup['user_ids']) | [user.id]
+  save_backup!(backup)
   user
 end
 
-admin = demo_user!(ADMIN_LOGIN, 'Workflow', 'Admin', password, :admin => true)
+admin = demo_user!(ADMIN_LOGIN, 'Workflow', 'Admin', password, backup, :admin => true)
 User.current = admin
 people = PEOPLE.to_h do |login, (firstname, lastname, _role)|
-  [login, demo_user!(login, firstname, lastname, password)]
+  [login, demo_user!(login, firstname, lastname, password, backup)]
 end
-
-backup = load_backup
-backup ||= { 'settings' => GLOBAL_SETTING_NAMES.index_with { |name| raw_setting(name) } }
-backup['user_ids'] = ([admin] + people.values).map(&:id)
 
 group = backup['group_id'] && Group.find_by(:id => backup['group_id'])
 if group.nil?
@@ -185,6 +193,7 @@ end
 group.users = GROUP_MEMBERS.map { |login| people[login] }
 group.save!
 backup['group_id'] = group.id
+save_backup!(backup)
 say "users #{([admin] + people.values).map(&:login).join(', ')}, group ##{group.id} #{GROUP_NAME}"
 
 # --- global rows: statuses, trackers, roles ----------------------------------------
@@ -247,7 +256,7 @@ save_backup!(backup)
 # Rebuilt from scratch on every run. Only rows for the demo roles exist on the
 # demo trackers, so nothing else can widen them.
 
-WorkflowRule.where(:tracker_id => tracker_ids.values).delete_all
+WorkflowRule.where(:id => Array(backup['workflow_rule_ids'])).delete_all
 
 LINEAR = [%w[triage ready], %w[ready doing], %w[doing review], %w[review doing], %w[review qa],
           %w[qa doing], %w[qa accepted]].freeze
@@ -295,12 +304,22 @@ permissions << { :type => 'WorkflowPermission', :role_id => roles['developer'].i
                  :tracker_id => trackers['feature'].id, :old_status_id => statuses['accepted'].id,
                  :field_name => 'due_date', :rule => 'required' }
 WorkflowPermission.insert_all(permissions)
+# The demo roles and trackers are this script's own, so their rows are exactly
+# what was just inserted. Recorded, so the teardown deletes these and nothing else.
+backup['workflow_rule_ids'] = WorkflowRule.where(:tracker_id => tracker_ids.values,
+                                                 :role_id => role_ids.values).pluck(:id)
+save_backup!(backup)
 say "#{transitions.size} workflow transitions, #{permissions.size} field rules"
 
 # --- projects ------------------------------------------------------------------------
 
-def demo_project!(ident, name, parent, modules)
+# Same rule as for accounts: a project with a demo identifier is only rebuilt
+# when this script created it — the rebuild deletes its issues.
+def demo_project!(ident, name, parent, modules, backup)
   project = Project.find_by(:identifier => ident)
+  if project && !Array(backup['project_ids']).include?(project.id)
+    abort "refusing to rebuild the project '#{ident}' (##{project.id}): it was not created by this script."
+  end
   project ||= Project.new(:identifier => ident)
   project.name = name
   project.is_public = false
@@ -311,13 +330,15 @@ def demo_project!(ident, name, parent, modules)
   project.set_parent!(parent) if parent && project.parent_id != parent.id
   project.enabled_module_names = modules
   project.save!
+  backup['project_ids'] = (Array(backup['project_ids']) | [project.id])
+  save_backup!(backup)
   project
 end
 
 agile_modules = %w[issue_tracking time_tracking expert_agile expert_agile_backlog]
-parent = demo_project!(PARENT_IDENT, 'Workflow board', nil, agile_modules)
-sub = demo_project!(SUB_IDENT, 'Workflow board – sub', parent, agile_modules)
-noagile = demo_project!(NOAGILE_IDENT, 'Workflow board – no agile', parent, %w[issue_tracking])
+parent = demo_project!(PARENT_IDENT, 'Workflow board', nil, agile_modules, backup)
+sub = demo_project!(SUB_IDENT, 'Workflow board – sub', parent, agile_modules, backup)
+noagile = demo_project!(NOAGILE_IDENT, 'Workflow board – no agile', parent, %w[issue_tracking], backup)
 projects = [parent, sub, noagile]
 
 # Guard first: everything below deletes.

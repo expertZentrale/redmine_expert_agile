@@ -3,7 +3,8 @@
 #   DEMO_STACK=1 bundle exec rails runner \
 #     plugins/redmine_expert_agile/scripts/teardown_board_workflow_demo.rb
 #
-# Deletes the three demo projects with their issues, journals, relations,
+# Only acts on what the seed recorded in its backup row, and deletes nothing
+# at all without one. Deletes the three demo projects with their issues, journals, relations,
 # versions, categories and saved boards; then, from the ids recorded in the
 # "expert_agile_workflow_demo_backup" settings row, the demo workflow rules,
 # trackers, statuses, roles, users and group; and restores the global settings
@@ -23,17 +24,20 @@ unless ENV['DEMO_STACK'] == '1'
         'roles and users. Set it only on a disposable database.'
 end
 
+# The backup row is the only record of what the seed created. Without a valid
+# one nothing is deleted at all — not even projects that merely carry a demo
+# identifier.
 backup = begin
   raw = Setting.where(:name => BACKUP_KEY).pick(:value)
   raw.blank? ? nil : JSON.parse(raw)
 rescue JSON::ParserError => e
-  say "WARNING: backup row is not JSON (#{e.message}); global rows are left alone"
-  nil
+  abort "[teardown] backup row #{BACKUP_KEY} is not JSON (#{e.message}); nothing was deleted"
 end
+abort "[teardown] no backup row #{BACKUP_KEY} found; nothing was deleted" unless backup.is_a?(Hash)
 
 # --- projects ------------------------------------------------------------------
 
-projects = Project.where(:identifier => PROJECT_IDENTS).to_a
+projects = Project.where(:id => Array(backup['project_ids']), :identifier => PROJECT_IDENTS).to_a
 issue_ids = Issue.where(:project_id => projects.map(&:id)).pluck(:id)
 journal_ids = Journal.where(:journalized_type => 'Issue', :journalized_id => issue_ids).pluck(:id)
 
@@ -51,7 +55,7 @@ counts.each { |table, count| say "  #{table}: #{count}" }
 
 # Children first: a project with subprojects cannot be destroyed.
 PROJECT_IDENTS.each do |ident|
-  project = Project.find_by(:identifier => ident)
+  project = projects.detect { |candidate| candidate.identifier == ident }
   next if project.nil?
 
   project.reload.destroy
@@ -60,33 +64,34 @@ end
 
 # --- global rows -----------------------------------------------------------------
 
-if backup.nil?
-  say 'WARNING: no backup row found — demo statuses, trackers, roles, users and settings were left ' \
-      'untouched. Remove them by hand.'
-  exit
-end
-
 tracker_ids = (backup['tracker_ids'] || {}).values
 status_ids = (backup['status_ids'] || {}).values
 role_ids = (backup['role_ids'] || {}).values
+rule_ids = Array(backup['workflow_rule_ids'])
 
 # Trackers, statuses, roles and workflow rules are one set: a tracker kept
 # without its statuses and roles has no workflow left. So if an issue outside
 # the demo projects still uses a demo tracker or status, none of them is
 # touched; the backup row stays, and the teardown can be run again once
 # those issues are moved or deleted.
+# The same goes for workflow rules the seed did not write: destroying a
+# tracker or status deletes every rule on it, so a rule someone added that
+# uses a demo tracker or status would go too.
 outside = Issue.where(:tracker_id => tracker_ids).or(Issue.where(:status_id => status_ids)).pluck(:id)
-if outside.any?
-  say "WARNING: issues outside the demo projects still use demo trackers or statuses: #{outside.inspect}"
+foreign_rules = WorkflowRule.where(:tracker_id => tracker_ids)
+                            .or(WorkflowRule.where(:old_status_id => status_ids))
+                            .or(WorkflowRule.where(:new_status_id => status_ids))
+                            .where.not(:id => rule_ids).pluck(:id)
+if outside.any? || foreign_rules.any?
+  say "WARNING: issues outside the demo projects use demo trackers or statuses: #{outside.inspect}" if outside.any?
+  say "WARNING: workflow rules this seed did not write use demo trackers or statuses: #{foreign_rules.inspect}" if foreign_rules.any?
   say 'global rows (trackers, statuses, roles, workflow rules, users, group, settings) left untouched; ' \
-      'move or delete those issues and run the teardown again'
+      'remove those and run the teardown again'
   exit
 end
 
-say "workflow rules: #{WorkflowRule.where(:tracker_id => tracker_ids).delete_all}"
+say "workflow rules: #{WorkflowRule.where(:id => rule_ids).delete_all}"
 Tracker.where(:id => tracker_ids).each(&:destroy)
-say "workflow rules on demo statuses: " \
-    "#{WorkflowRule.where(:old_status_id => status_ids).or(WorkflowRule.where(:new_status_id => status_ids)).delete_all}"
 IssueStatus.where(:id => status_ids).each(&:destroy)
 say "trackers and statuses removed"
 
