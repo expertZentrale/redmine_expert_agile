@@ -108,7 +108,7 @@
   cursor: not-allowed;
 }
 .ea-drag-active .ea-cell.ea-drop-blocked { background-color: #f4eeee; }
-.ea-drag-active .ea-cell.ea-drop-blocked .ea-card { opacity: 0.55; }
+.ea-drag-active .ea-cell.ea-drop-blocked .ea-card { opacity: 0.55; cursor: not-allowed; }
 .ea-drag-active .ea-column-header.ea-drop-blocked { opacity: 0.6; }
 .ea-drag-active .ea-column-header.ea-drop-allowed { box-shadow: inset 0 -3px 0 #4fa35d; }
 .ea-drag-active .ea-column-header.ea-drop-origin { box-shadow: inset 0 -3px 0 #9aa3ad; }
