@@ -17,7 +17,7 @@ notes from the section matching the pushed tag.
   due, created, updated, closed) or the private flag answered with HTTP 500. None of those is a
   lane a team works in or a value a card should be dragged into, so they are no longer offered;
   swimlanes are project, tracker, status, priority, author, assignee, category and target version.
-  A board saved with one of them opens ungrouped (#37).
+  A board saved with swimlanes by one of the withdrawn fields opens ungrouped (#37).
 - **A swimlane field no issue on the board had a value for dropped the grouping silently.** The
   board now shows the single "(none)" lane instead of looking ungrouped.
 

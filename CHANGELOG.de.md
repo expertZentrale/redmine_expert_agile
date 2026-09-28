@@ -17,8 +17,8 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Datum (Beginn, Abgabe, Anlage, Aenderung, Abschluss) oder dem Privat-Merkmal zu gruppieren
   lieferte HTTP 500. Keines davon ist eine Bahn, in der ein Team arbeitet, oder ein Wert, auf den
   man eine Karte ziehen sollte — sie werden nicht mehr angeboten. Swimlanes sind Projekt, Tracker,
-  Status, Prioritaet, Autor, Bearbeiter, Kategorie und Zielversion. Ein damit gespeichertes Board
-  oeffnet ungruppiert (#37).
+  Status, Prioritaet, Autor, Bearbeiter, Kategorie und Zielversion. Ein Board, das mit Swimlanes
+  nach einem der entfernten Felder gespeichert wurde, oeffnet ungruppiert (#37).
 - **Ein Swimlane-Feld, das kein Ticket des Boards gesetzt hatte, hob die Gruppierung stillschweigend
   auf.** Das Board zeigt jetzt die eine Swimlane "(ohne)", statt ungruppiert auszusehen.
 
