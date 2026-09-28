@@ -484,8 +484,9 @@ save_backup!(backup)
 matrix = {}
 say ''
 say 'Transitions each user may make (A = as author, S = as assignee, AS = both; plain = always):'
-people.each do |login, user|
-  user_roles = user.roles_for_project(parent)
+# The administrator is asked the way core asks for one: every role counts.
+({ ADMIN_LOGIN => admin }).merge(people).each do |login, user|
+  user_roles = (user.admin? ? Role.all.to_a : user.roles_for_project(parent)).select(&:consider_workflow?)
   matrix[login] = {}
   trackers.each do |tracker_key, tracker|
     matrix[login][tracker_key] = {}
@@ -503,7 +504,7 @@ people.each do |login, user|
       end
       "#{from}->[#{always.join(',')}]#{extra.any? ? " #{extra.join(' ')}" : ''}"
     end
-    say "  #{login.ljust(12)} #{TRACKERS[tracker_key].ljust(11)} #{lines.join('  ')}"
+    say "  #{login.ljust(14)} #{TRACKERS[tracker_key].ljust(11)} #{lines.join('  ')}"
   end
 end
 say ''

@@ -70,19 +70,24 @@ tracker_ids = (backup['tracker_ids'] || {}).values
 status_ids = (backup['status_ids'] || {}).values
 role_ids = (backup['role_ids'] || {}).values
 
-say "workflow rules: #{WorkflowRule.where(:tracker_id => tracker_ids).delete_all}"
-say "workflow rules of demo roles elsewhere: #{WorkflowRule.where(:role_id => role_ids).delete_all}"
+# Trackers, statuses, roles and workflow rules are one set: a tracker kept
+# without its statuses and roles has no workflow left. So if an issue outside
+# the demo projects still uses a demo tracker or status, none of them is
+# touched; the backup row stays, and the teardown can be run again once
+# those issues are moved or deleted.
+outside = Issue.where(:tracker_id => tracker_ids).or(Issue.where(:status_id => status_ids)).pluck(:id)
+if outside.any?
+  say "WARNING: issues outside the demo projects still use demo trackers or statuses: #{outside.inspect}"
+  say 'global rows (trackers, statuses, roles, workflow rules, users, group, settings) left untouched; ' \
+      'move or delete those issues and run the teardown again'
+  exit
+end
 
-# Only once nothing uses them any more — an issue the seed did not create
-# would otherwise be left pointing at nothing.
-used_trackers = Issue.where(:tracker_id => tracker_ids).distinct.pluck(:tracker_id)
-used_statuses = Issue.where(:status_id => status_ids).distinct.pluck(:status_id)
-say "WARNING: trackers still in use, kept: #{used_trackers.inspect}" if used_trackers.any?
-say "WARNING: statuses still in use, kept: #{used_statuses.inspect}" if used_statuses.any?
-Tracker.where(:id => tracker_ids - used_trackers).each(&:destroy)
-WorkflowRule.where(:old_status_id => status_ids - used_statuses).delete_all
-WorkflowRule.where(:new_status_id => status_ids - used_statuses).delete_all
-IssueStatus.where(:id => status_ids - used_statuses).each(&:destroy)
+say "workflow rules: #{WorkflowRule.where(:tracker_id => tracker_ids).delete_all}"
+Tracker.where(:id => tracker_ids).each(&:destroy)
+say "workflow rules on demo statuses: " \
+    "#{WorkflowRule.where(:old_status_id => status_ids).or(WorkflowRule.where(:new_status_id => status_ids)).delete_all}"
+IssueStatus.where(:id => status_ids).each(&:destroy)
 say "trackers and statuses removed"
 
 Role.where(:id => role_ids).each do |role|
