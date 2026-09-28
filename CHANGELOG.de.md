@@ -28,6 +28,14 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   dessen Speichern gelang, dessen Status aber nicht in der Datenbank ankam, meldete Erfolg, und die
   Karte sprang beim naechsten Neuladen zurueck. Der Zug wird jetzt mit einer Meldung abgelehnt, die
   beide Status nennt.
+- **Swimlanes werden nur noch fuer Datensatz-Felder angeboten.** Ein Board nach % erledigt, einem
+  Datum (Beginn, Abgabe, Anlage, Aenderung, Abschluss) oder dem Privat-Merkmal zu gruppieren
+  lieferte HTTP 500. Keines davon ist eine Bahn, in der ein Team arbeitet, oder ein Wert, auf den
+  man eine Karte ziehen sollte — sie werden nicht mehr angeboten. Swimlanes sind Projekt, Tracker,
+  Status, Prioritaet, Autor, Bearbeiter, Kategorie und Zielversion. Ein Board, das mit Swimlanes
+  nach einem der entfernten Felder gespeichert wurde, oeffnet ungruppiert (#37).
+- **Ein Swimlane-Feld, das kein Ticket des Boards gesetzt hatte, hob die Gruppierung stillschweigend
+  auf.** Das Board zeigt jetzt die eine Swimlane "(ohne)", statt ungruppiert auszusehen.
 
 ## [0.5.5] - 2026-09-27
 

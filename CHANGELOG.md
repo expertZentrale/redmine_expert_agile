@@ -26,6 +26,13 @@ notes from the section matching the pushed tag.
 - **A status change another plugin undid was reported as saved.** A move whose save passed but
   whose status did not reach the database answered with success, and the card jumped back on the
   next reload. The move is now refused with a message naming both statuses.
+- **Swimlanes are offered for record fields only.** Grouping a board by % done, a date (start,
+  due, created, updated, closed) or the private flag answered with HTTP 500. None of those is a
+  lane a team works in or a value a card should be dragged into, so they are no longer offered;
+  swimlanes are project, tracker, status, priority, author, assignee, category and target version.
+  A board saved with swimlanes by one of the withdrawn fields opens ungrouped (#37).
+- **A swimlane field no issue on the board had a value for dropped the grouping silently.** The
+  board now shows the single "(none)" lane instead of looking ungrouped.
 
 ## [0.5.5] - 2026-09-27
 
