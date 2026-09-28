@@ -117,17 +117,6 @@ module RedmineExpertAgile
       issue_board[key] || []
     end
 
-    # What identifies a lane in the markup (`data-swimlane-id`): the record's
-    # id, or the plain value itself for fields that group by one — % done, a
-    # date, the private flag. Empty for the "no value" lane and an ungrouped
-    # board. Calling `.id` on every lane answered a board grouped by any of
-    # those plain fields with a 500.
-    def swimlane_dom_key(swimlane)
-      return '' if swimlane == :none || swimlane.nil?
-
-      lane_key(swimlane).to_s
-    end
-
     private
 
     # Association lanes are identified by id; a scalar grouped value is its own
@@ -137,14 +126,10 @@ module RedmineExpertAgile
     end
 
     # Redmine's own ordering where the lane object has one (trackers, statuses
-    # and priorities carry `position`), natural order for numbers and dates —
-    # alphabetical would put a 100 % lane between 10 % and 30 % — otherwise
-    # alphabetical.
+    # and priorities carry `position`), otherwise alphabetical.
     def sort_lanes(lanes)
       if lanes.all? { |lane| lane.respond_to?(:position) && lane.position.present? }
         lanes.sort_by(&:position)
-      elsif lanes.all?(Numeric) || lanes.all?(Date) || lanes.all?(Time)
-        lanes.sort
       else
         lanes.sort_by { |lane| lane.to_s.downcase }
       end

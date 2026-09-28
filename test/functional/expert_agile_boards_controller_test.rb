@@ -196,66 +196,45 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'tr.ea-swimlane-title th', :minimum => 1
   end
 
-  def test_every_swimlane_field_renders_a_board
-    # Association fields group into records, the rest into plain values —
-    # % done, dates, the private flag. The board used to call `.id` on every
-    # lane, so each plain field answered with a 500.
-    User.find(2).update!(:admin => true) # so is_private is offered too
+  def test_only_record_fields_are_offered_as_swimlanes
+    User.find(2).update!(:admin => true) # so is_private would be offered too
     fields = ExpertAgileQuery.new(:project => @project).groupable_columns.map { |column| column.name.to_s }
-    assert_includes fields, 'done_ratio'
-    assert_includes fields, 'due_date'
 
-    fields.each do |field|
-      get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => field,
-                               :f => ['status_id'], :op => { 'status_id' => '*' } }
-
-      assert_response :success, "grouping by #{field}"
-      assert_select 'tr.ea-swimlane-title', { :minimum => 1 }, "lanes for #{field}"
+    assert_includes fields, 'assigned_to'
+    assert_includes fields, 'fixed_version'
+    %w[done_ratio start_date due_date created_on updated_on closed_on is_private].each do |field|
+      assert_not_includes fields, field
     end
   end
 
-  def test_plain_value_lanes_are_keyed_and_labelled_by_their_value
-    Issue.where(:project_id => @project.id).update_all(:done_ratio => 30)
-    Issue.where(:id => @issue.id).update_all(:done_ratio => 100)
-
-    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'done_ratio' }
-
-    assert_response :success
-    assert_select ".ea-cell[data-swimlane-id='100'] #ea-card-#{@issue.id}"
-    assert_select 'tr.ea-swimlane-title .ea-swimlane-name', :text => '100'
-  end
-
-  def test_numeric_lanes_are_in_numeric_order
-    # Alphabetical would put 100 between 10 and 30.
-    issues = Issue.where(:project_id => @project.id).order(:id).limit(3).to_a
-    assert_equal 3, issues.size
-    Issue.where(:project_id => @project.id).update_all(:done_ratio => 10)
-    Issue.where(:id => issues[1].id).update_all(:done_ratio => 100)
-    Issue.where(:id => issues[2].id).update_all(:done_ratio => 30)
-
-    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'done_ratio' }
-
-    values = css_select('tr.ea-swimlane-title .ea-swimlane-name').map { |node| node.text.strip.to_i }
-    assert_includes values, 100
-    assert_equal values.sort, values
-  end
-
-  def test_a_private_flag_lane_reads_yes_or_no
+  def test_every_offered_swimlane_field_renders_a_board
     User.find(2).update!(:admin => true)
-    Issue.where(:id => @issue.id).update_all(:is_private => true)
+    ExpertAgileQuery.new(:project => @project).groupable_columns.each do |column|
+      get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => column.name.to_s }
 
-    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'is_private' }
+      assert_response :success, "grouping by #{column.name}"
+      assert_select 'tr.ea-swimlane-title', { :minimum => 1 }, "lanes for #{column.name}"
+    end
+  end
+
+  def test_a_board_grouped_by_a_plain_field_renders_ungrouped
+    # A board saved before these fields were withdrawn must still open.
+    board = ExpertAgileQuery.new(:name => 'By due date', :project => @project, :user => User.find(2),
+                                 :visibility => Query::VISIBILITY_PUBLIC)
+    board.group_by = 'due_date'
+    board.save!(:validate => false)
+
+    get :index, :params => { :project_id => @project.id, :query_id => board.id }
 
     assert_response :success
-    names = css_select('tr.ea-swimlane-title .ea-swimlane-name').map { |node| node.text.strip }
-    assert_includes names, l(:general_text_Yes)
-    assert_includes names, l(:general_text_No)
+    assert_select 'tr.ea-swimlane-title', 0
+    assert_select 'div.ea-card', :minimum => 1
   end
 
   def test_a_field_no_issue_has_still_groups_into_one_none_lane
-    Issue.update_all(:start_date => nil)
+    Issue.update_all(:category_id => nil)
 
-    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'start_date' }
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'category' }
 
     assert_response :success
     assert_select 'tr.ea-swimlane-title .ea-swimlane-name', :count => 1,

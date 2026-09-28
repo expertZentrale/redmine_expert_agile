@@ -54,7 +54,7 @@
           <tr class="ea-swimlane-title <%= expert_agile_swimlane_color_class(swimlane) %>"<%= expert_agile_style_attribute(expert_agile_swimlane_style(swimlane)) %>>
             <th colspan="<%= @board_columns.size %>">
               <span class="ea-swimlane-name">
-                <%= expert_agile_swimlane_label(swimlane) %>
+                <%= swimlane.nil? ? l(:label_expert_agile_swimlane_none_value) : h(swimlane.to_s) %>
               </span>
               <% totals = @query.swimlane_totals(swimlane) %>
               <span class="ea-swimlane-totals">

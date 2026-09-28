@@ -13,11 +13,12 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ### Behoben
 
-- **Ein nach einem einfachen Feld gruppiertes Board antwortete mit einem Fehler.** Swimlanes nach
-  % erledigt, Beginn, Abgabedatum, Anlage-, Aenderungs- oder Abschlussdatum oder dem Privat-Merkmal
-  lieferten HTTP 500, weil jede Swimlane als Datensatz angenommen wurde. Sie werden jetzt
-  dargestellt, betitelt wie in Redmines Ticketliste (Datum im Format des Benutzers, Ja / Nein), und
-  Zahlen- und Datums-Swimlanes stehen in natuerlicher statt alphabetischer Reihenfolge (#37).
+- **Swimlanes werden nur noch fuer Datensatz-Felder angeboten.** Ein Board nach % erledigt, einem
+  Datum (Beginn, Abgabe, Anlage, Aenderung, Abschluss) oder dem Privat-Merkmal zu gruppieren
+  lieferte HTTP 500. Keines davon ist eine Bahn, in der ein Team arbeitet, oder ein Wert, auf den
+  man eine Karte ziehen sollte — sie werden nicht mehr angeboten. Swimlanes sind Projekt, Tracker,
+  Status, Prioritaet, Autor, Bearbeiter, Kategorie und Zielversion. Ein damit gespeichertes Board
+  oeffnet ungruppiert (#37).
 - **Ein Swimlane-Feld, das kein Ticket des Boards gesetzt hatte, hob die Gruppierung stillschweigend
   auf.** Das Board zeigt jetzt die eine Swimlane "(ohne)", statt ungruppiert auszusehen.
 

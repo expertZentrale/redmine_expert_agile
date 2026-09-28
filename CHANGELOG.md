@@ -13,11 +13,11 @@ notes from the section matching the pushed tag.
 
 ### Fixed
 
-- **A board grouped by a plain field answered with an error.** Swimlanes by % done, start or due
-  date, created, updated or closed date, or the private flag returned HTTP 500, because every lane
-  was assumed to be a record. They now render, titled the way Redmine's issue list shows the value
-  (dates in the user's format, Yes / No), and numeric and date lanes are in natural order rather
-  than alphabetical (#37).
+- **Swimlanes are offered for record fields only.** Grouping a board by % done, a date (start,
+  due, created, updated, closed) or the private flag answered with HTTP 500. None of those is a
+  lane a team works in or a value a card should be dragged into, so they are no longer offered;
+  swimlanes are project, tracker, status, priority, author, assignee, category and target version.
+  A board saved with one of them opens ungrouped (#37).
 - **A swimlane field no issue on the board had a value for dropped the grouping silently.** The
   board now shows the single "(none)" lane instead of looking ungrouped.
 
