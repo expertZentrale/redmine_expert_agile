@@ -17,6 +17,10 @@ notes from the section matching the pushed tag.
   column allowed (green) or blocked (striped) for that card, from the same workflow check the
   server enforces moves with: tracker, status, the user's roles, author- and assignee-only
   transitions, open subtasks and blocking issues. A blocked column does not accept the drop.
+- **Workflow demo data for testing the board by hand.** `scripts/seed_board_workflow_demo.rb` and
+  its teardown build projects with restrictive, role-dependent workflows and one saved board per
+  swimlane field, on the disposable screenshots stack. Development only; not part of the plugin's
+  runtime.
 
 ### Fixed
 

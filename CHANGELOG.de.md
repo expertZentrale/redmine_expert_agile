@@ -18,6 +18,10 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   derselben Workflow-Pruefung, mit der der Server Zuege durchsetzt: Tracker, Status, Rollen des
   Benutzers, Uebergaenge nur fuer Autor oder Bearbeiter, offene Unteraufgaben und blockierende
   Tickets. Eine gesperrte Spalte nimmt die Karte nicht an.
+- **Workflow-Demodaten zum Testen des Boards von Hand.** `scripts/seed_board_workflow_demo.rb` und
+  das zugehoerige Teardown bauen Projekte mit restriktiven, rollenabhaengigen Workflows und je
+  einem gespeicherten Board pro Swimlane-Feld auf dem wegwerfbaren Screenshot-Stack. Nur fuer die
+  Entwicklung; nicht Teil der Plugin-Laufzeit.
 
 ### Behoben
 

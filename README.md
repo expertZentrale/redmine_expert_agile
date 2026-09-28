@@ -241,6 +241,19 @@ Inside a Redmine environment:
 bundle exec rake redmine:plugins:test NAME=redmine_expert_agile RAILS_ENV=test
 ```
 
+For testing moves by hand, `scripts/seed_board_workflow_demo.rb` builds projects with restrictive,
+role-dependent workflows (author- and assignee-only transitions, a group assignee, read-only and
+required fields, an unclosable parent and a blocked issue) and one saved board per field the
+installation offers as a swimlane. It runs on the disposable screenshots stack and prints the
+transition matrix each demo user should see; `scripts/teardown_board_workflow_demo.rb` removes it
+all again:
+
+```bash
+docker-compose -f docker-compose.screenshots.yml --profile seed run --build --rm \
+  -e DEMO_STACK=1 -e DEMO_PASSWORD=... redmine-seed \
+  rails runner plugins/redmine_expert_agile/scripts/seed_board_workflow_demo.rb
+```
+
 ## License
 
 GPL-2.0-or-later. This plugin is an independent, clean-room implementation; it contains no code

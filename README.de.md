@@ -262,6 +262,19 @@ Innerhalb einer Redmine-Umgebung:
 bundle exec rake redmine:plugins:test NAME=redmine_expert_agile RAILS_ENV=test
 ```
 
+Zum Testen von Zuegen von Hand baut `scripts/seed_board_workflow_demo.rb` Projekte mit
+restriktiven, rollenabhaengigen Workflows (Uebergaenge nur fuer Autor oder Bearbeiter, eine Gruppe
+als Bearbeiter, schreibgeschuetzte und Pflichtfelder, ein nicht schliessbares Elternticket und ein
+blockiertes Ticket) sowie je ein gespeichertes Board pro Feld, das die Installation als Swimlane
+anbietet. Es laeuft auf dem wegwerfbaren Screenshot-Stack und gibt die Uebergangsmatrix aus, die
+jeder Demo-Benutzer sehen sollte; `scripts/teardown_board_workflow_demo.rb` entfernt alles wieder:
+
+```bash
+docker-compose -f docker-compose.screenshots.yml --profile seed run --build --rm \
+  -e DEMO_STACK=1 -e DEMO_PASSWORD=... redmine-seed \
+  rails runner plugins/redmine_expert_agile/scripts/seed_board_workflow_demo.rb
+```
+
 ## Lizenz
 
 GPL-2.0-or-later. Dieses Plugin ist eine unabhaengige Clean-Room-Implementierung und enthaelt
