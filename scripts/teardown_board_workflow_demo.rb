@@ -95,15 +95,29 @@ Tracker.where(:id => tracker_ids).each(&:destroy)
 IssueStatus.where(:id => status_ids).each(&:destroy)
 say "trackers and statuses removed"
 
+# Destroying a role deletes every workflow rule it has, and destroying a group
+# unassigns every issue assigned to it and drops its memberships. Both are kept
+# if they are used anywhere the seed did not put them; the demo projects, with
+# their issues and memberships, are gone by now.
 Role.where(:id => role_ids).each do |role|
-  if role.members.any?
-    say "WARNING: role #{role.name} still has members, kept"
+  foreign = WorkflowRule.where(:role_id => role.id).where.not(:id => rule_ids).count
+  if role.members.any? || foreign.positive?
+    say "WARNING: role #{role.name} kept: #{role.members.count} memberships, #{foreign} workflow rules " \
+        'the seed did not write'
   else
     role.destroy
   end
 end
 
-Group.where(:id => backup['group_id']).each(&:destroy)
+Group.where(:id => backup['group_id']).each do |group|
+  assigned = Issue.where(:assigned_to_id => group.id).count
+  if assigned.positive? || group.memberships.any?
+    say "WARNING: group #{group.name} kept: assigned to #{assigned} issues, " \
+        "member of #{group.memberships.count} projects"
+  else
+    group.destroy
+  end
+end
 User.where(:id => Array(backup['user_ids'])).each(&:destroy)
 say "roles, group and users removed"
 

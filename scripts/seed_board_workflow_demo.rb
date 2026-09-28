@@ -292,6 +292,7 @@ end
 STATUSES.each_key do |from|
   STATUSES.each_key { |to| add.call('developer', 'chore', from, to) unless from == to }
 end
+existing_rule_ids = WorkflowRule.pluck(:id)
 WorkflowTransition.insert_all(transitions)
 
 permissions = []
@@ -304,10 +305,10 @@ permissions << { :type => 'WorkflowPermission', :role_id => roles['developer'].i
                  :tracker_id => trackers['feature'].id, :old_status_id => statuses['accepted'].id,
                  :field_name => 'due_date', :rule => 'required' }
 WorkflowPermission.insert_all(permissions)
-# The demo roles and trackers are this script's own, so their rows are exactly
-# what was just inserted. Recorded, so the teardown deletes these and nothing else.
-backup['workflow_rule_ids'] = WorkflowRule.where(:tracker_id => tracker_ids.values,
-                                                 :role_id => role_ids.values).pluck(:id)
+# Exactly the rows this run inserted — not every row on a demo tracker or
+# role, which could include one somebody added by hand between runs. The
+# teardown deletes these and treats any other row as someone else's.
+backup['workflow_rule_ids'] = WorkflowRule.where.not(:id => existing_rule_ids).pluck(:id)
 save_backup!(backup)
 say "#{transitions.size} workflow transitions, #{permissions.size} field rules"
 
