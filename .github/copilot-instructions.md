@@ -104,6 +104,7 @@ of the release commit:
   if a callback put the old one back; a 200 must mean the card stays where it was dropped.
 - The drop preview (`RedmineExpertAgile::MoveTargets` -> `data-allowed-status-ids` on each card) uses
   the same calls the update enforces with (`editable?`, `safe_attribute?('status_id')`,
-  `new_statuses_allowed_to`), memoised per project/tracker/status/author/assignee/closable/reopenable.
+  `new_statuses_allowed_to`). Plain cards share answers per project/tracker/status/author/assignee;
+  cards with a parent, subtasks or a blocking relation are always asked through core one by one.
   Never reimplement workflow rules client-side; the server stays authoritative. Swimlane drops are
   not covered by it (issue #37).

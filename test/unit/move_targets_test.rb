@@ -1,8 +1,8 @@
 require File.expand_path('../../test_helper', __FILE__)
 
-# The drop preview's per-card lists. The list itself always comes from core's
-# new_statuses_allowed_to; what is tested here is that the batched hierarchy
-# checks used for memoising agree with core, and that they are batched.
+# The drop preview's per-card lists. Every list comes from core's
+# new_statuses_allowed_to; what is tested here is that sharing answers between
+# cards never hands one card another's list, and that plain cards do share.
 class MoveTargetsTest < ActiveSupport::TestCase
   fixtures :projects, :users, :email_addresses, :members, :member_roles, :roles,
            :enabled_modules, :trackers, :projects_trackers, :issue_statuses,
@@ -16,16 +16,6 @@ class MoveTargetsTest < ActiveSupport::TestCase
     @closed = IssueStatus.where(:is_closed => true).sorted.first
   end
 
-  def test_hierarchy_answers_match_core
-    issues = hierarchy
-    targets = RedmineExpertAgile::MoveTargets.new(@user, IssueStatus.pluck(:id)).preload(issues)
-
-    issues.each do |issue|
-      assert_equal issue.closable?, targets.send(:closable?, issue), "closable? for #{issue.subject}"
-      assert_equal issue.reopenable?, targets.send(:reopenable?, issue), "reopenable? for #{issue.subject}"
-    end
-  end
-
   def test_lists_match_core_for_every_card
     issues = hierarchy
     targets = RedmineExpertAgile::MoveTargets.new(@user, IssueStatus.pluck(:id)).preload(issues)
@@ -36,12 +26,15 @@ class MoveTargetsTest < ActiveSupport::TestCase
     end
   end
 
-  def test_parents_and_subtasks_do_not_cost_a_query_each
-    small = Array.new(2) { family }.flatten
-    large = Array.new(8) { family }.flatten
+  def test_plain_cards_share_their_answers
+    few = Array.new(2) { issue('plain') }
+    many = Array.new(10) { issue('plain') }
+    # The first run also pays for the user's roles and memberships, which the
+    # user object keeps; compare only runs that start from the same state.
+    queries_for(few)
 
-    assert_equal queries_for(small), queries_for(large),
-                 'hierarchy lookups must be batched, not asked per parent or subtask'
+    assert_equal queries_for(few), queries_for(many),
+                 'plain cards of one tracker and status must not cost a query each'
   end
 
   private
@@ -65,13 +58,13 @@ class MoveTargetsTest < ActiveSupport::TestCase
     issue('grandchild', :parent_issue_id => middle.id)
 
     leaf = issue('leaf')
-    Issue.where(:id => [open_parent, done_parent, closed_parent, closed_child, middle, leaf].map(&:id))
+    blocker = issue('blocker')
+    blocked = issue('blocked')
+    IssueRelation.create!(:issue_from => blocker, :issue_to => blocked,
+                          :relation_type => IssueRelation::TYPE_BLOCKS)
+    Issue.where(:id => [open_parent, done_parent, closed_parent, closed_child, middle, leaf,
+                        blocker, blocked].map(&:id))
          .or(Issue.where(:parent_id => [open_parent.id, done_parent.id, middle.id])).to_a
-  end
-
-  def family
-    parent = issue('parent')
-    [parent.reload, issue('child', :parent_issue_id => parent.id)]
   end
 
   def issue(subject, attributes = {})
@@ -79,8 +72,7 @@ class MoveTargetsTest < ActiveSupport::TestCase
                       :author_id => @user.id, :subject => subject }.merge(attributes))
   end
 
-  # Counts the queries a board of these cards costs once the workflow answers
-  # for their tracker/status are memoised: the preload plus one lookup per card.
+  # Queries a board of these cards costs, preload included.
   def queries_for(issues)
     issues = Issue.where(:id => issues.map(&:id)).to_a
     count = 0
