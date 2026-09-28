@@ -1020,6 +1020,38 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_empty allowed_ids_on_card(@issue.reload) & closed
   end
 
+  def test_an_issue_the_user_may_not_edit_is_not_offered_for_dragging
+    # Not even a reorder: the server refuses every move of it, so a card that
+    # could be picked up would only ever be put back.
+    @role.remove_permission!(:edit_issues, :edit_own_issues, :add_issue_notes)
+
+    get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+    assert_select "#ea-card-#{@issue.id}[data-movable='0']"
+    assert_select "#ea-card-#{@issue.id}[data-allowed-status-ids]", 0
+  end
+
+  def test_an_assignee_only_transition_is_offered_to_members_of_the_assigned_group
+    status = IssueStatus.create!(:name => 'Only for the team')
+    WorkflowTransition.create!(:role_id => @role.id, :tracker_id => @issue.tracker_id,
+                               :old_status_id => @issue.status_id, :new_status_id => status.id,
+                               :assignee => true)
+    group = Group.generate!
+    group.users << User.find(2)
+    Member.create!(:project => @project, :principal => group, :role_ids => [@role.id])
+    with_settings :issue_group_assignment => '1' do
+      ours = Issue.generate!(:project_id => @project.id, :tracker_id => @issue.tracker_id,
+                             :status_id => @issue.status_id, :author_id => 3, :assigned_to_id => group.id)
+      theirs = Issue.generate!(:project_id => @project.id, :tracker_id => @issue.tracker_id,
+                               :status_id => @issue.status_id, :author_id => 3, :assigned_to_id => 3)
+
+      get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+      assert_includes allowed_ids_on_card(ours), status.id
+      assert_not_includes allowed_ids_on_card(theirs), status.id
+    end
+  end
+
   def test_a_card_that_cannot_be_moved_carries_no_list
     sub = Project.generate!(:parent_id => @project.id, :is_public => true)
     stray = Issue.generate!(:project_id => sub.id, :status_id => @issue.status_id)
