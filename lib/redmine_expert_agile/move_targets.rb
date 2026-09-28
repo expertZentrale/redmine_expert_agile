@@ -32,10 +32,12 @@ module RedmineExpertAgile
 
       associations = { :relations_to => { :issue_from => :status } }
       preloader = ActiveRecord::Associations::Preloader
-      if preloader.instance_method(:initialize).arity.zero?
-        preloader.new.preload(issues, associations) # Rails 6.1 (Redmine 5.x)
-      else
+      # Decided by version, not by probing the constructor: Rails 6.1's takes
+      # an optional keyword too, so an arity test picked the 7.0 call there.
+      if ActiveRecord.version >= Gem::Version.new('7.0')
         preloader.new(:records => issues, :associations => associations).call
+      else
+        preloader.new.preload(issues, associations) # Rails 6.1 (Redmine 5.x)
       end
       self
     end
