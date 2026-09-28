@@ -9,6 +9,18 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Behoben
+
+- **Ein nach einem einfachen Feld gruppiertes Board antwortete mit einem Fehler.** Swimlanes nach
+  % erledigt, Beginn, Abgabedatum, Anlage-, Aenderungs- oder Abschlussdatum oder dem Privat-Merkmal
+  lieferten HTTP 500, weil jede Swimlane als Datensatz angenommen wurde. Sie werden jetzt
+  dargestellt, betitelt wie in Redmines Ticketliste (Datum im Format des Benutzers, Ja / Nein), und
+  Zahlen- und Datums-Swimlanes stehen in natuerlicher statt alphabetischer Reihenfolge (#37).
+- **Ein Swimlane-Feld, das kein Ticket des Boards gesetzt hatte, hob die Gruppierung stillschweigend
+  auf.** Das Board zeigt jetzt die eine Swimlane "(ohne)", statt ungruppiert auszusehen.
+
 ## [0.5.5] - 2026-09-27
 
 ### Sicherheit

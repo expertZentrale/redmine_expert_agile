@@ -9,6 +9,18 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Fixed
+
+- **A board grouped by a plain field answered with an error.** Swimlanes by % done, start or due
+  date, created, updated or closed date, or the private flag returned HTTP 500, because every lane
+  was assumed to be a record. They now render, titled the way Redmine's issue list shows the value
+  (dates in the user's format, Yes / No), and numeric and date lanes are in natural order rather
+  than alphabetical (#37).
+- **A swimlane field no issue on the board had a value for dropped the grouping silently.** The
+  board now shows the single "(none)" lane instead of looking ungrouped.
+
 ## [0.5.5] - 2026-09-27
 
 ### Security

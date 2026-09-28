@@ -175,6 +175,18 @@ module ExpertAgileBoardsHelper
     })
   end
 
+  # Title of one swimlane. A lane is a record for association fields and a
+  # plain value for the rest (% done, dates, the private flag), which Redmine
+  # formats the way its issue list does: a date in the user's format, a flag
+  # as Yes / No. Records keep their plain name — format_object would turn a
+  # user or version into a link inside the band.
+  def expert_agile_swimlane_label(swimlane)
+    return l(:label_expert_agile_swimlane_none_value) if swimlane.nil?
+    return h(swimlane.to_s) if swimlane.respond_to?(:id)
+
+    format_object(swimlane, false).to_s
+  end
+
   # Accent colour for one swimlane, so adjacent lanes are told apart at a
   # glance rather than all sharing one hue.
   #
