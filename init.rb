@@ -42,7 +42,7 @@ Redmine::Plugin.register :redmine_expert_agile do
   name 'Redmine expert Agile'
   author 'Dennis Buehring'
   description 'Agile boards, story points, sprints and charts for Redmine'
-  version '0.5.5'
+  version '0.6.0'
   requires_redmine :version_or_higher => '5.0'
   url 'https://github.com/expertZentrale/redmine_expert_agile'
 

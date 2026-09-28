@@ -1,0 +1,20 @@
+h3. redmine_expert_agile 0.6.0 — 2026-09-28
+
+The board now shows where a card may go before it is dropped, and a card no longer ends up drawn in a place it is not stored.
+
+h4. Added
+
+* *Allowed and blocked columns while dragging.* Picking a card up marks every column green where the workflow lets that card go and striped where it does not. The answer is per card — tracker, current status, the user's roles, author- and assignee-only transitions (including a group the user belongs to), open subtasks and blocking issues all count — and it comes from the same check the server enforces the move with, so a column marked allowed is never refused for workflow reasons. A blocked column does not accept the drop. Cards the user may not edit at all are not offered for dragging.
+
+h4. Fixed
+
+* *A cancelled drag left the card in the wrong column.* Pressing Escape or letting go outside the board left the card wherever the pointer last was, with no request sent, until the next reload. It now goes back to where it was picked up.
+* *A status change another plugin undid was reported as saved,* and the card jumped back on the next reload. The move is now refused with a message naming both statuses.
+* *Boards grouped into swimlanes by % done, a date or the private flag answered with an error.* Swimlanes are now offered only for project, tracker, status, priority, author, assignee, category and target version.
+* *Swimlanes silently disappeared when no issue on the board had a value for the chosen field,* so the board looked ungrouped. It now shows the single "(none)" lane.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
+
+A board saved with swimlanes by % done, start or due date, created, updated or closed date, or the private flag now opens without swimlanes. Pick one of the remaining fields and save it again if you want lanes.
