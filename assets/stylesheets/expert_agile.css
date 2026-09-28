@@ -89,6 +89,30 @@
 
 .ea-cell-issues { min-height: 60px; }
 
+/* While a card is dragged every column says whether the workflow lets that
+ * card in. Blocked is stripes as well as colour, so it does not rely on
+ * telling red from green; it is laid over the header's own status colour
+ * rather than replacing it, so the column stays recognisable. */
+.ea-drag-active .ea-cell.ea-drop-allowed {
+  background: #eef8ef;
+  box-shadow: inset 0 0 0 2px #8cc896;
+}
+.ea-drag-active .ea-cell.ea-drop-allowed.ea-cell-hover {
+  background: #dcf1df;
+  box-shadow: inset 0 0 0 3px #4fa35d;
+}
+.ea-drag-active .ea-cell.ea-drop-origin { background: #f7f8fa; box-shadow: inset 0 0 0 2px #c6ccd4; }
+.ea-drag-active .ea-cell.ea-drop-blocked,
+.ea-drag-active .ea-column-header.ea-drop-blocked {
+  background-image: repeating-linear-gradient(135deg, rgba(190, 70, 70, 0.10) 0 8px, transparent 8px 16px);
+  cursor: not-allowed;
+}
+.ea-drag-active .ea-cell.ea-drop-blocked { background-color: #f4eeee; }
+.ea-drag-active .ea-cell.ea-drop-blocked .ea-card { opacity: 0.55; cursor: not-allowed; }
+.ea-drag-active .ea-column-header.ea-drop-blocked { opacity: 0.6; }
+.ea-drag-active .ea-column-header.ea-drop-allowed { box-shadow: inset 0 -3px 0 #4fa35d; }
+.ea-drag-active .ea-column-header.ea-drop-origin { box-shadow: inset 0 -3px 0 #9aa3ad; }
+
 /* --- Cards --------------------------------------------------------------- */
 
 .ea-card {

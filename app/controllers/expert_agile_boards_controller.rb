@@ -84,6 +84,16 @@ class ExpertAgileBoardsController < ApplicationController
         raise ActiveRecord::Rollback
       end
 
+      # A save that succeeded is not yet a status that changed: a callback from
+      # another plugin can put the old status back and still let the save pass.
+      # Answering 200 then draws the card in the new column, and the next reload
+      # moves it back — the one failure the user would never be told about.
+      # What counts is what the database holds.
+      if target_status_id && (kept = Issue.where(:id => @issue.id).pick(:status_id)) != target_status_id
+        render_move_error(status_not_kept_error(target_status_id, kept), :unprocessable_entity)
+        raise ActiveRecord::Rollback
+      end
+
       # Same transaction as the issue save: RedmineUP writes ranks in a separate
       # one, so a failed rank write leaves the card in its new column unranked.
       RedmineExpertAgile::BoardPositions.place!(
@@ -342,6 +352,16 @@ class ExpertAgileBoardsController < ApplicationController
       :tracker => @issue.tracker.name,
       :from => @issue.status.name,
       :to => target ? target.name : target_status_id)
+  end
+
+  # A status change the save let through and something else undid.
+  def status_not_kept_error(target_status_id, kept_status_id)
+    target = IssueStatus.find_by(:id => target_status_id)
+    kept = IssueStatus.find_by(:id => kept_status_id)
+
+    l(:error_expert_agile_status_not_kept,
+      :to => target ? target.name : target_status_id,
+      :status => kept ? kept.name : kept_status_id)
   end
 
   # What the user *can* do from here, which is the part that turns the refusal

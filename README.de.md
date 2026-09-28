@@ -69,6 +69,15 @@ Die Spalten sind Ticketstatus, Karten werden zwischen ihnen verschoben. Status m
 Praefix — `Dev: Review` und `Dev: Test` — laufen unter einer gemeinsamen Ueberschrift zusammen,
 und eine Spalte oberhalb ihrer WIP-Grenze markiert sich selbst.
 
+Sobald eine Karte aufgenommen wird, markiert das Board jede Spalte: gruen, wohin der Workflow
+diese Karte laesst, schraffiert, wohin nicht. Die Antwort gilt pro Karte — Tracker, aktueller
+Status, Ihre Rollen, ob Sie Autor oder Bearbeiter sind, offene Unteraufgaben und blockierende
+Tickets zaehlen mit — und sie beruht auf derselben Pruefung, mit der der Server den Zug
+durchsetzt: eine als erlaubt markierte Spalte wird nie aus Workflow-Gruenden abgelehnt. Eine
+gesperrte Spalte nimmt die Karte gar nicht erst an, und ein abgebrochenes Ziehen legt die Karte
+dorthin zurueck, wo sie lag. Was der Workflow nicht im Voraus wissen kann, etwa ein im neuen
+Status verlangtes Pflichtfeld, wird weiterhin nach dem Ablegen abgelehnt — mit Begruendung.
+
 ![Agile-Board mit fuenf Statusspalten: Zu erledigen, In Arbeit, eine gemeinsame Dev-Ueberschrift
 ueber den Unterspalten Review und Test sowie Fertig. Jede Spaltenueberschrift traegt ihre
 Kartenzahl und WIP-Grenze, Review ist hervorgehoben, weil dort fuenf Karten gegen eine Grenze von
