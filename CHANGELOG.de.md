@@ -9,6 +9,15 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Hinzugefuegt
+
+- **Workflow-Demodaten zum Testen des Boards von Hand.** `scripts/seed_board_workflow_demo.rb` und
+  das zugehoerige Teardown bauen Projekte mit restriktiven, rollenabhaengigen Workflows und je
+  einem gespeicherten Board pro Swimlane-Feld auf dem wegwerfbaren Screenshot-Stack. Nur fuer die
+  Entwicklung; nicht Teil der Plugin-Laufzeit.
+
 ## [0.5.5] - 2026-09-27
 
 ### Sicherheit

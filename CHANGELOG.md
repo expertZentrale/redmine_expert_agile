@@ -9,6 +9,15 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Added
+
+- **Workflow demo data for testing the board by hand.** `scripts/seed_board_workflow_demo.rb` and
+  its teardown build projects with restrictive, role-dependent workflows and one saved board per
+  swimlane field, on the disposable screenshots stack. Development only; not part of the plugin's
+  runtime.
+
 ## [0.5.5] - 2026-09-27
 
 ### Security
