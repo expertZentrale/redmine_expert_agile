@@ -22,13 +22,22 @@ module RedmineExpertAgile
       @editable = {}
       @status_editable = {}
       @allowed = {}
+      @hierarchy = {}
     end
 
-    # Loads what `closable?` reads for every card in one go. Without it each
-    # card asks for its blocking relations on its own.
+    # Loads what `closable?` and `reopenable?` read for every card in one go:
+    # blocking relations, which parents still have an open subtask and which
+    # subtasks sit under a closed ancestor. Without it every card that is
+    # blocked, a parent or a subtask asks on its own.
     def preload(issues)
       issues = issues.to_a
       return self if issues.empty?
+
+      open_below = parents_with_open_descendants(issues)
+      closed_above = issues_with_closed_ancestors(issues)
+      issues.each do |issue|
+        @hierarchy[issue.id] = [open_below.include?(issue.id), closed_above.include?(issue.id)]
+      end
 
       associations = { :relations_to => { :issue_from => :status } }
       preloader = ActiveRecord::Associations::Preloader
@@ -50,13 +59,59 @@ module RedmineExpertAgile
       return [] unless memo(@editable, key) { issue.editable?(@user) }
       return [issue.status_id] unless memo(@status_editable, key) { issue.safe_attribute?('status_id', @user) }
 
-      key += [assignee?(issue), issue.closable?, issue.reopenable?]
+      key += [assignee?(issue), closable?(issue), reopenable?(issue)]
       memo(@allowed, key) do
         ((issue.new_statuses_allowed_to(@user).map(&:id) & @column_ids) | [issue.status_id]).sort
       end
     end
 
     private
+
+    # The same answers as Issue#closable? and #reopenable?, from the batches
+    # `preload` loaded. They only pick the memo key; the list itself always
+    # comes from core's new_statuses_allowed_to. A card that was not preloaded
+    # asks core directly.
+    def closable?(issue)
+      return issue.closable? unless @hierarchy.key?(issue.id)
+
+      !@hierarchy[issue.id][0] && !issue.blocked?
+    end
+
+    def reopenable?(issue)
+      return issue.reopenable? unless @hierarchy.key?(issue.id)
+
+      !@hierarchy[issue.id][1]
+    end
+
+    # Ids of the parents among `issues` with at least one open descendant —
+    # core's `descendants.open.any?`. Leaves have no descendants to ask about.
+    def parents_with_open_descendants(issues)
+      ids = issues.reject(&:leaf?).map(&:id)
+      return [] if ids.empty?
+
+      table = Issue.table_name
+      Issue.joins("INNER JOIN #{table} below ON below.root_id = #{table}.root_id " \
+                  "AND below.lft > #{table}.lft AND below.rgt < #{table}.rgt")
+           .joins("INNER JOIN #{IssueStatus.table_name} below_status ON below_status.id = below.status_id")
+           .where(:id => ids)
+           .where('below_status.is_closed = ?', false)
+           .distinct.pluck(:id)
+    end
+
+    # Ids of the subtasks among `issues` with a closed ancestor — core's
+    # `ancestors.open(false).any?`. Root issues have no ancestors to ask about.
+    def issues_with_closed_ancestors(issues)
+      ids = issues.select(&:parent_id).map(&:id)
+      return [] if ids.empty?
+
+      table = Issue.table_name
+      Issue.joins("INNER JOIN #{table} above ON above.root_id = #{table}.root_id " \
+                  "AND above.lft < #{table}.lft AND above.rgt > #{table}.rgt")
+           .joins("INNER JOIN #{IssueStatus.table_name} above_status ON above_status.id = above.status_id")
+           .where(:id => ids)
+           .where('above_status.is_closed = ?', true)
+           .distinct.pluck(:id)
+    end
 
     def memo(store, key)
       store.key?(key) ? store[key] : (store[key] = yield)
