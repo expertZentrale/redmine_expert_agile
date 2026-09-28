@@ -263,12 +263,14 @@ class ExpertAgileQuery < IssueQuery
 
   # --- Columns -------------------------------------------------------
 
-  # Swimlanes are built by loading the grouped association's records, which
-  # only works for association-backed columns — a custom field column has no
-  # `reflect_on_association`. Excluding them here is what keeps `swimlanes`
-  # from blowing up.
+  # Swimlanes are the records an issue belongs to — project, tracker, status,
+  # priority, author, assignee, category, target version. Core also groups by
+  # plain values (% done, start and due date, created / updated / closed on,
+  # the private flag) and by custom fields; none of those is a lane a team
+  # works in, and none is a value a card should ever be dragged into. They
+  # are not offered at all, and a saved board grouped by one shows ungrouped.
   def groupable_columns
-    super.reject { |column| column.is_a?(QueryCustomFieldColumn) }
+    super.select { |column| !column.is_a?(QueryCustomFieldColumn) && Issue.reflect_on_association(column.name) }
   end
 
   # --- Board scope ---------------------------------------------------

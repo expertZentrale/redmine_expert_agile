@@ -43,7 +43,9 @@
     </thead>
 
     <tbody>
-      <% if @swimlanes.any? %>
+      <%# Not any?: a board where no issue has a value for the field has one lane,
+            nil, and [nil].any? is false — it dropped the grouping without a word. %>
+      <% unless @swimlanes.empty? %>
         <% @swimlanes.each do |swimlane| %>
           <%# A band across the full width of the board, then the lane's cells
               beneath it. A narrow label cell on the left does not read as a

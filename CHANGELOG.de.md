@@ -13,10 +13,33 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ### Hinzugefuegt
 
+- **Das Board zeigt vor dem Ablegen, wohin eine Karte darf.** Beim Aufnehmen einer Karte wird
+  jede Spalte fuer diese Karte als erlaubt (gruen) oder gesperrt (schraffiert) markiert — aus
+  derselben Workflow-Pruefung, mit der der Server Zuege durchsetzt: Tracker, Status, Rollen des
+  Benutzers, Uebergaenge nur fuer Autor oder Bearbeiter, offene Unteraufgaben und blockierende
+  Tickets. Eine gesperrte Spalte nimmt die Karte nicht an.
 - **Workflow-Demodaten zum Testen des Boards von Hand.** `scripts/seed_board_workflow_demo.rb` und
   das zugehoerige Teardown bauen Projekte mit restriktiven, rollenabhaengigen Workflows und je
   einem gespeicherten Board pro Swimlane-Feld auf dem wegwerfbaren Screenshot-Stack. Nur fuer die
   Entwicklung; nicht Teil der Plugin-Laufzeit.
+
+### Behoben
+
+- **Ein abgebrochenes Ziehen liess die Karte in der falschen Spalte stehen.** Escape oder Loslassen
+  ausserhalb des Boards liess die Karte dort, wo der Zeiger zuletzt war — ohne Anfrage, bis zum
+  naechsten Neuladen. Die Karte kehrt jetzt an ihren Ausgangsplatz zurueck.
+- **Ein Statuswechsel, den ein anderes Plugin rueckgaengig machte, galt als gespeichert.** Ein Zug,
+  dessen Speichern gelang, dessen Status aber nicht in der Datenbank ankam, meldete Erfolg, und die
+  Karte sprang beim naechsten Neuladen zurueck. Der Zug wird jetzt mit einer Meldung abgelehnt, die
+  beide Status nennt.
+- **Swimlanes werden nur noch fuer Datensatz-Felder angeboten.** Ein Board nach % erledigt, einem
+  Datum (Beginn, Abgabe, Anlage, Aenderung, Abschluss) oder dem Privat-Merkmal zu gruppieren
+  lieferte HTTP 500. Keines davon ist eine Bahn, in der ein Team arbeitet, oder ein Wert, auf den
+  man eine Karte ziehen sollte — sie werden nicht mehr angeboten. Swimlanes sind Projekt, Tracker,
+  Status, Prioritaet, Autor, Bearbeiter, Kategorie und Zielversion. Ein Board, das mit Swimlanes
+  nach einem der entfernten Felder gespeichert wurde, oeffnet ungruppiert (#37).
+- **Ein Swimlane-Feld, das kein Ticket des Boards gesetzt hatte, hob die Gruppierung stillschweigend
+  auf.** Das Board zeigt jetzt die eine Swimlane "(ohne)", statt ungruppiert auszusehen.
 
 ## [0.5.5] - 2026-09-27
 

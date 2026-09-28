@@ -196,6 +196,51 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'tr.ea-swimlane-title th', :minimum => 1
   end
 
+  def test_only_record_fields_are_offered_as_swimlanes
+    User.find(2).update!(:admin => true) # so is_private would be offered too
+    fields = ExpertAgileQuery.new(:project => @project).groupable_columns.map { |column| column.name.to_s }
+
+    assert_includes fields, 'assigned_to'
+    assert_includes fields, 'fixed_version'
+    %w[done_ratio start_date due_date created_on updated_on closed_on is_private].each do |field|
+      assert_not_includes fields, field
+    end
+  end
+
+  def test_every_offered_swimlane_field_renders_a_board
+    User.find(2).update!(:admin => true)
+    ExpertAgileQuery.new(:project => @project).groupable_columns.each do |column|
+      get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => column.name.to_s }
+
+      assert_response :success, "grouping by #{column.name}"
+      assert_select 'tr.ea-swimlane-title', { :minimum => 1 }, "lanes for #{column.name}"
+    end
+  end
+
+  def test_a_board_grouped_by_a_plain_field_renders_ungrouped
+    # A board saved before these fields were withdrawn must still open.
+    board = ExpertAgileQuery.new(:name => 'By due date', :project => @project, :user => User.find(2),
+                                 :visibility => Query::VISIBILITY_PUBLIC)
+    board.group_by = 'due_date'
+    board.save!(:validate => false)
+
+    get :index, :params => { :project_id => @project.id, :query_id => board.id }
+
+    assert_response :success
+    assert_select 'tr.ea-swimlane-title', 0
+    assert_select 'div.ea-card', :minimum => 1
+  end
+
+  def test_a_field_no_issue_has_still_groups_into_one_none_lane
+    Issue.update_all(:category_id => nil)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'category' }
+
+    assert_response :success
+    assert_select 'tr.ea-swimlane-title .ea-swimlane-name', :count => 1,
+                  :text => l(:label_expert_agile_swimlane_none_value)
+  end
+
   def test_swimlane_band_spans_every_column
     # A lane has to read as one band across the board. A narrow label cell on
     # the left leaves the row visually unconnected across the columns.
@@ -951,6 +996,158 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert moved_column['over_wip_limit'], 'the breach is reported back to the board'
   end
 
+  # --- Drop preview ----------------------------------------------------
+
+  def test_a_card_lists_the_columns_the_workflow_lets_it_into
+    forbidden = forbidden_status_for(@issue)
+    get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+    assert_response :success
+    expected = @issue.new_statuses_allowed_to(User.find(2)).map(&:id) | [@issue.status_id]
+    assert_equal expected.sort, allowed_ids_on_card(@issue)
+    assert_not_includes allowed_ids_on_card(@issue), forbidden.id
+  end
+
+  def test_a_card_always_lists_its_own_column
+    # A reorder inside the column is a move the server accepts, so the card's
+    # own column must never be marked blocked.
+    get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+    assert_includes allowed_ids_on_card(@issue), @issue.status_id
+  end
+
+  def test_statuses_that_are_not_on_the_board_are_not_listed
+    target = allowed_status_for(@issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    get :index, :params => board_with_statuses([@issue.status_id, target.id])
+
+    assert_equal [@issue.status_id, target.id].sort, allowed_ids_on_card(@issue)
+  end
+
+  def test_an_author_only_transition_is_offered_on_the_authors_cards_only
+    status = IssueStatus.create!(:name => 'Only for authors')
+    WorkflowTransition.create!(:role_id => @role.id, :tracker_id => @issue.tracker_id,
+                               :old_status_id => @issue.status_id, :new_status_id => status.id,
+                               :author => true)
+    theirs = Issue.generate!(:project_id => @project.id, :tracker_id => @issue.tracker_id,
+                             :status_id => @issue.status_id, :author_id => 3)
+
+    get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+    assert_includes allowed_ids_on_card(@issue), status.id, 'user 2 wrote issue 1'
+    assert_not_includes allowed_ids_on_card(theirs), status.id
+  end
+
+  def test_an_assignee_only_transition_is_offered_on_the_assignees_cards_only
+    status = IssueStatus.create!(:name => 'Only for assignees')
+    WorkflowTransition.create!(:role_id => @role.id, :tracker_id => @issue.tracker_id,
+                               :old_status_id => @issue.status_id, :new_status_id => status.id,
+                               :assignee => true)
+    mine = Issue.generate!(:project_id => @project.id, :tracker_id => @issue.tracker_id,
+                           :status_id => @issue.status_id, :author_id => 3, :assigned_to_id => 2)
+    theirs = Issue.generate!(:project_id => @project.id, :tracker_id => @issue.tracker_id,
+                             :status_id => @issue.status_id, :author_id => 3, :assigned_to_id => 3)
+
+    get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+    assert_includes allowed_ids_on_card(mine), status.id
+    assert_not_includes allowed_ids_on_card(theirs), status.id
+  end
+
+  def test_a_parent_with_an_open_subtask_is_not_offered_closed_columns
+    Issue.generate!(:project_id => @project.id, :parent_issue_id => @issue.id)
+    closed = IssueStatus.where(:is_closed => true).pluck(:id)
+    assert closed.any?
+
+    get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+    assert_empty allowed_ids_on_card(@issue.reload) & closed
+  end
+
+  def test_an_issue_the_user_may_not_edit_is_not_offered_for_dragging
+    # Not even a reorder: the server refuses every move of it, so a card that
+    # could be picked up would only ever be put back.
+    @role.remove_permission!(:edit_issues, :edit_own_issues, :add_issue_notes)
+
+    get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+    assert_select "#ea-card-#{@issue.id}[data-movable='0']"
+    assert_select "#ea-card-#{@issue.id}[data-allowed-status-ids]", 0
+  end
+
+  def test_an_assignee_only_transition_is_offered_to_members_of_the_assigned_group
+    status = IssueStatus.create!(:name => 'Only for the team')
+    WorkflowTransition.create!(:role_id => @role.id, :tracker_id => @issue.tracker_id,
+                               :old_status_id => @issue.status_id, :new_status_id => status.id,
+                               :assignee => true)
+    group = Group.generate!
+    group.users << User.find(2)
+    Member.create!(:project => @project, :principal => group, :role_ids => [@role.id])
+    with_settings :issue_group_assignment => '1' do
+      ours = Issue.generate!(:project_id => @project.id, :tracker_id => @issue.tracker_id,
+                             :status_id => @issue.status_id, :author_id => 3, :assigned_to_id => group.id)
+      theirs = Issue.generate!(:project_id => @project.id, :tracker_id => @issue.tracker_id,
+                               :status_id => @issue.status_id, :author_id => 3, :assigned_to_id => 3)
+
+      get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+      assert_includes allowed_ids_on_card(ours), status.id
+      assert_not_includes allowed_ids_on_card(theirs), status.id
+    end
+  end
+
+  def test_a_card_that_cannot_be_moved_carries_no_list
+    sub = Project.generate!(:parent_id => @project.id, :is_public => true)
+    stray = Issue.generate!(:project_id => sub.id, :status_id => @issue.status_id)
+
+    get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+    assert_select "#ea-card-#{stray.id}[data-movable='0']"
+    assert_select "#ea-card-#{stray.id}[data-allowed-status-ids]", 0
+  end
+
+  def test_a_card_the_user_may_not_change_the_status_of_lists_its_own_column_only
+    # Notes only: the server still accepts a reorder, never a status change.
+    @role.remove_permission!(:edit_issues, :edit_own_issues)
+    @role.add_permission!(:add_issues, :add_issue_notes)
+
+    get :index, :params => board_with_statuses(IssueStatus.pluck(:id))
+
+    assert_equal [@issue.status_id], allowed_ids_on_card(@issue)
+  end
+
+  def test_a_moved_card_comes_back_with_the_list_for_its_new_status
+    target = allowed_status_for(@issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    put :update, :params => { :id => @issue.id, :status_id => target.id }, :format => :js
+
+    assert_response :success
+    card = Nokogiri::HTML.fragment(JSON.parse(response.body)['card']).at_css('.ea-card')
+    listed = card['data-allowed-status-ids'].split(',').map(&:to_i)
+    assert_includes listed, target.id
+    expected = @issue.reload.new_statuses_allowed_to(User.find(2)).map(&:id) | [target.id]
+    assert_equal (expected & ExpertAgileQuery.new(:project => @project).board_columns.map(&:id)).sort,
+                 listed.sort
+  end
+
+  def test_a_status_change_something_else_undid_is_refused_not_reported_saved
+    target = allowed_status_for(@issue)
+    skip 'workflow offers no other status' if target.nil?
+    # A save that passes without the status reaching the database — what a
+    # callback from another plugin putting the old status back looks like.
+    Issue.any_instance.stubs(:save).returns(true)
+
+    put :update, :params => { :id => @issue.id, :status_id => target.id }, :format => :js
+
+    assert_response :unprocessable_entity
+    error = JSON.parse(response.body)['error']
+    assert_includes error, target.name
+    assert_includes error, @issue.status.name
+    assert_not_equal target.id, @issue.reload.status_id
+  end
+
   # --- Tooltip ---------------------------------------------------------
 
   def test_issue_tooltip
@@ -961,6 +1158,16 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
   end
 
   private
+
+  def board_with_statuses(status_ids)
+    { :project_id => @project.id, :set_filter => '1', :board_status_ids => status_ids.map(&:to_s) }
+  end
+
+  def allowed_ids_on_card(issue)
+    card = css_select("#ea-card-#{issue.id}").first
+    assert card, "card ##{issue.id} is on the board"
+    card['data-allowed-status-ids'].to_s.split(',').map(&:to_i).sort
+  end
 
   def allowed_status_for(issue)
     issue.new_statuses_allowed_to(User.find(2)).detect { |status| status.id != issue.status_id }

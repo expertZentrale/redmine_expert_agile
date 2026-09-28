@@ -13,10 +13,30 @@ notes from the section matching the pushed tag.
 
 ### Added
 
+- **The board shows where a card may go before it is dropped.** Picking a card up marks every
+  column allowed (green) or blocked (striped) for that card, from the same workflow check the
+  server enforces moves with: tracker, status, the user's roles, author- and assignee-only
+  transitions, open subtasks and blocking issues. A blocked column does not accept the drop.
 - **Workflow demo data for testing the board by hand.** `scripts/seed_board_workflow_demo.rb` and
   its teardown build projects with restrictive, role-dependent workflows and one saved board per
   swimlane field, on the disposable screenshots stack. Development only; not part of the plugin's
   runtime.
+
+### Fixed
+
+- **A cancelled drag left the card in the wrong column.** Pressing Escape or letting go outside
+  the board left the card wherever the pointer last was, with no request sent, until the next
+  reload. The card now goes back to where it was picked up.
+- **A status change another plugin undid was reported as saved.** A move whose save passed but
+  whose status did not reach the database answered with success, and the card jumped back on the
+  next reload. The move is now refused with a message naming both statuses.
+- **Swimlanes are offered for record fields only.** Grouping a board by % done, a date (start,
+  due, created, updated, closed) or the private flag answered with HTTP 500. None of those is a
+  lane a team works in or a value a card should be dragged into, so they are no longer offered;
+  swimlanes are project, tracker, status, priority, author, assignee, category and target version.
+  A board saved with swimlanes by one of the withdrawn fields opens ungrouped (#37).
+- **A swimlane field no issue on the board had a value for dropped the grouping silently.** The
+  board now shows the single "(none)" lane instead of looking ungrouped.
 
 ## [0.5.5] - 2026-09-27
 

@@ -213,3 +213,15 @@ configured from a `data-ea-coloris` attribute by `expert_agile_colors.js`.
 ### Workflow enforcement
 The board update calls `issue.new_statuses_allowed_to(User.current)` explicitly and returns a
 specific error. WIP limits are **advisory** — they flag the column, they never block a move.
+After the save it re-reads the status from the database and refuses the move if another
+callback put the old one back — a 200 must mean the card stays where it was dropped.
+
+The drop preview (`RedmineExpertAgile::MoveTargets`, rendered as `data-allowed-status-ids` on each
+card) is built from the **same** calls the update enforces with — `editable?`,
+`safe_attribute?('status_id')`, `new_statuses_allowed_to`. Plain cards share answers per
+project/tracker/status/author/assignee, so a full board costs a handful of workflow queries; cards
+with a parent, subtasks or a blocking relation are always asked through core one by one, because
+their closable/reopenable state depends on other issues. Never reimplement the workflow rules
+client-side or in a second code path: the preview must not be able to disagree with the refusal.
+The server stays authoritative; the preview only shows its answer early. Swimlane drops are
+unaffected by it (see issue #37).
