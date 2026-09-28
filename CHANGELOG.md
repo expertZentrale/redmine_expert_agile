@@ -35,8 +35,8 @@ notes from the section matching the pushed tag.
   lane a team works in or a value a card should be dragged into, so they are no longer offered;
   swimlanes are project, tracker, status, priority, author, assignee, category and target version.
   A board saved with swimlanes by one of the withdrawn fields opens ungrouped (#37).
-- **A swimlane field no issue on the board had a value for dropped the grouping silently.** The
-  board now shows the single "(none)" lane instead of looking ungrouped.
+- **Swimlanes silently disappeared when no issue on the board had a value for the chosen field,**
+  so the board looked ungrouped. It now shows the single "(none)" lane.
 
 ## [0.5.5] - 2026-09-27
 

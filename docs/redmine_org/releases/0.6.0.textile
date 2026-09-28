@@ -11,7 +11,7 @@ h4. Fixed
 * *A cancelled drag left the card in the wrong column.* Pressing Escape or letting go outside the board left the card wherever the pointer last was, with no request sent, until the next reload. It now goes back to where it was picked up.
 * *A status change another plugin undid was reported as saved,* and the card jumped back on the next reload. The move is now refused with a message naming both statuses.
 * *Boards grouped into swimlanes by % done, a date or the private flag answered with an error.* Swimlanes are now offered only for project, tracker, status, priority, author, assignee, category and target version.
-* *A swimlane field no issue on the board had a value for dropped the grouping silently.* The board now shows the single "(none)" lane.
+* *Swimlanes silently disappeared when no issue on the board had a value for the chosen field,* so the board looked ungrouped. It now shows the single "(none)" lane.
 
 h4. Upgrade notes
 
