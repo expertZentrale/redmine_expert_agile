@@ -116,12 +116,12 @@
     }
     if (config.containerType) { body.append('container_type', config.containerType); }
     /* What the lanes on screen are grouped by, so the answer refreshes those
-     * lanes. The lane itself only when the card left its own, which the
-     * server refuses: dropping it there is not a way to change the field. */
+     * lanes. The lane itself only when the card left its own: that drop sets
+     * the field, and only then. */
     if (config.swimlaneField) {
       body.append('swimlane_field', config.swimlaneField);
       var lane = laneOf(cell);
-      if (from && lane !== null && lane !== from.lane) { body.append('swimlane_id', lane); }
+      if (from && !sameLane(lane, from.lane)) { body.append('swimlane_id', lane); }
     }
 
     /* Set the moment the server says it saved, so a failure *after* that is not
@@ -370,10 +370,15 @@
     return allowedTargets.indexOf(cell.getAttribute('data-column-id')) !== -1;
   }
 
-  /* A card stays in its own lane: lanes are for reading the board. */
+  /* Another lane takes the card only where dropping it there sets the field
+   * the lanes are grouped by. Whether this user may set it on this card is
+   * the server's to say; a refusal puts the card back. */
   function laneAllowed(cell) {
-    var lane = laneOf(cell);
-    return originLane === null || lane === null || lane === originLane;
+    return config.swimlaneWritable || sameLane(laneOf(cell), originLane);
+  }
+
+  function sameLane(lane, own) {
+    return own === null || own === undefined || lane === null || lane === own;
   }
 
   function boardRoot() {
@@ -396,7 +401,10 @@
       var cell = node.classList.contains('ea-cell');
       if (cell && !laneAllowed(node)) { allowed = false; }
       node.classList.add(allowed ? 'ea-drop-allowed' : 'ea-drop-blocked');
-      if (id === own && allowed) { node.classList.add('ea-drop-origin'); }
+      /* The cell it came from, not the same column in every lane. */
+      if (id === own && allowed && (!cell || sameLane(laneOf(node), originLane))) {
+        node.classList.add('ea-drop-origin');
+      }
       if (node.classList.contains('ea-column-header')) {
         node.setAttribute('data-ea-title', node.getAttribute('title') || '');
         node.setAttribute('title', allowed ? config.labels.dropAllowed : config.labels.dropBlocked);
@@ -436,7 +444,7 @@
    * words the server would have used, without asking it: the answer is
    * already known. */
   function refuseBlockedDrop(card, cell, from, allowed) {
-    if (from && laneOf(cell) !== null && from.lane !== null && laneOf(cell) !== from.lane) {
+    if (!config.swimlaneWritable && from && !sameLane(laneOf(cell), from.lane)) {
       revertMove({ error: config.labels.laneBlocked || config.labels.moveFailed }, from);
       return;
     }

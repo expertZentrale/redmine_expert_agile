@@ -45,13 +45,16 @@ class ExpertAgileBoardsController < ApplicationController
     end
 
     # The board script sends a lane only when the card left the one it was
-    # picked up from. Lanes are for reading the board: the drop used to be
-    # accepted, its status change saved and its lane silently ignored, so the
-    # card was drawn in a lane the database never put it in. Refused before
-    # anything is written, so the status change that came with it is refused
-    # as well rather than half the gesture being accepted.
+    # picked up from. Such a drop writes the field the lanes are grouped by,
+    # for the fields a drag may set. Any other lane is refused by name before
+    # anything is written, so the status change that came with the drop is
+    # refused as well rather than half the gesture being accepted. It used to
+    # be: the status was saved, the lane ignored, and the card drawn in a lane
+    # the database never put it in.
+    lane_attribute = nil
     if params.key?(:swimlane_id)
-      return render_move_error(swimlane_not_writable_error, :unprocessable_entity)
+      lane_attribute = swimlane_column && ExpertAgileQuery.swimlane_attribute(swimlane_column.name)
+      return render_move_error(swimlane_not_writable_error, :unprocessable_entity) if lane_attribute.nil?
     end
 
     target_status_id = params[:status_id].presence && params[:status_id].to_i
@@ -81,6 +84,10 @@ class ExpertAgileBoardsController < ApplicationController
     Issue.transaction do
       @issue.init_journal(User.current)
       @issue.status_id = target_status_id if target_status_id
+      if lane_attribute && !assign_lane(lane_attribute)
+        render_move_error(swimlane_field_not_editable_error, :forbidden)
+        raise ActiveRecord::Rollback
+      end
       assign_to_current_user_if_configured(target_status_id)
 
       unless @issue.save
@@ -101,6 +108,12 @@ class ExpertAgileBoardsController < ApplicationController
       # What counts is what the database holds.
       if target_status_id && (kept = Issue.where(:id => @issue.id).pick(:status_id)) != target_status_id
         render_move_error(status_not_kept_error(target_status_id, kept), :unprocessable_entity)
+        raise ActiveRecord::Rollback
+      end
+      # The lane, for the same reason: a card drawn in a lane it is not in is
+      # exactly what the drop used to leave behind.
+      if lane_attribute && Issue.where(:id => @issue.id).pick(lane_attribute) != @issue.send(lane_attribute)
+        render_move_error(swimlane_not_kept_error, :unprocessable_entity)
         raise ActiveRecord::Rollback
       end
 
@@ -412,6 +425,8 @@ class ExpertAgileBoardsController < ApplicationController
     # the status changed. The status is set just before this runs.
     return unless target_status_id && @issue.status_id_changed?
     return if @issue.assigned_to_id.present?
+    # Dropped into the unassigned lane: the user said who it belongs to.
+    return if @issue.assigned_to_id_changed?
     # The issue form's rule for the field: the right to edit the issue, and the
     # assignee not made read-only by the workflow for this user.
     return unless @issue.safe_attribute?('assigned_to_id', User.current)
@@ -464,6 +479,30 @@ class ExpertAgileBoardsController < ApplicationController
 
   def swimlane_not_writable_error
     l(:error_expert_agile_swimlane_not_writable, :field => swimlane_field_label)
+  end
+
+  def swimlane_field_not_editable_error
+    l(:error_expert_agile_swimlane_field_not_editable, :field => swimlane_field_label)
+  end
+
+  def swimlane_not_kept_error
+    l(:error_expert_agile_swimlane_not_kept, :field => swimlane_field_label)
+  end
+
+  # Writes the lane the card was dropped into, '' being the "no value" lane.
+  # Through safe_attributes= and after the status is set, as the issue form
+  # does it, so the workflow's read-only fields for the new status and the
+  # right to edit the issue apply exactly as they do there. Whether the value
+  # is one the issue may take (a category of its project, a version it may be
+  # planned into, a user it may be assigned to) is left to the issue's own
+  # validation, which the save reports. False when the field may not be set.
+  def assign_lane(attribute)
+    return false unless @issue.safe_attribute?(attribute, User.current)
+
+    value = params[:swimlane_id].to_s
+    # send, because `a.b = x, y` would pass [x, y] as one argument.
+    @issue.send(:safe_attributes=, { attribute => value }, User.current)
+    @issue.send(attribute) == value.presence&.to_i
   end
 
   # The moved card plus fresh column aggregates, so the board can swap one card

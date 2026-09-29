@@ -84,8 +84,17 @@ Kartenzahl und WIP-Grenze, Review ist hervorgehoben, weil dort fuenf Karten gege
 vier stehen, und die Karten zeigen Ticketnummer, Tracker, Titel, Bearbeiter, Story Points und
 Fortschritt](docs/screenshots/de/01-board.png)
 
-Jedes Feld, nach dem die Abfrage gruppieren kann, wird zur Swimlane — dasselbe Board laesst sich
-so nach Bearbeiter, Tracker oder Prioritaet lesen.
+Swimlanes gruppieren das Board nach einem Datensatz, zu dem die Tickets gehoeren: Projekt,
+Tracker, Status, Prioritaet, Autor, Bearbeiter, Kategorie oder Zielversion. Dasselbe Board laesst
+sich so nach Bearbeiter, Tracker oder Prioritaet lesen.
+
+Eine Karte in eine andere Swimlane zu ziehen setzt dieses Feld, fuer die vier, die ein Zug aendern
+darf: Bearbeiter (die Karte uebergeben), Prioritaet, Kategorie und Zielversion. Es ist dieselbe
+Aenderung wie im Ticketformular, mit denselben Regeln: das Recht, das Ticket zu bearbeiten, Felder,
+die der Workflow schreibgeschuetzt macht, und die Validierung des Tickets (eine Kategorie seines
+Projekts, eine Version, in die es geplant werden darf). Ein Zug, der Swimlane und Spalte zugleich
+wechselt, wird als eine Aenderung gespeichert oder als eine abgelehnt. Swimlanes nach Projekt,
+Tracker, Status oder Autor sind nur zum Lesen: andere Swimlanes sind beim Ziehen gesperrt.
 
 Ein Board traegt die Tickets seiner Unterprojekte, das globale Board traegt alles. Ob eine Karte
 gezogen werden darf, ist deshalb eine Frage an das Projekt der Karte, nicht an das Projekt, dessen

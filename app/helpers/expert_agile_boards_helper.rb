@@ -264,9 +264,11 @@ module ExpertAgileBoardsHelper
       :editable => User.current.allowed_to?(:edit_expert_agile_board, project, :global => project.nil?),
       :columns => query.board_columns.map(&:to_h),
       # What the lanes are grouped by, sent back with every move so the answer
-      # carries the lanes on screen. A card is never dropped into another
-      # lane: the board holds it back there and the server refuses it.
+      # carries the lanes on screen, and whether a card may be dropped into
+      # another lane to change that field. Where it may not, the board holds
+      # the card back and the server refuses the drop.
       :swimlaneField => query.grouped? ? query.group_by : nil,
+      :swimlaneWritable => query.grouped? && ExpertAgileQuery.swimlane_attribute(query.group_by).present?,
       :labels => {
         :wipExceeded => l(:text_expert_agile_wip_limit_exceeded),
         # Only for a request that never came back with an answer. A move the
