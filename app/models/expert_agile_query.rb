@@ -295,6 +295,7 @@ class ExpertAgileQuery < IssueQuery
     @issue_count_by_status = nil
     @estimated_hours_by_status = nil
     @story_points_by_status = nil
+    reset_board_grid!
   end
 
   def board_columns

@@ -1148,6 +1148,104 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_not_equal target.id, @issue.reload.status_id
   end
 
+  # --- Swimlanes -------------------------------------------------------
+
+  def test_a_lane_band_carries_the_lane_its_cells_carry
+    issue = Issue.generate!(:project_id => @project.id, :category_id => 1)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'category' }
+
+    assert_response :success
+    assert_select 'tr.ea-swimlane-title[data-swimlane-id=?]', '1'
+    assert_select 'tr.ea-swimlane-title[data-swimlane-id=?] .ea-swimlane-points', '1'
+    assert_select "td.ea-cell[data-swimlane-id='1'] #ea-card-#{issue.id}"
+  end
+
+  def test_the_board_tells_its_script_what_the_lanes_are_grouped_by
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'tracker' }
+
+    config = JSON.parse(css_select('script#ea-board-data').first.text)
+    assert_equal 'tracker', config['swimlaneField']
+    assert_includes config['labels']['laneBlocked'], l(:field_tracker)
+  end
+
+  # Issue #37: a drop into another lane saved its status change and ignored
+  # the lane, so the card was drawn in a lane the database never put it in.
+  def test_a_drop_into_another_lane_is_refused_with_its_status_change
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :category_id => nil)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    put :update, :params => { :id => issue.id, :status_id => target.id,
+                              :swimlane_field => 'category', :swimlane_id => '1' }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert_includes JSON.parse(response.body)['error'], l(:field_category)
+    issue.reload
+    assert_equal 1, issue.status_id, 'the status change is refused with the lane'
+    assert_nil issue.category_id
+  end
+
+  def test_a_move_answers_with_the_lanes_on_screen
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :category_id => 1)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+    # The board on screen, which the move rebuilds from the session.
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'category' }
+
+    put :update, :params => { :id => issue.id, :status_id => target.id,
+                              :swimlane_field => 'category' }, :format => :js
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_equal '1', payload['swimlaneId']
+
+    board = ExpertAgileQuery.new(:name => '_', :project => @project)
+    board.group_by = 'category'
+    expected = board.swimlanes.map do |lane|
+      board.swimlane_totals(lane).merge(:id => board.swimlane_dom_id(lane)).stringify_keys
+    end
+    assert_equal expected, payload['lanes']
+  end
+
+  def test_a_move_on_an_ungrouped_board_carries_no_lanes
+    put :update, :params => { :id => @issue.id, :status_id => @issue.status_id }, :format => :js
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_not payload.key?('lanes')
+    assert_not payload.key?('swimlaneId')
+  end
+
+  def test_a_field_that_is_not_a_swimlane_answers_without_lanes
+    put :update, :params => { :id => @issue.id, :status_id => @issue.status_id,
+                              :swimlane_field => 'due_date' }, :format => :js
+
+    assert_response :success
+    assert_not JSON.parse(response.body).key?('lanes')
+  end
+
+  # Moving can change the lane without the card leaving its own: claiming it
+  # on a board grouped by assignee puts it in the claimer's lane.
+  def test_a_claimed_card_reports_the_lane_it_now_belongs_to
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :assigned_to_id => nil)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    with_agile_settings('auto_assign_on_move' => '1') do
+      put :update, :params => { :id => issue.id, :status_id => target.id,
+                                :swimlane_field => 'assigned_to' }, :format => :js
+    end
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_equal '2', payload['swimlaneId']
+    assert(payload['lanes'].any? { |lane| lane['id'] == '2' })
+  end
+
   # --- Tooltip ---------------------------------------------------------
 
   def test_issue_tooltip

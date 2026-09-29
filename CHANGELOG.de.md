@@ -9,6 +9,20 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Behoben
+
+- **Eine in eine andere Swimlane gezogene Karte wurde dort gezeichnet, ihre Swimlane aber nie
+  gespeichert** (#37). Der Statuswechsel des Zugs wurde gespeichert, die Swimlane ignoriert, und
+  die Karte zeigte bis zum naechsten Neuladen eine Zugehoerigkeit, die die Datenbank nicht kannte.
+  Eine Karte bleibt jetzt in ihrer Swimlane: andere Swimlanes sind beim Ziehen als gesperrt
+  markiert, und ein Ablegen dort wird mit Meldung abgelehnt, samt Statuswechsel.
+- **Die Summen der Swimlanes veralteten nach einem Zug.** Die Swimlane-Baender behielten ihre
+  Ticket- und Story-Point-Zahlen bis zum naechsten Neuladen. Ein Zug liefert jetzt die Summen
+  aller Swimlanes, und eine Karte, deren Swimlane sich als Nebenwirkung des Zugs geaendert hat
+  (Uebernehmen auf einem Board nach Bearbeiter), wird in ihre neue Swimlane gesetzt.
+
 ## [0.6.1] - 2026-10-01
 
 ### Behoben

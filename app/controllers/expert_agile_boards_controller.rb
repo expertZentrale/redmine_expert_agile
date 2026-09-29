@@ -44,6 +44,16 @@ class ExpertAgileBoardsController < ApplicationController
       return render_move_error(l(:error_expert_agile_issue_not_editable), :forbidden)
     end
 
+    # The board script sends a lane only when the card left the one it was
+    # picked up from. Lanes are for reading the board: the drop used to be
+    # accepted, its status change saved and its lane silently ignored, so the
+    # card was drawn in a lane the database never put it in. Refused before
+    # anything is written, so the status change that came with it is refused
+    # as well rather than half the gesture being accepted.
+    if params.key?(:swimlane_id)
+      return render_move_error(swimlane_not_writable_error, :unprocessable_entity)
+    end
+
     target_status_id = params[:status_id].presence && params[:status_id].to_i
     if target_status_id && target_status_id != @issue.status_id
       # `editable?` above only says the user may touch the issue at all, which
@@ -431,10 +441,35 @@ class ExpertAgileBoardsController < ApplicationController
     Issue.visible.where(:id => id).first
   end
 
+  # The field the page's lanes are grouped by, as the board script reports it,
+  # or nil for an ungrouped page. Only a field the board offers as swimlanes
+  # counts. Taken from the page rather than from the rebuilt board, so the
+  # lanes a move answers with are the ones on screen even when the session
+  # board has been regrouped in another tab since.
+  def swimlane_column
+    return @swimlane_column if defined?(@swimlane_column)
+
+    field = params[:swimlane_field].to_s
+    @swimlane_column = field.present? ? swimlane_columns.detect { |column| column.name.to_s == field } : nil
+  end
+
+  def swimlane_columns
+    ExpertAgileQuery.new(:project => @project).groupable_columns
+  end
+
+  def swimlane_field_label
+    column = swimlane_column
+    column ? column.caption : params[:swimlane_field].to_s.humanize
+  end
+
+  def swimlane_not_writable_error
+    l(:error_expert_agile_swimlane_not_writable, :field => swimlane_field_label)
+  end
+
   # The moved card plus fresh column aggregates, so the board can swap one card
   # and update the headers instead of reloading.
   def move_payload
-    {
+    payload = {
       :issueId => @issue.id,
       :statusId => @issue.status_id,
       :card => render_to_string(:partial => 'expert_agile_boards/issue_card',
@@ -442,6 +477,17 @@ class ExpertAgileBoardsController < ApplicationController
                                 :formats => [:html]),
       :columns => @query.board_columns.map(&:to_h)
     }
+    # The card goes into the cell of the lane it now belongs to, and the lane
+    # bands are refreshed. A move can change the lane without being dropped
+    # into another one: claiming a card on a board grouped by assignee does.
+    # Only after the card is rendered: its drop preview preloads the whole
+    # board once the board's issues are loaded.
+    if swimlane_column
+      @query.group_by = swimlane_column.name.to_s
+      payload[:swimlaneId] = @query.swimlane_dom_id_for(@issue)
+      payload[:lanes] = @query.swimlane_summaries
+    end
+    payload
   end
 
   # A plain JSON contract. RedmineUP returns an HTML partial on success and a
