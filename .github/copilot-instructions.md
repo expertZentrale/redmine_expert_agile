@@ -69,6 +69,10 @@ Branch `type/short-desc` (Conventional-Commit types), PR into protected `main`, 
 squash-merge. Releases are tag-driven: bump `version` in `init.rb` (single source of truth),
 commit, then `git tag vX.Y.Z && git push origin vX.Y.Z`. `release.yml` verifies tag == init.rb
 version and builds the notes from the matching `## [<version>]` CHANGELOG section.
+A final step asks the plugin website (`expertZentrale/redmine-plugins`) to rebuild via a
+`plugin-released` dispatch, using the `SITE_DISPATCH_TOKEN` secret (fine-grained token, Contents
+read/write on that repo only); without it the site catches up on its weekly cron, and the step
+never fails a release.
 
 Every release also updates `docs/redmine_org/` — Textile (not Markdown: `h3.`, `*bold*`, `@code@`,
 `"label":url`) copy-paste sources for <https://www.redmine.org/plugins/redmine_expert_agile>, part
