@@ -139,6 +139,10 @@ first, then tag the same commit and push (`git tag vX.Y.Z && git push origin vX.
 `.github/workflows/release.yml` verifies that the `init.rb` version equals the tag (fails on
 mismatch), builds `redmine_expert_agile-<version>.{zip,tar.gz}` from the tagged tree, and
 publishes the release with notes taken from the matching `## [<version>]` CHANGELOG section.
+A final step asks the plugin website (`expertZentrale/redmine-plugins`) to rebuild via a
+`plugin-released` dispatch, using the `SITE_DISPATCH_TOKEN` secret (fine-grained token, Contents
+read/write on that repo only); without it the site catches up on its weekly cron, and the step
+never fails a release.
 
 **Every release must also update `docs/redmine_org/`** — the copy-paste sources for the listing
 at <https://www.redmine.org/plugins/redmine_expert_agile>. That directory renders **Textile**, not
