@@ -1,0 +1,11 @@
+h3. redmine_expert_agile 0.6.1 — 2026-10-01
+
+A bugfix release. Please update if you use story points or sprints.
+
+h4. Fixed
+
+* *Creating an issue with story points or a sprint failed.* As soon as the new-issue form shows the story points or the sprint field, it sends them along, even when left empty, and saving then failed with "Issue cannot be blank". Creating issues with @expert_agile_data_attributes@ through the REST API (@POST /issues.json@) failed the same way. Both work again; the rule that a sprint must belong to the issue's project still applies.
+
+h4. Upgrade notes
+
+No migrations and no new settings. Replace the plugin directory and restart.
