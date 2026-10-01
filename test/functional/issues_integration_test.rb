@@ -154,6 +154,60 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     assert_equal own.id, ExpertAgileData.where(:issue_id => @issue.id).pick(:sprint_id)
   end
 
+  # The new-issue form posts expert_agile_data_attributes as soon as the story
+  # points or sprint field is shown - even left empty. The nested record used
+  # to validate issue_id before the issue had one, so every such create failed
+  # with "Issue cannot be blank" (#48).
+  def test_create_with_empty_agile_fields
+    with_agile_settings('sprints_on' => '1', 'story_points_on' => '1') do
+      assert_difference 'Issue.count', 1 do
+        post :create, :params => {
+          :project_id => @project.id,
+          :issue => { :tracker_id => 1, :subject => 'Created from the form',
+                      :expert_agile_data_attributes => { :story_points => '', :sprint_id => '' } }
+        }
+      end
+    end
+
+    assert_response :redirect
+  end
+
+  def test_create_with_story_points_and_sprint
+    own = ExpertAgileSprint.create!(:project => @project, :name => 'Own sprint',
+                                    :start_date => Date.new(2026, 1, 1),
+                                    :end_date => Date.new(2026, 1, 14))
+
+    with_agile_settings('sprints_on' => '1', 'story_points_on' => '1') do
+      post :create, :params => {
+        :project_id => @project.id,
+        :issue => { :tracker_id => 1, :subject => 'Planned from the start',
+                    :expert_agile_data_attributes => { :story_points => '5', :sprint_id => own.id.to_s } }
+      }
+    end
+
+    assert_response :redirect
+    data = Issue.order(:id => :desc).first.expert_agile_data
+    assert_equal 5, data.story_points
+    assert_equal own.id, data.sprint_id
+  end
+
+  # Still enforced on create: the sprint must belong to the new issue's project.
+  def test_create_refuses_a_sprint_of_an_unrelated_project
+    foreign = foreign_sprint
+
+    with_agile_settings('sprints_on' => '1') do
+      assert_no_difference 'Issue.count' do
+        post :create, :params => {
+          :project_id => @project.id,
+          :issue => { :tracker_id => 1, :subject => 'Sneaky',
+                      :expert_agile_data_attributes => { :sprint_id => foreign.id.to_s } }
+        }
+      end
+    end
+
+    assert_response :success
+  end
+
   # Journals written before the validation may still point at a sprint the
   # reader has no business knowing about. The history names it only when the
   # reader could see it anyway, and shows the bare id otherwise.

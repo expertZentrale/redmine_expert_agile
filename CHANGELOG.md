@@ -9,6 +9,16 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Fixed
+
+- **Creating an issue with story points or a sprint failed.** The new-issue form sends the agile
+  fields as soon as story points or the sprint selector are shown, even left empty, and the save
+  then failed with "Issue cannot be blank" — the same for `POST /issues.json` with
+  `expert_agile_data_attributes`. The agile row is now validated against its issue rather than the
+  not-yet-assigned `issue_id`. ([#48](https://github.com/expertZentrale/redmine_expert_agile/issues/48))
+
 ## [0.6.0] - 2026-09-28
 
 ### Added

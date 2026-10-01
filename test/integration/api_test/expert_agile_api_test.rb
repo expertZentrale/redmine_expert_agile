@@ -91,6 +91,36 @@ class ExpertAgileApiTest < Redmine::IntegrationTest
     assert_includes [401, 403, 404], response.status
   end
 
+  # POST /issues.json with nested agile data used to fail with "Issue cannot be
+  # blank" for any value, so clients needed a second PUT (#48).
+  def test_create_issue_with_agile_data
+    sprint = sprint!
+
+    assert_difference 'Issue.count', 1 do
+      post '/issues.json',
+           :params => { :issue => { :project_id => @project.id, :tracker_id => 1, :subject => 'Via API',
+                                    :expert_agile_data_attributes => { :story_points => 3,
+                                                                       :sprint_id => sprint.id } } }.to_json,
+           :headers => auth.merge('Content-Type' => 'application/json')
+    end
+
+    assert_response :created
+    data = Issue.order(:id => :desc).first.expert_agile_data
+    assert_equal 3, data.story_points
+    assert_equal sprint.id, data.sprint_id
+  end
+
+  def test_create_issue_with_empty_agile_data
+    assert_difference 'Issue.count', 1 do
+      post '/issues.json',
+           :params => { :issue => { :project_id => @project.id, :tracker_id => 1, :subject => 'Via API',
+                                    :expert_agile_data_attributes => { :story_points => '' } } }.to_json,
+           :headers => auth.merge('Content-Type' => 'application/json')
+    end
+
+    assert_response :created
+  end
+
   def test_put_agile_data_sets_story_points
     put "/issues/#{@issue.id}/expert_agile_data.json",
         :params => { :expert_agile_data => { :story_points => 8 } }.to_json,

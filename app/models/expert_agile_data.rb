@@ -10,7 +10,14 @@ class ExpertAgileData < ExpertAgileApplicationRecord
   # lazily, so declaring the association here is safe either way.
   belongs_to :sprint, :class_name => 'ExpertAgileSprint', :optional => true
 
-  validates :issue_id, :presence => true, :uniqueness => true
+  # The association, not the column: on a new issue the nested record is
+  # validated before the issue is inserted, so issue_id is still nil while
+  # inverse_of already points it at its issue. Checking the column made every
+  # create with agile fields fail with "Issue cannot be blank" - from the
+  # new-issue form as well as POST /issues.json (#48). The unique index on
+  # issue_id still backs the uniqueness check.
+  validates :issue, :presence => true
+  validates :issue_id, :uniqueness => true, :allow_nil => true
   validates :story_points,
             :numericality => { :only_integer => true, :greater_than_or_equal_to => 0,
                                :less_than => 2**31, :allow_nil => true }

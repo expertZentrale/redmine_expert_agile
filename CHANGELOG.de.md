@@ -9,6 +9,17 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Behoben
+
+- **Anlegen eines Tickets mit Story Points oder Sprint schlug fehl.** Das Formular für neue
+  Tickets schickt die Agile-Felder mit, sobald Story Points oder die Sprint-Auswahl sichtbar sind
+  — auch leer —, und das Speichern scheiterte dann mit „Ticket muss ausgefüllt werden“; ebenso
+  `POST /issues.json` mit `expert_agile_data_attributes`. Der Agile-Datensatz wird jetzt gegen sein
+  Ticket geprüft statt gegen die noch nicht vergebene `issue_id`.
+  ([#48](https://github.com/expertZentrale/redmine_expert_agile/issues/48))
+
 ## [0.6.0] - 2026-09-28
 
 ### Hinzugefuegt
