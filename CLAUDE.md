@@ -232,8 +232,9 @@ The server stays authoritative; the preview only shows its answer early.
 ### Swimlane drops
 A drop into another lane writes the grouped field only for `ExpertAgileQuery::WRITABLE_SWIMLANES`
 (assignee, category, target version, priority), through `safe_attributes=` after the status is set
-and inside the move's transaction, then re-reads it like the status. Every other lane is refused
-by name before anything is written. The board script sends `swimlane_field` on every move and
-`swimlane_id` only when the card left its lane; the answer carries `swimlaneId` and every lane's
-totals (`BoardGrid#swimlane_summaries`, the same numbers the page renders). Never add a field to
-the allowlist that a drag should not set (project, tracker, author, dates).
+and inside the move's transaction, then re-reads it against the requested lane like the status.
+Every other lane is refused by name before anything is written. The board script sends
+`swimlane_field` on every move and `swimlane_id` only when the card left its lane; the answer
+carries `swimlaneId` and every lane's totals (`BoardGrid#swimlane_summaries`, the same numbers the
+page renders). Never add a field to the allowlist that a drag should not set (project, tracker,
+author, dates).

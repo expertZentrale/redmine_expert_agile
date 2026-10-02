@@ -111,8 +111,10 @@ class ExpertAgileBoardsController < ApplicationController
         raise ActiveRecord::Rollback
       end
       # The lane, for the same reason: a card drawn in a lane it is not in is
-      # exactly what the drop used to leave behind.
-      if lane_attribute && Issue.where(:id => @issue.id).pick(lane_attribute) != @issue.send(lane_attribute)
+      # exactly what the drop used to leave behind. Measured against the lane
+      # the card was dropped into, not against the issue in memory: a
+      # before_save callback that puts the old value back changes both.
+      if lane_attribute && Issue.where(:id => @issue.id).pick(lane_attribute) != requested_lane_value
         render_move_error(swimlane_not_kept_error, :unprocessable_entity)
         raise ActiveRecord::Rollback
       end
@@ -499,10 +501,14 @@ class ExpertAgileBoardsController < ApplicationController
   def assign_lane(attribute)
     return false unless @issue.safe_attribute?(attribute, User.current)
 
-    value = params[:swimlane_id].to_s
     # send, because `a.b = x, y` would pass [x, y] as one argument.
-    @issue.send(:safe_attributes=, { attribute => value }, User.current)
-    @issue.send(attribute) == value.presence&.to_i
+    @issue.send(:safe_attributes=, { attribute => params[:swimlane_id].to_s }, User.current)
+    @issue.send(attribute) == requested_lane_value
+  end
+
+  # The id of the lane the card was dropped into, nil for the "no value" lane.
+  def requested_lane_value
+    params[:swimlane_id].to_s.presence&.to_i
   end
 
   # The moved card plus fresh column aggregates, so the board can swap one card
