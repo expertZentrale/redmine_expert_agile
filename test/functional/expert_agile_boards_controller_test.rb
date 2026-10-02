@@ -1387,15 +1387,21 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
   # A before_save callback that puts the old value back changes the issue in
   # memory as well as in the database, so the two agree and only the lane the
   # card was dropped into tells that the drop did not land.
+  #
+  # The callback is a method named by a symbol, not a proc: Rails 6.1
+  # (Redmine 5.1) identifies a proc callback by its object_id, so
+  # skip_callback cannot find it again, and it would stay on Issue for every
+  # later test.
   def test_a_lane_a_callback_put_back_is_refused_not_reported_saved
     issue = Issue.generate!(:project_id => @project.id, :category_id => nil)
-    revert = proc { self.category_id = category_id_was }
-    Issue.set_callback(:save, :before, revert)
+    Issue.send(:define_method, :expert_agile_test_revert_category) { self.category_id = category_id_was }
+    Issue.set_callback(:save, :before, :expert_agile_test_revert_category)
     begin
       put :update, :params => { :id => issue.id, :status_id => issue.status_id,
                                 :swimlane_field => 'category', :swimlane_id => '1' }, :format => :js
     ensure
-      Issue.skip_callback(:save, :before, revert)
+      Issue.skip_callback(:save, :before, :expert_agile_test_revert_category)
+      Issue.send(:remove_method, :expert_agile_test_revert_category)
     end
 
     assert_response :unprocessable_entity
