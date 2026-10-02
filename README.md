@@ -75,8 +75,16 @@ Review and Test sub-columns, and Done. Each column header carries its card count
 Review is highlighted for holding five cards against a limit of four, and the cards show issue
 id, tracker, subject, assignee, story points and percent done](docs/screenshots/en/01-board.png)
 
-Any field the query can group by becomes a swimlane, so the same board can be read per assignee,
-per tracker or per priority.
+Swimlanes group the board by a record the issues belong to: project, tracker, status, priority,
+author, assignee, category or target version. The same board can be read per assignee, per tracker
+or per priority.
+
+Dropping a card into another lane sets that field, for the four a drag may change: assignee (hand
+the card over), priority, category and target version. It is the same edit the issue form makes,
+with the same rules: the right to edit the issue, fields the workflow makes read-only, and the
+issue's own validation (a category of its project, a version it may be planned into). A drop that
+changes both lane and column is saved as one change or refused as one. Lanes by project, tracker,
+status or author are for reading only: other lanes are blocked while a card is dragged.
 
 A board carries its subprojects' issues, and the global board carries everything — so whether a
 card may be dragged is a question about that card's own project, not about the one whose board is

@@ -333,6 +333,8 @@
 }
 
 .ea-swimlane-points { background: #e5ecfb; color: #2f5aa8; border-color: #c3d3f0; }
+/* inline-block above would otherwise override the attribute. */
+.ea-swimlane-points[hidden] { display: none; }
 
 /* Separate one lane from the next. */
 .ea-swimlane td { border-bottom: 2px solid #e3e7ec; padding-bottom: 10px; }

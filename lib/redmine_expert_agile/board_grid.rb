@@ -116,6 +116,37 @@ module RedmineExpertAgile
       }
     end
 
+    # The lane id a cell and a lane band carry in data-swimlane-id: the
+    # record's id, or '' for the "no value" lane and an ungrouped board.
+    def swimlane_dom_id(swimlane)
+      return '' if swimlane.nil? || swimlane == :none
+
+      lane_key(swimlane).to_s
+    end
+
+    # The lane one issue is drawn in, in the same terms.
+    def swimlane_dom_id_for(issue)
+      grouped? ? swimlane_dom_id(group_by_column.group_value(issue)) : ''
+    end
+
+    # Every lane with its totals, for a move to refresh the lane bands with.
+    # The same totals the page renders, so the two cannot disagree.
+    def swimlane_summaries
+      swimlanes.map do |swimlane|
+        swimlane_totals(swimlane).merge(:id => swimlane_dom_id(swimlane))
+      end
+    end
+
+    # Drops everything derived from the loaded issues, for a caller that has
+    # just written one of them.
+    def reset_board_grid!
+      @board_issues = nil
+      @truncated = nil
+      @swimlanes = nil
+      @issue_board = nil
+      @status_changed_at = nil
+    end
+
     # Issues of one cell. Pass :none for an ungrouped board, or a swimlane
     # (including nil, the "no value" lane) for a grouped one.
     def issues_for(status_id, swimlane = :none)

@@ -1148,6 +1148,338 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_not_equal target.id, @issue.reload.status_id
   end
 
+  # --- Swimlanes -------------------------------------------------------
+
+  def test_a_lane_band_carries_the_lane_its_cells_carry
+    issue = Issue.generate!(:project_id => @project.id, :category_id => 1)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'category' }
+
+    assert_response :success
+    assert_select 'tr.ea-swimlane-title[data-swimlane-id=?]', '1'
+    assert_select 'tr.ea-swimlane-title[data-swimlane-id=?] .ea-swimlane-points', '1'
+    assert_select "td.ea-cell[data-swimlane-id='1'] #ea-card-#{issue.id}"
+  end
+
+  def test_the_board_tells_its_script_what_the_lanes_are_grouped_by
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'tracker' }
+
+    config = JSON.parse(css_select('script#ea-board-data').first.text)
+    assert_equal 'tracker', config['swimlaneField']
+    assert_includes config['labels']['laneBlocked'], l(:field_tracker)
+  end
+
+  def test_the_board_tells_its_script_which_lanes_take_a_card
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'category' }
+    assert JSON.parse(css_select('script#ea-board-data').first.text)['swimlaneWritable']
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'tracker' }
+    assert_not JSON.parse(css_select('script#ea-board-data').first.text)['swimlaneWritable']
+  end
+
+  # Issue #37: a drop into another lane saved its status change and ignored
+  # the lane, so the card was drawn in a lane the database never put it in.
+  def test_a_drop_into_another_lane_writes_the_field_with_the_status_change
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :category_id => nil)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    put :update, :params => { :id => issue.id, :status_id => target.id,
+                              :swimlane_field => 'category', :swimlane_id => '1' }, :format => :js
+
+    assert_response :success
+    assert_equal '1', JSON.parse(response.body)['swimlaneId']
+    issue.reload
+    assert_equal target.id, issue.status_id
+    assert_equal 1, issue.category_id
+    changed = issue.journals.last.details.map(&:prop_key)
+    assert_includes changed, 'category_id', 'the lane change is in the issue history'
+    assert_includes changed, 'status_id'
+  end
+
+  def test_a_drop_into_the_none_lane_clears_the_field
+    issue = Issue.generate!(:project_id => @project.id, :category_id => 1)
+
+    put :update, :params => { :id => issue.id, :status_id => issue.status_id,
+                              :swimlane_field => 'category', :swimlane_id => '' }, :format => :js
+
+    assert_response :success
+    assert_equal '', JSON.parse(response.body)['swimlaneId']
+    assert_nil issue.reload.category_id
+  end
+
+  def test_a_drop_into_an_assignee_lane_hands_the_card_over
+    issue = Issue.generate!(:project_id => @project.id, :assigned_to_id => 2)
+
+    put :update, :params => { :id => issue.id, :status_id => issue.status_id,
+                              :swimlane_field => 'assigned_to', :swimlane_id => '3' }, :format => :js
+
+    assert_response :success
+    assert_equal 3, issue.reload.assigned_to_id
+  end
+
+  # Dropping into the unassigned lane says who the card belongs to: nobody.
+  # Claiming it on the way would overrule the user.
+  def test_a_drop_into_the_unassigned_lane_is_not_claimed
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :assigned_to_id => 3)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    with_agile_settings('auto_assign_on_move' => '1') do
+      put :update, :params => { :id => issue.id, :status_id => target.id,
+                                :swimlane_field => 'assigned_to', :swimlane_id => '' }, :format => :js
+    end
+
+    assert_response :success
+    assert_nil issue.reload.assigned_to_id
+  end
+
+  def test_a_drop_into_a_lane_of_a_field_a_drag_may_not_set_is_refused_by_name
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    put :update, :params => { :id => issue.id, :status_id => target.id,
+                              :swimlane_field => 'tracker', :swimlane_id => '2' }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert_includes JSON.parse(response.body)['error'], l(:field_tracker)
+    issue.reload
+    assert_equal 1, issue.tracker_id
+    assert_equal 1, issue.status_id, 'the status change is refused with the lane'
+  end
+
+  def test_a_lane_of_a_field_that_is_not_a_swimlane_is_refused
+    put :update, :params => { :id => @issue.id, :status_id => @issue.status_id,
+                              :swimlane_field => 'due_date', :swimlane_id => '2026-01-01' }, :format => :js
+
+    assert_response :unprocessable_entity
+  end
+
+  # The issue form's rule: a field the workflow makes read-only for this role
+  # cannot be set by dragging either. Core asks the workflow with the issue's
+  # current status, and the move sets the new status before it writes the
+  # lane, so the rules of the status the card is dropped into apply, as on the
+  # issue form. Read-only in the target status alone is therefore enough.
+  def test_a_lane_whose_field_is_read_only_in_the_new_status_is_refused_with_its_status_change
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :category_id => nil)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+    WorkflowPermission.create!(:role_id => @role.id, :tracker_id => issue.tracker_id,
+                               :old_status_id => target.id,
+                               :field_name => 'category_id', :rule => 'readonly')
+
+    put :update, :params => { :id => issue.id, :status_id => target.id,
+                              :swimlane_field => 'category', :swimlane_id => '1' }, :format => :js
+
+    assert_response :forbidden
+    assert_includes JSON.parse(response.body)['error'], l(:field_category)
+    issue.reload
+    assert_nil issue.category_id
+    assert_equal 1, issue.status_id
+  end
+
+  # The other half: read-only only in the status the card leaves does not
+  # stop a drop that also moves it to a status where the field is editable.
+  def test_a_lane_whose_field_is_read_only_only_in_the_old_status_is_written
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :category_id => nil)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+    WorkflowPermission.create!(:role_id => @role.id, :tracker_id => issue.tracker_id,
+                               :old_status_id => issue.status_id,
+                               :field_name => 'category_id', :rule => 'readonly')
+
+    put :update, :params => { :id => issue.id, :status_id => target.id,
+                              :swimlane_field => 'category', :swimlane_id => '1' }, :format => :js
+
+    assert_response :success
+    issue.reload
+    assert_equal 1, issue.category_id
+    assert_equal target.id, issue.status_id
+  end
+
+  def test_a_drop_into_a_priority_lane_sets_the_priority
+    issue = Issue.generate!(:project_id => @project.id, :priority_id => 5)
+
+    put :update, :params => { :id => issue.id, :status_id => issue.status_id,
+                              :swimlane_field => 'priority', :swimlane_id => '7' }, :format => :js
+
+    assert_response :success
+    assert_equal '7', JSON.parse(response.body)['swimlaneId']
+    assert_equal 7, issue.reload.priority_id
+  end
+
+  def test_a_drop_into_a_version_lane_plans_the_card
+    issue = Issue.generate!(:project_id => @project.id, :fixed_version_id => nil)
+    open_version = Version.find(3)
+    assert_equal 'open', open_version.status
+
+    put :update, :params => { :id => issue.id, :status_id => issue.status_id,
+                              :swimlane_field => 'fixed_version', :swimlane_id => open_version.id.to_s }, :format => :js
+
+    assert_response :success
+    assert_equal open_version.id, issue.reload.fixed_version_id
+  end
+
+  def test_a_drop_into_a_version_shared_from_another_project_plans_the_card
+    issue = Issue.generate!(:project_id => @project.id, :fixed_version_id => nil)
+    shared = Version.find(4)
+    assert_not_equal @project.id, shared.project_id
+    assert_includes @project.shared_versions, shared
+
+    put :update, :params => { :id => issue.id, :status_id => issue.status_id,
+                              :swimlane_field => 'fixed_version', :swimlane_id => shared.id.to_s }, :format => :js
+
+    assert_response :success
+    assert_equal shared.id, issue.reload.fixed_version_id
+  end
+
+  # A closed version is not one an issue may be planned into. The status
+  # change that came with the drop is refused with it.
+  def test_a_drop_into_a_closed_version_lane_is_refused_with_its_status_change
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :fixed_version_id => nil)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+    closed = Version.find(1)
+    assert_equal 'closed', closed.status
+
+    put :update, :params => { :id => issue.id, :status_id => target.id,
+                              :swimlane_field => 'fixed_version', :swimlane_id => closed.id.to_s }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert_includes JSON.parse(response.body)['error'], l(:field_fixed_version)
+    issue.reload
+    assert_nil issue.fixed_version_id
+    assert_equal 1, issue.status_id
+  end
+
+  def test_a_drop_into_a_version_of_an_unrelated_project_is_refused
+    issue = Issue.generate!(:project_id => @project.id, :fixed_version_id => nil)
+    foreign = Version.find(5)
+    assert_not_includes @project.shared_versions, foreign
+
+    put :update, :params => { :id => issue.id, :status_id => issue.status_id,
+                              :swimlane_field => 'fixed_version', :swimlane_id => foreign.id.to_s }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert_includes JSON.parse(response.body)['error'], l(:field_fixed_version)
+    assert_nil issue.reload.fixed_version_id
+  end
+
+  # Whether the value fits the issue is the issue's own validation.
+  def test_a_lane_value_the_issue_may_not_take_is_refused_with_the_reason
+    issue = Issue.generate!(:project_id => @project.id, :category_id => nil)
+    foreign = IssueCategory.where.not(:project_id => @project.id).first
+
+    put :update, :params => { :id => issue.id, :status_id => issue.status_id,
+                              :swimlane_field => 'category', :swimlane_id => foreign.id.to_s }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert_includes JSON.parse(response.body)['error'], l(:field_category)
+    assert_nil issue.reload.category_id
+  end
+
+  # A before_save callback that puts the old value back changes the issue in
+  # memory as well as in the database, so the two agree and only the lane the
+  # card was dropped into tells that the drop did not land.
+  #
+  # The callback is a method named by a symbol, not a proc: Rails 6.1
+  # (Redmine 5.1) identifies a proc callback by its object_id, so
+  # skip_callback cannot find it again, and it would stay on Issue for every
+  # later test.
+  def test_a_lane_a_callback_put_back_is_refused_not_reported_saved
+    issue = Issue.generate!(:project_id => @project.id, :category_id => nil)
+    Issue.send(:define_method, :expert_agile_test_revert_category) { self.category_id = category_id_was }
+    Issue.set_callback(:save, :before, :expert_agile_test_revert_category)
+    begin
+      put :update, :params => { :id => issue.id, :status_id => issue.status_id,
+                                :swimlane_field => 'category', :swimlane_id => '1' }, :format => :js
+    ensure
+      Issue.skip_callback(:save, :before, :expert_agile_test_revert_category)
+      Issue.send(:remove_method, :expert_agile_test_revert_category)
+    end
+
+    assert_response :unprocessable_entity
+    assert_includes JSON.parse(response.body)['error'], l(:field_category)
+    assert_nil issue.reload.category_id
+  end
+
+  def test_a_lane_change_something_else_undid_is_refused_not_reported_saved
+    issue = Issue.generate!(:project_id => @project.id, :category_id => nil)
+    Issue.any_instance.stubs(:save).returns(true)
+
+    put :update, :params => { :id => issue.id, :status_id => issue.status_id,
+                              :swimlane_field => 'category', :swimlane_id => '1' }, :format => :js
+
+    assert_response :unprocessable_entity
+    assert_includes JSON.parse(response.body)['error'], l(:field_category)
+    assert_nil issue.reload.category_id
+  end
+
+  def test_a_move_answers_with_the_lanes_on_screen
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :category_id => 1)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+    # The board on screen, which the move rebuilds from the session.
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'category' }
+
+    put :update, :params => { :id => issue.id, :status_id => target.id,
+                              :swimlane_field => 'category' }, :format => :js
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_equal '1', payload['swimlaneId']
+
+    board = ExpertAgileQuery.new(:name => '_', :project => @project)
+    board.group_by = 'category'
+    expected = board.swimlanes.map do |lane|
+      board.swimlane_totals(lane).merge(:id => board.swimlane_dom_id(lane)).stringify_keys
+    end
+    assert_equal expected, payload['lanes']
+  end
+
+  def test_a_move_on_an_ungrouped_board_carries_no_lanes
+    put :update, :params => { :id => @issue.id, :status_id => @issue.status_id }, :format => :js
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_not payload.key?('lanes')
+    assert_not payload.key?('swimlaneId')
+  end
+
+  def test_a_field_that_is_not_a_swimlane_answers_without_lanes
+    put :update, :params => { :id => @issue.id, :status_id => @issue.status_id,
+                              :swimlane_field => 'due_date' }, :format => :js
+
+    assert_response :success
+    assert_not JSON.parse(response.body).key?('lanes')
+  end
+
+  # Moving can change the lane without the card leaving its own: claiming it
+  # on a board grouped by assignee puts it in the claimer's lane.
+  def test_a_claimed_card_reports_the_lane_it_now_belongs_to
+    issue = Issue.generate!(:project_id => @project.id, :tracker_id => 1, :status_id => 1,
+                            :assigned_to_id => nil)
+    target = allowed_status_for(issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    with_agile_settings('auto_assign_on_move' => '1') do
+      put :update, :params => { :id => issue.id, :status_id => target.id,
+                                :swimlane_field => 'assigned_to' }, :format => :js
+    end
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_equal '2', payload['swimlaneId']
+    assert(payload['lanes'].any? { |lane| lane['id'] == '2' })
+  end
+
   # --- Tooltip ---------------------------------------------------------
 
   def test_issue_tooltip

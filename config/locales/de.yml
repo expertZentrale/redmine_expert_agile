@@ -127,6 +127,10 @@ de:
   error_expert_agile_sprint_not_editable: Sie duerfen den Sprint dieses Tickets nicht aendern
   error_expert_agile_status_not_editable: Sie duerfen den Status dieses Tickets nicht aendern
   error_expert_agile_status_not_kept: "Der Statuswechsel nach %{to} wurde nicht gespeichert: das Ticket steht weiterhin auf %{status}. Eine andere Regel oder ein Plugin hat ihn verhindert"
+  error_expert_agile_swimlane_not_writable: "Eine Karte kann nicht in eine andere Swimlane nach %{field} verschoben werden"
+  error_expert_agile_swimlane_field_not_editable: "Sie duerfen das Feld %{field} dieses Tickets nicht aendern"
+  error_expert_agile_swimlane_not_kept: "Die Aenderung von %{field} wurde nicht gespeichert. Eine andere Regel oder ein Plugin hat den alten Wert beibehalten"
+  error_expert_agile_move_saved_lane_not_shown: Der Zug wurde gespeichert. Die Karte gehoert jetzt zu einer Swimlane, die das Board nicht zeigt. Laden Sie die Seite neu, um sie zu sehen
   text_expert_agile_drop_allowed: Diese Karte darf hier abgelegt werden
   text_expert_agile_drop_blocked: Der Workflow erlaubt diese Karte hier nicht
   label_expert_agile_swimlane_none: Keine Swimlanes

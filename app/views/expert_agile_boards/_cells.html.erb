@@ -3,7 +3,7 @@
   <td class="ea-cell"
       data-column-id="<%= column.id %>"
       data-drop-id="<%= column.id %>"
-      data-swimlane-id="<%= swimlane == :none || swimlane.nil? ? '' : swimlane.id %>">
+      data-swimlane-id="<%= @query.swimlane_dom_id(swimlane) %>">
     <div class="ea-cell-issues">
       <% @query.issues_for(column.id, swimlane).each do |issue| %>
         <%= render :partial => 'expert_agile_boards/issue_card',

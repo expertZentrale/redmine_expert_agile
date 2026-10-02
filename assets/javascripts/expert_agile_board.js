@@ -21,6 +21,9 @@
   /* Status columns the dragged card may be dropped into, read from the card
    * at dragstart; null when the card carries no such list. */
   var allowedTargets = null;
+  /* The lane the dragged card was picked up from, '' for the "no value"
+   * lane; null on an ungrouped board and in the backlog planner. */
+  var originLane = null;
 
   function readConfig() {
     var island = document.getElementById('ea-board-data');
@@ -112,6 +115,14 @@
       body.append('board_project_id', config.projectId === null || config.projectId === undefined ? '' : config.projectId);
     }
     if (config.containerType) { body.append('container_type', config.containerType); }
+    /* What the lanes on screen are grouped by, so the answer refreshes those
+     * lanes. The lane itself only when the card left its own: that drop sets
+     * the field, and only then. */
+    if (config.swimlaneField) {
+      body.append('swimlane_field', config.swimlaneField);
+      var lane = laneOf(cell);
+      if (from && !sameLane(lane, from.lane)) { body.append('swimlane_id', lane); }
+    }
 
     /* Set the moment the server says it saved, so a failure *after* that is not
      * mistaken for a move that never happened. Putting the card back then would
@@ -181,9 +192,67 @@
       var fresh = holder.firstElementChild;
       card.parentNode.replaceChild(fresh, card);
       makeDraggable(fresh);
+      placeInLane(fresh, payload);
     }
     updateColumns(payload.columns);
     updateLaneTotals(payload.totals, payload.containerId);
+    updateSwimlanes(payload.lanes);
+  }
+
+  /* The lane of a board cell, or null where cells carry none. */
+  function laneOf(cell) {
+    return cell ? cell.getAttribute('data-swimlane-id') : null;
+  }
+
+  function cellOf(card) {
+    var node = card.parentNode;
+    while (node && !(node.classList && node.classList.contains('ea-cell'))) { node = node.parentNode; }
+    return node;
+  }
+
+  /* The card belongs in the cell of its status and the lane the server says
+   * it is in, which is not always the cell it was dropped into: a move can
+   * change the lane on its own, as claiming a card on a board grouped by
+   * assignee does. A lane that is not on the page cannot take it; the card
+   * leaves the board then rather than be drawn somewhere it is not. */
+  function placeInLane(card, payload) {
+    if (payload.swimlaneId === undefined || payload.swimlaneId === null) { return; }
+    var current = cellOf(card);
+    var lane = String(payload.swimlaneId);
+    if (current && laneOf(current) === lane &&
+        current.getAttribute('data-column-id') === String(payload.statusId)) { return; }
+    var root = boardRoot();
+    var target = root && Array.prototype.filter.call(
+      root.querySelectorAll('.ea-cell[data-column-id="' + payload.statusId + '"]'),
+      function (cell) { return laneOf(cell) === lane; }
+    )[0];
+    if (!target) {
+      card.parentNode.removeChild(card);
+      setMessage(config.labels.laneNotShown, false);
+      return;
+    }
+    (target.querySelector('.ea-cell-issues') || target).appendChild(card);
+  }
+
+  /* Board: the issue and story point totals of every lane band. A lane the
+   * answer does not list holds no card any more. */
+  function updateSwimlanes(lanes) {
+    if (!lanes) { return; }
+    var root = boardRoot();
+    if (!root) { return; }
+    var byId = {};
+    lanes.forEach(function (lane) { byId[String(lane.id)] = lane; });
+    Array.prototype.forEach.call(root.querySelectorAll('tr.ea-swimlane-title[data-swimlane-id]'), function (band) {
+      var values = byId[band.getAttribute('data-swimlane-id')] || { issue_count: 0, story_points: 0 };
+      var count = band.querySelector('.ea-swimlane-count');
+      if (count) { count.textContent = values.issue_count; }
+      var points = band.querySelector('.ea-swimlane-points');
+      if (points) {
+        var value = parseInt(values.story_points, 10) || 0;
+        points.textContent = value;
+        points.hidden = value <= 0;
+      }
+    });
   }
 
   /* Puts a card back where it was picked up. `where` is passed down through the
@@ -256,7 +325,8 @@
     card.addEventListener('dragstart', function (event) {
       dragged = card;
       var next = card.nextElementSibling;
-      origin = { cardId: card.id, parent: card.parentNode, nextId: next ? next.id : null };
+      originLane = laneOf(cellOf(card));
+      origin = { cardId: card.id, parent: card.parentNode, nextId: next ? next.id : null, lane: originLane };
       allowedTargets = allowedStatusIds(card);
       card.classList.add('ea-dragging');
       markDropTargets(card);
@@ -276,6 +346,7 @@
         dragged = null;
         origin = null;
         allowedTargets = null;
+        originLane = null;
       }
     });
   }
@@ -291,8 +362,23 @@
   }
 
   function dropAllowed(cell) {
+    return columnAllowed(cell) && laneAllowed(cell);
+  }
+
+  function columnAllowed(cell) {
     if (!allowedTargets) { return true; }
     return allowedTargets.indexOf(cell.getAttribute('data-column-id')) !== -1;
+  }
+
+  /* Another lane takes the card only where dropping it there sets the field
+   * the lanes are grouped by. Whether this user may set it on this card is
+   * the server's to say; a refusal puts the card back. */
+  function laneAllowed(cell) {
+    return config.swimlaneWritable || sameLane(laneOf(cell), originLane);
+  }
+
+  function sameLane(lane, own) {
+    return own === null || own === undefined || lane === null || lane === own;
   }
 
   function boardRoot() {
@@ -301,8 +387,8 @@
 
   /* Marks every column allowed or blocked for the card just picked up, cells
    * and headers alike, so a move the workflow forbids is visibly impossible
-   * before the drop instead of being refused after it. Per column, identical
-   * in every swimlane: only the status decides. */
+   * before the drop instead of being refused after it. The headers answer for
+   * the status alone; a cell is blocked as well when it lies in another lane. */
   function markDropTargets(card) {
     var root = boardRoot();
     if (!root || !allowedTargets) { return; }
@@ -312,8 +398,13 @@
     Array.prototype.forEach.call(targets, function (node) {
       var id = node.getAttribute('data-column-id');
       var allowed = allowedTargets.indexOf(id) !== -1;
+      var cell = node.classList.contains('ea-cell');
+      if (cell && !laneAllowed(node)) { allowed = false; }
       node.classList.add(allowed ? 'ea-drop-allowed' : 'ea-drop-blocked');
-      if (id === own) { node.classList.add('ea-drop-origin'); }
+      /* The cell it came from, not the same column in every lane. */
+      if (id === own && allowed && (!cell || sameLane(laneOf(node), originLane))) {
+        node.classList.add('ea-drop-origin');
+      }
       if (node.classList.contains('ea-column-header')) {
         node.setAttribute('data-ea-title', node.getAttribute('title') || '');
         node.setAttribute('title', allowed ? config.labels.dropAllowed : config.labels.dropBlocked);
@@ -353,6 +444,10 @@
    * words the server would have used, without asking it: the answer is
    * already known. */
   function refuseBlockedDrop(card, cell, from, allowed) {
+    if (!config.swimlaneWritable && from && !sameLane(laneOf(cell), from.lane)) {
+      revertMove({ error: config.labels.laneBlocked || config.labels.moveFailed }, from);
+      return;
+    }
     var own = card.getAttribute('data-status-id');
     var tracker = card.querySelector('.ea-card-tracker');
     var open = (allowed || []).filter(function (id) { return id !== own; }).map(columnName);
@@ -424,6 +519,7 @@
       dragged = null;
       origin = null;
       allowedTargets = null;
+      originLane = null;
       clearDropTargets();
       if (!permitted) {
         refuseBlockedDrop(card, cell, from, allowed);

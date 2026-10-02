@@ -9,6 +9,30 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Added
+
+- **Dropping a card into another swimlane sets the field the lanes are grouped by** (#37), for
+  assignee, priority, category and target version: hand a card over, raise it, triage it, plan it.
+  The drop is the issue form's edit with the issue form's rules (the right to edit the issue,
+  fields the workflow makes read-only, the issue's own validation), lands in the issue history,
+  and is saved together with a column change or refused together with it. Dropping into the
+  unassigned lane is not undone by "Assign to me when moving a card". Lanes by project, tracker, status or author
+  cannot be dropped into.
+
+### Fixed
+
+- **A card dropped into another swimlane was drawn there, but its lane was never written** (#37).
+  The status change that came with the drop was saved, the lane was ignored, and the card showed a
+  lane membership the database did not hold until the next reload. A card now stays in its own
+  lane: other lanes are marked blocked while it is dragged, and a drop into one is refused with a
+  message, status change included; lanes of the four fields above take the card and write it.
+- **Swimlane totals went stale after a move.** The lane bands kept their issue and story point
+  counts until the next reload. A move now answers with the totals of every lane, and a card whose
+  lane changed as a side effect of the move (claiming it on a board grouped by assignee) is put
+  into its new lane.
+
 ## [0.6.1] - 2026-10-01
 
 ### Fixed

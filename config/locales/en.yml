@@ -127,6 +127,10 @@ en:
   error_expert_agile_sprint_not_editable: You are not allowed to change the sprint of this issue
   error_expert_agile_status_not_editable: You are not allowed to change the status of this issue
   error_expert_agile_status_not_kept: "The status change to %{to} was not saved: the issue is still %{status}. Another rule or plugin kept it"
+  error_expert_agile_swimlane_not_writable: "A card cannot be moved into another %{field} lane"
+  error_expert_agile_swimlane_field_not_editable: "You are not allowed to change the field %{field} of this issue"
+  error_expert_agile_swimlane_not_kept: "The change of %{field} was not saved. Another rule or plugin kept the old value"
+  error_expert_agile_move_saved_lane_not_shown: The move was saved. The card now belongs to a lane that is not on the board. Reload the page to see it
   text_expert_agile_drop_allowed: This card may be dropped here
   text_expert_agile_drop_blocked: The workflow does not allow this card here
   label_expert_agile_swimlane_none: No swimlanes

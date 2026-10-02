@@ -113,5 +113,12 @@ of the release commit:
   with a parent, subtasks or a blocking relation are always asked through core one by one, because
   their closable/reopenable state depends on other issues. Never reimplement the workflow rules
   client-side or in a second code path: the preview must not be able to disagree with the refusal.
-  The server stays authoritative; the preview only shows its answer early. Swimlane drops are
-  unaffected by it (see issue #37).
+  The server stays authoritative; the preview only shows its answer early.
+- **Swimlane drops** write the grouped field only for `ExpertAgileQuery::WRITABLE_SWIMLANES`
+  (assignee, category, target version, priority), through `safe_attributes=` after the status is
+  set and inside the move's transaction, then re-read it against the requested lane like the
+  status. Every other lane is refused by name before anything is written. The board script sends
+  `swimlane_field` on every move and `swimlane_id` only when the card left its lane; the answer
+  carries `swimlaneId` and every lane's totals (`BoardGrid#swimlane_summaries`, the same numbers
+  the page renders). Never add a field to the allowlist that a drag should not set (project,
+  tracker, author, dates).

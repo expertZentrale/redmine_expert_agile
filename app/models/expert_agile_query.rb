@@ -263,6 +263,25 @@ class ExpertAgileQuery < IssueQuery
 
   # --- Columns -------------------------------------------------------
 
+  # The swimlanes a card may be dragged into, and the issue attribute such a
+  # drop writes. Dropping into someone's lane hands the card over, into a
+  # priority lane raises it, into a version lane plans it, into a category
+  # lane triages it: ordinary attributes the issue form edits too. Project,
+  # tracker, status and author are not on the list on purpose: they are not
+  # editable, or far too consequential for a drag, and a drop into one of
+  # their lanes is refused by name.
+  WRITABLE_SWIMLANES = {
+    'assigned_to' => 'assigned_to_id',
+    'category' => 'category_id',
+    'fixed_version' => 'fixed_version_id',
+    'priority' => 'priority_id'
+  }.freeze
+
+  # The attribute a drop into a lane of this field writes, or nil.
+  def self.swimlane_attribute(field)
+    WRITABLE_SWIMLANES[field.to_s]
+  end
+
   # Swimlanes are the records an issue belongs to — project, tracker, status,
   # priority, author, assignee, category, target version. Core also groups by
   # plain values (% done, start and due date, created / updated / closed on,
@@ -295,6 +314,7 @@ class ExpertAgileQuery < IssueQuery
     @issue_count_by_status = nil
     @estimated_hours_by_status = nil
     @story_points_by_status = nil
+    reset_board_grid!
   end
 
   def board_columns
