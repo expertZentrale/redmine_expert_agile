@@ -10,6 +10,26 @@
   padding-bottom: 8px;
 }
 
+/* The copy of the column headers that stays at the top of the window while a
+ * tall board scrolls past (see pinHeader in expert_agile_board.js, which sets
+ * its position). overflow clips it to the part of the board that is on
+ * screen, and the white background fills the gaps border-spacing leaves
+ * between the headers, which the cards would otherwise show through. It sits
+ * above the board but below Redmine's own fixed header bar on narrow screens
+ * (z-index 9999), which it slides under at the board's end.
+ *
+ * No display rule here: the script shows and hides it with the hidden
+ * attribute. Redmine links this stylesheet for the screen only, so a
+ * display:none here would not reach a printout, and the copy would print as
+ * a second head above the board. */
+.ea-pinned-head {
+  position: fixed;
+  z-index: 20;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
 /* Not table-layout:fixed, and not width:100%. Fixed layout divides the
  * available width by the number of columns, so a board with many statuses
  * squeezes each to a few dozen pixels and the card text wraps one character
