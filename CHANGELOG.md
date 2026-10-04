@@ -26,8 +26,9 @@ notes from the section matching the pushed tag.
 - **A card dropped into another swimlane was drawn there, but its lane was never written** (#37).
   The status change that came with the drop was saved, the lane was ignored, and the card showed a
   lane membership the database did not hold until the next reload. A card now stays in its own
-  lane: other lanes are marked blocked while it is dragged, and a drop into one is refused with a
-  message, status change included; lanes of the four fields above take the card and write it.
+  lane: other lanes are marked blocked while it is dragged, and the card snaps back from them
+  without a request or a message. The server refuses such a move as well, status change included,
+  should one reach it. Lanes of the four fields above take the card and write it.
 - **Swimlane totals went stale after a move.** The lane bands kept their issue and story point
   counts until the next reload. A move now answers with the totals of every lane, and a card whose
   lane changed as a side effect of the move (claiming it on a board grouped by assignee) is put

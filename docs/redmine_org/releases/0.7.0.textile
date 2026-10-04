@@ -8,7 +8,7 @@ h4. Added
 
 h4. Fixed
 
-* *A drop into another swimlane drew the card in a lane the database never put it in.* The status change was saved and the lane ignored, so the board looked different after a reload. Lanes that may not take a card (project, tracker, status, author) are now marked blocked while it is dragged, and a drop into one is refused, status change included.
+* *A drop into another swimlane drew the card in a lane the database never put it in.* The status change was saved and the lane ignored, so the board looked different after a reload. Lanes that may not take a card (project, tracker, status, author) are now marked blocked while it is dragged, and the card snaps back from them without changing anything. The server refuses such a move as well, status change included.
 * *Lane totals went stale after a move.* A move now refreshes the totals of every lane and puts the card into the lane it belongs to, also when the move changed the lane on the side (a status change on a board grouped by status, claiming a card on a board grouped by assignee).
 
 h4. Upgrade notes
