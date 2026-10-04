@@ -1,0 +1,16 @@
+h3. redmine_expert_agile 0.7.0 — 2026-10-02
+
+Swimlanes become drop targets.
+
+h4. Added
+
+* *Dropping a card into another swimlane sets the field the lanes are grouped by* — for assignee, priority, category and target version. Into someone's lane hands the card over, into a priority lane raises it, into a version lane plans it, into a category lane triages it. The drop follows the issue form's rules: the right to edit the issue, the fields the workflow makes read-only for the new status, and the issue's own validation, whose message the board shows. Status change and field are saved together or not at all.
+
+h4. Fixed
+
+* *A drop into another swimlane drew the card in a lane the database never put it in.* The status change was saved and the lane ignored, so the board looked different after a reload. Lanes that may not take a card (project, tracker, status, author) are now marked blocked while it is dragged, and the card snaps back from them without changing anything. The server refuses such a move as well, status change included.
+* *Lane totals went stale after a move.* A move now refreshes the totals of every lane and puts the card into the lane it belongs to, also when the move changed the lane on the side (a status change on a board grouped by status, claiming a card on a board grouped by assignee).
+
+h4. Upgrade notes
+
+No migrations and no new settings. Replace the plugin directory and restart.
