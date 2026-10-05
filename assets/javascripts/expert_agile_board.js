@@ -529,6 +529,86 @@
     });
   }
 
+  /* Where the copy of the column headers may pin: the top of the window,
+   * or just below a header bar fixed over the page. Redmine's narrow-screen
+   * layout fixes its own, 64px high and above everything else, so a copy at
+   * the very top would sit behind it, out of sight. */
+  function windowTopEdge() {
+    var bar = document.getElementById('header');
+    if (!bar || window.getComputedStyle(bar).position !== 'fixed') { return 0; }
+    return Math.max(0, bar.getBoundingClientRect().bottom);
+  }
+
+  /* Keeps the column headers at the top of the window while a tall board
+   * scrolls past, from the moment the real ones leave it until the last row
+   * goes. position: sticky cannot do this: the board scrolls sideways, and a
+   * box that scrolls on one axis is the scroll container on both, so a sticky
+   * head would pin to the board, never to the page.
+   *
+   * A copy of the head is shown fixed instead, clipped to the board's visible
+   * width and shifted by its sideways scroll. It lives inside the board, so
+   * the count updates and the drop marking, which query for every header of
+   * a column, reach it without knowing it is there. */
+  function pinHeader(root) {
+    var table = root.querySelector('.ea-board-table');
+    var head = table && table.tHead;
+    if (!head) { return; }
+
+    var pinnedHead = document.createElement('div');
+    pinnedHead.className = 'ea-pinned-head';
+    pinnedHead.hidden = true;
+    /* The real head is still in the page; nobody needs the columns read out
+     * twice. */
+    pinnedHead.setAttribute('aria-hidden', 'true');
+    var copy = document.createElement('table');
+    copy.className = table.className;
+    copy.appendChild(head.cloneNode(true));
+    pinnedHead.appendChild(copy);
+    root.insertBefore(pinnedHead, root.firstChild);
+    var printing = false;
+
+    /* Run straight from the scroll event rather than deferred to an animation
+     * frame: browsers already fire scroll once per frame, and deferring would
+     * draw the copy a frame behind the page. Every measurement comes before
+     * every write, so the handler never makes the browser lay the page out a
+     * second time. The real head stands in for the copy's height: both are
+     * the same rows under the same rules. */
+    function place() {
+      var edge = windowTopEdge();
+      var tableBox = table.getBoundingClientRect();
+      var headTop = head.getBoundingClientRect().top;
+      var headHeight = head.offsetHeight;
+      var boardLeft = root.getBoundingClientRect().left + root.clientLeft;
+      var boardWidth = root.clientWidth;
+
+      var shown = !printing && headTop < edge && tableBox.bottom > edge;
+      pinnedHead.hidden = !shown;
+      if (!shown) { return; }
+      pinnedHead.style.left = boardLeft + 'px';
+      pinnedHead.style.width = boardWidth + 'px';
+      /* Pushed up with the last row rather than left hanging over the page
+       * beneath the board. */
+      pinnedHead.style.top = Math.min(edge, tableBox.bottom - headHeight) + 'px';
+      copy.style.transform = 'translateX(' + (tableBox.left - boardLeft) + 'px)';
+    }
+
+    window.addEventListener('scroll', place, { passive: true });
+    window.addEventListener('resize', place);
+    root.addEventListener('scroll', place, { passive: true });
+    /* The board changes width without the window resizing when Redmine's
+     * sidebar is collapsed or expanded. */
+    new ResizeObserver(place).observe(root);
+    /* Redmine's narrow-screen menu slides the whole page aside by a class on
+     * <html>, which moves the board without resizing or scrolling anything. */
+    new MutationObserver(place).observe(document.documentElement,
+                                        { attributes: true, attributeFilter: ['class'] });
+    /* A printout has the real head; the copy, fixed, would repeat on every
+     * page at a position worked out for the screen. */
+    window.addEventListener('beforeprint', function () { printing = true; place(); });
+    window.addEventListener('afterprint', function () { printing = false; place(); });
+    place();
+  }
+
   function init() {
     config = readConfig();
     if (!config) { return; }
@@ -538,6 +618,7 @@
 
     Array.prototype.forEach.call(root.querySelectorAll('.ea-card'), makeDraggable);
     Array.prototype.forEach.call(root.querySelectorAll('.ea-cell'), makeDroppable);
+    if (root === boardRoot()) { pinHeader(root); }
   }
 
   window.ExpertAgileBoard = {

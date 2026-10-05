@@ -9,6 +9,15 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Hinzugefuegt
+
+- **Die Spaltenkoepfe des Boards bleiben sichtbar.** Scrollt man ein Board herunter, das hoeher ist
+  als das Fenster, bleiben die Statuskoepfe am oberen Fensterrand stehen, bis die letzte Zeile des
+  Boards vorbei ist, sodass eine lange Spalte ihren Namen nie verliert. Seitliches Scrollen des
+  Boards machen sie mit.
+
 ## [0.7.0] - 2026-10-02
 
 ### Hinzugefuegt

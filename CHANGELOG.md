@@ -9,6 +9,14 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Added
+
+- **The board's column headers stay in view.** Scrolling down a board taller than the window, the
+  status headers stop at the top edge of the window and stay there until the board's last row has
+  passed, so a long column never loses its name. They follow the board's sideways scrolling.
+
 ## [0.7.0] - 2026-10-02
 
 ### Added
