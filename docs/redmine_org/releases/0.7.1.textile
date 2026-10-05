@@ -1,0 +1,11 @@
+h3. redmine_expert_agile 0.7.1 — 2026-10-05
+
+Long boards keep their column names in view.
+
+h4. Added
+
+* *The board's column headers stay in view.* On a board taller than the window, the status headers stop at the top edge of the window while you scroll down and stay there until the board's last row has passed, so a long column never loses its name. They follow the board when it is scrolled sideways.
+
+h4. Upgrade notes
+
+No migrations and no new settings. Replace the plugin directory and restart.
