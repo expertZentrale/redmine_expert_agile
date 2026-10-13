@@ -91,6 +91,9 @@ class ExpertAgileBoardsController < ApplicationController
 
     retrieve_board_query_for_move
     siblings = column_siblings(target_status_id || @issue.status_id)
+    # The epic the card leaves, if it leaves one: its lane stays on screen
+    # even when this was its last card, and its bar has to follow.
+    @epic_left = lane_attribute == 'parent_issue_id' ? RedmineExpertAgile::Epics.nearest([@issue])[@issue.id] : nil
 
     Issue.transaction do
       @issue.init_journal(User.current)
@@ -548,7 +551,15 @@ class ExpertAgileBoardsController < ApplicationController
     if swimlane_column
       @query.group_by = swimlane_column.name.to_s
       payload[:swimlaneId] = @query.swimlane_dom_id_for(@issue)
-      payload[:lanes] = @query.swimlane_summaries.map do |lane|
+      lanes = @query.swimlane_summaries
+      # A lane the answer does not list holds no card any more, and the board
+      # zeroes its counts — but an epic's bar measures everything below the
+      # epic, not just the cards on screen.
+      if @epic_left && lanes.none? { |lane| lane[:id] == @epic_left.id.to_s }
+        lanes << { :id => @epic_left.id.to_s, :issue_count => 0, :story_points => 0,
+                   :progress => @query.epic_progress(@epic_left) }
+      end
+      payload[:lanes] = lanes.map do |lane|
         lane[:progress] ? lane.merge(:progress => helpers.expert_agile_epic_progress_data(lane[:progress])) : lane
       end
     end

@@ -1388,6 +1388,21 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_includes story.journals.last.details.map(&:prop_key), 'parent_id'
   end
 
+  def test_the_epic_a_card_leaves_gets_its_progress_even_without_cards_left
+    epic_a, epic_b, story = epic_lane_fixture
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :id => story.id, :status_id => story.status_id,
+                                :swimlane_field => 'epic', :swimlane_id => epic_b.id.to_s }, :format => :js
+    end
+
+    assert_response :success
+    lane = JSON.parse(response.body)['lanes'].detect { |entry| entry['id'] == epic_a.id.to_s }
+    assert lane, 'the lane the story left is answered for'
+    assert_equal 0, lane['issue_count']
+    assert_equal l(:label_expert_agile_epic_progress_issues, :closed => 0, :total => 0), lane['progress']['title']
+  end
+
   def test_a_drop_into_the_none_lane_takes_the_story_out_of_its_epic
     _epic_a, _epic_b, story = epic_lane_fixture
 
