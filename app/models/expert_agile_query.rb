@@ -27,7 +27,7 @@ class ExpertAgileQuery < IssueQuery
   # Card fields we render ourselves and therefore never repeat in the generic
   # attribute list at the bottom of a card.
   SPECIAL_CARD_COLUMNS = %i(id project tracker status subject assigned_to done_ratio
-                            estimated_hours spent_hours story_points description).freeze
+                            estimated_hours spent_hours story_points description epic).freeze
 
   def initialize(attributes = nil, *args)
     super
@@ -121,6 +121,12 @@ class ExpertAgileQuery < IssueQuery
       columns << QueryColumn.new(:day_in_state, :sortable => false, :groupable => false,
                                                 :caption => :label_expert_agile_day_in_state)
     end
+    # The epic badge. Offered only while some tracker is an epic tracker; a
+    # board that kept the field after epics were switched off simply drops it.
+    if RedmineExpertAgile::Epics.enabled? && columns.none? { |column| column.name == :epic }
+      columns << QueryColumn.new(:epic, :sortable => false, :groupable => false,
+                                        :caption => :label_expert_agile_epic)
+    end
     @available_columns = columns
   end
 
@@ -149,7 +155,7 @@ class ExpertAgileQuery < IssueQuery
   # The board-specific settings, as a small plain hash, for stashing in the
   # session between requests. Deliberately not the whole `options` blob.
   BOARD_SESSION_KEYS = %i(board_status_ids wip_limits color_base board_type
-                          show_avatar sprint_id backlog_enabled).freeze
+                          show_avatar sprint_id backlog_enabled hide_epics).freeze
 
   # Read through this rather than the constant, so a subclass with settings of
   # its own can add them to what survives a request.
@@ -186,6 +192,7 @@ class ExpertAgileQuery < IssueQuery
     self.board_type = params[:board_type] if params[:board_type].present?
     self.show_avatar = params[:show_avatar] if params.key?(:show_avatar)
     self.sprint_id = params[:sprint_id] if params.key?(:sprint_id)
+    self.hide_epics = params[:hide_epics] if params.key?(:hide_epics)
     self
   end
 
@@ -245,6 +252,50 @@ class ExpertAgileQuery < IssueQuery
     options[:backlog_enabled] = value.to_s == '1' ? '1' : '0'
   end
 
+  # --- Epics ---------------------------------------------------------
+
+  # Whether the epics themselves are left off the board. On unless switched
+  # off, so a board saved before epics existed hides them as well.
+  def hide_epics?
+    value = options[:hide_epics]
+    value.nil? ? true : value.to_s == '1'
+  end
+
+  def hide_epics=(value)
+    options[:hide_epics] = value.to_s == '1' ? '1' : '0'
+  end
+
+  # Whether cards carry their epic, i.e. the card field is switched on.
+  def card_epics?
+    RedmineExpertAgile::Epics.enabled? && has_column?(:epic)
+  end
+
+  # The epic one card belongs to, or nil.
+  #
+  # Looked up for every card the board has loaded at once, the first time any
+  # card asks; a screen that renders cards from several lists (the backlog)
+  # hands each list to preload_card_epics first. A card asked about on its
+  # own — the one a move answers with — costs its own single query.
+  def card_epic(issue)
+    return nil unless card_epics?
+
+    @card_epics ||= {}
+    unless @card_epics.key?(issue.id)
+      batch = board_issues_loaded? ? board_issues.reject { |other| @card_epics.key?(other.id) } : []
+      batch << issue unless batch.include?(issue)
+      preload_card_epics(batch)
+    end
+    @card_epics[issue.id]
+  end
+
+  def preload_card_epics(issues)
+    return issues unless card_epics?
+
+    @card_epics ||= {}
+    @card_epics.merge!(RedmineExpertAgile::Epics.nearest(issues))
+    issues
+  end
+
   # --- Visibility ----------------------------------------------------
 
   # Mirrors Query#editable_by? with the agile permission substituted.
@@ -296,7 +347,7 @@ class ExpertAgileQuery < IssueQuery
 
   # The issues considered by this board, before column/swimlane bucketing.
   def board_scope
-    sprint_filtered(base_scope)
+    board_filtered(base_scope)
       .eager_load(:status, :project, :assigned_to, :tracker, :priority, :fixed_version,
                   :expert_agile_data)
       .where(:status_id => board_columns.map(&:id))
@@ -314,6 +365,7 @@ class ExpertAgileQuery < IssueQuery
     @issue_count_by_status = nil
     @estimated_hours_by_status = nil
     @story_points_by_status = nil
+    @card_epics = nil
     reset_board_grid!
   end
 
@@ -362,6 +414,22 @@ class ExpertAgileQuery < IssueQuery
 
   private
 
+  # Everything the board narrows its issues by beyond the query's own filters.
+  # Counts, totals and cards all go through here, so the column headers never
+  # count a card the board does not show.
+  def board_filtered(scope)
+    epic_filtered(sprint_filtered(scope))
+  end
+
+  # Leaves the epics themselves off the board when it is asked to, as Jira
+  # does: an epic is a container of work, not a card that moves through it.
+  def epic_filtered(scope)
+    ids = RedmineExpertAgile::Epics.tracker_ids
+    return scope unless hide_epics? && ids.any?
+
+    scope.where.not(:tracker_id => ids)
+  end
+
   # Narrows a scope to the board's sprint. A subquery rather than a join, so it
   # composes with the scopes that already join agile data under an alias.
   #
@@ -397,7 +465,7 @@ class ExpertAgileQuery < IssueQuery
   # base_scope already joins :status and :project, so grouping needs no extra
   # join — status_id is a column on issues itself.
   def grouped_issue_count(select_sql = nil)
-    scope = sprint_filtered(base_scope).reorder(nil).group("#{Issue.table_name}.status_id")
+    scope = board_filtered(base_scope).reorder(nil).group("#{Issue.table_name}.status_id")
     select_sql ? scope.sum(select_sql) : scope.count
   end
 
@@ -411,7 +479,7 @@ class ExpertAgileQuery < IssueQuery
 
   def story_points_by_status
     @story_points_by_status ||=
-      sprint_filtered(base_scope).reorder(nil)
+      board_filtered(base_scope).reorder(nil)
                 .joins("LEFT OUTER JOIN #{ExpertAgileData.table_name} ead " \
                        "ON ead.issue_id = #{Issue.table_name}.id")
                 .group("#{Issue.table_name}.status_id")

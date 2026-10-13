@@ -19,6 +19,7 @@
     <span class="ea-card-id"><%= link_to("##{issue.id}", issue_path(issue)) %></span>
     <span class="ea-card-tracker"><%= issue.tracker.name %></span>
   </div>
+  <%= expert_agile_epic_badge(@query.card_epic(issue)) %>
 
   <div class="ea-card-subject">
     <%= link_to issue.subject, issue_path(issue) %>

@@ -119,6 +119,15 @@ Ticketformular bietet sie als feste Skala an, direkt neben dem Sprint des Ticket
 ![Ticketformular mit Redmines eigenen Attributfeldern und darunter zwei Feldern des Plugins: ein
 Auswahlfeld Story Points mit dem Wert 2 und ein Auswahlfeld Sprint mit Sprint 24](docs/screenshots/de/05-story-points.png)
 
+### Epics
+
+Epics buendeln Stories wie in Jira, auf Grundlage von Redmines eigenem Unteraufgaben-Baum. In den
+Plugin-Einstellungen (*Epics*) werden die Epic-Tracker gewaehlt; ein Ticket gehoert dann zum
+naechsten Epic ueber ihm. Die Stories eines Epics sind also seine Unteraufgaben, und deren
+Unteraufgaben gehoeren ebenfalls dazu. Mit dem Kartenfeld **Epic** zeigt jede Karte auf dem Board
+und im Backlog ihr Epic als farbiges Badge, eine Farbe je Epic. Die Epics selbst stehen nicht auf
+dem Board, solange *Epics auf dem Board ausblenden* in den Board-Optionen eingeschaltet ist.
+
 ### Sprints
 
 Sprints sind datierte Behaelter mit eigenem Lebenszyklus — offen, aktiv, abgeschlossen —, die in

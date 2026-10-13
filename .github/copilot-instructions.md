@@ -122,3 +122,10 @@ of the release commit:
   carries `swimlaneId` and every lane's totals (`BoardGrid#swimlane_summaries`, the same numbers
   the page renders). Never add a field to the allowlist that a drag should not set (project,
   tracker, author, dates).
+- **Epics** (`lib/redmine_expert_agile/epics.rb`): an epic is an issue of a tracker in the
+  `epic_tracker_ids` setting (empty = off); an issue belongs to the nearest epic ancestor in the
+  subtask tree. No table or custom field of its own. `Epics.nearest(issues, user)` answers a whole
+  list from the nested set in one query and only considers epics the user may see — never walk
+  `parent` per card. Cards read it through `ExpertAgileQuery#card_epic` (batch-loaded);
+  `hide_epics` (default on) filters epic trackers in `board_filtered`, which counts and totals
+  share.

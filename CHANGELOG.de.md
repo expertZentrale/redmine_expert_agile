@@ -9,6 +9,23 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Hinzugefuegt
+
+- **Epics wie in Jira.** Unter *Administration → expert Agile → Epics* werden die Tracker
+  gewaehlt, deren Tickets Epics sind; ein Ticket gehoert zum naechsten Epic ueber ihm im
+  Unteraufgaben-Baum von Redmine. Eine Story ist also Unteraufgabe ihres Epics, und die
+  Unteraufgaben der Story gehoeren ueber sie zum selben Epic. Keine neue Tabelle und kein
+  benutzerdefiniertes Feld: Redmines Filter "Uebergeordnetes Ticket", die REST-API, das
+  Gantt-Diagramm und die Summierung der Story Points sehen dieselben Daten. Mit dem neuen
+  Kartenfeld **Epic** traegt jede Karte auf dem Board und im Backlog ihr Epic als farbiges Badge
+  mit Link, eine Farbe je Epic; auch der Karten-Tooltip nennt das Epic. Angezeigt werden nur
+  Epics, die der Betrachter sehen darf.
+- **Epics stehen standardmaessig nicht auf dem Board**, wie in Jira — ein Epic ist ein Behaelter
+  fuer Arbeit, keine Karte, die durch die Spalten wandert. *Epics auf dem Board ausblenden* in den
+  Board-Optionen holt sie zurueck; Spaltenzaehler und Summen folgen dem, was das Board zeigt.
+
 ## [0.7.1] - 2026-10-05
 
 ### Hinzugefuegt

@@ -21,6 +21,7 @@ require File.expand_path('../lib/redmine_expert_agile/board_positions', __FILE__
 require File.expand_path('../lib/redmine_expert_agile/colorable', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/card_color', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/card_move_responses', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/epics', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/journal_projection', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/move_targets', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/charts/base', __FILE__)
@@ -82,6 +83,12 @@ Redmine::Plugin.register :redmine_expert_agile do
              'trackers_for_sp'         => '',
              # Suggested values in the story point selector (modified Fibonacci).
              'sp_values'               => '0,1,2,3,5,8,13,20,40,100',
+
+             # --- Epics -------------------------------------------------
+             # Trackers whose issues are epics; an issue belongs to the
+             # nearest epic above it in the subtask tree. Empty switches
+             # epics off.
+             'epic_tracker_ids'        => '',
 
              # --- Sprints -----------------------------------------------
              'sprints_on'              => '0',

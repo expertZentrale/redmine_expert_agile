@@ -34,6 +34,7 @@ en:
   label_expert_agile_settings_colors: Colors
   label_expert_agile_settings_estimates: Estimates
   label_expert_agile_settings_sprints: Sprints
+  label_expert_agile_settings_epics: Epics
   label_expert_agile_settings_charts: Charts
 
   # --- Settings: board ------------------------------------------------
@@ -67,6 +68,8 @@ en:
   text_expert_agile_trackers_for_sp: Select none to enable story points for every tracker
   label_expert_agile_sp_values: Story point values
   text_expert_agile_sp_values: Comma separated values offered in the story point selector
+  label_expert_agile_epic_trackers: Epic trackers
+  text_expert_agile_epic_trackers: Issues of these trackers are epics; an issue belongs to the nearest epic above it in the subtask tree. Select none to switch epics off
 
   # --- Settings: sprints ----------------------------------------------
   label_expert_agile_sprints_on: Enable sprints
@@ -139,6 +142,7 @@ en:
   label_expert_agile_card_fields: Card fields
   label_expert_agile_appearance: Appearance
   label_expert_agile_day_in_state: Time in status
+  label_expert_agile_epic: Epic
   label_expert_agile_today: today
   label_expert_agile_days_count: "%{count} d"
   label_expert_agile_card_text_fields: Text fields
@@ -146,6 +150,7 @@ en:
   text_expert_agile_card_description_length: Characters of the description shown on a card when that field is switched on
   label_expert_agile_swimlanes: Swimlanes
   label_expert_agile_show_avatar: Show assignee avatar
+  label_expert_agile_hide_epics: Hide epics on the board
   label_expert_agile_columns_and_limits: Columns and WIP limits
   label_expert_agile_wip_min: Min
   label_expert_agile_wip_max: Max

@@ -34,6 +34,7 @@ de:
   label_expert_agile_settings_colors: Farben
   label_expert_agile_settings_estimates: Schaetzungen
   label_expert_agile_settings_sprints: Sprints
+  label_expert_agile_settings_epics: Epics
   label_expert_agile_settings_charts: Diagramme
 
   # --- Einstellungen: Board -------------------------------------------
@@ -67,6 +68,8 @@ de:
   text_expert_agile_trackers_for_sp: Nichts auswaehlen aktiviert Story Points fuer alle Tracker
   label_expert_agile_sp_values: Story-Point-Werte
   text_expert_agile_sp_values: Kommagetrennte Werte fuer die Story-Point-Auswahl
+  label_expert_agile_epic_trackers: Epic-Tracker
+  text_expert_agile_epic_trackers: Tickets dieser Tracker sind Epics; ein Ticket gehoert zum naechsten Epic ueber ihm im Unteraufgaben-Baum. Nichts auswaehlen schaltet Epics ab
 
   # --- Einstellungen: Sprints -----------------------------------------
   label_expert_agile_sprints_on: Sprints aktivieren
@@ -139,6 +142,7 @@ de:
   label_expert_agile_card_fields: Kartenfelder
   label_expert_agile_appearance: Darstellung
   label_expert_agile_day_in_state: Zeit im Status
+  label_expert_agile_epic: Epic
   label_expert_agile_today: heute
   label_expert_agile_days_count: "%{count} T"
   label_expert_agile_card_text_fields: Textfelder
@@ -146,6 +150,7 @@ de:
   text_expert_agile_card_description_length: Zeichen der Beschreibung, die auf einer Karte erscheinen, wenn das Feld aktiviert ist
   label_expert_agile_swimlanes: Swimlanes
   label_expert_agile_show_avatar: Avatar des Bearbeiters anzeigen
+  label_expert_agile_hide_epics: Epics auf dem Board ausblenden
   label_expert_agile_columns_and_limits: Spalten und WIP-Limits
   label_expert_agile_wip_min: Min
   label_expert_agile_wip_max: Max
