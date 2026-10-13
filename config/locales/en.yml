@@ -116,6 +116,7 @@ en:
   error_expert_agile_sprint_complete_issue_hidden: "not visible to you"
   error_expert_agile_sprint_already_closed: "This sprint is already closed"
   error_expert_agile_sprint_complete_activate_foreign: "Only someone who may manage sprints in the target sprint's project can make it the active one"
+  error_expert_agile_sprint_complete_gone: "This sprint no longer exists"
   label_expert_agile_sprint_unavailable: (sprint not available)
   label_expert_agile_sprint_sharing_none: Not shared
   label_expert_agile_sprint_sharing_descendants: With subprojects

@@ -234,4 +234,22 @@ class ExpertAgileSprintCompletionTest < ActiveSupport::TestCase
 
     assert_equal @sprint.id, sprint_of(@open_a)
   end
+
+  def test_a_target_deleted_meanwhile_is_a_refusal
+    stale = completion
+    stale.next_sprint
+    ExpertAgileSprint.where(:id => @next.id).delete_all
+
+    assert_not stale.complete('next')
+    assert_includes stale.sprint.errors.full_messages, I18n.t(:error_expert_agile_sprint_complete_target)
+    assert_equal @sprint.id, sprint_of(@open_a)
+  end
+
+  def test_a_sprint_deleted_meanwhile_is_a_refusal
+    stale = completion
+    ExpertAgileSprint.where(:id => @sprint.id).delete_all
+
+    assert_not stale.complete('backlog')
+    assert_includes stale.sprint.errors.full_messages, I18n.t(:error_expert_agile_sprint_complete_gone)
+  end
 end

@@ -97,8 +97,18 @@ module RedmineExpertAgile
         # Read again: the target was looked up before the lock, and another
         # request may have closed it, or activated another sprint, since.
         existing_target = destination && destination != @new_sprint ? destination : nil
-        ExpertAgileSprint.lock.where(:id => [sprint.id, existing_target && existing_target.id].compact)
-                         .order(:id).pluck(:id)
+        locked = ExpertAgileSprint.lock.where(:id => [sprint.id, existing_target && existing_target.id].compact)
+                                  .order(:id).pluck(:id)
+        # Either row may have been deleted in between; that is a refusal,
+        # not an error.
+        unless locked.include?(sprint.id)
+          sprint.errors.add(:base, ::I18n.t(:error_expert_agile_sprint_complete_gone))
+          raise ActiveRecord::Rollback
+        end
+        if existing_target && !locked.include?(existing_target.id)
+          invalid_target
+          raise ActiveRecord::Rollback
+        end
         sprint.reload
         if sprint.closed?
           sprint.errors.add(:base, ::I18n.t(:error_expert_agile_sprint_already_closed))

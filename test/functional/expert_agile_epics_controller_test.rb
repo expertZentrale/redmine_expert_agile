@@ -45,7 +45,12 @@ class ExpertAgileEpicsControllerTest < Redmine::ControllerTest
   end
 
   def test_closed_epics_are_folded_away_until_asked_for
-    @epic.update_column(:status_id, IssueStatus.where(:is_closed => true).first.id)
+    closed = IssueStatus.where(:is_closed => true).order(:id).first
+    @epic.update_column(:status_id, closed.id)
+    # Diagnostics for a failure seen twice and not reproduced with its seed:
+    # the epic has to be closed in the database before the page is asked.
+    assert @epic.reload.closed?, "epic status #{@epic.status_id} is_closed=#{@epic.status.is_closed.inspect}"
+    assert_not Issue.open.where(:id => @epic.id).exists?, 'Issue.open still finds the closed epic'
 
     get_epics
     assert_select '.ea-epic-title a[href=?]', "/issues/#{@epic.id}", false
