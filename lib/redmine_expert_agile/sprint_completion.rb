@@ -151,9 +151,17 @@ module RedmineExpertAgile
         ok = true
       end
       unless ok
-        # The rollback undid the database, not the objects: put the sprint
-        # back as it was, so the page shows it as it still is.
-        sprint.status = sprint.status_was if sprint.status_changed?
+        # The rollback undid the database, not the objects: read the sprint
+        # back as it still is, so the page shows it that way — also when it
+        # had been saved closed before a later step refused. Its errors are
+        # what the page reports, so they are kept.
+        errors = sprint.errors.dup
+        begin
+          sprint.reload
+        rescue ActiveRecord::RecordNotFound
+          nil # deleted meanwhile; the refusal already says so
+        end
+        errors.each { |error| sprint.errors.add(error.attribute, error.message) } if sprint.errors.empty?
         @moved = []
       end
       ok

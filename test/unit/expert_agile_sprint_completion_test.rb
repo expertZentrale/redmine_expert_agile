@@ -180,6 +180,7 @@ class ExpertAgileSprintCompletionTest < ActiveSupport::TestCase
     run = RedmineExpertAgile::SprintCompletion.new(own, user)
     assert_not run.complete(parent_sprint.id.to_s, :activate => true)
     assert_includes run.sprint.errors.full_messages, I18n.t(:error_expert_agile_sprint_complete_activate_foreign)
+    assert run.sprint.active?, 'the object shows the sprint as it still is, not as it was about to be'
     assert parent_sprint.reload.open?
     assert own.reload.active?
   end

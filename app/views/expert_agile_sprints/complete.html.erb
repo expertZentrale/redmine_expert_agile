@@ -82,7 +82,10 @@
     <p>
       <label>
         <%= hidden_field_tag 'activate_target', '0', :id => nil %>
-        <%= check_box_tag 'activate_target', '1', params.key?(:activate_target) ? params[:activate_target] == '1' : true %>
+        <%# Off by default where it is bound to be refused: a next sprint shared
+            from a project in which the user may not manage sprints. %>
+        <% may_activate = next_sprint.nil? || User.current.allowed_to?(:manage_expert_agile_sprints, next_sprint.project) %>
+        <%= check_box_tag 'activate_target', '1', params.key?(:activate_target) ? params[:activate_target] == '1' : may_activate %>
         <%= l(:label_expert_agile_sprint_complete_activate) %>
       </label>
       <em class="info"><%= l(:text_expert_agile_sprint_complete_activate) %></em>
