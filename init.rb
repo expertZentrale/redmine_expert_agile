@@ -23,6 +23,7 @@ require File.expand_path('../lib/redmine_expert_agile/card_color', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/card_move_responses', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/epics', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/epic_query_column', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/sprint_completion', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/hierarchy', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/journal_projection', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/move_targets', __FILE__)
@@ -142,7 +143,7 @@ Redmine::Plugin.register :redmine_expert_agile do
                  :expert_agile_charts_queries => [:index] },
                :read => true
     permission :manage_expert_agile_sprints,
-               { :expert_agile_sprints => [:index, :show, :new, :create, :edit, :update, :destroy] },
+               { :expert_agile_sprints => [:index, :show, :new, :create, :edit, :update, :destroy, :complete] },
                :require => :member
   end
 

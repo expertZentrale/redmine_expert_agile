@@ -56,7 +56,12 @@ RedmineApp::Application.routes.draw do
     resources :expert_agile_backlog_queries, :only => [:index, :new, :create]
 
     # --- Sprints --------------------------------------------------------
-    resources :expert_agile_sprints
+    resources :expert_agile_sprints do
+      # Completing a sprint: the form, and the completion itself.
+      member do
+        match 'complete', :via => [:get, :post]
+      end
+    end
   end
 
   # --- Colors -----------------------------------------------------------

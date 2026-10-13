@@ -1,0 +1,101 @@
+<%# Completing a sprint: where its open issues go, and whether the sprint they
+    go to becomes the active one. A plain form, no script. %>
+<h2><%= l(:label_expert_agile_sprint_complete) %>: <%= @sprint.name %></h2>
+
+<% if @completion.refusals.any? || @sprint.errors.any? || (@completion.new_sprint && @completion.new_sprint.errors.any?) %>
+  <div id="errorExplanation">
+    <% if @completion.refusals.any? %>
+      <p><%= l(:text_expert_agile_sprint_complete_refused) %></p>
+      <ul>
+        <% @completion.refusals.each do |refusal| %>
+          <li>
+            <%= refusal.issue.visible? ? link_to_issue(refusal.issue, :subject => true, :tracker => false) : l(:label_expert_agile_hidden_issue) %>:
+            <%= refusal.reason %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+    <% (@sprint.errors.full_messages + (@completion.new_sprint ? @completion.new_sprint.errors.full_messages : [])).uniq.each do |message| %>
+      <p><%= message %></p>
+    <% end %>
+  </div>
+<% end %>
+
+<% visible_open = @open_issues.select(&:visible?) %>
+<div class="box ea-sprint-complete-summary">
+  <p>
+    <%= l(:text_expert_agile_sprint_complete_summary,
+          :closed => @completion.closed_issue_count, :open => @open_issues.size,
+          :points => @completion.points(@open_issues)) %>
+  </p>
+  <% if visible_open.any? %>
+    <ul class="ea-sprint-complete-issues">
+      <% visible_open.each do |issue| %>
+        <li><%= link_to_issue(issue, :subject => true) %> <span class="ea-sprint-complete-status"><%= issue.status.name %></span></li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>
+
+<%= form_tag(complete_project_expert_agile_sprint_path(@project, @sprint), :method => :post, :id => 'ea-sprint-complete') do %>
+  <%# Redmine's own helper: the url is validated before it is used. %>
+  <%= back_url_hidden_field_tag %>
+  <% next_sprint = @completion.next_sprint %>
+  <% chosen = params[:target].presence || (next_sprint ? 'next' : 'backlog') %>
+  <fieldset class="box">
+    <legend><%= l(:label_expert_agile_sprint_complete_target) %></legend>
+    <% if next_sprint %>
+      <p>
+        <label>
+          <%= radio_button_tag 'target', 'next', chosen == 'next' %>
+          <%= l(:label_expert_agile_sprint_complete_next, :sprint => next_sprint.name) %>
+          (<%= format_date(next_sprint.start_date) %> – <%= format_date(next_sprint.end_date) %>)
+        </label>
+      </p>
+    <% end %>
+    <p>
+      <label>
+        <%= radio_button_tag 'target', 'backlog', chosen == 'backlog' %>
+        <%= l(:label_expert_agile_sprint_complete_backlog) %>
+      </label>
+    </p>
+    <p>
+      <label>
+        <%= radio_button_tag 'target', 'new', chosen == 'new' %>
+        <%= l(:label_expert_agile_sprint_complete_new) %>
+      </label>
+    </p>
+    <div class="ea-sprint-complete-new tabular">
+      <p>
+        <label for="new_sprint_name"><%= l(:field_name) %></label>
+        <%= text_field_tag 'new_sprint[name]', @new_sprint.name, :id => 'new_sprint_name', :size => 40 %>
+      </p>
+      <p>
+        <label for="new_sprint_start_date"><%= l(:field_start_date) %></label>
+        <%= date_field_tag 'new_sprint[start_date]', @new_sprint.start_date, :id => 'new_sprint_start_date' %>
+      </p>
+      <p>
+        <label for="new_sprint_end_date"><%= l(:field_due_date) %></label>
+        <%= date_field_tag 'new_sprint[end_date]', @new_sprint.end_date, :id => 'new_sprint_end_date' %>
+      </p>
+    </div>
+    <p>
+      <label>
+        <%= hidden_field_tag 'activate_target', '0', :id => nil %>
+        <%= check_box_tag 'activate_target', '1', params.key?(:activate_target) ? params[:activate_target] == '1' : true %>
+        <%= l(:label_expert_agile_sprint_complete_activate) %>
+      </label>
+      <em class="info"><%= l(:text_expert_agile_sprint_complete_activate) %></em>
+    </p>
+  </fieldset>
+  <p>
+    <%= submit_tag l(:button_expert_agile_sprint_complete) %>
+    <%= link_to l(:button_cancel), project_expert_agile_sprints_path(@project) %>
+  </p>
+<% end %>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'expert_agile', :plugin => 'redmine_expert_agile' %>
+<% end %>
+
+<% html_title(l(:label_expert_agile_sprint_complete)) %>
