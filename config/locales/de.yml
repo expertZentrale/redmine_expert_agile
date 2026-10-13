@@ -148,10 +148,10 @@ de:
   label_expert_agile_epic: Epic
   label_expert_agile_epic_plural: Epics
   label_expert_agile_epic_progress: Fortschritt
-  label_expert_agile_epic_progress_issues: "%{closed} von %{total} Tickets erledigt"
-  label_expert_agile_epic_progress_points: "%{closed} von %{total} Story Points erledigt"
+  label_expert_agile_epic_progress_issues: "Erledigte Tickets: %{closed}/%{total}"
+  label_expert_agile_epic_progress_points: "Erledigte Story Points: %{closed}/%{total}"
   label_expert_agile_subtasks: Unteraufgaben
-  label_expert_agile_subtasks_done: "%{closed}/%{total} Unteraufgaben erledigt"
+  label_expert_agile_subtasks_done: "Erledigte Unteraufgaben: %{closed}/%{total}"
   label_expert_agile_story_arrow: "↳"
   label_expert_agile_epics_show_closed: "Geschlossene Epics anzeigen (%{count})"
   label_expert_agile_epics_hide_closed: Geschlossene Epics ausblenden

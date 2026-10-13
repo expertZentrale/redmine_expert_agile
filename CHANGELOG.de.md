@@ -53,6 +53,12 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Geschlossene Epics sind einen Klick entfernt. Gelistet werden nur Tickets, die der Betrachter
   sehen darf; den Reiter gibt es, solange Epics eingeschaltet sind.
 
+### Behoben
+
+- **Der Planer aktualisiert die Lane, die eine Karte verlaesst.** Wurde eine Karte von einem Sprint,
+  einer Version oder einem Epic in ein anderes gezogen, behielt die Ausgangs-Lane Anzahl und Story
+  Points bis zum Neuladen; die Verschiebung antwortet nun auch fuer diese Lane.
+
 ## [0.7.1] - 2026-10-05
 
 ### Hinzugefuegt

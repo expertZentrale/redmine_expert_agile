@@ -175,6 +175,33 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
                  progress[epic_a.id.to_s]['title']
   end
 
+  # A card moving between two lanes leaves the one it came from with one
+  # card fewer; the answer has to say so, or that lane keeps its old count.
+  def test_the_lane_a_card_leaves_gets_its_totals
+    epic_a, epic_b, story = epics!
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :project_id => @project.id, :id => story.id,
+                                :container_type => 'epic', :container_id => epic_b.id }, :format => :js
+    end
+
+    source = JSON.parse(response.body)['totals']['source']
+    assert_equal epic_a.id, source['id']
+    assert_equal 0, source['issue_count']
+  end
+
+  def test_the_sprint_a_card_leaves_gets_its_totals
+    sprint_a = sprint!
+    sprint_b = sprint!(:name => 'Sprint B', :start_date => Date.new(2026, 1, 15), :end_date => Date.new(2026, 1, 28))
+    @issue.expert_agile_data!.update!(:sprint_id => sprint_a.id)
+
+    put :update, :params => { :project_id => @project.id, :id => @issue.id,
+                              :container_type => 'sprint', :container_id => sprint_b.id }, :format => :js
+
+    assert_response :success
+    assert_equal sprint_a.id, JSON.parse(response.body)['totals']['source']['id']
+  end
+
   def test_planning_into_the_backlog_takes_the_story_out_of_its_epic
     _epic_a, _epic_b, story = epics!
 

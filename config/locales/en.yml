@@ -148,10 +148,10 @@ en:
   label_expert_agile_epic: Epic
   label_expert_agile_epic_plural: Epics
   label_expert_agile_epic_progress: Progress
-  label_expert_agile_epic_progress_issues: "%{closed} of %{total} issues done"
-  label_expert_agile_epic_progress_points: "%{closed} of %{total} story points done"
+  label_expert_agile_epic_progress_issues: "Issues done: %{closed}/%{total}"
+  label_expert_agile_epic_progress_points: "Story points done: %{closed}/%{total}"
   label_expert_agile_subtasks: Subtasks
-  label_expert_agile_subtasks_done: "%{closed}/%{total} subtasks done"
+  label_expert_agile_subtasks_done: "Subtasks done: %{closed}/%{total}"
   label_expert_agile_story_arrow: "↳"
   label_expert_agile_epics_show_closed: "Show closed epics (%{count})"
   label_expert_agile_epics_hide_closed: Hide closed epics
