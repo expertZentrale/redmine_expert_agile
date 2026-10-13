@@ -157,7 +157,7 @@ curl -X POST -H "X-Redmine-API-Key: $KEY" -H "Content-Type: application/json" \
 
 | Parameter | Notes |
 | --- | --- |
-| `target` | `"next"` (the next open sprint by start date — the default), `"backlog"` (no sprint), `"new"`, or the id of an open sprint the project may plan into |
+| `target` | `"next"` (the next open sprint by start date — the default), `"backlog"` (no sprint), `"new"`, or the id of an open or active sprint the project may plan into |
 | `new_sprint` | With `target: "new"`: `{"name", "start_date", "end_date"}` |
 | `activate_target` | Make the target sprint the active one. Defaults to `true` unless the target is the backlog |
 

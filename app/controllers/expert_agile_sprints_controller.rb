@@ -179,7 +179,7 @@ class ExpertAgileSprintsController < ApplicationController
     render :json => { :sprint_id => @sprint.id, :status => @sprint.status_name,
                       :moved_issue_ids => @completion.moved.map(&:id),
                       :target_sprint_id => destination && destination.id,
-                      :target_status => destination && destination.reload.status_name }
+                      :target_status => destination && destination.status_name }
   end
 
   # GET on the API: what a completion would move, and where "next" points.
