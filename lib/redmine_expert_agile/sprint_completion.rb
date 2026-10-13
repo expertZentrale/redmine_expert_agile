@@ -97,6 +97,11 @@ module RedmineExpertAgile
         # Read again: the target was looked up before the lock, and another
         # request may have closed it, or activated another sprint, since.
         existing_target = destination && destination != @new_sprint ? destination : nil
+        # Every activation locks the project first and its sprints after
+        # (ExpertAgileSprint#deactivate_sibling_sprints). Activating here
+        # follows the same order, or it could hold the sprints while another
+        # activation holds the project and waits for them.
+        Project.lock.where(:id => destination.project_id).pluck(:id) if activate && destination
         locked = ExpertAgileSprint.lock.where(:id => [sprint.id, existing_target && existing_target.id].compact)
                                   .order(:id).pluck(:id)
         # Either row may have been deleted in between; that is a refusal,
