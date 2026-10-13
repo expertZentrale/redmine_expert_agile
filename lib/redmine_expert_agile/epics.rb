@@ -36,7 +36,10 @@ module RedmineExpertAgile
         nested = issues.select { |issue| issue.parent_id && issue.root_id }
         return result if ids.empty? || nested.empty?
 
+        # With the tracker: the badge names it, and a lazy load would cost a
+        # query per epic on the board.
         epics = Issue.visible(user)
+                     .includes(:tracker)
                      .where(:root_id => nested.map(&:root_id).uniq, :tracker_id => ids)
                      .where("#{Issue.table_name}.rgt - #{Issue.table_name}.lft > 1")
                      .to_a
