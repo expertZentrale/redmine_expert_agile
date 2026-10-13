@@ -4,9 +4,9 @@ class ExpertAgileSprintsController < ApplicationController
 
   before_action :find_project_by_project_id
   before_action :authorize
-  before_action :find_sprint, :only => [:show, :edit, :update, :destroy]
+  before_action :find_sprint, :only => [:show, :edit, :update, :destroy, :complete]
 
-  accept_api_auth :index, :show, :create, :update, :destroy
+  accept_api_auth :index, :show, :create, :update, :destroy, :complete
 
   def index
     @sprints = @project.expert_agile_sprints.sorted.to_a
@@ -89,7 +89,105 @@ class ExpertAgileSprintsController < ApplicationController
     end
   end
 
+  # Completes a sprint in one step: the form on GET, the completion on POST.
+  # See RedmineExpertAgile::SprintCompletion for what happens to the issues.
+  def complete
+    # The page or JSON, decided before anything is written: any other format
+    # would complete the sprint and only then find nothing to answer with.
+    return render_error(:status => 406) unless %w(html json).include?(request.format.symbol.to_s)
+
+    @completion = RedmineExpertAgile::SprintCompletion.new(@sprint)
+    if @sprint.closed?
+      return complete_refused(l(:error_expert_agile_sprint_already_closed))
+    end
+    # Only a POST completes. HEAD rides on the GET route but is not a GET,
+    # and crawlers and proxies send it freely.
+    return render_complete_form unless request.post?
+
+    target = params[:target].presence || RedmineExpertAgile::SprintCompletion::TARGET_NEXT
+    activate = params.key?(:activate_target) ? params[:activate_target].to_s.in?(%w(1 true)) : target.to_s != 'backlog'
+    if @completion.complete(target, :activate => activate,
+                                    :new_sprint_attributes => new_sprint_params)
+      respond_to do |format|
+        format.html do
+          flash[:notice] = completed_notice
+          redirect_back_or_default project_expert_agile_sprints_path(@project)
+        end
+        format.api { render_api_completion }
+      end
+    else
+      respond_to do |format|
+        format.html { render_complete_form(:unprocessable_entity) }
+        format.api do
+          render :json => { :errors => completion_errors,
+                            :refused_issues => @completion.refusals.map { |r| refused_issue_json(r) } },
+                 :status => :unprocessable_entity
+        end
+      end
+    end
+  end
+
   private
+
+  def render_complete_form(status = :ok)
+    @open_issues = @completion.visible_open_issues
+    @new_sprint = @completion.new_sprint ||
+                  @project.expert_agile_sprints.build(@completion.suggested_new_sprint_attributes)
+    respond_to do |format|
+      format.html { render :action => 'complete', :status => status }
+      format.api { render_api_completion_preview }
+    end
+  end
+
+  # Only the three fields the form offers; the completion slices them again.
+  def new_sprint_params
+    attributes = params[:new_sprint]
+    return {} unless attributes.respond_to?(:permit)
+
+    attributes.permit(:name, :start_date, :end_date).to_h
+  end
+
+  def complete_refused(message)
+    respond_to do |format|
+      format.html do
+        flash[:error] = message
+        redirect_back_or_default project_expert_agile_sprints_path(@project)
+      end
+      format.api { render :json => { :errors => [message] }, :status => :unprocessable_entity }
+    end
+  end
+
+  def completed_notice
+    destination = @completion.destination
+    l(:notice_expert_agile_sprint_completed,
+      :sprint => @sprint.name, :count => @completion.moved.size,
+      :target => destination ? destination.name : l(:label_expert_agile_backlog))
+  end
+
+  def completion_errors
+    (@sprint.errors.full_messages + (@completion.new_sprint ? @completion.new_sprint.errors.full_messages : [])).uniq
+  end
+
+  # Hidden issues come as one refusal without an id.
+  def refused_issue_json(refusal)
+    { :id => refusal.issue && refusal.issue.id, :reason => refusal.reason }
+  end
+
+  def render_api_completion
+    destination = @completion.destination
+    render :json => { :sprint_id => @sprint.id, :status => @sprint.status_name,
+                      :moved_issue_ids => @completion.moved.map(&:id),
+                      :target_sprint_id => destination && destination.id,
+                      :target_status => destination && destination.status_name }
+  end
+
+  # GET on the API: what a completion would move, and where "next" points.
+  def render_api_completion_preview
+    next_sprint = @completion.next_sprint
+    render :json => { :sprint_id => @sprint.id,
+                      :open_issue_count => @open_issues.size, :closed_issue_count => @completion.closed_issue_count,
+                      :next_sprint_id => next_sprint && next_sprint.id }
+  end
 
   def find_sprint
     @sprint = @project.expert_agile_sprints.find(params[:id])

@@ -143,3 +143,7 @@ of the release commit:
   column (`SprintQueryColumn`) come from `IssueQueryPatch`. A QueryColumn grouped in SQL must
   override `group_by_statement` — core groups by the column's name otherwise — and its
   `group_value` must equal the SQL key, or the group counts come back empty.
+  Completing a sprint is `RedmineExpertAgile::SprintCompletion` (`ExpertAgileSprintsController#complete`):
+  open issues move like a planner move (journaled, `manage_expert_agile_backlog`, the issue's own
+  validation), then the sprint closes and the target may be activated — one transaction; a single
+  refusal rolls back everything and is reported per issue. Never relax `no_open_issues_when_closing`.

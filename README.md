@@ -140,6 +140,10 @@ limits](docs/screenshots/en/11-sprint-board.png)
 The issue list knows the sprint too: a **Sprint** filter (a sprint, *Active sprint*, any or none)
 and a **Sprint** column that sorts, groups and exports to CSV.
 
+At the end of an iteration, **Complete sprint** (sprint list or the sprint's lane in the planner)
+moves the open issues to the next sprint, the backlog or a new sprint, closes the sprint and can make
+the target the active one — in one step.
+
 ### Backlog planner
 
 The planner puts the unplanned backlog next to the sprints it can be dragged into, each lane

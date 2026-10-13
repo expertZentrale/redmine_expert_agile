@@ -20,6 +20,22 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   gespeicherte Listen wie "alles im aktuellen Sprint", Exporte eines Sprints und Sammelbearbeitung
   seiner Tickets. Angeboten nur in Projekten mit einem der Plugin-Module und in projektuebergreifenden
   Listen.
+- **Sprint in einem Schritt abschliessen**, wie in Jira. *Sprint abschliessen* — in der Sprint-Liste
+  des Projekts und im Kopf der Sprint-Lane im Backlog-Planer — zeigt, was erledigt und was noch offen
+  ist, und verschiebt die offenen Tickets in den naechsten Sprint, zurueck ins Backlog oder in einen
+  direkt angelegten neuen Sprint (Name hochgezaehlt, Daten anschliessend). Danach wird der Sprint
+  geschlossen und auf Wunsch das Ziel zum aktiven Sprint, sodass ein Board, das dem aktiven Sprint
+  folgt, es sofort zeigt. Jedes Ticket wird wie im Planer verschoben — mit Journaleintrag, unter dem
+  Recht *Backlog verwalten* und der eigenen Validierung des Tickets; laesst sich ein einziges Ticket
+  nicht verschieben, wird nichts geschrieben und die Seite nennt jede Ablehnung. Auch als
+  `POST …/expert_agile_sprints/:id/complete.json`.
+
+### Behoben
+
+- **Ein wieder geoeffnetes Ticket liess offene Arbeit in einem geschlossenen Sprint.** Ein
+  abgeschlossener Sprint behaelt die in ihm erledigten Tickets; wurde eines davon spaeter wieder
+  geoeffnet, blieb es in diesem Sprint. Jetzt verlaesst es beim Wiedereroeffnen den geschlossenen
+  Sprint und geht zurueck ins Backlog, vermerkt in seiner Historie.
 
 ## [0.8.0] - 2026-10-13
 

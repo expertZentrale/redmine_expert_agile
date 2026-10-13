@@ -42,6 +42,11 @@ module RedmineExpertAgile
           # to that sprint's backlog, yet blocking it from being closed.
           before_save :expert_agile_drop_unshared_sprint, :if => :will_save_change_to_project_id?
 
+          # A closed sprint keeps the issues done in it, and holds no open
+          # one. Reopening such an issue takes it out of that sprint, back to
+          # the backlog, rather than leaving open work in a finished sprint.
+          before_save :expert_agile_leave_closed_sprint, :if => :expert_agile_reopening?
+
           # Defined on Issue itself, not in this module: accepts_nested_attributes_for
           # generates the writer in a module included after this one, which
           # would otherwise shadow it; `super` reaches that generated writer.
@@ -81,6 +86,26 @@ module RedmineExpertAgile
       # wherever the sprint is set from.
       def expert_agile_sprint_editable_by?(user = User.current)
         project.present? && user.allowed_to?(:manage_expert_agile_backlog, project)
+      end
+
+      def expert_agile_reopening?
+        return false unless will_save_change_to_status_id? && status && !status.is_closed?
+
+        IssueStatus.where(:id => status_id_in_database, :is_closed => true).exists?
+      end
+
+      # Under the sprint row's lock, so a completion of that sprint running
+      # right now is waited for and its outcome seen.
+      def expert_agile_leave_closed_sprint
+        data = expert_agile_data
+        return if data.nil? || data.sprint_id.nil?
+
+        # Locked by id first, read afterwards: a lock taken only on a row that
+        # is already closed would let a completion close it in between.
+        sprint = ExpertAgileSprint.lock.find_by(:id => data.sprint_id)
+        return unless sprint && sprint.closed?
+
+        data.sprint_id = nil
       end
 
       def expert_agile_drop_unshared_sprint

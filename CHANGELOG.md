@@ -19,6 +19,20 @@ notes from the section matching the pushed tag.
   by sprint and goes into the CSV export. Saved lists such as "everything in the current sprint",
   sprint exports and bulk edits of a sprint's issues become possible. Offered only in projects with
   one of the plugin's modules switched on, and on cross-project lists.
+- **Complete a sprint in one step**, as in Jira. *Complete sprint* — in the project's sprint list and
+  in the sprint's lane header in the backlog planner — shows what is done and what is still open, and
+  moves the open issues to the next sprint, back to the backlog, or into a new sprint created on the
+  spot (name counted up, dates following on). It closes the sprint and, if asked, makes the target
+  the active sprint, so a board following the active sprint shows it right away. Every issue moves
+  like a planner move — journaled, under the *Manage backlog* permission and the issue's own
+  validation; if a single issue cannot move, nothing is written and the page lists each refusal.
+  Also as `POST …/expert_agile_sprints/:id/complete.json`.
+
+### Fixed
+
+- **A reopened issue left open work in a closed sprint.** A completed sprint keeps the issues done in
+  it; reopening one of them later kept it in that sprint. Reopening now takes the issue out of a
+  closed sprint and back to the backlog, recorded in its history.
 
 ## [0.8.0] - 2026-10-13
 

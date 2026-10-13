@@ -154,6 +154,10 @@ WIP-Limits](docs/screenshots/de/11-sprint-board.png)
 Auch die Ticketliste kennt den Sprint: ein Filter **Sprint** (ein Sprint, *Aktiver Sprint*,
 irgendeiner oder keiner) und eine Spalte **Sprint**, die sortiert, gruppiert und in den CSV-Export geht.
 
+Am Ende einer Iteration verschiebt **Sprint abschliessen** (Sprint-Liste oder Sprint-Lane im
+Planer) die offenen Tickets in den naechsten Sprint, ins Backlog oder in einen neuen Sprint, schliesst
+den Sprint und kann das Ziel zum aktiven Sprint machen — in einem Schritt.
+
 ### Backlog-Planer
 
 Der Planer stellt den ungeplanten Backlog neben die Sprints, in die er gezogen werden kann; jede

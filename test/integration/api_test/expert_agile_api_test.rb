@@ -483,4 +483,46 @@ class ExpertAgileApiTest < Redmine::IntegrationTest
     assert_response :success
     assert_select 'expert_agile_sprints expert_agile_sprint name', :text => 'Sprint A'
   end
+
+  # --- Completing a sprint -------------------------------------------------
+
+  def test_complete_a_sprint_over_the_api
+    sprint = sprint!(:status => ExpertAgileSprint::STATUS_ACTIVE)
+    target = sprint!(:name => 'Sprint B', :start_date => Date.new(2026, 1, 15), :end_date => Date.new(2026, 1, 28))
+    ExpertAgileData.create!(:issue_id => @issue.id, :sprint_id => sprint.id)
+
+    post "/projects/#{@project.id}/expert_agile_sprints/#{sprint.id}/complete.json",
+         :params => { :target => target.id, :activate_target => true }.to_json,
+         :headers => auth.merge('CONTENT_TYPE' => 'application/json')
+
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 'closed', body['status']
+    assert_equal [@issue.id], body['moved_issue_ids']
+    assert_equal 'active', body['target_status']
+  end
+
+  def test_complete_refusals_over_the_api
+    sprint = sprint!(:status => ExpertAgileSprint::STATUS_ACTIVE)
+    ExpertAgileData.create!(:issue_id => @issue.id, :sprint_id => sprint.id)
+    @role.remove_permission!(:manage_expert_agile_backlog)
+
+    post "/projects/#{@project.id}/expert_agile_sprints/#{sprint.id}/complete.json",
+         :params => { :target => 'backlog' }.to_json,
+         :headers => auth.merge('CONTENT_TYPE' => 'application/json')
+
+    assert_response :unprocessable_entity
+    assert_equal [@issue.id], JSON.parse(response.body)['refused_issues'].map { |r| r['id'] }
+    assert sprint.reload.active?
+  end
+
+  def test_complete_answers_json_only
+    sprint = sprint!(:status => ExpertAgileSprint::STATUS_ACTIVE)
+
+    post "/projects/#{@project.id}/expert_agile_sprints/#{sprint.id}/complete.xml",
+         :params => { :target => 'backlog' }, :headers => auth
+
+    assert_response 406
+    assert sprint.reload.active?
+  end
 end
