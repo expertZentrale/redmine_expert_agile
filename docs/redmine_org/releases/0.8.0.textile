@@ -5,8 +5,8 @@ Epics, as in Jira, on top of Redmine's own subtask tree.
 h4. Added
 
 * *Epics.* Choose the trackers whose issues are epics under *Administration → expert Agile → Epics*. An issue belongs to the nearest epic above it in the subtask tree, so a story is a subtask of its epic and the story's subtasks belong to it through the story. No new table and no custom field: Redmine's parent filter, the REST API, the Gantt chart and the story point roll-up see the same data.
-* *Epic card field.* Every card on the board and in the backlog carries its epic as a coloured badge, one colour per epic; a story's subtask also names its story, and the tooltip shows the whole path. Only epics and issues the viewer may see are shown.
-* *Epics stay off the board* by default, as in Jira. The board option *Hide epics on the board* brings them back; column counts and totals follow what the board shows.
+* *Epic card field.* With the *Epic* card field switched on, every card on the board and in the backlog that belongs to an epic carries it as a coloured badge, one colour per epic; a story's subtask also names its story, and the tooltip shows the whole path. Only epics and issues the viewer may see are shown.
+* *Epics stay off the board* by default, as in Jira. Switching off the board option *Hide epics on the board* brings them back; column counts and totals follow what the board shows.
 * *Swimlanes by epic.* One lane per epic plus a lane without one. Dropping a story into another epic's lane makes it that epic's subtask, under the issue form's rules (the *Manage subtasks* permission, the issue's own validation) and into the issue history. A story's subtask and an epic itself are refused by name.
 * *Planning into epics.* The backlog planner offers *Epics* next to *Sprints* and *Versions*.
 * *Epic progress.* Epic lanes on the board and in the planner, and the epic's issue page, show a bar with the share done — by story points where the work is estimated, by issue count otherwise. A move refreshes every epic it touched.
