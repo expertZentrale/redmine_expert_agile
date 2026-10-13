@@ -162,6 +162,9 @@ module RedmineExpertAgile
           nil # deleted meanwhile; the refusal already says so
         end
         errors.each { |error| sprint.errors.add(error.attribute, error.message) } if sprint.errors.empty?
+        # Asked again: the next sprint it pointed at may be the reason for the
+        # refusal, closed or deleted meanwhile, and the form offers it anew.
+        @next_sprint = nil
         @moved = []
       end
       ok
@@ -219,7 +222,15 @@ module RedmineExpertAgile
 
       issue.init_journal(user)
       issue.expert_agile_data!.sprint_id = destination && destination.id
-      if issue.save
+      saved = begin
+        issue.save
+      rescue ActiveRecord::StaleObjectError
+        # Edited by someone else since the sprint's issues were read:
+        # refused like any other issue that cannot move.
+        issue.errors.add(:base, ::I18n.t(:notice_issue_update_conflict))
+        false
+      end
+      if saved
         @moved << issue
       else
         @refusals << Refusal.new(issue, issue.errors.full_messages.join(', ').presence ||
