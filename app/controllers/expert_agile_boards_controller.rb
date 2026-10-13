@@ -55,8 +55,16 @@ class ExpertAgileBoardsController < ApplicationController
     if params.key?(:swimlane_id)
       lane_attribute = swimlane_column && ExpertAgileQuery.swimlane_attribute(swimlane_column.name)
       return render_move_error(swimlane_not_writable_error, :unprocessable_entity) if lane_attribute.nil?
-      if lane_attribute == 'parent_issue_id' && (refusal = RedmineExpertAgile::Epics.lane_refusal(@issue))
-        return render_move_error(l("error_expert_agile_epic_lane_#{refusal}"), :unprocessable_entity)
+      if lane_attribute == 'parent_issue_id'
+        if (refusal = RedmineExpertAgile::Epics.lane_refusal(@issue))
+          return render_move_error(l("error_expert_agile_epic_lane_#{refusal}"), :unprocessable_entity)
+        end
+        # The lane's id becomes the issue's parent, and Redmine's own parent
+        # rules accept any issue there. Only an epic the user may see is a
+        # lane to drop into; '' is the lane without one.
+        if requested_lane_value && !RedmineExpertAgile::Epics.epic?(Issue.visible.find_by(:id => requested_lane_value))
+          return render_move_error(l(:error_expert_agile_epic_lane_not_an_epic), :unprocessable_entity)
+        end
       end
     end
 
@@ -83,6 +91,9 @@ class ExpertAgileBoardsController < ApplicationController
 
     retrieve_board_query_for_move
     siblings = column_siblings(target_status_id || @issue.status_id)
+    # The epic the card leaves, if it leaves one: its lane stays on screen
+    # even when this was its last card, and its bar has to follow.
+    @epic_left = lane_attribute == 'parent_issue_id' ? RedmineExpertAgile::Epics.nearest([@issue])[@issue.id] : nil
 
     Issue.transaction do
       @issue.init_journal(User.current)
@@ -540,7 +551,15 @@ class ExpertAgileBoardsController < ApplicationController
     if swimlane_column
       @query.group_by = swimlane_column.name.to_s
       payload[:swimlaneId] = @query.swimlane_dom_id_for(@issue)
-      payload[:lanes] = @query.swimlane_summaries.map do |lane|
+      lanes = @query.swimlane_summaries
+      # A lane the answer does not list holds no card any more, and the board
+      # zeroes its counts — but an epic's bar measures everything below the
+      # epic, not just the cards on screen.
+      if @epic_left && lanes.none? { |lane| lane[:id] == @epic_left.id.to_s }
+        lanes << { :id => @epic_left.id.to_s, :issue_count => 0, :story_points => 0,
+                   :progress => @query.epic_progress(@epic_left) }
+      end
+      payload[:lanes] = lanes.map do |lane|
         lane[:progress] ? lane.merge(:progress => helpers.expert_agile_epic_progress_data(lane[:progress])) : lane
       end
     end

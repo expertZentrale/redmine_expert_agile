@@ -9,6 +9,7 @@ require File.expand_path('../../test_helper', __FILE__)
 # core page with the plugin loaded. These do.
 class IssuesIntegrationTest < Redmine::ControllerTest
   tests IssuesController
+  include Redmine::I18n
 
   fixtures :projects, :users, :email_addresses, :members, :member_roles, :roles,
            :enabled_modules, :trackers, :projects_trackers, :issue_statuses,
@@ -231,6 +232,35 @@ class IssuesIntegrationTest < Redmine::ControllerTest
 
     assert_response :success
     assert_includes response.body, own.name
+  end
+
+
+  # The epic progress row goes through the same hook as the story points.
+  def test_an_epic_shows_its_progress_in_its_attribute_table
+    epic = Issue.generate!(:project => @project, :tracker_id => 2)
+    Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :show, :params => { :id => epic.id }
+    end
+
+    assert_response :success
+    assert_select '.expert-agile-epic-progress .ea-epic-progress'
+    assert_select '.expert-agile-epic-progress-detail',
+                  :text => l(:label_expert_agile_epic_progress_issues, :closed => 0, :total => 1)
+    # Redmine 5 serves plugin_assets/<plugin>/stylesheets/expert_agile.css,
+    # 6 and later a digested expert_agile-<hash>.css.
+    hrefs = css_select('link[rel=stylesheet]').map { |link| link['href'] }
+    assert hrefs.any? { |href| href =~ %r{redmine_expert_agile/.*expert_agile[-.].*css} }, hrefs.inspect
+  end
+
+  def test_an_ordinary_issue_shows_no_epic_progress
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :show, :params => { :id => @issue.id }
+    end
+
+    assert_response :success
+    assert_select '.expert-agile-epic-progress', false
   end
 
   private

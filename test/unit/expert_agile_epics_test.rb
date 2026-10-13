@@ -88,6 +88,12 @@ class ExpertAgileEpicsTest < ActiveSupport::TestCase
     assert_equal one, many
   end
 
+  def test_the_epics_come_with_their_tracker
+    epic = nearest([@story])[@story.id]
+
+    assert epic.association(:tracker).loaded?, 'the badge reads the tracker; it must not cost a query per epic'
+  end
+
   # --- Progress --------------------------------------------------------
 
   def progress_of(epic)
