@@ -137,6 +137,9 @@ or `sprint_id=active`. Only sprints the project may plan into are accepted; any 
 selector set to "Active sprint (follows automatically)", and the status columns with their WIP
 limits](docs/screenshots/en/11-sprint-board.png)
 
+The issue list knows the sprint too: a **Sprint** filter (a sprint, *Active sprint*, any or none)
+and a **Sprint** column that sorts, groups and exports to CSV.
+
 ### Backlog planner
 
 The planner puts the unplanned backlog next to the sprints it can be dragged into, each lane

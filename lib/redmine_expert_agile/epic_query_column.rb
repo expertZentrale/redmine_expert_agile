@@ -13,9 +13,15 @@ Query
 module RedmineExpertAgile
   class EpicQueryColumn < QueryColumn
     def initialize(query)
-      super(:epic, :sortable => false, :groupable => RedmineExpertAgile::Epics.nearest_epic_sql,
-                   :caption => :label_expert_agile_epic)
+      super(:epic, :sortable => false, :groupable => true, :caption => :label_expert_agile_epic)
       @query = query
+    end
+
+    # Core groups in SQL by the column's name, which is no column of the
+    # issues table; the board itself groups the loaded cards in Ruby and never
+    # asks, but anything grouping in the database gets the nearest epic.
+    def group_by_statement
+      RedmineExpertAgile::Epics.nearest_epic_sql
     end
 
     def value_object(issue)

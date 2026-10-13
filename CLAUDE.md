@@ -258,3 +258,7 @@ only issues straight under an epic or under nothing.
 `RedmineExpertAgile::Hierarchy` answers `children`, `parents` and `descendant_rows` (epic overview,
 `ExpertAgileEpicsController`) for a whole list in one visible-scoped query each; cards read them
 through `ExpertAgileQuery#card_story` / `#card_subtasks`, batch-loaded by `load_for_board`.
+The issue list's sprint filter (`expert_agile_sprint_id`, `active` resolved at query time) and
+column (`SprintQueryColumn`) come from `IssueQueryPatch`. A QueryColumn grouped in SQL must
+override `group_by_statement` — core groups by the column's name otherwise — and its
+`group_value` must equal the SQL key, or the group counts come back empty.

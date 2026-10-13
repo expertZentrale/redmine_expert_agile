@@ -9,6 +9,18 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Hinzugefuegt
+
+- **Sprint als Filter und Spalte in der Ticketliste.** Die Ticketliste von Redmine bekommt einen
+  Filter *Sprint* — ein oder mehrere Sprints, *Aktiver Sprint (automatisch)*, bei jedem Aufruf neu
+  aufgeloest, irgendein Sprint oder keiner (das Backlog) — und eine Spalte *Sprint*, die nach dem
+  Sprintbeginn sortiert, die Liste nach Sprint gruppiert und im CSV-Export landet. Damit gehen
+  gespeicherte Listen wie "alles im aktuellen Sprint", Exporte eines Sprints und Sammelbearbeitung
+  seiner Tickets. Angeboten nur in Projekten mit einem der Plugin-Module und in projektuebergreifenden
+  Listen.
+
 ## [0.8.0] - 2026-10-13
 
 ### Hinzugefuegt

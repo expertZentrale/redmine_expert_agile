@@ -151,6 +151,9 @@ laufenden Sprint, zeigt ein leeres Board statt aller Tickets.
 Sprint-Auswahl "Aktiver Sprint (automatisch)" und die Statusspalten mit ihren
 WIP-Limits](docs/screenshots/de/11-sprint-board.png)
 
+Auch die Ticketliste kennt den Sprint: ein Filter **Sprint** (ein Sprint, *Aktiver Sprint*,
+irgendeiner oder keiner) und eine Spalte **Sprint**, die sortiert, gruppiert und in den CSV-Export geht.
+
 ### Backlog-Planer
 
 Der Planer stellt den ungeplanten Backlog neben die Sprints, in die er gezogen werden kann; jede

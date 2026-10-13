@@ -1,4 +1,5 @@
-# Exposes story points as a column and a filter on the core issue list.
+# Exposes story points and the sprint as columns and filters on the core
+# issue list.
 #
 # Wrapped by UnboundMethod capture, NOT prepend + super. Both RedmineUP plugins
 # installed here (`redmine_agile`, `redmine_contacts_helpdesk`) patch
@@ -25,6 +26,29 @@ module RedmineExpertAgile
           "WHERE ead.issue_id = #{Issue.table_name}.id)"
       end
 
+      # Whether a query offers the sprint: everywhere for a cross-project
+      # list, in a project only where one of the plugin's modules is on, so a
+      # project without it never sees an empty sprint filter.
+      def self.sprints_offered?(project)
+        project.nil? || project.module_enabled?(:expert_agile) || project.module_enabled?(:expert_agile_backlog)
+      end
+
+      # The sprints a query can filter by, most relevant first: the ones the
+      # project may plan into, or every sprint the user may see on a
+      # cross-project list, which then names each sprint's project. The
+      # active sprint comes first as a value of its own, resolved when the
+      # query runs, so a saved list follows the iteration.
+      def self.sprint_filter_values(project)
+        values = [[::I18n.t(:label_expert_agile_sprint_active_mode), 'active']]
+        sprints = project ? project.shared_expert_agile_sprints : ExpertAgileSprint.visible.includes(:project)
+        sprints.sorted.each do |sprint|
+          label = "#{sprint.name} (#{::I18n.t("label_expert_agile_sprint_status_#{sprint.status_name}")})"
+          label = "#{sprint.project.name} » #{label}" if project.nil?
+          values << [label, sprint.id.to_s]
+        end
+        values
+      end
+
       def self.apply!(base = IssueQuery)
         return if base.instance_variable_get(:@expert_agile_query_patched)
 
@@ -44,6 +68,10 @@ module RedmineExpertAgile
               :caption => :label_expert_agile_story_points
             )
           end
+          if RedmineExpertAgile::Patches::IssueQueryPatch.sprints_offered?(project) &&
+             columns.none? { |column| column.name == :expert_agile_sprint }
+            columns << RedmineExpertAgile::SprintQueryColumn.new
+          end
           columns
         end
 
@@ -53,6 +81,14 @@ module RedmineExpertAgile
           original_filters.bind(self).call
           add_available_filter('story_points', :type => :integer,
                                                :name => l(:label_expert_agile_story_points))
+          if RedmineExpertAgile::Patches::IssueQueryPatch.sprints_offered?(project)
+            query_project = project
+            add_available_filter('expert_agile_sprint_id',
+                                 :type => :list_optional, :name => l(:label_expert_agile_sprint),
+                                 :values => lambda {
+                                   RedmineExpertAgile::Patches::IssueQueryPatch.sprint_filter_values(query_project)
+                                 })
+          end
         end
         base.send(filters_visibility, :initialize_available_filters)
 
@@ -60,6 +96,38 @@ module RedmineExpertAgile
       end
 
       module SqlMethods
+        # Through the agile data row, as a subquery on issue ids like the
+        # story points: an issue never planned has no row, and "not in sprint
+        # X" has to keep it.
+        def sql_for_expert_agile_sprint_id_field(_field, operator, value)
+          table = ExpertAgileData.table_name
+          case operator
+          when '*', '!*'
+            planned = "SELECT issue_id FROM #{table} WHERE sprint_id IS NOT NULL"
+            "#{Issue.table_name}.id #{operator == '*' ? 'IN' : 'NOT IN'} (#{planned})"
+          else
+            ids = expert_agile_sprint_filter_ids(value)
+            return(operator == '!' ? '1=1' : '1=0') if ids.empty?
+
+            in_sprints = "SELECT issue_id FROM #{table} WHERE sprint_id IN (#{ids.join(',')})"
+            "#{Issue.table_name}.id #{operator == '!' ? 'NOT IN' : 'IN'} (#{in_sprints})"
+          end
+        end
+
+        # The filter's values as sprint ids, "active" resolved now: the
+        # active sprints the project may plan into, or every active sprint
+        # the user may see on a cross-project list.
+        def expert_agile_sprint_filter_ids(values)
+          Array(values).flat_map do |value|
+            if value.to_s == 'active'
+              scope = project ? project.shared_expert_agile_sprints : ExpertAgileSprint.visible
+              scope.active.pluck(:id)
+            else
+              value.to_s =~ /\A\d+\z/ ? [value.to_i] : []
+            end
+          end.uniq
+        end
+
         # Filtering goes through a subquery on issue ids rather than through
         # `sql_for_field` against the correlated expression: sql_for_field always
         # builds "#{db_table}.#{db_field}", so it cannot take an expression.
