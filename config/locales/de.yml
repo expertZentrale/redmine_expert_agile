@@ -133,6 +133,8 @@ de:
   error_expert_agile_swimlane_not_writable: "Eine Karte kann nicht in eine andere Swimlane nach %{field} verschoben werden"
   error_expert_agile_swimlane_field_not_editable: "Sie duerfen das Feld %{field} dieses Tickets nicht aendern"
   error_expert_agile_swimlane_not_kept: "Die Aenderung von %{field} wurde nicht gespeichert. Eine andere Regel oder ein Plugin hat den alten Wert beibehalten"
+  error_expert_agile_epic_lane_subtask: "Eine Unteraufgabe einer Story gehoert ueber die Story zum Epic. Verschieben Sie stattdessen die Story"
+  error_expert_agile_epic_lane_epic: "Ein Epic kann nicht in ein anderes Epic gezogen werden. Aendern Sie das uebergeordnete Ticket im Ticketformular"
   error_expert_agile_move_saved_lane_not_shown: Der Zug wurde gespeichert. Die Karte gehoert jetzt zu einer Swimlane, die das Board nicht zeigt. Laden Sie die Seite neu, um sie zu sehen
   text_expert_agile_drop_allowed: Diese Karte darf hier abgelegt werden
   text_expert_agile_drop_blocked: Der Workflow erlaubt diese Karte hier nicht

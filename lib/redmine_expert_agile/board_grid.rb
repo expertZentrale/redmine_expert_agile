@@ -165,6 +165,9 @@ module RedmineExpertAgile
     # Redmine's own ordering where the lane object has one (trackers, statuses
     # and priorities carry `position`), otherwise alphabetical.
     def sort_lanes(lanes)
+      # Epics by subject: an issue's to_s leads with its tracker and id.
+      return lanes.sort_by { |lane| lane.subject.to_s.downcase } if lanes.all? { |lane| lane.is_a?(Issue) }
+
       if lanes.all? { |lane| lane.respond_to?(:position) && lane.position.present? }
         lanes.sort_by(&:position)
       else

@@ -21,8 +21,15 @@ notes from the section matching the pushed tag.
   card on the board and in the backlog carries its epic as a coloured badge linking to it, one
   colour per epic; the card tooltip names the epic too. Only epics the viewer may see are shown.
 - **Epics are left off the board** by default, as in Jira — an epic is a container of work, not a
-  card that moves through the columns. *Hide epics on the board* in the board options brings them
-  back; column counts and totals follow what the board shows.
+  card that moves through the columns. Switching off *Hide epics on the board* in the board options
+  brings them back; column counts and totals follow what the board shows.
+- **Swimlanes by epic.** *Epic* is offered as a swimlane field while epics are switched on: one
+  lane per epic, titled and linked like the epic badge and in the same colour, plus a lane for
+  issues outside any epic. Dropping a story into another epic's lane makes it a subtask of that
+  epic, dropping it into the lane without an epic takes it out — through the issue form's rules
+  (the right to manage subtasks, the issue's own validation) and into the issue history. A story's
+  subtask belongs to its epic through the story and is refused by name rather than torn out of
+  it; an epic is not dropped into another epic.
 
 ## [0.7.1] - 2026-10-05
 

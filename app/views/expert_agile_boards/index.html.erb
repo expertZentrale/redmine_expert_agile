@@ -55,7 +55,7 @@
               data-swimlane-id="<%= @query.swimlane_dom_id(swimlane) %>">
             <th colspan="<%= @board_columns.size %>">
               <span class="ea-swimlane-name">
-                <%= swimlane.nil? ? l(:label_expert_agile_swimlane_none_value) : h(swimlane.to_s) %>
+                <%= expert_agile_swimlane_label(swimlane) %>
               </span>
               <% totals = @query.swimlane_totals(swimlane) %>
               <span class="ea-swimlane-totals">

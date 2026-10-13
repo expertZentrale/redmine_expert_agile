@@ -1340,6 +1340,105 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_equal 7, issue.reload.priority_id
   end
 
+  # --- Epic lanes ------------------------------------------------------
+
+  def epic_lane_fixture
+    epic_a = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Epic A')
+    epic_b = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Epic B')
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic_a.id)
+    [epic_a, epic_b, story]
+  end
+
+  def test_the_epic_is_offered_as_a_swimlane_while_epics_are_on
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      assert_includes ExpertAgileQuery.new(:project => @project).groupable_columns.map(&:name), :epic
+    end
+    with_agile_settings('epic_tracker_ids' => '') do
+      assert_not_includes ExpertAgileQuery.new(:project => @project).groupable_columns.map(&:name), :epic
+    end
+  end
+
+  def test_the_board_groups_cards_into_a_lane_per_epic
+    epic_a, epic_b, story = epic_lane_fixture
+    subtask = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => story.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'epic' }
+    end
+
+    assert_response :success
+    assert_select "tr.ea-swimlane-title[data-swimlane-id=?] a[href=?]", epic_a.id.to_s, "/issues/#{epic_a.id}"
+    assert_select "td[data-swimlane-id=?] #ea-card-#{story.id}", epic_a.id.to_s
+    assert_select "td[data-swimlane-id=?] #ea-card-#{subtask.id}", epic_a.id.to_s
+    assert_select "tr.ea-swimlane-title[data-swimlane-id=?]", epic_b.id.to_s, false # no card, no lane
+    assert_select "td[data-swimlane-id=''] #ea-card-#{@issue.id}"
+  end
+
+  def test_a_drop_into_another_epic_lane_moves_the_story
+    _epic_a, epic_b, story = epic_lane_fixture
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :id => story.id, :status_id => story.status_id,
+                                :swimlane_field => 'epic', :swimlane_id => epic_b.id.to_s }, :format => :js
+    end
+
+    assert_response :success
+    assert_equal epic_b.id.to_s, JSON.parse(response.body)['swimlaneId']
+    assert_equal epic_b.id, story.reload.parent_id
+    assert_includes story.journals.last.details.map(&:prop_key), 'parent_id'
+  end
+
+  def test_a_drop_into_the_none_lane_takes_the_story_out_of_its_epic
+    _epic_a, _epic_b, story = epic_lane_fixture
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :id => story.id, :status_id => story.status_id,
+                                :swimlane_field => 'epic', :swimlane_id => '' }, :format => :js
+    end
+
+    assert_response :success
+    assert_nil story.reload.parent_id
+  end
+
+  def test_a_story_subtask_is_not_torn_out_of_its_story
+    _epic_a, epic_b, story = epic_lane_fixture
+    subtask = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => story.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :id => subtask.id, :status_id => subtask.status_id,
+                                :swimlane_field => 'epic', :swimlane_id => epic_b.id.to_s }, :format => :js
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal l(:error_expert_agile_epic_lane_subtask), JSON.parse(response.body)['error']
+    assert_equal story.id, subtask.reload.parent_id
+  end
+
+  def test_an_epic_is_not_dropped_into_another_epic
+    epic_a, epic_b, _story = epic_lane_fixture
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :id => epic_a.id, :status_id => epic_a.status_id,
+                                :swimlane_field => 'epic', :swimlane_id => epic_b.id.to_s }, :format => :js
+    end
+
+    assert_response :unprocessable_entity
+    assert_nil epic_a.reload.parent_id
+  end
+
+  def test_an_epic_lane_needs_the_right_to_manage_subtasks
+    _epic_a, epic_b, story = epic_lane_fixture
+    @role.remove_permission!(:manage_subtasks)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :id => story.id, :status_id => story.status_id,
+                                :swimlane_field => 'epic', :swimlane_id => epic_b.id.to_s }, :format => :js
+    end
+
+    assert_response :forbidden
+    assert_not_equal epic_b.id, story.reload.parent_id
+  end
+
   def test_a_drop_into_a_version_lane_plans_the_card
     issue = Issue.generate!(:project_id => @project.id, :fixed_version_id => nil)
     open_version = Version.find(3)

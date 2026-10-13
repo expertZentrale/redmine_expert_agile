@@ -248,3 +248,6 @@ same data. `Epics.nearest(issues, user)` answers a whole list from the nested se
 card. Cards get the epic through `ExpertAgileQuery#card_epic` (batch-loaded per board, or per list
 via `preload_card_epics` on the backlog). `hide_epics` (on by default) filters epic trackers out in
 `board_filtered`, which every count and total goes through as well.
+Epic swimlanes use `RedmineExpertAgile::EpicQueryColumn` (the one non-association lane); a drop
+writes `parent_issue_id` (`WRITABLE_SWIMLANES['epic']`), re-read from `parent_id`, and
+`Epics.lane_refusal` refuses a story's subtask and an epic by name before anything is written.
