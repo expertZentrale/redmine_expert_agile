@@ -86,24 +86,27 @@ module RedmineExpertAgile
       @moved = []
       ok = false
       ExpertAgileSprint.transaction do
-        # Two completions of one sprint at once would both find it open and
-        # both move its issues. The row lock makes the second wait, and then
-        # see the sprint closed.
-        sprint.lock!
+        destination = resolve_target(target, new_sprint_attributes)
+        raise ActiveRecord::Rollback if destination == :invalid
+
+        # The sprint and an existing target are locked together, in id order,
+        # and read again under the lock. Together: two completions of one
+        # sprint would otherwise both find it open and both move its issues.
+        # In id order: completing A into B while B is completed into A would
+        # otherwise have each request hold one row and wait for the other.
+        # Read again: the target was looked up before the lock, and another
+        # request may have closed it, or activated another sprint, since.
+        existing_target = destination && destination != @new_sprint ? destination : nil
+        ExpertAgileSprint.lock.where(:id => [sprint.id, existing_target && existing_target.id].compact)
+                         .order(:id).pluck(:id)
+        sprint.reload
         if sprint.closed?
           sprint.errors.add(:base, ::I18n.t(:error_expert_agile_sprint_already_closed))
           raise ActiveRecord::Rollback
         end
-
-        destination = resolve_target(target, new_sprint_attributes)
-        raise ActiveRecord::Rollback if destination == :invalid
-
-        # An existing target is locked and read again before anything moves
-        # into it: it was looked up before the lock, and another request may
-        # have closed it, or activated a different sprint, in between.
-        if destination && destination.persisted? && destination != @new_sprint
-          destination.lock!
-          unless destination.open? || destination.active?
+        if existing_target
+          existing_target.reload
+          unless existing_target.open? || existing_target.active?
             invalid_target
             raise ActiveRecord::Rollback
           end

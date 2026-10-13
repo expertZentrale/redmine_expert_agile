@@ -99,8 +99,11 @@ module RedmineExpertAgile
       def expert_agile_leave_closed_sprint
         data = expert_agile_data
         return if data.nil? || data.sprint_id.nil?
-        return unless ExpertAgileSprint.lock.where(:id => data.sprint_id,
-                                                   :status => ExpertAgileSprint::STATUS_CLOSED).pluck(:id).any?
+
+        # Locked by id first, read afterwards: a lock taken only on a row that
+        # is already closed would let a completion close it in between.
+        sprint = ExpertAgileSprint.lock.find_by(:id => data.sprint_id)
+        return unless sprint && sprint.closed?
 
         data.sprint_id = nil
       end
