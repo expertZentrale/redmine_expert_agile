@@ -59,6 +59,16 @@ module RedmineExpertAgile
         result
       end
 
+      # The visible issues between an epic and an issue below it, top down:
+      # the story, and in a deeper tree everything under the story as well.
+      def path_between(epic, issue, user = User.current)
+        Issue.visible(user)
+             .where(:root_id => issue.root_id)
+             .where("#{Issue.table_name}.lft > ? AND #{Issue.table_name}.lft < ? AND #{Issue.table_name}.rgt > ?",
+                    epic.lft, issue.lft, issue.rgt)
+             .order(:lft).to_a
+      end
+
       # {issue_id => parent or nil} for every given issue: the visible parent
       # each one hangs under.
       def parents(issues, user = User.current)
@@ -67,7 +77,8 @@ module RedmineExpertAgile
         ids = issues.map(&:parent_id).compact.uniq
         return result if ids.empty?
 
-        found = Issue.visible(user).where(:id => ids).index_by(&:id)
+        # With the tracker: the story chip names it in its title.
+        found = Issue.visible(user).includes(:tracker).where(:id => ids).index_by(&:id)
         issues.each { |issue| result[issue.id] = found[issue.parent_id] if issue.parent_id }
         result
       end

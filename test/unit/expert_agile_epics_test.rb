@@ -148,6 +148,20 @@ class ExpertAgileEpicsTest < ActiveSupport::TestCase
     assert_equal @story, parents[@subtask.id]
   end
 
+  def test_the_path_between_an_epic_and_a_deep_issue_keeps_every_step
+    child = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => @subtask.id)
+
+    path = RedmineExpertAgile::Hierarchy.path_between(@epic.reload, child.reload)
+
+    assert_equal [@story.id, @subtask.id], path.map(&:id)
+  end
+
+  def test_parents_come_with_their_tracker
+    parent = RedmineExpertAgile::Hierarchy.parents([@subtask])[@subtask.id]
+
+    assert parent.association(:tracker).loaded?
+  end
+
   def test_descendant_rows_walk_the_tree_with_depth
     rows = RedmineExpertAgile::Hierarchy.descendant_rows([@epic])[@epic.id]
 

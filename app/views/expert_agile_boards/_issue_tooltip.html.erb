@@ -6,15 +6,15 @@
     <li><%= l(:field_status) %>: <%= h issue.status.name %></li>
     <li><%= l(:field_priority) %>: <%= h issue.priority.name %></li>
     <li><%= l(:field_assigned_to) %>: <%= issue.assigned_to ? h(issue.assigned_to.name) : '-' %></li>
-    <%# The card's whole path in the tree: its epic, and the story between
-        the two for a story's subtask. %>
+    <%# The card's whole path in the tree: its epic, everything visible
+        between the two, then the card itself. %>
     <% if (epic = RedmineExpertAgile::Epics.enabled? && RedmineExpertAgile::Epics.nearest([issue])[issue.id]) %>
-      <% story = RedmineExpertAgile::Hierarchy.parents([issue])[issue.id] %>
-      <% story = nil if story.nil? || story.id == epic.id %>
       <li class="ea-tooltip-lineage">
         <%= l(:label_expert_agile_epic) %>:
         <%= link_to "##{epic.id} #{epic.subject}", issue_path(epic) %>
-        <% if story %> › <%= link_to "##{story.id} #{story.subject}", issue_path(story) %><% end %>
+        <% RedmineExpertAgile::Hierarchy.path_between(epic, issue).each do |step| %>
+          › <%= link_to "##{step.id} #{step.subject}", issue_path(step) %>
+        <% end %>
         › #<%= issue.id %>
       </li>
     <% end %>

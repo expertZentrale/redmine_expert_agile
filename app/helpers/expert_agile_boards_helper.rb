@@ -246,7 +246,8 @@ module ExpertAgileBoardsHelper
       end
       items = children.map do |child|
         content_tag(:li, :class => "ea-subtask#{' ea-subtask-closed' if child.closed?}") do
-          content_tag(:span, '', :class => 'ea-subtask-dot', :title => child.status_name) +
+          content_tag(:span, '', :class => 'ea-subtask-dot', :title => child.status_name,
+                                 :role => 'img', :'aria-label' => child.status_name) +
             link_to("##{child.id} #{child.subject}", issue_path(child.id))
         end
       end
