@@ -9,6 +9,17 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Added
+
+- **Sprint filter and column on the issue list.** The core issue list gains a *Sprint* filter —
+  one or more sprints, *Active sprint (automatic)* resolved each time the list runs, any sprint or
+  none (the backlog) — and a *Sprint* column that sorts by the sprint's start date, groups the list
+  by sprint and goes into the CSV export. Saved lists such as "everything in the current sprint",
+  sprint exports and bulk edits of a sprint's issues become possible. Offered only in projects with
+  one of the plugin's modules switched on, and on cross-project lists.
+
 ## [0.8.0] - 2026-10-13
 
 ### Added

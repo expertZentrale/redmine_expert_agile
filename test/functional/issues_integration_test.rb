@@ -263,6 +263,35 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     assert_select '.expert-agile-epic-progress', false
   end
 
+
+  # The issue list with the sprint filter and column: a core page, so it is
+  # rendered here like every other page the plugin touches.
+  def test_the_issue_list_filters_and_shows_the_sprint
+    sprint = ExpertAgileSprint.create!(:project => @project, :name => 'Sprint Liste',
+                                       :start_date => Date.new(2026, 1, 1), :end_date => Date.new(2026, 1, 14))
+    @issue.expert_agile_data!.update!(:sprint_id => sprint.id)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :f => ['expert_agile_sprint_id'], :op => { 'expert_agile_sprint_id' => '=' },
+                             :v => { 'expert_agile_sprint_id' => [sprint.id.to_s] },
+                             :c => %w(subject expert_agile_sprint) }
+
+    assert_response :success
+    assert_select 'table.issues tr.issue', 1
+    assert_select 'table.issues td.expert_agile_sprint', :text => 'Sprint Liste'
+  end
+
+  def test_the_issue_list_exports_the_sprint_to_csv
+    sprint = ExpertAgileSprint.create!(:project => @project, :name => 'Sprint CSV',
+                                       :start_date => Date.new(2026, 1, 1), :end_date => Date.new(2026, 1, 14))
+    @issue.expert_agile_data!.update!(:sprint_id => sprint.id)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :format => 'csv',
+                             :c => %w(subject expert_agile_sprint) }
+
+    assert_response :success
+    assert_includes response.body, 'Sprint CSV'
+  end
   private
 
   # A sprint of project 2, which user 2 cannot see a board of and which shares
