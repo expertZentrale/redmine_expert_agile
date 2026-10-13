@@ -23,8 +23,16 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   mit Link, eine Farbe je Epic; auch der Karten-Tooltip nennt das Epic. Angezeigt werden nur
   Epics, die der Betrachter sehen darf.
 - **Epics stehen standardmaessig nicht auf dem Board**, wie in Jira — ein Epic ist ein Behaelter
-  fuer Arbeit, keine Karte, die durch die Spalten wandert. *Epics auf dem Board ausblenden* in den
-  Board-Optionen holt sie zurueck; Spaltenzaehler und Summen folgen dem, was das Board zeigt.
+  fuer Arbeit, keine Karte, die durch die Spalten wandert. Wer *Epics auf dem Board ausblenden* in
+  den Board-Optionen abschaltet, holt sie zurueck; Spaltenzaehler und Summen folgen dem, was das Board zeigt.
+- **Swimlanes nach Epic.** Solange Epics eingeschaltet sind, steht *Epic* als Swimlane-Feld zur
+  Wahl: eine Lane je Epic, betitelt und verlinkt wie das Epic-Badge und in derselben Farbe, dazu
+  eine Lane fuer Tickets ohne Epic. Eine Story in die Lane eines anderen Epics zu ziehen macht sie
+  zur Unteraufgabe dieses Epics, in die Lane ohne Epic nimmt sie heraus — nach den Regeln des
+  Ticketformulars (Recht, Unteraufgaben zu verwalten, eigene Validierung des Tickets) und mit
+  Eintrag in der Ticket-Historie. Eine Unteraufgabe einer Story gehoert ueber die Story zum Epic
+  und wird mit Begruendung abgelehnt statt herausgerissen; ein Epic wird nicht in ein anderes
+  Epic gezogen.
 
 ## [0.7.1] - 2026-10-05
 

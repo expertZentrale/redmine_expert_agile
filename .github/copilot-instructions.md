@@ -129,3 +129,6 @@ of the release commit:
   `parent` per card. Cards read it through `ExpertAgileQuery#card_epic` (batch-loaded);
   `hide_epics` (default on) filters epic trackers in `board_filtered`, which counts and totals
   share.
+  Epic swimlanes use `RedmineExpertAgile::EpicQueryColumn` (the one non-association lane); a drop
+  writes `parent_issue_id` (`WRITABLE_SWIMLANES['epic']`), re-read from `parent_id`, and
+  `Epics.lane_refusal` refuses a story's subtask and an epic by name before anything is written.

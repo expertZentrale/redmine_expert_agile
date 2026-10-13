@@ -126,7 +126,8 @@ Plugin-Einstellungen (*Epics*) werden die Epic-Tracker gewaehlt; ein Ticket geho
 naechsten Epic ueber ihm. Die Stories eines Epics sind also seine Unteraufgaben, und deren
 Unteraufgaben gehoeren ebenfalls dazu. Mit dem Kartenfeld **Epic** zeigt jede Karte auf dem Board
 und im Backlog ihr Epic als farbiges Badge, eine Farbe je Epic. Die Epics selbst stehen nicht auf
-dem Board, solange *Epics auf dem Board ausblenden* in den Board-Optionen eingeschaltet ist.
+dem Board, solange *Epics auf dem Board ausblenden* in den Board-Optionen eingeschaltet ist. Wird das Board nach *Epic* gruppiert, entsteht eine Swimlane je Epic; eine Story in die Lane
+eines anderen Epics zu ziehen verschiebt sie dorthin.
 
 ### Sprints
 

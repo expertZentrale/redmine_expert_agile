@@ -121,11 +121,11 @@ class ExpertAgileQuery < IssueQuery
       columns << QueryColumn.new(:day_in_state, :sortable => false, :groupable => false,
                                                 :caption => :label_expert_agile_day_in_state)
     end
-    # The epic badge. Offered only while some tracker is an epic tracker; a
-    # board that kept the field after epics were switched off simply drops it.
+    # The epic badge and the epic swimlanes. Offered only while some tracker
+    # is an epic tracker; a board that kept either after epics were switched
+    # off simply drops it.
     if RedmineExpertAgile::Epics.enabled? && columns.none? { |column| column.name == :epic }
-      columns << QueryColumn.new(:epic, :sortable => false, :groupable => false,
-                                        :caption => :label_expert_agile_epic)
+      columns << RedmineExpertAgile::EpicQueryColumn.new(self)
     end
     @available_columns = columns
   end
@@ -270,20 +270,25 @@ class ExpertAgileQuery < IssueQuery
     RedmineExpertAgile::Epics.enabled? && has_column?(:epic)
   end
 
-  # The epic one card belongs to, or nil.
+  # The epic one card shows, or nil while the card field is off.
+  def card_epic(issue)
+    card_epics? ? epic_of(issue) : nil
+  end
+
+  # The epic an issue belongs to, for the card badge and the epic swimlanes.
   #
   # Looked up for every card the board has loaded at once, the first time any
   # card asks; a screen that renders cards from several lists (the backlog)
   # hands each list to preload_card_epics first. A card asked about on its
   # own — the one a move answers with — costs its own single query.
-  def card_epic(issue)
-    return nil unless card_epics?
+  def epic_of(issue)
+    return nil if issue.nil? || !RedmineExpertAgile::Epics.enabled?
 
     @card_epics ||= {}
     unless @card_epics.key?(issue.id)
       batch = board_issues_loaded? ? board_issues.reject { |other| @card_epics.key?(other.id) } : []
       batch << issue unless batch.include?(issue)
-      preload_card_epics(batch)
+      @card_epics.merge!(RedmineExpertAgile::Epics.nearest(batch))
     end
     @card_epics[issue.id]
   end
@@ -325,7 +330,10 @@ class ExpertAgileQuery < IssueQuery
     'assigned_to' => 'assigned_to_id',
     'category' => 'category_id',
     'fixed_version' => 'fixed_version_id',
-    'priority' => 'priority_id'
+    'priority' => 'priority_id',
+    # A lane per epic: the drop sets the parent, and only for an issue that
+    # hangs straight under an epic or under nothing (Epics.lane_refusal).
+    'epic' => 'parent_issue_id'
   }.freeze
 
   # The attribute a drop into a lane of this field writes, or nil.
@@ -339,8 +347,13 @@ class ExpertAgileQuery < IssueQuery
   # the private flag) and by custom fields; none of those is a lane a team
   # works in, and none is a value a card should ever be dragged into. They
   # are not offered at all, and a saved board grouped by one shows ungrouped.
+  # The one lane that is no association is the epic: the record an issue
+  # belongs to there sits above it in the subtask tree.
   def groupable_columns
-    super.select { |column| !column.is_a?(QueryCustomFieldColumn) && Issue.reflect_on_association(column.name) }
+    super.select do |column|
+      column.is_a?(RedmineExpertAgile::EpicQueryColumn) ||
+        (!column.is_a?(QueryCustomFieldColumn) && Issue.reflect_on_association(column.name))
+    end
   end
 
   # --- Board scope ---------------------------------------------------

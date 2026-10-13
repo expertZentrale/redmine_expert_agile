@@ -212,6 +212,14 @@ module ExpertAgileBoardsHelper
     'ea-lane-colored'
   end
 
+  # A lane's title. An epic lane links to its epic, like the epic badge does.
+  def expert_agile_swimlane_label(swimlane)
+    return l(:label_expert_agile_swimlane_none_value) if swimlane.nil?
+    return link_to("##{swimlane.id} #{swimlane.subject}", issue_path(swimlane)) if swimlane.is_a?(Issue)
+
+    h(swimlane.to_s)
+  end
+
   # The lane's colour as inline custom properties. A lane with nothing to take
   # a colour from gets the palette's gray, so it still reads as a band.
   def expert_agile_swimlane_style(swimlane)

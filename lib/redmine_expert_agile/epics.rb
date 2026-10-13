@@ -21,6 +21,35 @@ module RedmineExpertAgile
         issue.present? && tracker_ids.include?(issue.tracker_id)
       end
 
+      # The same answer as `nearest`, as an SQL expression over the issues
+      # table, for anything that groups in the database. Visibility is left to
+      # the query it is used in; the board itself groups the loaded issues in
+      # Ruby through `nearest` and never reads this.
+      def nearest_epic_sql
+        ids = tracker_ids
+        return 'NULL' if ids.empty?
+
+        table = Issue.table_name
+        "(SELECT ep.id FROM #{table} ep WHERE ep.root_id = #{table}.root_id " \
+          "AND ep.lft < #{table}.lft AND ep.rgt > #{table}.rgt " \
+          "AND ep.tracker_id IN (#{ids.map(&:to_i).join(',')}) ORDER BY ep.lft DESC LIMIT 1)"
+      end
+
+      # Why a card may not be dropped into another epic's lane, or nil when it
+      # may. Only the parent link is ever written, so only an issue hanging
+      # straight under an epic, or under nothing, can change epics that way:
+      # a story's subtask belongs to its epic through the story, and moving it
+      # would tear it out of the story. An epic is not dropped into another
+      # epic either; nesting epics is a decision for the issue form.
+      def lane_refusal(issue)
+        return :epic if epic?(issue)
+
+        parent = issue.parent
+        return nil if parent.nil? || epic?(parent)
+
+        :subtask
+      end
+
       # {issue_id => nearest epic or nil} for every given issue, in one query
       # whatever the number of issues.
       #

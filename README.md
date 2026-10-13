@@ -113,7 +113,8 @@ trackers in the plugin settings (*Epics*); an issue then belongs to the nearest 
 an epic's stories are its subtasks and their subtasks belong to it as well. Switch on the **Epic**
 card field and every card on the board and in the backlog shows its epic as a coloured badge, one
 colour per epic. The epics themselves stay off the board unless *Hide epics on the board* is
-switched off in the board options.
+switched off in the board options. Group the board by *Epic* for one swimlane per epic; dropping a story into another epic's lane
+moves it there.
 
 ### Sprints
 
