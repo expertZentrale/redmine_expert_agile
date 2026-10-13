@@ -38,6 +38,14 @@ notes from the section matching the pushed tag.
   page show how far the epic is along: a bar with the share done, by story points where the work
   is estimated and by issue count where it is not, with the numbers behind it in its title. A move
   refreshes the bars of both epics it touched.
+- **The tree on the card.** With the *Epic* card field on, a story's subtask names its story under
+  the epic badge (Epic, then ↳ story), and the card tooltip shows the whole path. A new
+  **Subtasks** card field shows a story's subtasks as "2/5 subtasks done" with a thin bar, folding
+  open into the list with each subtask's status — plain `<details>`, no script.
+- **Epic overview.** A new *Epics* tab next to the board lists every open epic of the project as a
+  folding block: its progress, and below it the stories with their subtasks indented, each with
+  status, assignee, story points and its own subtask progress. Closed epics are a click away. Only
+  issues the viewer may see are listed; the tab exists while epics are switched on.
 
 ### Fixed
 

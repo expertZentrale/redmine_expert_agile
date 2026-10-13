@@ -136,3 +136,6 @@ of the release commit:
   points) in one query; `ExpertAgileQuery#epic_progress` batches it over `epics_on_screen` (board epic
   lanes, planner epic containers). The planner's `epic` container writes `parent_issue_id` and shows
   only issues straight under an epic or under nothing.
+  `RedmineExpertAgile::Hierarchy` answers `children`, `parents` and `descendant_rows` (epic overview,
+  `ExpertAgileEpicsController`) for a whole list in one visible-scoped query each; cards read them
+  through `ExpertAgileQuery#card_story` / `#card_subtasks`, batch-loaded by `load_for_board`.

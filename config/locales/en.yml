@@ -150,6 +150,12 @@ en:
   label_expert_agile_epic_progress: Progress
   label_expert_agile_epic_progress_issues: "Issues done: %{closed}/%{total}"
   label_expert_agile_epic_progress_points: "Story points done: %{closed}/%{total}"
+  label_expert_agile_subtasks: Subtasks
+  label_expert_agile_subtasks_done: "Subtasks done: %{closed}/%{total}"
+  label_expert_agile_story_arrow: "↳"
+  label_expert_agile_epics_show_closed: "Show closed epics (%{count})"
+  label_expert_agile_epics_hide_closed: Hide closed epics
+  text_expert_agile_epic_empty: Nothing planned into this epic yet.
   text_expert_agile_no_epics: No open epics yet. Create an issue of an epic tracker to plan into it.
   error_expert_agile_epic_not_editable: You are not allowed to change the parent of this issue
   label_expert_agile_today: today

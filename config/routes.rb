@@ -24,6 +24,10 @@ RedmineApp::Application.routes.draw do
   get 'expert_agile/board/issues/:id/tooltip', :to => 'expert_agile_boards#issue_tooltip',
       :as => 'expert_agile_board_issue_tooltip'
 
+  # --- Epics ------------------------------------------------------------
+  get 'projects/:project_id/expert_agile/epics', :to => 'expert_agile_epics#index',
+      :as => 'project_expert_agile_epics'
+
   # --- Charts -----------------------------------------------------------
   get 'projects/:project_id/expert_agile/charts', :to => 'expert_agile_charts#show',
       :as => 'project_expert_agile_charts'

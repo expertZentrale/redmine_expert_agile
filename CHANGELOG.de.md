@@ -42,6 +42,16 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Epics zeigen, wie weit das Epic ist: ein Balken mit dem erledigten Anteil, nach Story Points, wo
   die Arbeit geschaetzt ist, sonst nach Anzahl der Tickets; die Zahlen dahinter stehen im Titel.
   Eine Verschiebung aktualisiert die Balken beider beteiligten Epics.
+- **Der Baum auf der Karte.** Mit dem Kartenfeld *Epic* nennt die Unteraufgabe einer Story unter
+  dem Epic-Badge ihre Story (Epic, dann ↳ Story), und der Karten-Tooltip zeigt den ganzen Pfad. Ein
+  neues Kartenfeld **Unteraufgaben** zeigt die Unteraufgaben einer Story als
+  "2/5 Unteraufgaben erledigt" mit schmalem Balken und klappt zur Liste mit dem Status jeder
+  Unteraufgabe auf — einfaches `<details>`, kein Skript.
+- **Epic-Uebersicht.** Ein neuer Reiter *Epics* neben dem Board listet jedes offene Epic des
+  Projekts als aufklappbaren Block: sein Fortschritt, darunter die Stories mit eingerueckten
+  Unteraufgaben, jeweils mit Status, Bearbeiter, Story Points und eigenem Unteraufgaben-Fortschritt.
+  Geschlossene Epics sind einen Klick entfernt. Gelistet werden nur Tickets, die der Betrachter
+  sehen darf; den Reiter gibt es, solange Epics eingeschaltet sind.
 
 ### Behoben
 

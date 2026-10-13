@@ -115,7 +115,8 @@ card field and every card on the board and in the backlog shows its epic as a co
 colour per epic. The epics themselves stay off the board unless *Hide epics on the board* is
 switched off in the board options. Group the board by *Epic* for one swimlane per epic; dropping a story into another epic's lane
 moves it there. In the backlog planner, *Epics* plans stories into epics the same way.
-Every epic lane and the epic's issue page show its progress.
+Every epic lane and the epic's issue page show its progress. The *Subtasks* card field folds a story's subtasks out on its card,
+and the *Epics* tab shows each epic with its stories and subtasks as a tree.
 
 ### Sprints
 

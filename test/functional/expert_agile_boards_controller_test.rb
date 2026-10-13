@@ -336,6 +336,71 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'input#hide_epics[type=checkbox][checked]'
   end
 
+  def test_a_subtask_card_names_its_story_after_its_epic
+    epic = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Checkout epic')
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic.id,
+                            :subject => 'Pay by card')
+    subtask = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => story.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => { :project_id => @project.id, :set_filter => '1', :c => %w(tracker epic) }
+    end
+
+    assert_response :success
+    assert_select "#ea-card-#{subtask.id} .ea-card-epic a[href=?]", "/issues/#{epic.id}"
+    assert_select "#ea-card-#{subtask.id} .ea-card-story a[href=?]", "/issues/#{story.id}"
+    assert_select "#ea-card-#{story.id} .ea-card-story", false, 'a story hangs straight under its epic'
+  end
+
+  def test_a_story_card_folds_out_its_subtasks
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :subject => 'Story')
+    done = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => story.id, :subject => 'Done one')
+    Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => story.id, :subject => 'Open one')
+    done.update_column(:status_id, IssueStatus.where(:is_closed => true).first.id)
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :f => ['status_id'], :op => { 'status_id' => '*' }, :c => %w(tracker subtasks) }
+
+    assert_response :success
+    assert_select "#ea-card-#{story.id} details.ea-card-subtasks summary",
+                  :text => l(:label_expert_agile_subtasks_done, :closed => 1, :total => 2)
+    assert_select "#ea-card-#{story.id} details.ea-card-subtasks li.ea-subtask", 2
+    assert_select "#ea-card-#{story.id} li.ea-subtask-closed a[href=?]", "/issues/#{done.id}"
+    assert_select 'dl.ea-card-fields dt', :text => l(:label_expert_agile_subtasks), :count => 0
+  end
+
+  def test_moving_a_subtask_redraws_its_storys_card
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :subject => 'Story')
+    subtask = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => story.id)
+    closed = IssueStatus.where(:is_closed => true).detect { |status| subtask.new_statuses_allowed_to(User.find(2)).include?(status) }
+    skip 'workflow offers no closed status' if closed.nil?
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :c => %w(tracker subtasks) }
+    put :update, :params => { :id => subtask.id, :status_id => closed.id }, :format => :js
+
+    assert_response :success
+    related = JSON.parse(response.body)['relatedCards']
+    assert_equal [story.id], related.map { |card| card['issueId'] }
+    assert_includes related.first['card'], l(:label_expert_agile_subtasks_done, :closed => 1, :total => 1)
+  end
+
+  def test_moving_a_story_between_epic_lanes_redraws_both_epics
+    epic_a = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Epic A')
+    epic_b = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Epic B')
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic_a.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'epic',
+                               :hide_epics => '0', :c => %w(tracker subtasks) }
+      put :update, :params => { :id => story.id, :status_id => story.status_id,
+                                :swimlane_field => 'epic', :swimlane_id => epic_b.id.to_s }, :format => :js
+    end
+
+    assert_response :success
+    assert_equal [epic_a.id, epic_b.id].sort,
+                 JSON.parse(response.body)['relatedCards'].map { |card| card['issueId'] }.sort
+  end
+
   def test_the_epic_options_stay_away_while_epics_are_off
     with_agile_settings('epic_tracker_ids' => '') do
       get :index, :params => { :project_id => @project.id }

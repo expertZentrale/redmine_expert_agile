@@ -27,7 +27,7 @@ class ExpertAgileQuery < IssueQuery
   # Card fields we render ourselves and therefore never repeat in the generic
   # attribute list at the bottom of a card.
   SPECIAL_CARD_COLUMNS = %i(id project tracker status subject assigned_to done_ratio
-                            estimated_hours spent_hours story_points description epic).freeze
+                            estimated_hours spent_hours story_points description epic subtasks).freeze
 
   def initialize(attributes = nil, *args)
     super
@@ -126,6 +126,11 @@ class ExpertAgileQuery < IssueQuery
     # off simply drops it.
     if RedmineExpertAgile::Epics.enabled? && columns.none? { |column| column.name == :epic }
       columns << RedmineExpertAgile::EpicQueryColumn.new(self)
+    end
+    # A story's subtasks, done and open, on its card.
+    unless columns.any? { |column| column.name == :subtasks }
+      columns << QueryColumn.new(:subtasks, :sortable => false, :groupable => false,
+                                            :caption => :label_expert_agile_subtasks)
     end
     @available_columns = columns
   end
@@ -285,11 +290,7 @@ class ExpertAgileQuery < IssueQuery
     return nil if issue.nil? || !RedmineExpertAgile::Epics.enabled?
 
     @card_epics ||= {}
-    unless @card_epics.key?(issue.id)
-      batch = board_issues_loaded? ? board_issues.reject { |other| @card_epics.key?(other.id) } : []
-      batch << issue unless batch.include?(issue)
-      @card_epics.merge!(RedmineExpertAgile::Epics.nearest(batch))
-    end
+    load_for_board(@card_epics, issue) { |batch| RedmineExpertAgile::Epics.nearest(batch) }
     @card_epics[issue.id]
   end
 
@@ -316,11 +317,38 @@ class ExpertAgileQuery < IssueQuery
   end
 
   def preload_card_epics(issues)
-    return issues unless card_epics?
-
-    @card_epics ||= {}
-    @card_epics.merge!(RedmineExpertAgile::Epics.nearest(issues))
+    if card_epics?
+      @card_epics ||= {}
+      @card_epics.merge!(RedmineExpertAgile::Epics.nearest(issues))
+      @card_parents ||= {}
+      @card_parents.merge!(RedmineExpertAgile::Hierarchy.parents(issues))
+    end
+    if has_column?(:subtasks)
+      @card_children ||= {}
+      @card_children.merge!(RedmineExpertAgile::Hierarchy.children(issues))
+    end
     issues
+  end
+
+  # The story a subtask card belongs to, shown after its epic: the card's
+  # parent, unless that parent is the epic itself. Comes with the epic card
+  # field, as the rest of the card's place in the tree.
+  def card_story(issue)
+    return nil unless card_epics? && issue.parent_id
+
+    @card_parents ||= {}
+    load_for_board(@card_parents, issue) { |batch| RedmineExpertAgile::Hierarchy.parents(batch) }
+    parent = @card_parents[issue.id]
+    parent && !RedmineExpertAgile::Epics.epic?(parent) ? parent : nil
+  end
+
+  # The subtasks a card lists, [] while the card field is off.
+  def card_subtasks(issue)
+    return [] unless has_column?(:subtasks)
+
+    @card_children ||= {}
+    load_for_board(@card_children, issue) { |batch| RedmineExpertAgile::Hierarchy.children(batch) }
+    @card_children[issue.id] || []
   end
 
   # --- Visibility ----------------------------------------------------
@@ -401,6 +429,8 @@ class ExpertAgileQuery < IssueQuery
     @estimated_hours_by_status = nil
     @story_points_by_status = nil
     @card_epics = nil
+    @card_parents = nil
+    @card_children = nil
     @epic_progress = nil
     reset_board_grid!
   end
@@ -449,6 +479,16 @@ class ExpertAgileQuery < IssueQuery
   end
 
   private
+
+  # Fills one per-card cache for every card the board has loaded that it
+  # does not hold yet, plus the card asked about — one query for a board.
+  def load_for_board(cache, issue)
+    return if cache.key?(issue.id)
+
+    batch = board_issues_loaded? ? board_issues.reject { |other| cache.key?(other.id) } : []
+    batch << issue unless batch.include?(issue)
+    cache.merge!(yield(batch))
+  end
 
   # Everything the board narrows its issues by beyond the query's own filters.
   # Counts, totals and cards all go through here, so the column headers never

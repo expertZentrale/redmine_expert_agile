@@ -1,0 +1,75 @@
+<%# Epic overview: one folding block per epic, its stories and their subtasks
+    indented beneath. Markup only; <details> does the folding. %>
+<div class="contextual">
+  <% if @show_closed %>
+    <%= link_to l(:label_expert_agile_epics_hide_closed), project_expert_agile_epics_path(@project) %>
+  <% elsif @closed_count.positive? %>
+    <%= link_to l(:label_expert_agile_epics_show_closed, :count => @closed_count),
+                project_expert_agile_epics_path(@project, :closed => '1') %>
+  <% end %>
+</div>
+
+<h2><%= l(:label_expert_agile_epic_plural) %></h2>
+
+<% if @epics.empty? %>
+  <p class="nodata"><%= l(:text_expert_agile_no_epics) %></p>
+<% end %>
+
+<div class="ea-epic-tree">
+  <% @epics.each do |epic| %>
+    <% progress = @progress[epic.id] %>
+    <% rows = @rows[epic.id] %>
+    <details class="ea-epic-block<%= ' ea-epic-closed' if epic.closed? %>" open
+             <%= expert_agile_style_attribute(expert_agile_swimlane_style(epic)) %>>
+      <summary class="ea-epic-summary">
+        <span class="ea-epic-title"><%= link_to "##{epic.id} #{epic.subject}", issue_path(epic) %></span>
+        <span class="ea-epic-status"><%= epic.status.name %></span>
+        <%= expert_agile_epic_progress(progress) %>
+        <span class="ea-epic-counts"><%= progress.title %></span>
+      </summary>
+
+      <% if rows.empty? %>
+        <p class="ea-epic-empty"><%= l(:text_expert_agile_epic_empty) %></p>
+      <% else %>
+        <table class="list ea-epic-rows">
+          <thead>
+            <tr>
+              <th><%= l(:field_subject) %></th>
+              <th><%= l(:field_status) %></th>
+              <th><%= l(:field_assigned_to) %></th>
+              <th><%= l(:label_expert_agile_story_points) %></th>
+              <th><%= l(:label_expert_agile_subtasks) %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rows.each do |issue, depth, children| %>
+              <tr class="ea-epic-row ea-depth-<%= [depth, 3].min %><%= ' ea-row-closed' if issue.closed? %>">
+                <td class="subject">
+                  <%= link_to "#{issue.tracker.name} ##{issue.id}", issue_path(issue), :class => 'ea-row-ref' %>
+                  <%= issue.subject %>
+                </td>
+                <td class="status"><%= issue.status.name %></td>
+                <td class="assigned_to"><%= issue.assigned_to ? link_to_user(issue.assigned_to) : '' %></td>
+                <td class="ea-row-points"><%= issue.story_points %></td>
+                <td class="ea-row-subtasks">
+                  <% if children.any? %>
+                    <% closed = children.count(&:closed?) %>
+                    <% percent = (closed * 100.0 / children.size).round %>
+                    <span class="ea-subtasks-bar" style="--ea-progress: <%= percent %>%;"></span>
+                    <%= l(:label_expert_agile_subtasks_done, :closed => closed, :total => children.size) %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </details>
+  <% end %>
+</div>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'expert_agile', :plugin => 'redmine_expert_agile' %>
+<% end %>
+
+<% html_title(l(:label_expert_agile_epic_plural)) %>

@@ -23,6 +23,7 @@ require File.expand_path('../lib/redmine_expert_agile/card_color', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/card_move_responses', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/epics', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/epic_query_column', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/hierarchy', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/journal_projection', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/move_targets', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/charts/base', __FILE__)
@@ -110,7 +111,8 @@ Redmine::Plugin.register :redmine_expert_agile do
   project_module :expert_agile do
     permission :view_expert_agile_board,
                { :expert_agile_boards  => [:index, :issue_tooltip, :agile_data],
-                 :expert_agile_queries => [:index] },
+                 :expert_agile_queries => [:index],
+                 :expert_agile_epics   => [:index] },
                :read => true
     permission :edit_expert_agile_board,
                { :expert_agile_boards => [:update, :create_issue, :edit_issue, :update_issue,
@@ -184,6 +186,15 @@ Redmine::Plugin.register :redmine_expert_agile do
   menu :project_menu, :expert_agile_charts,
        { :controller => 'expert_agile_charts', :action => 'show' },
        charts_menu_options
+
+  # Epic overview, next to the board it belongs to. Shown only while some
+  # tracker is an epic tracker; the page itself answers 404 otherwise.
+  epics_menu_options = { :caption => :label_expert_agile_epic_plural, :after => :expert_agile,
+                         :param => :project_id, :if => proc { RedmineExpertAgile.epics_on? } }
+  epics_menu_options[:plugin] = :redmine_expert_agile if Redmine::VERSION::MAJOR >= 6
+  menu :project_menu, :expert_agile_epics,
+       { :controller => 'expert_agile_epics', :action => 'index' },
+       epics_menu_options
 
   # Backlog planner. Separate module so a project can run a plain Kanban board
   # without the backlog UI, mirroring how RedmineUP splits :agile/:agile_backlog.

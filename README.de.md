@@ -128,7 +128,8 @@ Unteraufgaben gehoeren ebenfalls dazu. Mit dem Kartenfeld **Epic** zeigt jede Ka
 und im Backlog ihr Epic als farbiges Badge, eine Farbe je Epic. Die Epics selbst stehen nicht auf
 dem Board, solange *Epics auf dem Board ausblenden* in den Board-Optionen eingeschaltet ist. Wird das Board nach *Epic* gruppiert, entsteht eine Swimlane je Epic; eine Story in die Lane
 eines anderen Epics zu ziehen verschiebt sie dorthin. Im Backlog-Planer plant *Epics* Stories auf dieselbe Weise in Epics.
-Jede Epic-Lane und die Ticketseite des Epics zeigen seinen Fortschritt.
+Jede Epic-Lane und die Ticketseite des Epics zeigen seinen Fortschritt. Das Kartenfeld *Unteraufgaben* klappt die Unteraufgaben einer Story auf
+ihrer Karte auf, und der Reiter *Epics* zeigt jedes Epic mit Stories und Unteraufgaben als Baum.
 
 ### Sprints
 
