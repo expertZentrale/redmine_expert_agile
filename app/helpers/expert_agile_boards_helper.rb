@@ -212,6 +212,48 @@ module ExpertAgileBoardsHelper
     'ea-lane-colored'
   end
 
+  # A card's place in the tree: its epic, and for a story's subtask the story
+  # in between. Nothing for a card outside any epic and story.
+  def expert_agile_card_lineage(issue, query)
+    epic = query.card_epic(issue)
+    story = query.card_story(issue)
+    return nil if epic.nil? && story.nil?
+
+    parts = []
+    parts << expert_agile_epic_badge(epic) if epic
+    if story
+      parts << content_tag(:div, :class => 'ea-card-story') do
+        link_to("#{l(:label_expert_agile_story_arrow)} ##{story.id} #{story.subject}", issue_path(story),
+                :title => "#{story.tracker.name} ##{story.id}: #{story.subject}")
+      end
+    end
+    safe_join(parts)
+  end
+
+  # A story's subtasks on its card: how many are done, as a count and a thin
+  # bar, folding open into the list with each one's status. <details> does
+  # the folding, so the card stays free of script.
+  def expert_agile_card_subtasks(children)
+    return nil if children.blank?
+
+    closed = children.count(&:closed?)
+    percent = (closed * 100.0 / children.size).round
+    content_tag(:details, :class => 'ea-card-subtasks') do
+      summary = content_tag(:summary) do
+        content_tag(:span, '', :class => 'ea-subtasks-bar', :style => "--ea-progress: #{percent}%;") +
+          content_tag(:span, l(:label_expert_agile_subtasks_done, :closed => closed, :total => children.size),
+                      :class => 'ea-subtasks-count')
+      end
+      items = children.map do |child|
+        content_tag(:li, :class => "ea-subtask#{' ea-subtask-closed' if child.closed?}") do
+          content_tag(:span, '', :class => 'ea-subtask-dot', :title => child.status_name) +
+            link_to("##{child.id} #{child.subject}", issue_path(child.id))
+        end
+      end
+      summary + content_tag(:ul, safe_join(items))
+    end
+  end
+
   # How far an epic is along, as a small bar with its percentage. The numbers
   # behind it are in the title; a move refreshes all three through
   # `expert_agile_epic_progress_data` and the board script.

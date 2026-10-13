@@ -660,3 +660,108 @@
 }
 .expert-agile-epic-progress .ea-epic-progress { margin-left: 0; }
 .expert-agile-epic-progress-detail { margin-left: 8px; color: #777; }
+
+/* --- Place in the tree -------------------------------------------------
+ * Under the epic badge, a story's subtask names its story; a story lists
+ * its subtasks, folded behind a count and a thin bar. */
+.ea-card-story {
+  margin: 0 0 3px;
+  font-size: 0.85em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ea-card-story a { color: #6b727c; text-decoration: none; }
+.ea-card-story a:hover { text-decoration: underline; }
+
+.ea-card-subtasks { margin-top: 5px; font-size: 0.85em; }
+.ea-card-subtasks summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: #555;
+  list-style-position: inside;
+}
+.ea-card-subtasks ul { margin: 4px 0 0; padding-left: 4px; list-style: none; }
+.ea-subtask {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ea-subtask a { color: inherit; text-decoration: none; overflow: hidden; text-overflow: ellipsis; }
+.ea-subtask a:hover { text-decoration: underline; }
+.ea-subtask-closed a { color: #8a8f98; text-decoration: line-through; }
+.ea-subtask-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #c3c7cd;
+}
+.ea-subtask-closed .ea-subtask-dot { background: #4f9d69; }
+
+.ea-subtasks-bar {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background: #e3e5e8;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.ea-subtasks-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--ea-progress, 0%);
+  background: #4f9d69;
+}
+
+/* --- Epic overview page ---------------------------------------------- */
+.ea-epic-block {
+  margin: 0 0 14px;
+  border: 1px solid #dfe2e6;
+  border-left: 4px solid var(--ea-accent, #8a8f98);
+  border-radius: 4px;
+  background: #fff;
+}
+.ea-epic-block.ea-epic-closed { opacity: 0.7; }
+.ea-epic-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--ea-tint, #f6f7f8);
+  cursor: pointer;
+}
+.ea-epic-title { font-weight: 600; font-size: 1.05em; }
+.ea-epic-title a { text-decoration: none; }
+.ea-epic-status {
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: #fff;
+  font-size: 0.85em;
+  color: #555;
+}
+.ea-epic-summary .ea-epic-progress { margin-left: 0; }
+.ea-epic-counts { font-size: 0.85em; color: #777; }
+.ea-epic-empty { margin: 8px 12px; color: #888; }
+table.ea-epic-rows { margin: 0; border: 0; }
+table.ea-epic-rows td.subject { text-align: left; }
+table.ea-epic-rows .ea-row-ref { margin-right: 4px; font-size: 0.9em; }
+.ea-epic-row.ea-depth-1 td.subject { padding-left: 28px; }
+.ea-epic-row.ea-depth-2 td.subject { padding-left: 48px; }
+.ea-epic-row.ea-depth-3 td.subject { padding-left: 68px; }
+.ea-epic-row.ea-depth-1 td.subject::before,
+.ea-epic-row.ea-depth-2 td.subject::before,
+.ea-epic-row.ea-depth-3 td.subject::before { content: "↳ "; color: #a0a5ad; }
+.ea-epic-row.ea-row-closed td { color: #8a8f98; }
+.ea-epic-row.ea-row-closed td.subject a { text-decoration: line-through; }
+td.ea-row-subtasks { white-space: nowrap; font-size: 0.9em; color: #555; }

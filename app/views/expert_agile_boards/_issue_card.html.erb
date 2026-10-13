@@ -19,7 +19,7 @@
     <span class="ea-card-id"><%= link_to("##{issue.id}", issue_path(issue)) %></span>
     <span class="ea-card-tracker"><%= issue.tracker.name %></span>
   </div>
-  <%= expert_agile_epic_badge(@query.card_epic(issue)) %>
+  <%= expert_agile_card_lineage(issue, @query) %>
 
   <div class="ea-card-subject">
     <%= link_to issue.subject, issue_path(issue) %>
@@ -43,6 +43,8 @@
       <span class="ea-card-done"><%= issue.done_ratio %>%</span>
     <% end %>
   </div>
+
+  <%= expert_agile_card_subtasks(@query.card_subtasks(issue)) %>
 
   <%# Description is a block column, so it gets its own place on the card
       rather than being squeezed into the field list. %>

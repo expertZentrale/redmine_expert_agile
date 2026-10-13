@@ -149,6 +149,12 @@ de:
   label_expert_agile_epic_progress: Fortschritt
   label_expert_agile_epic_progress_issues: "%{closed} von %{total} Tickets erledigt"
   label_expert_agile_epic_progress_points: "%{closed} von %{total} Story Points erledigt"
+  label_expert_agile_subtasks: Unteraufgaben
+  label_expert_agile_subtasks_done: "%{closed}/%{total} Unteraufgaben erledigt"
+  label_expert_agile_story_arrow: "↳"
+  label_expert_agile_epics_show_closed: "Geschlossene Epics anzeigen (%{count})"
+  label_expert_agile_epics_hide_closed: Geschlossene Epics ausblenden
+  text_expert_agile_epic_empty: In dieses Epic ist noch nichts eingeplant.
   text_expert_agile_no_epics: Noch keine offenen Epics. Legen Sie ein Ticket eines Epic-Trackers an, um hinein zu planen.
   error_expert_agile_epic_not_editable: Sie duerfen das uebergeordnete Ticket dieses Tickets nicht aendern
   label_expert_agile_today: heute
