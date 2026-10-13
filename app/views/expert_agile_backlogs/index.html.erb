@@ -10,7 +10,12 @@
               :class => (@query.sprints? ? 'selected' : nil) %>
   <%= link_to l(:label_version_plural),
               backlog_path_for(@project, :container_type => 'version', :query_id => @query.id),
-              :class => (@query.sprints? ? nil : 'selected') %>
+              :class => (@query.container_type == 'version' ? 'selected' : nil) %>
+  <% if RedmineExpertAgile::Epics.enabled? %>
+    <%= link_to l(:label_expert_agile_epic_plural),
+                backlog_path_for(@project, :container_type => 'epic', :query_id => @query.id),
+                :class => (@query.epics? ? 'selected' : nil) %>
+  <% end %>
 </div>
 
 <%= form_tag(backlog_path_for(@project), :method => :get, :id => 'ea_query_form') do %>
@@ -21,7 +26,7 @@
   <%= render :partial => 'expert_agile_backlogs/lane', :locals => { :container => nil } %>
   <% if @query.containers.empty? %>
     <div class="ea-backlog-empty nodata">
-      <%= @query.sprints? ? l(:text_expert_agile_no_sprints) : l(:text_expert_agile_no_versions) %>
+      <%= l(@query.sprints? ? :text_expert_agile_no_sprints : (@query.epics? ? :text_expert_agile_no_epics : :text_expert_agile_no_versions)) %>
       <% if @query.sprints? && User.current.allowed_to?(:manage_expert_agile_sprints, @project) %>
         <%= link_to l(:label_expert_agile_sprint_new),
                     new_project_expert_agile_sprint_path(@project), :class => 'icon icon-add' %>

@@ -16,7 +16,14 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
 
   CONTAINER_SPRINT = 'sprint'.freeze
   CONTAINER_VERSION = 'version'.freeze
-  CONTAINER_TYPES = [CONTAINER_SPRINT, CONTAINER_VERSION].freeze
+  CONTAINER_EPIC = 'epic'.freeze
+  CONTAINER_TYPES = [CONTAINER_SPRINT, CONTAINER_VERSION, CONTAINER_EPIC].freeze
+
+  # Epics are a container only while some tracker is an epic tracker; a
+  # backlog saved for epics falls back to sprints once they are switched off.
+  def self.container_types
+    RedmineExpertAgile::Epics.enabled? ? CONTAINER_TYPES : CONTAINER_TYPES - [CONTAINER_EPIC]
+  end
 
   # Which containers are being planned into is display state like any other
   # panel setting, so it has to survive a request the same way.
@@ -26,15 +33,24 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
 
   def container_type
     value = options[:container_type].to_s
-    CONTAINER_TYPES.include?(value) ? value : CONTAINER_SPRINT
+    self.class.container_types.include?(value) ? value : CONTAINER_SPRINT
   end
 
   def container_type=(value)
-    options[:container_type] = CONTAINER_TYPES.include?(value.to_s) ? value.to_s : CONTAINER_SPRINT
+    options[:container_type] = self.class.container_types.include?(value.to_s) ? value.to_s : CONTAINER_SPRINT
   end
 
   def sprints?
     container_type == CONTAINER_SPRINT
+  end
+
+  def epics?
+    container_type == CONTAINER_EPIC
+  end
+
+  # The planner's epic lanes show their progress, like the board's.
+  def epics_on_screen
+    epics? ? containers : []
   end
 
   # The planner's own part of the options panel. Redmine's build_from_params
@@ -52,7 +68,13 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
 
   # The lanes to plan into, in planning order.
   def containers
-    @containers ||= sprints? ? available_sprints : available_versions
+    @containers ||= if sprints?
+                      available_sprints
+                    elsif epics?
+                      available_epics
+                    else
+                      available_versions
+                    end
   end
 
   # Issues already planned into one container, in board rank order.
@@ -121,8 +143,29 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
     project ? project.shared_versions.open.sorted.to_a : []
   end
 
+  # Open epics of the project and its subprojects that the user may see, by
+  # subject. Planning into an epic makes the issue its subtask, so an epic
+  # from elsewhere is refused by the issue's own validation if it must be.
+  def available_epics
+    return [] unless project
+
+    Issue.visible.open
+         .where(:tracker_id => RedmineExpertAgile::Epics.tracker_ids)
+         .where(:project_id => project.self_and_descendants.select(:id))
+         .order(:subject).to_a
+  end
+
+  # Planning into epics moves stories: issues straight under an epic, or
+  # under nothing. A story's subtasks follow their story, and the epics are
+  # the lanes, so neither is a card here.
+  def epic_planning_scope
+    planning_scope.where.not(:tracker_id => RedmineExpertAgile::Epics.tracker_ids)
+  end
+
   def planned_scope(container)
-    if sprints?
+    if epics?
+      epic_planning_scope.where(:parent_id => container.id)
+    elsif sprints?
       planning_scope.joins(:expert_agile_data)
                     .where(ExpertAgileData.table_name => { :sprint_id => container.id })
     else
@@ -131,7 +174,9 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
   end
 
   def unplanned_scope
-    if sprints?
+    if epics?
+      epic_planning_scope.where(:parent_id => nil)
+    elsif sprints?
       planning_scope.where(
         "#{Issue.table_name}.id NOT IN (SELECT issue_id FROM #{ExpertAgileData.table_name} " \
         'WHERE sprint_id IS NOT NULL)'

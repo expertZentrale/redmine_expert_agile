@@ -293,6 +293,28 @@ class ExpertAgileQuery < IssueQuery
     @card_epics[issue.id]
   end
 
+  # How far one epic is along (Epics::Progress), or nil for anything that
+  # is not an epic. Answered for every epic on screen at once — the board's
+  # epic lanes, the planner's epic lanes — the first time one is asked for.
+  def epic_progress(epic)
+    return nil unless epic.is_a?(Issue) && RedmineExpertAgile::Epics.enabled?
+
+    @epic_progress ||= {}
+    unless @epic_progress.key?(epic.id)
+      batch = epics_on_screen.reject { |other| @epic_progress.key?(other.id) }
+      batch << epic unless batch.include?(epic)
+      @epic_progress.merge!(RedmineExpertAgile::Epics.progress(batch))
+    end
+    @epic_progress[epic.id]
+  end
+
+  # The epics whose progress the page shows: the board's epic lanes.
+  def epics_on_screen
+    return [] unless grouped? && group_by_column.is_a?(RedmineExpertAgile::EpicQueryColumn)
+
+    swimlanes.select { |lane| lane.is_a?(Issue) }
+  end
+
   def preload_card_epics(issues)
     return issues unless card_epics?
 
@@ -379,6 +401,7 @@ class ExpertAgileQuery < IssueQuery
     @estimated_hours_by_status = nil
     @story_points_by_status = nil
     @card_epics = nil
+    @epic_progress = nil
     reset_board_grid!
   end
 

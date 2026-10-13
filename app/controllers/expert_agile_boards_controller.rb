@@ -540,7 +540,9 @@ class ExpertAgileBoardsController < ApplicationController
     if swimlane_column
       @query.group_by = swimlane_column.name.to_s
       payload[:swimlaneId] = @query.swimlane_dom_id_for(@issue)
-      payload[:lanes] = @query.swimlane_summaries
+      payload[:lanes] = @query.swimlane_summaries.map do |lane|
+        lane[:progress] ? lane.merge(:progress => helpers.expert_agile_epic_progress_data(lane[:progress])) : lane
+      end
     end
     payload
   end

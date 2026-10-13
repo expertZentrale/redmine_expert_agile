@@ -42,6 +42,13 @@ class ExpertAgileBacklogsController < ApplicationController
       return render_planning_error(planning_field_refusal, :forbidden)
     end
 
+    # Planning into epics moves a story by its parent link. A story's subtask
+    # and an epic are refused by name, as on the board; the planner never
+    # shows either as a card, so only a crafted request gets here with one.
+    if @query.epics? && (refusal = RedmineExpertAgile::Epics.lane_refusal(@issue))
+      return render_planning_error(l("error_expert_agile_epic_lane_#{refusal}"), :unprocessable_entity)
+    end
+
     target = @query.container_for(params[:container_id])
     if params[:container_id].present? && target.nil?
       # An id that is not among the containers this project may plan into. A
@@ -239,7 +246,13 @@ class ExpertAgileBacklogsController < ApplicationController
   # which the issue form sets through nested attributes, the version is the
   # issue's own fixed_version_id.
   def planning_field
-    @query.sprints? ? 'expert_agile_data_attributes' : 'fixed_version_id'
+    if @query.sprints?
+      'expert_agile_data_attributes'
+    elsif @query.epics?
+      'parent_issue_id'
+    else
+      'fixed_version_id'
+    end
   end
 
   def planning_field_writable?
@@ -247,13 +260,21 @@ class ExpertAgileBacklogsController < ApplicationController
   end
 
   def planning_field_refusal
-    key = @query.sprints? ? :error_expert_agile_sprint_not_editable : :error_expert_agile_version_not_editable
+    key = if @query.sprints?
+            :error_expert_agile_sprint_not_editable
+          elsif @query.epics?
+            :error_expert_agile_epic_not_editable
+          else
+            :error_expert_agile_version_not_editable
+          end
     l(key)
   end
 
   def assign_container(target)
     if @query.sprints?
       @issue.expert_agile_data!.sprint_id = target && target.id
+    elsif @query.epics?
+      @issue.parent_issue_id = target && target.id
     else
       @issue.fixed_version_id = target && target.id
     end
@@ -276,7 +297,12 @@ class ExpertAgileBacklogsController < ApplicationController
       :totals => {
         :container => target ? @query.totals_for(target) : nil,
         :backlog => @query.totals_for(nil)
-      }
+      },
+      # Every epic lane's progress: a story leaving one epic for another
+      # changes both, and the answer names only the one it landed in.
+      :progress => @query.epics_on_screen.each_with_object({}) do |epic, acc|
+        acc[epic.id] = helpers.expert_agile_epic_progress_data(@query.epic_progress(epic))
+      end
     }
   end
 

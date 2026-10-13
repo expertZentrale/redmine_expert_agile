@@ -145,6 +145,12 @@ en:
   label_expert_agile_appearance: Appearance
   label_expert_agile_day_in_state: Time in status
   label_expert_agile_epic: Epic
+  label_expert_agile_epic_plural: Epics
+  label_expert_agile_epic_progress: Progress
+  label_expert_agile_epic_progress_issues: "%{closed} of %{total} issues done"
+  label_expert_agile_epic_progress_points: "%{closed} of %{total} story points done"
+  text_expert_agile_no_epics: No open epics yet. Create an issue of an epic tracker to plan into it.
+  error_expert_agile_epic_not_editable: You are not allowed to change the parent of this issue
   label_expert_agile_today: today
   label_expert_agile_days_count: "%{count} d"
   label_expert_agile_card_text_fields: Text fields

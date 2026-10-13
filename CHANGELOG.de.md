@@ -33,6 +33,15 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Eintrag in der Ticket-Historie. Eine Unteraufgabe einer Story gehoert ueber die Story zum Epic
   und wird mit Begruendung abgelehnt statt herausgerissen; ein Epic wird nicht in ein anderes
   Epic gezogen.
+- **Planen in Epics.** Der Backlog-Planer bietet neben *Sprints* und *Versionen* nun *Epics*: eine
+  Lane je offenem Epic, und die Backlog-Lane enthaelt die Stories ohne Epic. Eine Story in die Lane
+  eines Epics zu ziehen macht sie zur Unteraufgabe dieses Epics, zurueckziehen nimmt sie heraus —
+  nach denselben Regeln wie auf dem Board. Die Unteraufgaben einer Story folgen ihrer Story und
+  sind keine eigenen Karten.
+- **Fortschritt je Epic.** Jede Epic-Lane — auf dem Board und im Planer — und die Ticketseite des
+  Epics zeigen, wie weit das Epic ist: ein Balken mit dem erledigten Anteil, nach Story Points, wo
+  die Arbeit geschaetzt ist, sonst nach Anzahl der Tickets; die Zahlen dahinter stehen im Titel.
+  Eine Verschiebung aktualisiert die Balken beider beteiligten Epics.
 
 ## [0.7.1] - 2026-10-05
 

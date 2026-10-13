@@ -195,7 +195,7 @@
       placeInLane(fresh, payload);
     }
     updateColumns(payload.columns);
-    updateLaneTotals(payload.totals, payload.containerId);
+    updateLaneTotals(payload.totals, payload.containerId, payload.progress);
     updateSwimlanes(payload.lanes);
   }
 
@@ -252,7 +252,19 @@
         points.textContent = value;
         points.hidden = value <= 0;
       }
+      applyEpicProgress(band, values.progress);
     });
+  }
+
+  /* An epic lane's progress bar, from the numbers the server answered with. */
+  function applyEpicProgress(container, progress) {
+    if (!container || !progress) { return; }
+    var bar = container.querySelector('.ea-epic-progress');
+    if (!bar) { return; }
+    bar.style.setProperty('--ea-progress', progress.percent + '%');
+    bar.title = progress.title;
+    var text = bar.querySelector('.ea-epic-progress-text');
+    if (text) { text.textContent = progress.percent + ' %'; }
   }
 
   /* Puts a card back where it was picked up. `where` is passed down through the
@@ -294,9 +306,15 @@
   }
 
   /* Backlog planner: refresh the counts in the two lanes a move touched. */
-  function updateLaneTotals(totals, containerId) {
+  function updateLaneTotals(totals, containerId, progress) {
     if (!totals) { return; }
     applyLaneTotals('', totals.backlog);
+    if (progress) {
+      Object.keys(progress).forEach(function (id) {
+        applyEpicProgress(document.querySelector('.ea-backlog-lane-header[data-container-id="' + id + '"]'),
+                          progress[id]);
+      });
+    }
     if (totals.container) {
       applyLaneTotals(containerId === null || containerId === undefined ? '' : containerId,
                       totals.container);

@@ -30,6 +30,14 @@ notes from the section matching the pushed tag.
   (the right to manage subtasks, the issue's own validation) and into the issue history. A story's
   subtask belongs to its epic through the story and is refused by name rather than torn out of
   it; an epic is not dropped into another epic.
+- **Planning into epics.** The backlog planner gains *Epics* next to *Sprints* and *Versions*: one
+  lane per open epic, and the backlog lane holds the stories outside any epic. Dragging a story
+  into an epic's lane makes it that epic's subtask, dragging it back takes it out, under the same
+  rules as on the board. A story's subtasks follow their story and are not cards of their own.
+- **Epic progress.** Every epic lane — on the board and in the planner — and the epic's own issue
+  page show how far the epic is along: a bar with the share done, by story points where the work
+  is estimated and by issue count where it is not, with the numbers behind it in its title. A move
+  refreshes the bars of both epics it touched.
 
 ## [0.7.1] - 2026-10-05
 

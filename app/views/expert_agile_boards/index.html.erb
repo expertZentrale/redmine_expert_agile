@@ -57,6 +57,7 @@
               <span class="ea-swimlane-name">
                 <%= expert_agile_swimlane_label(swimlane) %>
               </span>
+              <%= expert_agile_epic_progress(@query.epic_progress(swimlane)) %>
               <% totals = @query.swimlane_totals(swimlane) %>
               <span class="ea-swimlane-totals">
                 <span class="ea-swimlane-count" title="<%= l(:label_issue_plural) %>">

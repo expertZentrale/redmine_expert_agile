@@ -251,3 +251,7 @@ via `preload_card_epics` on the backlog). `hide_epics` (on by default) filters e
 Epic swimlanes use `RedmineExpertAgile::EpicQueryColumn` (the one non-association lane); a drop
 writes `parent_issue_id` (`WRITABLE_SWIMLANES['epic']`), re-read from `parent_id`, and
 `Epics.lane_refusal` refuses a story's subtask and an epic by name before anything is written.
+`Epics.progress(epics, user)` aggregates the visible non-epic descendants (count, closed, story
+points) in one query; `ExpertAgileQuery#epic_progress` batches it over `epics_on_screen` (board epic
+lanes, planner epic containers). The planner's `epic` container writes `parent_issue_id` and shows
+only issues straight under an epic or under nothing.

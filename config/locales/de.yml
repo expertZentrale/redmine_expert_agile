@@ -145,6 +145,12 @@ de:
   label_expert_agile_appearance: Darstellung
   label_expert_agile_day_in_state: Zeit im Status
   label_expert_agile_epic: Epic
+  label_expert_agile_epic_plural: Epics
+  label_expert_agile_epic_progress: Fortschritt
+  label_expert_agile_epic_progress_issues: "%{closed} von %{total} Tickets erledigt"
+  label_expert_agile_epic_progress_points: "%{closed} von %{total} Story Points erledigt"
+  text_expert_agile_no_epics: Noch keine offenen Epics. Legen Sie ein Ticket eines Epic-Trackers an, um hinein zu planen.
+  error_expert_agile_epic_not_editable: Sie duerfen das uebergeordnete Ticket dieses Tickets nicht aendern
   label_expert_agile_today: heute
   label_expert_agile_days_count: "%{count} T"
   label_expert_agile_card_text_fields: Textfelder
