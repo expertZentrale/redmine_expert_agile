@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.8.0] - 2026-10-13
 
 ### Added
 
@@ -40,7 +40,7 @@ notes from the section matching the pushed tag.
   refreshes the bars of both epics it touched.
 - **The tree on the card.** With the *Epic* card field on, a story's subtask names its story under
   the epic badge (Epic, then ↳ story), and the card tooltip shows the whole path. A new
-  **Subtasks** card field shows a story's subtasks as "2/5 subtasks done" with a thin bar, folding
+  **Subtasks** card field shows a story's subtasks as "Subtasks done: 2/5" with a thin bar, folding
   open into the list with each subtask's status — plain `<details>`, no script.
 - **Epic overview.** A new *Epics* tab next to the board lists every open epic of the project as a
   folding block: its progress, and below it the stories with their subtasks indented, each with
