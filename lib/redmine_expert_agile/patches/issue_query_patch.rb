@@ -70,7 +70,7 @@ module RedmineExpertAgile
           end
           if RedmineExpertAgile::Patches::IssueQueryPatch.sprints_offered?(project) &&
              columns.none? { |column| column.name == :expert_agile_sprint }
-            columns << RedmineExpertAgile::SprintQueryColumn.new
+            columns << RedmineExpertAgile::SprintQueryColumn.new(self)
           end
           columns
         end
@@ -144,14 +144,21 @@ module RedmineExpertAgile
           end
         end
 
-        # The filter's values as sprint ids, "active" resolved now: the
-        # active sprints the project may plan into, or every active sprint
-        # the user may see on a cross-project list.
+        # The filter's values as sprint ids, "active" resolved now. In a
+        # project that is the one sprint its board follows — the project's
+        # own running sprint, else one shared with it — so a project that has
+        # both does not get two iterations' issues. Across projects it is
+        # every active sprint the user may see.
         def expert_agile_sprint_filter_ids(values)
           Array(values).flat_map do |value|
             if value.to_s == 'active'
-              scope = project ? project.shared_expert_agile_sprints : ExpertAgileSprint.visible
-              scope.active.pluck(:id)
+              if project
+                active = project.shared_expert_agile_sprints.active
+                sprint = active.find_by(:project_id => project.id) || active.sorted.first
+                sprint ? [sprint.id] : []
+              else
+                ExpertAgileSprint.visible.active.pluck(:id)
+              end
             else
               value.to_s =~ /\A\d+\z/ ? [value.to_i] : []
             end

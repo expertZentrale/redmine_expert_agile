@@ -76,6 +76,51 @@ class ExpertAgileSprintFilterTest < ActiveSupport::TestCase
     assert_not_includes none, @in_next.id
   end
 
+  # The project's own running sprint, as on the board: a shared active
+  # sprint from the parent does not add a second iteration's issues.
+  def test_active_in_a_project_is_one_sprint_its_own_first
+    parent_sprint = ExpertAgileSprint.create!(:project => @project, :name => 'Shared', :status => ExpertAgileSprint::STATUS_ACTIVE,
+                                              :sharing => ExpertAgileSprint::SHARING_DESCENDANTS,
+                                              :start_date => Date.new(2026, 3, 1), :end_date => Date.new(2026, 3, 14))
+    child = Project.find(3) # a subproject of project 1
+    child.enable_module!(:expert_agile)
+    own = ExpertAgileSprint.create!(:project => child, :name => 'Own', :status => ExpertAgileSprint::STATUS_ACTIVE,
+                                    :start_date => Date.new(2026, 3, 1), :end_date => Date.new(2026, 3, 14))
+    in_own = Issue.generate!(:project => child)
+    in_own.expert_agile_data!.update!(:sprint_id => own.id)
+    in_shared = Issue.generate!(:project => child)
+    in_shared.expert_agile_data!.update!(:sprint_id => parent_sprint.id)
+
+    query = IssueQuery.new(:name => '_', :project => child)
+    query.add_filter('expert_agile_sprint_id', '=', ['active'])
+    ids = query.issues.map(&:id)
+
+    assert_includes ids, in_own.id
+    assert_not_includes ids, in_shared.id
+  end
+
+  # An issue can keep a sprint its project no longer shares; the list does
+  # not name it, and does not fold it into the issues without a sprint.
+  def test_a_sprint_the_reader_may_not_see_is_not_named
+    other = Project.find(2)
+    secret = ExpertAgileSprint.create!(:project => other, :name => 'Confidential',
+                                       :start_date => Date.new(2026, 2, 1), :end_date => Date.new(2026, 2, 14))
+    kept = Issue.generate!(:project => @project)
+    ExpertAgileData.new(:issue => kept, :sprint_id => secret.id).save(:validate => false)
+    User.current = User.find(2) # no board permission in project 2
+
+    query = IssueQuery.new(:name => '_', :project => @project)
+    column = query.available_columns.detect { |c| c.name == :expert_agile_sprint }
+    assert_equal I18n.t(:label_expert_agile_sprint_unavailable), column.value(kept.reload)
+
+    query.add_filter('expert_agile_sprint_id', '*', [''])
+    query.group_by = 'expert_agile_sprint'
+    counts = query.result_count_by_group
+    hidden = counts.keys.detect { |key| key.is_a?(RedmineExpertAgile::SprintQueryColumn::HiddenSprint) }
+    assert_equal 1, counts[hidden]
+    assert_not counts.keys.map(&:to_s).include?('Confidential')
+  end
+
   def test_active_with_no_active_sprint_matches_nothing
     @active.update!(:status => ExpertAgileSprint::STATUS_OPEN)
 
@@ -143,12 +188,16 @@ class ExpertAgileSprintFilterTest < ActiveSupport::TestCase
     column = query.available_columns.detect { |c| c.name == :expert_agile_sprint }
     rows = query.issues
 
+    # The first row pays for the list once (which sprints the reader may see
+    # named); every further row costs nothing.
+    column.value(rows.detect { |issue| issue.expert_agile_data && issue.expert_agile_data.sprint_id })
     count = 0
     counter = ->(*, payload) { count += 1 unless %w(SCHEMA TRANSACTION).include?(payload[:name]) || payload[:cached] }
     ActiveSupport::Notifications.subscribed(counter, 'sql.active_record') do
       rows.each { |issue| column.value(issue); issue.story_points }
     end
 
+    assert_operator rows.size, :>, 1
     assert_equal 0, count
   end
 end
