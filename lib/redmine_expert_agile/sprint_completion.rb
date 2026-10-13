@@ -174,7 +174,17 @@ module RedmineExpertAgile
         @new_sprint = sprint.project.expert_agile_sprints.build
         @new_sprint.safe_attributes = (attributes || {}).to_h.stringify_keys.slice('name', 'start_date', 'end_date')
         @new_sprint.status = ExpertAgileSprint::STATUS_OPEN
-        @new_sprint.save ? @new_sprint : :invalid
+        # In a savepoint: a sprint of the same name created by a request
+        # running at the same time passes validation here and is refused by
+        # the database's unique index — a refusal like any other, not an
+        # error, and the transaction around it stays usable.
+        saved = begin
+          ExpertAgileSprint.transaction(:requires_new => true) { @new_sprint.save }
+        rescue ActiveRecord::RecordNotUnique
+          @new_sprint.errors.add(:name, :taken)
+          false
+        end
+        saved ? @new_sprint : :invalid
       else
         found = sprint.project.shared_expert_agile_sprints.available
                       .where.not(:id => sprint.id).find_by(:id => target.to_s.to_i)

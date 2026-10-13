@@ -147,7 +147,7 @@ Returns `204 No Content`. Issues in the sprint are **unassigned, not deleted**.
 
 Completes a sprint in one step: its open issues move on, the sprint closes, and the target sprint
 can become the active one. All of it or none of it. Requires *Manage sprints*; every issue moved
-also needs *Manage backlog* in its project, as in the backlog planner.
+also needs *Manage backlog* and *Edit issues* in its project, as in the backlog planner.
 
 ```bash
 curl -X POST -H "X-Redmine-API-Key: $KEY" -H "Content-Type: application/json" \
