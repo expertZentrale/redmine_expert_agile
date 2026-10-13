@@ -9,7 +9,7 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.8.0] - 2026-10-13
 
 ### Hinzugefuegt
 
@@ -45,7 +45,7 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 - **Der Baum auf der Karte.** Mit dem Kartenfeld *Epic* nennt die Unteraufgabe einer Story unter
   dem Epic-Badge ihre Story (Epic, dann ↳ Story), und der Karten-Tooltip zeigt den ganzen Pfad. Ein
   neues Kartenfeld **Unteraufgaben** zeigt die Unteraufgaben einer Story als
-  "2/5 Unteraufgaben erledigt" mit schmalem Balken und klappt zur Liste mit dem Status jeder
+  "Erledigte Unteraufgaben: 2/5" mit schmalem Balken und klappt zur Liste mit dem Status jeder
   Unteraufgabe auf — einfaches `<details>`, kein Skript.
 - **Epic-Uebersicht.** Ein neuer Reiter *Epics* neben dem Board listet jedes offene Epic des
   Projekts als aufklappbaren Block: sein Fortschritt, darunter die Stories mit eingerueckten

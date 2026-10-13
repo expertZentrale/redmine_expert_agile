@@ -24,7 +24,7 @@ Re-run the migration step after replacing the plugin directory, then restart. Mi
 h3. Permissions
 
 |_. Module |_. Permission |_. Allows |
-| expert Agile | View agile board | Open the board, read cards |
+| expert Agile | View agile board | Open the board and the *Epics* tab, read cards |
 | expert Agile | Edit agile board | Drag & drop, create and edit cards |
 | expert Agile | Save agile boards | Create private saved boards, charts and backlogs |
 | expert Agile | Manage public agile boards | Create and edit public saved boards, charts and backlogs |
@@ -32,6 +32,8 @@ h3. Permissions
 | expert Agile | Manage sprints | Create, edit and close sprints |
 | expert Agile Backlog | View backlog | Open the backlog planner, filter it, open a saved backlog |
 | expert Agile Backlog | Manage backlog | Plan issues into sprints and versions, also the sprint field on the issue form |
+
+Moving a story between epics — on the board or in the planner — sets its parent task, so it also needs Redmine's own *Manage subtasks* permission.
 
 Saving a backlog uses the two board permissions above, which belong to the *expert Agile* module. A project that enables *expert Agile Backlog* on its own can therefore filter its backlog but not save one — enable both modules if saved backlogs are wanted.
 
@@ -41,6 +43,8 @@ h3. Configuration
 
 * *Board item limit* (default 500) caps how many issues one board render loads. A board that hits the cap says so rather than looking complete.
 * *Chart item limit* (default 1000) and *chart cache duration* (default 60 minutes) bound the cost of every chart. A chart over more issues than the limit says so instead of drawing.
+
+* *Epic trackers* (default: none) switch epics on. Issues of the chosen trackers are epics; leaving the selection empty keeps the feature, its card fields, swimlane, planner view and *Epics* tab out of sight.
 
 Card colours for trackers, priorities and statuses are managed from the *Colors* section of that settings page, which links to the screen that assigns them.
 
