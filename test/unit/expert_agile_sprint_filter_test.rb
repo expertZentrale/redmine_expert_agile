@@ -182,6 +182,36 @@ class ExpertAgileSprintFilterTest < ActiveSupport::TestCase
     assert_equal 1, counts[twin]
   end
 
+  def test_the_board_and_the_planner_do_not_offer_the_sprint_column
+    names = ExpertAgileQuery.new(:project => @project).available_columns.map(&:name)
+
+    assert_not_includes names, :expert_agile_sprint
+  end
+
+  def test_grouping_by_sprint_preloads_even_without_the_column
+    query = IssueQuery.new(:name => '_', :project => @project)
+    query.column_names = [:subject]
+    query.group_by = 'expert_agile_sprint'
+    rows = query.issues
+
+    assert rows.all? { |issue| issue.association(:expert_agile_data).loaded? }
+  end
+
+  def test_two_sprints_starting_the_same_day_stay_contiguous_groups
+    sequence = with_agile_settings('allow_overlapping_sprints' => '1') do
+      twin = sprint!('Sprint A2', ExpertAgileSprint::STATUS_OPEN, @active.start_date)
+      3.times { planned(twin) }
+      2.times { planned(@active) }
+
+      query = IssueQuery.new(:name => '_', :project => @project)
+      query.add_filter('expert_agile_sprint_id', '=', [@active.id.to_s, twin.id.to_s])
+      query.group_by = 'expert_agile_sprint'
+      query.issues.map { |issue| issue.expert_agile_data.sprint_id }
+    end
+
+    assert_equal sequence.chunk_while { |a, b| a == b }.map(&:first).size, sequence.uniq.size
+  end
+
   def test_the_column_costs_no_query_per_row
     query = IssueQuery.new(:name => '_', :project => @project)
     query.column_names = [:subject, :expert_agile_sprint, :story_points]

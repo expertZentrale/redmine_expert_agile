@@ -32,7 +32,9 @@ module RedmineExpertAgile
 
     def initialize(query)
       @query = query
-      super(:expert_agile_sprint, :sortable => self.class.sprint_sql('start_date'),
+      # Start date first, then the sprint itself: two sprints starting the
+      # same day must not interleave, or a grouped list repeats its headers.
+      super(:expert_agile_sprint, :sortable => [self.class.sprint_sql('start_date'), self.class.sprint_sql('id')],
                                   :groupable => true,
                                   :caption => :label_expert_agile_sprint)
     end

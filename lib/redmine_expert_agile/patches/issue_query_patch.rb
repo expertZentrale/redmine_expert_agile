@@ -68,7 +68,10 @@ module RedmineExpertAgile
               :caption => :label_expert_agile_story_points
             )
           end
-          if RedmineExpertAgile::Patches::IssueQueryPatch.sprints_offered?(project) &&
+          # The issue list only: the board and the planner load their cards
+          # their own way and pick their sprint in their options instead.
+          if !is_a?(ExpertAgileQuery) &&
+             RedmineExpertAgile::Patches::IssueQueryPatch.sprints_offered?(project) &&
              columns.none? { |column| column.name == :expert_agile_sprint }
             columns << RedmineExpertAgile::SprintQueryColumn.new(self)
           end
@@ -99,7 +102,9 @@ module RedmineExpertAgile
         original_issues = base.instance_method(:issues)
         base.send(:define_method, :issues) do |*args|
           rows = original_issues.bind(self).call(*args)
-          if has_column?(:expert_agile_sprint)
+          # Grouping by sprint reads every row's sprint even when the column
+          # itself is not shown.
+          if has_column?(:expert_agile_sprint) || group_by.to_s == 'expert_agile_sprint'
             RedmineExpertAgile.preload(rows, :expert_agile_data => :sprint)
           elsif has_column?(:story_points)
             RedmineExpertAgile.preload(rows, :expert_agile_data)
