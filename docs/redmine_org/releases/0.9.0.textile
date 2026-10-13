@@ -1,0 +1,16 @@
+h3. redmine_expert_agile 0.9.0 — 2026-10-13
+
+Completing a sprint becomes one step, and the issue list knows the sprint.
+
+h4. Added
+
+* *Complete a sprint in one step*, as in Jira. *Complete sprint* — in the project's sprint list and in the sprint's lane header in the backlog planner — shows what is done and what is still open, and moves the open issues to the next sprint, back to the backlog, or into a new sprint created on the spot (name counted up, dates following on). It closes the sprint and, if asked, makes the target the active sprint, so a board following the active sprint shows it right away. Every issue moves like a planner move — journaled, under the *Manage backlog* and *Edit issues* permissions and the issue's own validation; if a single issue cannot move, nothing is written and the page lists each refusal. Also over the REST API: @POST /projects/:project_id/expert_agile_sprints/:id/complete.json@.
+* *Sprint filter and column on the issue list.* A *Sprint* filter — one or more sprints, *Active sprint (automatic)* resolved each time the list runs, any sprint or none — and a *Sprint* column that sorts by start date, groups the list by sprint and goes into the CSV export. Saved lists such as "everything in the current sprint", sprint exports and bulk edits become possible. Offered in projects with one of the plugin's modules and on cross-project lists; a sprint the reader may not see is never named.
+
+h4. Fixed
+
+* *A reopened issue left open work in a closed sprint.* A completed sprint keeps the issues done in it; reopening one of them later kept it there. Reopening now takes the issue out of the closed sprint and back to the backlog, recorded in its history.
+
+h4. Upgrade notes
+
+No migrations, no new settings and no new gems. Completing a sprint belongs to the existing *Manage sprints* permission. Replace the plugin directory and restart.
