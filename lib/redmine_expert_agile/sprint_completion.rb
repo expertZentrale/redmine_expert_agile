@@ -36,8 +36,16 @@ module RedmineExpertAgile
       sprint.issues.open.order(:id).to_a
     end
 
+    # What the page and the preview show: only issues the user may see. A
+    # shared sprint holds other projects' issues too, and their number is
+    # nobody's business here (the sprint API counts the same way). The move
+    # itself still covers every open issue, and refuses on one it cannot see.
+    def visible_open_issues
+      open_issues.select { |issue| issue.visible?(user) }
+    end
+
     def closed_issue_count
-      sprint.issues.joins(:status).where(IssueStatus.table_name => { :is_closed => true }).count
+      sprint.issues.visible(user).joins(:status).where(IssueStatus.table_name => { :is_closed => true }).count
     end
 
     def points(issues)
@@ -59,12 +67,13 @@ module RedmineExpertAgile
     # 5" already planned → "Sprint 6"). A name without a number gets one.
     def suggested_new_sprint_attributes
       length = (sprint.end_date - sprint.start_date).to_i
-      taken = sprint.project.expert_agile_sprints.pluck(:name).map(&:to_s)
+      # Names are unique per project regardless of case.
+      taken = sprint.project.expert_agile_sprints.pluck(:name).map { |name| name.to_s.downcase }
       last_end = sprint.project.expert_agile_sprints.maximum(:end_date) || sprint.end_date
       start = [sprint.end_date, last_end].max + 1
       base, number = sprint.name.to_s =~ /\A(.*?)(\d+)\s*\z/ ? [Regexp.last_match(1), Regexp.last_match(2).to_i] : ["#{sprint.name} ", 1]
       number += 1
-      number += 1 while taken.include?("#{base}#{number}")
+      number += 1 while taken.include?("#{base}#{number}".downcase)
       { :name => "#{base}#{number}", :start_date => start, :end_date => start + length }
     end
 
@@ -77,6 +86,15 @@ module RedmineExpertAgile
       @moved = []
       ok = false
       ExpertAgileSprint.transaction do
+        # Two completions of one sprint at once would both find it open and
+        # both move its issues. The row lock makes the second wait, and then
+        # see the sprint closed.
+        sprint.lock!
+        if sprint.closed?
+          sprint.errors.add(:base, ::I18n.t(:error_expert_agile_sprint_already_closed))
+          raise ActiveRecord::Rollback
+        end
+
         destination = resolve_target(target, new_sprint_attributes)
         raise ActiveRecord::Rollback if destination == :invalid
 
@@ -87,6 +105,13 @@ module RedmineExpertAgile
         raise ActiveRecord::Rollback unless sprint.save
 
         if activate && destination
+          # A sprint shared in from another project is that project's to
+          # start; activating it also stands that project's running sprint
+          # down.
+          unless user.allowed_to?(:manage_expert_agile_sprints, destination.project)
+            sprint.errors.add(:base, ::I18n.t(:error_expert_agile_sprint_complete_activate_foreign))
+            raise ActiveRecord::Rollback
+          end
           destination.status = ExpertAgileSprint::STATUS_ACTIVE
           unless destination.save
             sprint.errors.add(:base, destination.errors.full_messages.join(', '))

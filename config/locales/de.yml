@@ -115,6 +115,7 @@ de:
   error_expert_agile_sprint_complete_target: "Waehlen Sie einen offenen Sprint, in den das Projekt planen darf, das Backlog oder einen neuen Sprint"
   error_expert_agile_sprint_complete_issue_hidden: "fuer Sie nicht sichtbar"
   error_expert_agile_sprint_already_closed: "Dieser Sprint ist bereits abgeschlossen"
+  error_expert_agile_sprint_complete_activate_foreign: "Nur wer im Projekt des Ziel-Sprints Sprints verwalten darf, kann ihn zum aktiven Sprint machen"
   label_expert_agile_sprint_unavailable: (Sprint nicht verfügbar)
   label_expert_agile_sprint_sharing_none: Nicht geteilt
   label_expert_agile_sprint_sharing_descendants: Mit Unterprojekten

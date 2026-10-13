@@ -515,4 +515,14 @@ class ExpertAgileApiTest < Redmine::IntegrationTest
     assert_equal [@issue.id], JSON.parse(response.body)['refused_issues'].map { |r| r['id'] }
     assert sprint.reload.active?
   end
+
+  def test_complete_answers_json_only
+    sprint = sprint!(:status => ExpertAgileSprint::STATUS_ACTIVE)
+
+    post "/projects/#{@project.id}/expert_agile_sprints/#{sprint.id}/complete.xml",
+         :params => { :target => 'backlog' }, :headers => auth
+
+    assert_response 406
+    assert sprint.reload.active?
+  end
 end

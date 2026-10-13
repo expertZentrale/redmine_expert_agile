@@ -147,4 +147,58 @@ class ExpertAgileSprintCompletionTest < ActiveSupport::TestCase
     assert run.new_sprint.errors.any?
     assert_equal 2, ExpertAgileSprint.count, 'the invalid new sprint was not kept'
   end
+
+  # A second completion that loaded the sprint before the first one closed
+  # it: the row lock makes it see the sprint as it now is.
+  def test_a_completion_racing_another_finds_the_sprint_closed
+    stale = completion
+    ExpertAgileSprint.where(:id => @sprint.id).update_all(:status => ExpertAgileSprint::STATUS_CLOSED)
+
+    assert_not stale.complete('backlog')
+    assert_equal @sprint.id, sprint_of(@open_a), 'nothing moved'
+    assert_includes stale.sprint.errors.full_messages, I18n.t(:error_expert_agile_sprint_already_closed)
+  end
+
+  def test_activating_a_sprint_shared_from_another_project_needs_its_permission
+    parent_sprint = ExpertAgileSprint.create!(:project => @project, :name => 'Shared',
+                                              :sharing => ExpertAgileSprint::SHARING_DESCENDANTS,
+                                              :start_date => Date.new(2026, 3, 1), :end_date => Date.new(2026, 3, 14))
+    child = Project.find(3)
+    child.enable_module!(:expert_agile)
+    child.enable_module!(:expert_agile_backlog)
+    own = ExpertAgileSprint.create!(:project => child, :name => 'Child sprint', :status => ExpertAgileSprint::STATUS_ACTIVE,
+                                    :start_date => Date.new(2026, 1, 1), :end_date => Date.new(2026, 1, 14))
+    user = User.find(2)
+    Role.find(1).add_permission!(:manage_expert_agile_sprints, :manage_expert_agile_backlog, :edit_issues)
+    Member.create!(:project => child, :principal => user, :role_ids => [1]) unless child.users.include?(user)
+    Role.find(1).remove_permission!(:manage_expert_agile_sprints) # none anywhere now, so not in project 1
+    Role.create!(:name => 'Child sprint manager', :permissions => [:manage_expert_agile_sprints, :manage_expert_agile_backlog,
+                                                                 :edit_issues, :view_issues]).tap do |role|
+      Member.where(:project_id => child.id, :user_id => user.id).first.roles << role
+    end
+
+    run = RedmineExpertAgile::SprintCompletion.new(own, user)
+    assert_not run.complete(parent_sprint.id.to_s, :activate => true)
+    assert_includes run.sprint.errors.full_messages, I18n.t(:error_expert_agile_sprint_complete_activate_foreign)
+    assert parent_sprint.reload.open?
+    assert own.reload.active?
+  end
+
+  def test_the_suggested_name_skips_a_name_taken_in_another_case
+    @next.update_column(:name, 'SPRINT 5')
+
+    assert_equal 'Sprint 6', completion.suggested_new_sprint_attributes[:name]
+  end
+
+  def test_counts_shown_cover_only_issues_the_user_may_see
+    hidden = planned(@sprint)
+    hidden.update_column(:is_private, true)
+    user = User.find(3) # a developer: sees every issue but private ones
+    Role.find(2).add_permission!(:view_issues)
+
+    run = RedmineExpertAgile::SprintCompletion.new(@sprint.reload, user)
+
+    assert_not_includes run.visible_open_issues.map(&:id), hidden.id
+    assert_includes run.open_issues.map(&:id), hidden.id, 'the move still covers it'
+  end
 end

@@ -143,7 +143,7 @@ Same parameters. Returns `204 No Content`.
 
 Returns `204 No Content`. Issues in the sprint are **unassigned, not deleted**.
 
-### `POST /projects/:project_id/expert_agile_sprints/:id/complete.:format`
+### `POST /projects/:project_id/expert_agile_sprints/:id/complete.json`
 
 Completes a sprint in one step: its open issues move on, the sprint closes, and the target sprint
 can become the active one. All of it or none of it. Requires *Manage sprints*; every issue moved
@@ -161,11 +161,14 @@ curl -X POST -H "X-Redmine-API-Key: $KEY" -H "Content-Type: application/json" \
 | `new_sprint` | With `target: "new"`: `{"name", "start_date", "end_date"}` |
 | `activate_target` | Make the target sprint the active one. Defaults to `true` unless the target is the backlog |
 
+JSON only; `.xml` is answered with `406 Not Acceptable`. Activating a target sprint that is shared in
+from another project also needs *Manage sprints* there.
+
 `200 OK` with `{"sprint_id", "status": "closed", "moved_issue_ids", "target_sprint_id", "target_status"}`.
 `422` when anything refuses; nothing is written, and the body lists every refusal:
 `{"errors": [...], "refused_issues": [{"id", "reason"}]}` — `id` is `null` for an issue the caller cannot see.
 A `GET` on the same path returns what a completion would move: `open_issue_count`,
-`closed_issue_count`, `next_sprint_id`.
+`closed_issue_count` (both counting only issues the caller can see), `next_sprint_id`.
 
 **Why it exists.** A sprint cannot be closed while it holds open issues — closing it would rewrite its
 burndown after the fact. Without this, every leftover is dragged out by hand, then the sprint is

@@ -92,6 +92,10 @@ class ExpertAgileSprintsController < ApplicationController
   # Completes a sprint in one step: the form on GET, the completion on POST.
   # See RedmineExpertAgile::SprintCompletion for what happens to the issues.
   def complete
+    # JSON only: the answer is built as JSON, and a .xml request would
+    # otherwise be accepted and answered in the wrong format.
+    return render_error(:status => 406) if params[:format].to_s == 'xml'
+
     @completion = RedmineExpertAgile::SprintCompletion.new(@sprint)
     if @sprint.closed?
       return complete_refused(l(:error_expert_agile_sprint_already_closed))
@@ -124,7 +128,7 @@ class ExpertAgileSprintsController < ApplicationController
   private
 
   def render_complete_form(status = :ok)
-    @open_issues = @completion.open_issues
+    @open_issues = @completion.visible_open_issues
     @new_sprint = @completion.new_sprint ||
                   @project.expert_agile_sprints.build(@completion.suggested_new_sprint_attributes)
     respond_to do |format|
