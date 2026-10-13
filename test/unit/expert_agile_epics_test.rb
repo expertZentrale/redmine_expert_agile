@@ -135,6 +135,26 @@ class ExpertAgileEpicsTest < ActiveSupport::TestCase
     assert_equal 3, progress_of(@epic.reload).issue_count
   end
 
+  # --- Hierarchy -------------------------------------------------------
+
+  def test_children_and_parents_come_for_a_whole_list_at_once
+    children = RedmineExpertAgile::Hierarchy.children([@epic, @story, @subtask])
+    parents = RedmineExpertAgile::Hierarchy.parents([@epic, @story, @subtask])
+
+    assert_equal [@story.id], children[@epic.id].map(&:id)
+    assert_equal [@subtask.id], children[@story.id].map(&:id)
+    assert_equal [], children[@subtask.id]
+    assert_nil parents[@epic.id]
+    assert_equal @story, parents[@subtask.id]
+  end
+
+  def test_descendant_rows_walk_the_tree_with_depth
+    rows = RedmineExpertAgile::Hierarchy.descendant_rows([@epic])[@epic.id]
+
+    assert_equal [[@story.id, 0, [@subtask.id]], [@subtask.id, 1, []]],
+                 rows.map { |issue, depth, kids| [issue.id, depth, kids.map(&:id)] }
+  end
+
   # --- The board -----------------------------------------------------
 
   def test_the_board_hides_epics_by_default
