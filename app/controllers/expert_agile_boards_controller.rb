@@ -55,8 +55,16 @@ class ExpertAgileBoardsController < ApplicationController
     if params.key?(:swimlane_id)
       lane_attribute = swimlane_column && ExpertAgileQuery.swimlane_attribute(swimlane_column.name)
       return render_move_error(swimlane_not_writable_error, :unprocessable_entity) if lane_attribute.nil?
-      if lane_attribute == 'parent_issue_id' && (refusal = RedmineExpertAgile::Epics.lane_refusal(@issue))
-        return render_move_error(l("error_expert_agile_epic_lane_#{refusal}"), :unprocessable_entity)
+      if lane_attribute == 'parent_issue_id'
+        if (refusal = RedmineExpertAgile::Epics.lane_refusal(@issue))
+          return render_move_error(l("error_expert_agile_epic_lane_#{refusal}"), :unprocessable_entity)
+        end
+        # The lane's id becomes the issue's parent, and Redmine's own parent
+        # rules accept any issue there. Only an epic the user may see is a
+        # lane to drop into; '' is the lane without one.
+        if requested_lane_value && !RedmineExpertAgile::Epics.epic?(Issue.visible.find_by(:id => requested_lane_value))
+          return render_move_error(l(:error_expert_agile_epic_lane_not_an_epic), :unprocessable_entity)
+        end
       end
     end
 

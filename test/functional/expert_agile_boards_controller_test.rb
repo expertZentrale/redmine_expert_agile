@@ -1426,6 +1426,22 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_nil epic_a.reload.parent_id
   end
 
+  # A crafted lane id must not hang the story under an ordinary issue:
+  # Redmine's parent rules alone would accept it.
+  def test_a_lane_id_that_is_no_epic_is_refused
+    _epic_a, _epic_b, story = epic_lane_fixture
+    plain = Issue.generate!(:project => @project, :tracker_id => 1)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :id => story.id, :status_id => story.status_id,
+                                :swimlane_field => 'epic', :swimlane_id => plain.id.to_s }, :format => :js
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal l(:error_expert_agile_epic_lane_not_an_epic), JSON.parse(response.body)['error']
+    assert_not_equal plain.id, story.reload.parent_id
+  end
+
   def test_an_epic_lane_needs_the_right_to_manage_subtasks
     _epic_a, epic_b, story = epic_lane_fixture
     @role.remove_permission!(:manage_subtasks)
