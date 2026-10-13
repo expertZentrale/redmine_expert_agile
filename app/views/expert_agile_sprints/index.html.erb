@@ -28,6 +28,11 @@
           <td><%= format_date(sprint.end_date) %></td>
           <td><%= l("label_expert_agile_sprint_sharing_#{sprint.sharing_name}") %></td>
           <td class="buttons">
+        <% unless sprint.closed? %>
+          <%= link_to l(:button_expert_agile_sprint_complete),
+                      complete_project_expert_agile_sprint_path(@project, sprint),
+                      :class => 'icon icon-checked' %>
+        <% end %>
             <%= link_to l(:button_edit),
                         edit_project_expert_agile_sprint_path(@project, sprint),
                         :class => 'icon icon-edit' %>

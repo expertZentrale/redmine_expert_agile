@@ -25,6 +25,14 @@
     <% if meta.present? %>
       <span class="ea-backlog-lane-meta"><%= meta %></span>
     <% end %>
+    <%# Completing a sprint from where its leftovers are seen. Only in the
+        sprint's own project, where its settings live. %>
+    <% if container.is_a?(ExpertAgileSprint) && !container.closed? && container.project_id == @project.id &&
+          User.current.allowed_to?(:manage_expert_agile_sprints, @project) %>
+      <%= link_to l(:button_expert_agile_sprint_complete),
+                  complete_project_expert_agile_sprint_path(@project, container, :back_url => request.fullpath),
+                  :class => 'ea-backlog-lane-complete icon icon-checked' %>
+    <% end %>
   </h3>
 
   <div class="ea-cell ea-backlog-drop" data-drop-id="<%= container && container.id %>">

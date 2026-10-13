@@ -54,14 +54,18 @@ module RedmineExpertAgile
     end
 
     # Name and dates for a sprint created on the spot: the same length,
-    # starting the day after this one ends, and the name counted up when it
-    # ends in a number ("Sprint 4" → "Sprint 5").
+    # starting the day after the project's last planned sprint ends, and the
+    # name counted up to the first one not taken ("Sprint 4" with a "Sprint
+    # 5" already planned → "Sprint 6"). A name without a number gets one.
     def suggested_new_sprint_attributes
       length = (sprint.end_date - sprint.start_date).to_i
-      start = sprint.end_date + 1
-      name = sprint.name.to_s.sub(/(\d+)\s*\z/) { (Regexp.last_match(1).to_i + 1).to_s }
-      name = "#{sprint.name} (2)" if name == sprint.name
-      { :name => name, :start_date => start, :end_date => start + length }
+      taken = sprint.project.expert_agile_sprints.pluck(:name).map(&:to_s)
+      last_end = sprint.project.expert_agile_sprints.maximum(:end_date) || sprint.end_date
+      start = [sprint.end_date, last_end].max + 1
+      base, number = sprint.name.to_s =~ /\A(.*?)(\d+)\s*\z/ ? [Regexp.last_match(1), Regexp.last_match(2).to_i] : ["#{sprint.name} ", 1]
+      number += 1
+      number += 1 while taken.include?("#{base}#{number}")
+      { :name => "#{base}#{number}", :start_date => start, :end_date => start + length }
     end
 
     # Runs the completion. `target` is TARGET_NEXT, TARGET_BACKLOG,

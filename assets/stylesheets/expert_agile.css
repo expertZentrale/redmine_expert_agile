@@ -765,3 +765,16 @@ table.ea-epic-rows .ea-row-ref { margin-right: 4px; font-size: 0.9em; }
 .ea-epic-row.ea-row-closed td { color: #8a8f98; }
 .ea-epic-row.ea-row-closed td.subject a { text-decoration: line-through; }
 td.ea-row-subtasks { white-space: nowrap; font-size: 0.9em; color: #555; }
+
+/* --- Completing a sprint ---------------------------------------------- */
+.ea-backlog-lane-complete {
+  margin-left: 8px;
+  font-size: 0.8em;
+  font-weight: normal;
+  white-space: nowrap;
+}
+.ea-sprint-complete-issues { margin: 6px 0 0; padding-left: 18px; }
+.ea-sprint-complete-status { color: #777; font-size: 0.9em; }
+.ea-sprint-complete-new { margin: 0 0 6px 24px; }
+.ea-sprint-complete-new p { padding-left: 140px; }
+.ea-sprint-complete-new label { width: 130px; margin-left: -140px; }

@@ -258,3 +258,7 @@ only issues straight under an epic or under nothing.
 `RedmineExpertAgile::Hierarchy` answers `children`, `parents` and `descendant_rows` (epic overview,
 `ExpertAgileEpicsController`) for a whole list in one visible-scoped query each; cards read them
 through `ExpertAgileQuery#card_story` / `#card_subtasks`, batch-loaded by `load_for_board`.
+Completing a sprint is `RedmineExpertAgile::SprintCompletion` (`ExpertAgileSprintsController#complete`):
+open issues move like a planner move (journaled, `manage_expert_agile_backlog`, the issue's own
+validation), then the sprint closes and the target may be activated — one transaction; a single
+refusal rolls back everything and is reported per issue. Never relax `no_open_issues_when_closing`.

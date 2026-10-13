@@ -100,6 +100,21 @@ en:
   label_expert_agile_sprint_status_closed: Closed
   label_expert_agile_sprint_all_issues: All issues
   label_expert_agile_sprint_active_mode: Active sprint (follows automatically)
+  label_expert_agile_sprint_complete: "Complete sprint"
+  button_expert_agile_sprint_complete: "Complete sprint"
+  label_expert_agile_sprint_complete_target: "Move the open issues to"
+  label_expert_agile_sprint_complete_next: "the next sprint, %{sprint}"
+  label_expert_agile_sprint_complete_backlog: "the backlog (no sprint)"
+  label_expert_agile_sprint_complete_new: "a new sprint"
+  label_expert_agile_sprint_complete_activate: "Make the target sprint the active one"
+  text_expert_agile_sprint_complete_activate: "So a board following the active sprint shows it right away. Ignored when the issues go to the backlog."
+  text_expert_agile_sprint_complete_summary: "%{closed} issues done, %{open} still open (%{points} story points)."
+  text_expert_agile_sprint_complete_refused: "Nothing was changed. These issues could not be moved:"
+  label_expert_agile_hidden_issue: "An issue you cannot see"
+  notice_expert_agile_sprint_completed: "%{sprint} is closed; %{count} open issues moved to %{target}."
+  error_expert_agile_sprint_complete_target: "Choose an open sprint the project may plan into, the backlog, or a new sprint"
+  error_expert_agile_sprint_complete_issue_hidden: "not visible to you"
+  error_expert_agile_sprint_already_closed: "This sprint is already closed"
   label_expert_agile_sprint_unavailable: (sprint not available)
   label_expert_agile_sprint_sharing_none: Not shared
   label_expert_agile_sprint_sharing_descendants: With subprojects

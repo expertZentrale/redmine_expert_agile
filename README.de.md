@@ -151,6 +151,10 @@ laufenden Sprint, zeigt ein leeres Board statt aller Tickets.
 Sprint-Auswahl "Aktiver Sprint (automatisch)" und die Statusspalten mit ihren
 WIP-Limits](docs/screenshots/de/11-sprint-board.png)
 
+Am Ende einer Iteration verschiebt **Sprint abschliessen** (Sprint-Liste oder Sprint-Lane im
+Planer) die offenen Tickets in den naechsten Sprint, ins Backlog oder in einen neuen Sprint, schliesst
+den Sprint und kann das Ziel zum aktiven Sprint machen — in einem Schritt.
+
 ### Backlog-Planer
 
 Der Planer stellt den ungeplanten Backlog neben die Sprints, in die er gezogen werden kann; jede

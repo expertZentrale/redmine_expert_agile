@@ -100,6 +100,21 @@ de:
   label_expert_agile_sprint_status_closed: Geschlossen
   label_expert_agile_sprint_all_issues: Alle Tickets
   label_expert_agile_sprint_active_mode: Aktiver Sprint (automatisch)
+  label_expert_agile_sprint_complete: "Sprint abschliessen"
+  button_expert_agile_sprint_complete: "Sprint abschliessen"
+  label_expert_agile_sprint_complete_target: "Offene Tickets verschieben nach"
+  label_expert_agile_sprint_complete_next: "in den naechsten Sprint, %{sprint}"
+  label_expert_agile_sprint_complete_backlog: "ins Backlog (kein Sprint)"
+  label_expert_agile_sprint_complete_new: "in einen neuen Sprint"
+  label_expert_agile_sprint_complete_activate: "Ziel-Sprint zum aktiven Sprint machen"
+  text_expert_agile_sprint_complete_activate: "Damit ein Board, das dem aktiven Sprint folgt, ihn sofort zeigt. Ohne Wirkung, wenn die Tickets ins Backlog gehen."
+  text_expert_agile_sprint_complete_summary: "Erledigt: %{closed} Tickets, noch offen: %{open} (Story Points: %{points})."
+  text_expert_agile_sprint_complete_refused: "Es wurde nichts geaendert. Diese Tickets liessen sich nicht verschieben:"
+  label_expert_agile_hidden_issue: "Ein Ticket, das Sie nicht sehen duerfen"
+  notice_expert_agile_sprint_completed: "%{sprint} ist abgeschlossen; offene Tickets nach %{target} verschoben: %{count}."
+  error_expert_agile_sprint_complete_target: "Waehlen Sie einen offenen Sprint, in den das Projekt planen darf, das Backlog oder einen neuen Sprint"
+  error_expert_agile_sprint_complete_issue_hidden: "fuer Sie nicht sichtbar"
+  error_expert_agile_sprint_already_closed: "Dieser Sprint ist bereits abgeschlossen"
   label_expert_agile_sprint_unavailable: (Sprint nicht verfügbar)
   label_expert_agile_sprint_sharing_none: Nicht geteilt
   label_expert_agile_sprint_sharing_descendants: Mit Unterprojekten

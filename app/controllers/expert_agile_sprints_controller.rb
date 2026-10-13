@@ -101,7 +101,7 @@ class ExpertAgileSprintsController < ApplicationController
     target = params[:target].presence || RedmineExpertAgile::SprintCompletion::TARGET_NEXT
     activate = params.key?(:activate_target) ? params[:activate_target].to_s.in?(%w(1 true)) : target.to_s != 'backlog'
     if @completion.complete(target, :activate => activate,
-                                    :new_sprint_attributes => (params[:new_sprint] || {}).to_unsafe_h)
+                                    :new_sprint_attributes => new_sprint_params)
       respond_to do |format|
         format.html do
           flash[:notice] = completed_notice
@@ -131,6 +131,14 @@ class ExpertAgileSprintsController < ApplicationController
       format.html { render :action => 'complete', :status => status }
       format.api { render_api_completion_preview }
     end
+  end
+
+  # Only the three fields the form offers; the completion slices them again.
+  def new_sprint_params
+    attributes = params[:new_sprint]
+    return {} unless attributes.respond_to?(:permit)
+
+    attributes.permit(:name, :start_date, :end_date).to_h
   end
 
   def complete_refused(message)
