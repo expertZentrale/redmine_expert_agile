@@ -92,15 +92,17 @@ class ExpertAgileSprintsController < ApplicationController
   # Completes a sprint in one step: the form on GET, the completion on POST.
   # See RedmineExpertAgile::SprintCompletion for what happens to the issues.
   def complete
-    # JSON only: the answer is built as JSON, and a .xml request would
-    # otherwise be accepted and answered in the wrong format.
-    return render_error(:status => 406) if params[:format].to_s == 'xml'
+    # The page or JSON, decided before anything is written: any other format
+    # would complete the sprint and only then find nothing to answer with.
+    return render_error(:status => 406) unless %w(html json).include?(request.format.symbol.to_s)
 
     @completion = RedmineExpertAgile::SprintCompletion.new(@sprint)
     if @sprint.closed?
       return complete_refused(l(:error_expert_agile_sprint_already_closed))
     end
-    return render_complete_form if request.get?
+    # Only a POST completes. HEAD rides on the GET route but is not a GET,
+    # and crawlers and proxies send it freely.
+    return render_complete_form unless request.post?
 
     target = params[:target].presence || RedmineExpertAgile::SprintCompletion::TARGET_NEXT
     activate = params.key?(:activate_target) ? params[:activate_target].to_s.in?(%w(1 true)) : target.to_s != 'backlog'

@@ -161,7 +161,7 @@ curl -X POST -H "X-Redmine-API-Key: $KEY" -H "Content-Type: application/json" \
 | `new_sprint` | With `target: "new"`: `{"name", "start_date", "end_date"}` |
 | `activate_target` | Make the target sprint the active one. Defaults to `true` unless the target is the backlog |
 
-JSON only; `.xml` is answered with `406 Not Acceptable`. Activating a target sprint that is shared in
+JSON only; any other format is answered with `406 Not Acceptable` before anything is written. Activating a target sprint that is shared in
 from another project also needs *Manage sprints* there.
 
 `200 OK` with `{"sprint_id", "status": "closed", "moved_issue_ids", "target_sprint_id", "target_status"}`.

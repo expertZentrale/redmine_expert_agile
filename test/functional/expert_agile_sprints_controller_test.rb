@@ -99,4 +99,18 @@ class ExpertAgileSprintsControllerTest < Redmine::ControllerTest
 
     assert_redirected_to "/projects/#{@project.identifier}/expert_agile/backlog"
   end
+
+  def test_a_head_request_completes_nothing
+    head :complete, :params => { :project_id => @project.id, :id => @sprint.id, :target => 'backlog' }
+
+    assert @sprint.reload.active?
+    assert_equal @sprint.id, @open.reload.expert_agile_data.sprint_id
+  end
+
+  def test_an_unsupported_format_completes_nothing
+    post :complete, :params => { :project_id => @project.id, :id => @sprint.id, :target => 'backlog' }, :format => :js
+
+    assert_response 406
+    assert @sprint.reload.active?
+  end
 end

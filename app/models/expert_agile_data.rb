@@ -49,6 +49,11 @@ class ExpertAgileData < ExpertAgileApplicationRecord
   def sprint_available_to_issue_project
     return if sprint_id.nil?
 
+    # Waits for a completion of that sprint running right now: completing
+    # locks the sprint row for its whole transaction, so planning into it
+    # meanwhile sees it closed afterwards instead of slipping an open issue
+    # into a sprint that has just been closed.
+    ExpertAgileSprint.lock.where(:id => sprint_id).pluck(:id)
     project = issue && issue.project
     # Open or active only: a closed sprint is finished, and planning an open
     # issue into it would rewrite its burndown and velocity after the fact —
