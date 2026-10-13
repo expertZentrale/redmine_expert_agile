@@ -9,6 +9,21 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Added
+
+- **Epics, as in Jira.** Choose the trackers whose issues are epics under *Administration → expert
+  Agile → Epics*; an issue belongs to the nearest epic above it in Redmine's subtask tree, so a
+  story is a subtask of its epic and the story's subtasks belong to the same epic through it. No
+  new table and no custom field: Redmine's parent filter, the REST API, the Gantt chart and the
+  story point roll-up all see the same data. With the new **Epic** card field switched on, every
+  card on the board and in the backlog carries its epic as a coloured badge linking to it, one
+  colour per epic; the card tooltip names the epic too. Only epics the viewer may see are shown.
+- **Epics are left off the board** by default, as in Jira — an epic is a container of work, not a
+  card that moves through the columns. *Hide epics on the board* in the board options brings them
+  back; column counts and totals follow what the board shows.
+
 ## [0.7.1] - 2026-10-05
 
 ### Added

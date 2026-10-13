@@ -106,6 +106,15 @@ fixed scale on the issue form next to the sprint the issue belongs to.
 ![Issue form showing Redmine's own attribute fields above two fields added by the plugin: a Story
 points dropdown set to 2 and a Sprint dropdown set to Sprint 24](docs/screenshots/en/05-story-points.png)
 
+### Epics
+
+Epics group stories the way Jira does, on top of Redmine's own subtask tree. Pick the epic
+trackers in the plugin settings (*Epics*); an issue then belongs to the nearest epic above it, so
+an epic's stories are its subtasks and their subtasks belong to it as well. Switch on the **Epic**
+card field and every card on the board and in the backlog shows its epic as a coloured badge, one
+colour per epic. The epics themselves stay off the board unless *Hide epics on the board* is
+switched off in the board options.
+
 ### Sprints
 
 Sprints are dated containers with their own lifecycle — open, active, closed — managed in the

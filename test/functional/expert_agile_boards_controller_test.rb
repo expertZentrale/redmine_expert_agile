@@ -319,6 +319,33 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'dl.ea-card-fields dt', :minimum => 1
   end
 
+  def test_cards_carry_their_epic_as_a_badge
+    epic = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Checkout epic')
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                               :c => %w(tracker epic) }
+    end
+
+    assert_response :success
+    assert_select "#ea-card-#{story.id} .ea-card-epic a[href=?]", "/issues/#{epic.id}",
+                  :text => 'Checkout epic'
+    assert_select "#ea-card-#{epic.id}", false, 'the epic itself is hidden by default'
+    assert_select 'dl.ea-card-fields dt', :text => l(:label_expert_agile_epic), :count => 0
+    assert_select 'input#hide_epics[type=checkbox][checked]'
+  end
+
+  def test_the_epic_options_stay_away_while_epics_are_off
+    with_agile_settings('epic_tracker_ids' => '') do
+      get :index, :params => { :project_id => @project.id }
+    end
+
+    assert_response :success
+    assert_select 'input#hide_epics', false
+    assert_select '.ea-card-epic', false
+  end
+
   def test_created_and_updated_are_available_as_card_fields
     get :index, :params => { :project_id => @project.id, :set_filter => '1',
                              :c => %w(created_on updated_on) }

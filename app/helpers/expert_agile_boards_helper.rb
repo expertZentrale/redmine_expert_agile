@@ -48,6 +48,19 @@ module ExpertAgileBoardsHelper
     " style=\"#{ERB::Util.html_escape(css)}\"".html_safe
   end
 
+  # The epic a card belongs to, as a coloured badge linking to it; nothing for
+  # a card without one. The colour is the epic's own stable palette entry, so
+  # every card of one epic carries the same hue on every board.
+  def expert_agile_epic_badge(epic)
+    return nil if epic.nil?
+
+    colour = ExpertAgileColor.for_principal(epic)
+    content_tag(:div, :class => 'ea-card-epic',
+                      :style => ExpertAgileColor.css_variables(colour, ExpertAgileColor::LANE_TINT)) do
+      link_to(epic.subject, issue_path(epic), :title => "#{epic.tracker.name} ##{epic.id}: #{epic.subject}")
+    end
+  end
+
   # The inline colour of one card, or nil when the board is not coloured.
   def expert_agile_card_style(issue, query)
     ExpertAgileColor.css_variables(expert_agile_card_color(issue, query), ExpertAgileColor::CARD_TINT)

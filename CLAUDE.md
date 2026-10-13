@@ -238,3 +238,13 @@ Every other lane is refused by name before anything is written. The board script
 carries `swimlaneId` and every lane's totals (`BoardGrid#swimlane_summaries`, the same numbers the
 page renders). Never add a field to the allowlist that a drag should not set (project, tracker,
 author, dates).
+
+### Epics (`lib/redmine_expert_agile/epics.rb`)
+An epic is an issue of a tracker listed in the `epic_tracker_ids` setting (empty = off); an issue
+belongs to the **nearest epic ancestor** in Redmine's subtask tree. No table or custom field of its
+own — never add one, so the parent filter, REST API, Gantt and story point roll-up keep seeing the
+same data. `Epics.nearest(issues, user)` answers a whole list from the nested set (`root_id`,
+`lft`, `rgt`) in one query and only considers epics the user may see; never walk `parent` per
+card. Cards get the epic through `ExpertAgileQuery#card_epic` (batch-loaded per board, or per list
+via `preload_card_epics` on the backlog). `hide_epics` (on by default) filters epic trackers out in
+`board_filtered`, which every count and total goes through as well.

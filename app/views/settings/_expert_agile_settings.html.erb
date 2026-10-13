@@ -111,6 +111,21 @@
 </fieldset>
 
 <fieldset class="box tabular">
+  <legend><%= l(:label_expert_agile_settings_epics) %></legend>
+  <p>
+    <label for="settings_epic_tracker_ids"><%= l(:label_expert_agile_epic_trackers) %></label>
+    <%# As with the story point trackers: the empty entry makes "none
+        selected" a value that is posted rather than no value at all. %>
+    <%= hidden_field_tag 'settings[epic_tracker_ids][]', '' %>
+    <%= select_tag 'settings[epic_tracker_ids]',
+                   options_for_select(Tracker.sorted.map { |t| [t.name, t.id.to_s] },
+                                      RedmineExpertAgile.epic_tracker_ids.map(&:to_s)),
+                   :multiple => true %>
+    <em class="info"><%= l(:text_expert_agile_epic_trackers) %></em>
+  </p>
+</fieldset>
+
+<fieldset class="box tabular">
   <legend><%= l(:label_expert_agile_settings_sprints) %></legend>
 
   <p>

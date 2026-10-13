@@ -131,6 +131,17 @@ module RedmineExpertAgile
       setting_list(:sp_values).map(&:to_i).uniq.sort
     end
 
+    # --- Epics ---------------------------------------------------------
+
+    # Trackers whose issues are epics. Empty means the feature is off.
+    def epic_tracker_ids
+      setting_list(:epic_tracker_ids).map(&:to_i).reject(&:zero?)
+    end
+
+    def epics_on?
+      epic_tracker_ids.any?
+    end
+
     # --- Sprints -------------------------------------------------------
 
     def sprints_on?

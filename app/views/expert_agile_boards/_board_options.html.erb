@@ -70,6 +70,15 @@
             <%= check_box_tag 'show_avatar', '1', @query.show_avatar? %>
           </span>
         </p>
+        <% if RedmineExpertAgile::Epics.enabled? %>
+          <p class="ea-options-row">
+            <label for="hide_epics"><%= l(:label_expert_agile_hide_epics) %></label>
+            <span>
+              <%= hidden_field_tag 'hide_epics', '0', :id => nil %>
+              <%= check_box_tag 'hide_epics', '1', @query.hide_epics? %>
+            </span>
+          </p>
+        <% end %>
         <% sprints = @query.available_board_sprints %>
         <% if sprints.any? || @query.sprint_id %>
           <p class="ea-options-row">

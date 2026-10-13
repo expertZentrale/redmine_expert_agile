@@ -1,3 +1,5 @@
+<%# The cards' epics are looked up for the whole list at once, not per card. %>
+<% @query.preload_card_epics(issues) %>
 <% issues.each do |issue| %>
   <%= render :partial => 'expert_agile_backlogs/issue_card', :locals => { :issue => issue } %>
 <% end %>
