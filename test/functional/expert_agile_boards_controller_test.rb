@@ -384,6 +384,23 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_includes related.first['card'], l(:label_expert_agile_subtasks_done, :closed => 1, :total => 1)
   end
 
+  def test_moving_a_story_between_epic_lanes_redraws_both_epics
+    epic_a = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Epic A')
+    epic_b = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Epic B')
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic_a.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => { :project_id => @project.id, :set_filter => '1', :group_by => 'epic',
+                               :hide_epics => '0', :c => %w(tracker subtasks) }
+      put :update, :params => { :id => story.id, :status_id => story.status_id,
+                                :swimlane_field => 'epic', :swimlane_id => epic_b.id.to_s }, :format => :js
+    end
+
+    assert_response :success
+    assert_equal [epic_a.id, epic_b.id].sort,
+                 JSON.parse(response.body)['relatedCards'].map { |card| card['issueId'] }.sort
+  end
+
   def test_the_epic_options_stay_away_while_epics_are_off
     with_agile_settings('epic_tracker_ids' => '') do
       get :index, :params => { :project_id => @project.id }

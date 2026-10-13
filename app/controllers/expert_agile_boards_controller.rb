@@ -91,6 +91,9 @@ class ExpertAgileBoardsController < ApplicationController
 
     retrieve_board_query_for_move
     siblings = column_siblings(target_status_id || @issue.status_id)
+    # The parent before the move: a drop into another epic lane changes it,
+    # and the old parent's card then counts one subtask fewer.
+    @parent_id_before_move = @issue.parent_id
     # The epic the card leaves, if it leaves one: its lane stays on screen
     # even when this was its last card, and its bar has to follow.
     @epic_left = lane_attribute == 'parent_issue_id' ? RedmineExpertAgile::Epics.nearest([@issue])[@issue.id] : nil
@@ -543,14 +546,16 @@ class ExpertAgileBoardsController < ApplicationController
                                 :formats => [:html]),
       :columns => @query.board_columns.map(&:to_h)
     }
-    # A story's card counts its subtasks, done and open. Moving a subtask can
-    # change that count, so the story's card comes along, drawn afresh.
-    if @issue.parent_id && @query.has_column?(:subtasks) && (parent = Issue.visible.find_by(:id => @issue.parent_id))
-      payload[:relatedCards] = [{
-        :issueId => parent.id,
-        :card => render_to_string(:partial => 'expert_agile_boards/issue_card',
-                                  :locals => { :issue => parent }, :formats => [:html])
-      }]
+    # A card counts its subtasks, done and open. Moving a subtask can change
+    # that count for its parent — and a drop into another epic lane for the
+    # parent it left as well — so those cards come along, drawn afresh.
+    parent_ids = [@issue.parent_id, @parent_id_before_move].compact.uniq
+    if parent_ids.any? && @query.has_column?(:subtasks)
+      payload[:relatedCards] = Issue.visible.where(:id => parent_ids).map do |parent|
+        { :issueId => parent.id,
+          :card => render_to_string(:partial => 'expert_agile_boards/issue_card',
+                                    :locals => { :issue => parent }, :formats => [:html]) }
+      end
     end
     # The card goes into the cell of the lane it now belongs to, and the lane
     # bands are refreshed. A move can change the lane without being dropped
