@@ -277,4 +277,27 @@ class ExpertAgileSprintCompletionTest < ActiveSupport::TestCase
 
     assert_equal [other.id], ExpertAgileSprint.where(:project_id => @project.id).active.pluck(:id)
   end
+
+  def test_an_issue_edited_meanwhile_is_a_refusal
+    run = completion
+    issues = run.open_issues
+    stale = issues.first
+    # What Redmine's optimistic locking raises when the row changed under us.
+    stale.define_singleton_method(:save) { |*| raise ActiveRecord::StaleObjectError.new(self, 'update') }
+    run.define_singleton_method(:open_issues) { issues }
+
+    assert_not run.complete('backlog')
+    assert_equal [stale.id], run.refusals.map { |r| r.issue.id }
+    assert @sprint.reload.active?
+    assert_equal @sprint.id, sprint_of(issues.last), 'the others roll back too'
+  end
+
+  def test_after_a_refusal_the_next_sprint_is_asked_again
+    run = completion
+    run.next_sprint
+    ExpertAgileSprint.where(:id => @next.id).update_all(:status => ExpertAgileSprint::STATUS_CLOSED)
+    assert_not run.complete('next')
+
+    assert_nil run.next_sprint
+  end
 end
