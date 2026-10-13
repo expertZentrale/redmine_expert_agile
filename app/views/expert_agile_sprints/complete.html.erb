@@ -9,7 +9,7 @@
       <ul>
         <% @completion.refusals.each do |refusal| %>
           <li>
-            <%= refusal.issue.visible? ? link_to_issue(refusal.issue, :subject => true, :tracker => false) : l(:label_expert_agile_hidden_issue) %>:
+            <%= refusal.issue ? link_to_issue(refusal.issue, :subject => true, :tracker => false) : l(:label_expert_agile_hidden_issues) %>:
             <%= refusal.reason %>
           </li>
         <% end %>

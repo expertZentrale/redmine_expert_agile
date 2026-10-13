@@ -168,10 +168,9 @@ class ExpertAgileSprintsController < ApplicationController
     (@sprint.errors.full_messages + (@completion.new_sprint ? @completion.new_sprint.errors.full_messages : [])).uniq
   end
 
-  # A refusal names the issue only where the caller may see it.
+  # Hidden issues come as one refusal without an id.
   def refused_issue_json(refusal)
-    visible = refusal.issue.visible?
-    { :id => visible ? refusal.issue.id : nil, :reason => refusal.reason }
+    { :id => refusal.issue && refusal.issue.id, :reason => refusal.reason }
   end
 
   def render_api_completion

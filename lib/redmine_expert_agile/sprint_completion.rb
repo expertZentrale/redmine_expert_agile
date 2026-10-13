@@ -183,6 +183,14 @@ module RedmineExpertAgile
     end
 
     def move(issue, destination)
+      # Issues the user cannot see are refused together, once: one entry per
+      # hidden issue would tell how many there are.
+      unless issue.visible?(user)
+        unless @refusals.any? { |refusal| refusal.issue.nil? }
+          @refusals << Refusal.new(nil, ::I18n.t(:error_expert_agile_sprint_complete_issue_hidden))
+        end
+        return
+      end
       reason = refusal_reason(issue)
       return @refusals << Refusal.new(issue, reason) if reason
 

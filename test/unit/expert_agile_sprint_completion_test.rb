@@ -252,4 +252,28 @@ class ExpertAgileSprintCompletionTest < ActiveSupport::TestCase
     assert_not stale.complete('backlog')
     assert_includes stale.sprint.errors.full_messages, I18n.t(:error_expert_agile_sprint_complete_gone)
   end
+
+  # One entry however many hidden issues there are: a count per entry
+  # would tell how many the user cannot see.
+  def test_hidden_issues_are_refused_together_without_their_number
+    2.times do
+      hidden = planned(@sprint)
+      hidden.update_column(:is_private, true)
+    end
+    user = User.find(3)
+    Role.find(2).add_permission!(:view_issues, :edit_issues, :manage_expert_agile_backlog)
+
+    run = RedmineExpertAgile::SprintCompletion.new(@sprint.reload, user)
+    assert_not run.complete('backlog')
+
+    hidden_refusals = run.refusals.select { |refusal| refusal.issue.nil? }
+    assert_equal 1, hidden_refusals.size
+  end
+
+  def test_activating_a_sprint_stands_every_other_one_down
+    other = sprint!('Sprint 6', ExpertAgileSprint::STATUS_OPEN, Date.new(2026, 2, 1))
+    other.update!(:status => ExpertAgileSprint::STATUS_ACTIVE)
+
+    assert_equal [other.id], ExpertAgileSprint.where(:project_id => @project.id).active.pluck(:id)
+  end
 end

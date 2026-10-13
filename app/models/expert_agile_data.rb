@@ -53,12 +53,17 @@ class ExpertAgileData < ExpertAgileApplicationRecord
     # locks the sprint row for its whole transaction, so planning into it
     # meanwhile sees it closed afterwards instead of slipping an open issue
     # into a sprint that has just been closed.
-    ExpertAgileSprint.lock.where(:id => sprint_id).pluck(:id)
+    #
+    # The status is read by that same locking query: a locking read sees the
+    # committed row, where a plain read could answer from an older snapshot
+    # of this transaction and still find the sprint open.
+    status = ExpertAgileSprint.lock.where(:id => sprint_id).pick(:status)
     project = issue && issue.project
     # Open or active only: a closed sprint is finished, and planning an open
     # issue into it would rewrite its burndown and velocity after the fact —
     # and break the rule that a closed sprint holds no open issues.
-    return if project && project.shared_expert_agile_sprints.available.where(:id => sprint_id).exists?
+    return if [ExpertAgileSprint::STATUS_OPEN, ExpertAgileSprint::STATUS_ACTIVE].include?(status) &&
+              project && project.shared_expert_agile_sprints.where(:id => sprint_id).exists?
 
     errors.add(:sprint_id, :inclusion)
   end

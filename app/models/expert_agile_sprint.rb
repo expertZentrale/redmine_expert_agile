@@ -187,6 +187,10 @@ class ExpertAgileSprint < ExpertAgileApplicationRecord
   # A project runs one active sprint at a time; activating one stands the
   # others down.
   def deactivate_sibling_sprints
+    # Activations in one project take turns on the project's row: two at
+    # once would otherwise each find no other active sprint and both stay
+    # active.
+    Project.lock.where(:id => project_id).pluck(:id)
     scope = self.class.where(:project_id => project_id, :status => STATUS_ACTIVE)
     scope = scope.where.not(:id => id) if persisted?
     scope.update_all(:status => STATUS_OPEN)

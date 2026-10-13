@@ -110,7 +110,7 @@ en:
   text_expert_agile_sprint_complete_activate: "So a board following the active sprint shows it right away. Ignored when the issues go to the backlog."
   text_expert_agile_sprint_complete_summary: "%{closed} issues done, %{open} still open (%{points} story points)."
   text_expert_agile_sprint_complete_refused: "Nothing was changed. These issues could not be moved:"
-  label_expert_agile_hidden_issue: "An issue you cannot see"
+  label_expert_agile_hidden_issues: "Issues you cannot see"
   notice_expert_agile_sprint_completed: "%{sprint} is closed; %{count} open issues moved to %{target}."
   error_expert_agile_sprint_complete_target: "Choose an open sprint the project may plan into, the backlog, or a new sprint"
   error_expert_agile_sprint_complete_issue_hidden: "not visible to you"

@@ -110,7 +110,7 @@ de:
   text_expert_agile_sprint_complete_activate: "Damit ein Board, das dem aktiven Sprint folgt, ihn sofort zeigt. Ohne Wirkung, wenn die Tickets ins Backlog gehen."
   text_expert_agile_sprint_complete_summary: "Erledigt: %{closed} Tickets, noch offen: %{open} (Story Points: %{points})."
   text_expert_agile_sprint_complete_refused: "Es wurde nichts geaendert. Diese Tickets liessen sich nicht verschieben:"
-  label_expert_agile_hidden_issue: "Ein Ticket, das Sie nicht sehen duerfen"
+  label_expert_agile_hidden_issues: "Tickets, die Sie nicht sehen duerfen"
   notice_expert_agile_sprint_completed: "%{sprint} ist abgeschlossen; offene Tickets nach %{target} verschoben: %{count}."
   error_expert_agile_sprint_complete_target: "Waehlen Sie einen offenen Sprint, in den das Projekt planen darf, das Backlog oder einen neuen Sprint"
   error_expert_agile_sprint_complete_issue_hidden: "fuer Sie nicht sichtbar"
