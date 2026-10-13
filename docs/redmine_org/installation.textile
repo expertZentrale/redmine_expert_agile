@@ -39,7 +39,7 @@ Saving a backlog uses the two board permissions above, which belong to the *expe
 
 h3. Configuration
 
-*Administration → expert Agile.* Every setting ships with a default, so a fresh install is usable immediately. Two worth knowing:
+*Administration → expert Agile.* Every setting ships with a default, so a fresh install is usable immediately. Worth knowing:
 
 * *Board item limit* (default 500) caps how many issues one board render loads. A board that hits the cap says so rather than looking complete.
 * *Chart item limit* (default 1000) and *chart cache duration* (default 60 minutes) bound the cost of every chart. A chart over more issues than the limit says so instead of drawing.
