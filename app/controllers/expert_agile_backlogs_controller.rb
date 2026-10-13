@@ -58,6 +58,10 @@ class ExpertAgileBacklogsController < ApplicationController
                                    :unprocessable_entity)
     end
 
+    # The lane the card leaves, so its totals are answered for as well: it is
+    # neither the target nor the backlog when a card moves between two lanes.
+    @source = @query.container_for(current_container_id)
+
     Issue.transaction do
       @issue.init_journal(User.current)
       assign_container(target)
@@ -270,6 +274,17 @@ class ExpertAgileBacklogsController < ApplicationController
     l(key)
   end
 
+  # The id of the container the issue is planned into before the move.
+  def current_container_id
+    if @query.sprints?
+      @issue.expert_agile_data && @issue.expert_agile_data.sprint_id
+    elsif @query.epics?
+      @issue.parent_id
+    else
+      @issue.fixed_version_id
+    end
+  end
+
   def assign_container(target)
     if @query.sprints?
       @issue.expert_agile_data!.sprint_id = target && target.id
@@ -296,7 +311,8 @@ class ExpertAgileBacklogsController < ApplicationController
                                 :formats => [:html]),
       :totals => {
         :container => target ? @query.totals_for(target) : nil,
-        :backlog => @query.totals_for(nil)
+        :backlog => @query.totals_for(nil),
+        :source => @source && @source != target ? @query.totals_for(@source).merge(:id => @source.id) : nil
       },
       # Every epic lane's progress: a story leaving one epic for another
       # changes both, and the answer names only the one it landed in.

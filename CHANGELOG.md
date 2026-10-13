@@ -39,6 +39,12 @@ notes from the section matching the pushed tag.
   is estimated and by issue count where it is not, with the numbers behind it in its title. A move
   refreshes the bars of both epics it touched.
 
+### Fixed
+
+- **The planner refreshes the lane a card leaves.** Moving a card from one sprint, version or epic
+  to another used to leave the source lane's count and story points as they were until a reload;
+  the move now answers for that lane too.
+
 ## [0.7.1] - 2026-10-05
 
 ### Added

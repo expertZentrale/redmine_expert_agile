@@ -309,6 +309,8 @@
   function updateLaneTotals(totals, containerId, progress) {
     if (!totals) { return; }
     applyLaneTotals('', totals.backlog);
+    /* The lane the card left, when it was neither the backlog nor the target. */
+    if (totals.source) { applyLaneTotals(totals.source.id, totals.source); }
     if (progress) {
       Object.keys(progress).forEach(function (id) {
         applyEpicProgress(document.querySelector('.ea-backlog-lane-header[data-container-id="' + id + '"]'),
