@@ -13,6 +13,12 @@ notes from the section matching the pushed tag.
 
 ### Added
 
+- **Sprint filter and column on the issue list.** The core issue list gains a *Sprint* filter —
+  one or more sprints, *Active sprint (automatic)* resolved each time the list runs, any sprint or
+  none (the backlog) — and a *Sprint* column that sorts by the sprint's start date, groups the list
+  by sprint and goes into the CSV export. Saved lists such as "everything in the current sprint",
+  sprint exports and bulk edits of a sprint's issues become possible. Offered only in projects with
+  one of the plugin's modules switched on, and on cross-project lists.
 - **Complete a sprint in one step**, as in Jira. *Complete sprint* — in the project's sprint list and
   in the sprint's lane header in the backlog planner — shows what is done and what is still open, and
   moves the open issues to the next sprint, back to the backlog, or into a new sprint created on the

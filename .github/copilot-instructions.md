@@ -139,6 +139,10 @@ of the release commit:
   `RedmineExpertAgile::Hierarchy` answers `children`, `parents` and `descendant_rows` (epic overview,
   `ExpertAgileEpicsController`) for a whole list in one visible-scoped query each; cards read them
   through `ExpertAgileQuery#card_story` / `#card_subtasks`, batch-loaded by `load_for_board`.
+  The issue list's sprint filter (`expert_agile_sprint_id`, `active` resolved at query time) and
+  column (`SprintQueryColumn`) come from `IssueQueryPatch`. A QueryColumn grouped in SQL must
+  override `group_by_statement` — core groups by the column's name otherwise — and its
+  `group_value` must equal the SQL key, or the group counts come back empty.
   Completing a sprint is `RedmineExpertAgile::SprintCompletion` (`ExpertAgileSprintsController#complete`):
   open issues move like a planner move (journaled, `manage_expert_agile_backlog`, the issue's own
   validation), then the sprint closes and the target may be activated — one transaction; a single
