@@ -167,7 +167,16 @@ module RedmineExpertAgile
             else
               value.to_s =~ /\A\d+\z/ ? [value.to_i] : []
             end
-          end.uniq
+          end.uniq.then { |ids| expert_agile_filterable_sprint_ids(ids) }
+        end
+
+        # Only sprints the filter offers: a crafted id must not tell which
+        # readable issues sit in a sprint the reader may not see named.
+        def expert_agile_filterable_sprint_ids(ids)
+          return [] if ids.empty?
+
+          scope = project ? project.shared_expert_agile_sprints : ExpertAgileSprint.visible
+          scope.where(:id => ids).pluck(:id)
         end
 
         # Filtering goes through a subquery on issue ids rather than through

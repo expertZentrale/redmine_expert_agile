@@ -121,6 +121,16 @@ class ExpertAgileSprintFilterTest < ActiveSupport::TestCase
     assert_not counts.keys.map(&:to_s).include?('Confidential')
   end
 
+  def test_a_sprint_the_filter_does_not_offer_matches_nothing
+    other = Project.find(2)
+    secret = ExpertAgileSprint.create!(:project => other, :name => 'Confidential',
+                                       :start_date => Date.new(2026, 2, 1), :end_date => Date.new(2026, 2, 14))
+    kept = Issue.generate!(:project => @project)
+    ExpertAgileData.new(:issue => kept, :sprint_id => secret.id).save(:validate => false)
+
+    assert_not_includes ids_for('=', [secret.id.to_s]), kept.id
+  end
+
   def test_active_with_no_active_sprint_matches_nothing
     @active.update!(:status => ExpertAgileSprint::STATUS_OPEN)
 
