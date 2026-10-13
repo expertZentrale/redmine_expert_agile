@@ -121,6 +121,125 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_select 'div#ea-backlog'
   end
 
+  # --- Planning into epics ---------------------------------------------
+
+  def epics!
+    epic_a = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Epic A')
+    epic_b = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Epic B')
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic_a.id,
+                            :subject => 'Story in A')
+    [epic_a, epic_b, story]
+  end
+
+  def test_epic_lanes_are_offered_only_while_epics_are_on
+    epic_a, epic_b, story = epics!
+    subtask = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => story.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => { :project_id => @project.id, :container_type => 'epic' }
+    end
+
+    assert_response :success
+    assert_select '.ea-backlog-switch a.selected', :text => l(:label_expert_agile_epic_plural)
+    assert_select ".ea-backlog-lane-header[data-container-id=?]", epic_a.id.to_s
+    assert_select ".ea-backlog-lane-header[data-container-id=?] .ea-epic-progress", epic_b.id.to_s
+    assert_select ".ea-backlog-drop[data-drop-id=?] #ea-card-#{story.id}", epic_a.id.to_s
+    assert_select "#ea-card-#{subtask.id}", false, 'a subtask follows its story'
+    assert_select "#ea-card-#{epic_a.id}", false, 'the epics are the lanes'
+
+    with_agile_settings('epic_tracker_ids' => '') do
+      get :index, :params => { :project_id => @project.id, :container_type => 'epic' }
+    end
+    assert_select '.ea-backlog-switch a', :text => l(:label_expert_agile_epic_plural), :count => 0
+  end
+
+  def test_planning_into_an_epic_makes_the_story_its_subtask
+    epic_a, epic_b, story = epics!
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :project_id => @project.id, :id => story.id,
+                                :container_type => 'epic', :container_id => epic_b.id }, :format => :js
+    end
+
+    assert_response :success
+    assert_equal epic_b.id, story.reload.parent_id
+    # Both epics' bars are refreshed: the one the story left and the one it joined.
+    progress = JSON.parse(response.body)['progress']
+    assert_empty [epic_a.id, epic_b.id].map(&:to_s) - progress.keys
+    assert_equal 0, progress[epic_b.id.to_s]['percent']
+    # Counted where it landed, although the planner loaded the epic before
+    # the move renumbered the tree.
+    assert_equal l(:label_expert_agile_epic_progress_issues, :closed => 0, :total => 1),
+                 progress[epic_b.id.to_s]['title']
+    assert_equal l(:label_expert_agile_epic_progress_issues, :closed => 0, :total => 0),
+                 progress[epic_a.id.to_s]['title']
+  end
+
+  # A card moving between two lanes leaves the one it came from with one
+  # card fewer; the answer has to say so, or that lane keeps its old count.
+  def test_the_lane_a_card_leaves_gets_its_totals
+    epic_a, epic_b, story = epics!
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :project_id => @project.id, :id => story.id,
+                                :container_type => 'epic', :container_id => epic_b.id }, :format => :js
+    end
+
+    source = JSON.parse(response.body)['totals']['source']
+    assert_equal epic_a.id, source['id']
+    assert_equal 0, source['issue_count']
+  end
+
+  def test_the_sprint_a_card_leaves_gets_its_totals
+    sprint_a = sprint!
+    sprint_b = sprint!(:name => 'Sprint B', :start_date => Date.new(2026, 1, 15), :end_date => Date.new(2026, 1, 28))
+    @issue.expert_agile_data!.update!(:sprint_id => sprint_a.id)
+
+    put :update, :params => { :project_id => @project.id, :id => @issue.id,
+                              :container_type => 'sprint', :container_id => sprint_b.id }, :format => :js
+
+    assert_response :success
+    assert_equal sprint_a.id, JSON.parse(response.body)['totals']['source']['id']
+  end
+
+  def test_planning_into_the_backlog_takes_the_story_out_of_its_epic
+    _epic_a, _epic_b, story = epics!
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :project_id => @project.id, :id => story.id,
+                                :container_type => 'epic', :container_id => '' }, :format => :js
+    end
+
+    assert_response :success
+    assert_nil story.reload.parent_id
+  end
+
+  def test_planning_a_story_subtask_into_an_epic_is_refused
+    _epic_a, epic_b, story = epics!
+    subtask = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => story.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :project_id => @project.id, :id => subtask.id,
+                                :container_type => 'epic', :container_id => epic_b.id }, :format => :js
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal story.id, subtask.reload.parent_id
+  end
+
+  def test_planning_into_an_epic_needs_the_right_to_manage_subtasks
+    _epic_a, epic_b, story = epics!
+    @role.remove_permission!(:manage_subtasks)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      put :update, :params => { :project_id => @project.id, :id => story.id,
+                                :container_type => 'epic', :container_id => epic_b.id }, :format => :js
+    end
+
+    assert_response :forbidden
+    assert_equal l(:error_expert_agile_epic_not_editable), JSON.parse(response.body)['error']
+  end
+
   # --- Filter and options panel ----------------------------------------
 
   def test_index_renders_the_filter_panel

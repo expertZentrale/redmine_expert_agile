@@ -114,7 +114,8 @@ an epic's stories are its subtasks and their subtasks belong to it as well. Swit
 card field and every card on the board and in the backlog shows its epic as a coloured badge, one
 colour per epic. The epics themselves stay off the board unless *Hide epics on the board* is
 switched off in the board options. Group the board by *Epic* for one swimlane per epic; dropping a story into another epic's lane
-moves it there.
+moves it there. In the backlog planner, *Epics* plans stories into epics the same way.
+Every epic lane and the epic's issue page show its progress.
 
 ### Sprints
 

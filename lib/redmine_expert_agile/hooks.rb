@@ -49,14 +49,20 @@ module RedmineExpertAgile
       nil
     end
 
-    # Story points in the issue attribute table.
+    # Story points in the issue attribute table, and an epic's progress.
     def view_issues_show_details_bottom(context = {})
       issue = context[:issue]
-      return '' unless story_points_visible?(issue)
-      return '' if issue.story_points.blank?
-
-      context[:hook_caller].send(:render, :partial => 'issues/expert_agile_story_points',
-                                          :locals => { :issue => issue })
+      caller = context[:hook_caller]
+      out = ''.html_safe
+      if story_points_visible?(issue) && issue.story_points.present?
+        out << caller.send(:render, :partial => 'issues/expert_agile_story_points',
+                                    :locals => { :issue => issue })
+      end
+      if agile_issue?(issue) && RedmineExpertAgile::Epics.epic?(issue)
+        out << caller.send(:render, :partial => 'issues/expert_agile_epic_progress',
+                                    :locals => { :progress => RedmineExpertAgile::Epics.progress([issue])[issue.id] })
+      end
+      out
     end
 
     # Story points in the bulk edit form.

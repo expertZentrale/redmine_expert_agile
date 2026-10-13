@@ -627,3 +627,36 @@
 /* The lane carries the same accent class as a board swimlane, so a sprint
  * reads the same on both screens. */
 .ea-backlog-lane.ea-lane-colored .ea-backlog-lane-header { border-left-color: var(--ea-accent); }
+
+/* --- Epic progress -----------------------------------------------------
+ * A thin bar with its percentage, in an epic's lane header and on the epic
+ * itself. The share done arrives inline as --ea-progress; the lane's own
+ * accent colours it where there is one. */
+.ea-epic-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+  font-size: 0.8em;
+  font-weight: normal;
+  color: #555;
+  vertical-align: middle;
+}
+.ea-epic-progress-bar {
+  position: relative;
+  display: inline-block;
+  width: 80px;
+  height: 6px;
+  border-radius: 3px;
+  background: #e3e5e8;
+  overflow: hidden;
+}
+.ea-epic-progress-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--ea-progress, 0%);
+  background: var(--ea-accent, #4f9d69);
+}
+.expert-agile-epic-progress .ea-epic-progress { margin-left: 0; }
+.expert-agile-epic-progress-detail { margin-left: 8px; color: #777; }

@@ -1,0 +1,16 @@
+<%# An epic's progress in its attribute table: everything below it, done.
+    Markup of the board's progress bar, written out because the issue page
+    does not carry the board's helpers. %>
+<div class="attribute expert-agile-epic-progress">
+  <div class="label"><%= l(:label_expert_agile_epic_progress) %>:</div>
+  <div class="value">
+    <span class="ea-epic-progress" title="<%= progress.title %>" style="--ea-progress: <%= progress.percent %>%;">
+      <span class="ea-epic-progress-bar"></span>
+      <span class="ea-epic-progress-text"><%= progress.percent %> %</span>
+    </span>
+    <span class="expert-agile-epic-progress-detail"><%= progress.title %></span>
+  </div>
+</div>
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'expert_agile', :plugin => 'redmine_expert_agile' %>
+<% end %>

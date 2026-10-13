@@ -94,6 +94,47 @@ class ExpertAgileEpicsTest < ActiveSupport::TestCase
     assert epic.association(:tracker).loaded?, 'the badge reads the tracker; it must not cost a query per epic'
   end
 
+  # --- Progress --------------------------------------------------------
+
+  def progress_of(epic)
+    with_agile_settings('epic_tracker_ids' => [EPIC_TRACKER.to_s]) do
+      RedmineExpertAgile::Epics.progress([epic])[epic.id]
+    end
+  end
+
+  def test_progress_counts_everything_below_the_epic
+    progress = progress_of(@epic)
+
+    assert_equal 2, progress.issue_count # the story and its subtask
+    assert_equal 0, progress.closed_count
+    assert_equal 0, progress.percent
+  end
+
+  def test_progress_follows_story_points_where_there_are_any
+    @story.expert_agile_data!.update!(:story_points => 3)
+    @subtask.expert_agile_data!.update!(:story_points => 1)
+    @subtask.update_column(:status_id, IssueStatus.where(:is_closed => true).first.id)
+
+    progress = progress_of(@epic)
+
+    assert_equal 4, progress.points
+    assert_equal 1, progress.closed_points
+    assert_equal 25, progress.percent
+  end
+
+  def test_progress_falls_back_to_the_issue_count
+    @subtask.update_column(:status_id, IssueStatus.where(:is_closed => true).first.id)
+
+    assert_equal 50, progress_of(@epic).percent
+  end
+
+  def test_progress_leaves_out_nested_epics_but_counts_their_stories
+    inner = Issue.generate!(:project => @project, :tracker_id => EPIC_TRACKER, :parent_issue_id => @epic.id)
+    Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => inner.id)
+
+    assert_equal 3, progress_of(@epic.reload).issue_count
+  end
+
   # --- The board -----------------------------------------------------
 
   def test_the_board_hides_epics_by_default

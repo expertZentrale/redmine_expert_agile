@@ -8,6 +8,30 @@
 # the same data the board shows.
 module RedmineExpertAgile
   module Epics
+    # How far one epic is along: issues and story points, all and done.
+    Progress = Struct.new(:issue_count, :closed_count, :points, :closed_points) do
+      def percent
+        if points.positive?
+          (closed_points * 100.0 / points).round
+        elsif issue_count.positive?
+          (closed_count * 100.0 / issue_count).round
+        else
+          0
+        end
+      end
+
+      # The numbers behind the bar, for its title: issues, then story points
+      # where there are any. Plain I18n, so it reads the same on the board,
+      # in the planner and on the issue page, whose helpers differ.
+      def title
+        parts = [::I18n.t(:label_expert_agile_epic_progress_issues, :closed => closed_count, :total => issue_count)]
+        if points.positive?
+          parts << ::I18n.t(:label_expert_agile_epic_progress_points, :closed => closed_points, :total => points)
+        end
+        parts.join(' · ')
+      end
+    end
+
     class << self
       def tracker_ids
         RedmineExpertAgile.epic_tracker_ids
@@ -19,6 +43,47 @@ module RedmineExpertAgile
 
       def epic?(issue)
         issue.present? && tracker_ids.include?(issue.tracker_id)
+      end
+
+      # {epic_id => progress} for every given epic, in one query.
+      #
+      # Counts everything below the epic except epics — stories, their
+      # subtasks, the stories of a nested epic — that the user may see; done
+      # means a closed status. Story points are each issue's own, so a story
+      # and its subtasks both count when both are estimated. The percentage
+      # follows story points where there are any and falls back to the issue
+      # count, so an unestimated epic still shows how far along it is.
+      def progress(epics, user = User.current)
+        epics = Array(epics).compact
+        result = epics.each_with_object({}) { |epic, acc| acc[epic.id] = Progress.new(0, 0, 0, 0) }
+        return result if epics.empty?
+
+        # The tree's numbers as they are now, not as the epics were loaded:
+        # hanging a story under an epic renumbers the nested set, and the epic
+        # objects of a planner loaded before that move would no longer
+        # contain the story they just received.
+        bounds = Issue.where(:id => epics.map(&:id)).pluck(:id, :root_id, :lft, :rgt)
+        bounds = bounds.each_with_object({}) { |(id, root, lft, rgt), acc| acc[id] = [root, lft, rgt] }
+
+        rows = Issue.visible(user)
+                    .joins(:status)
+                    .joins("LEFT OUTER JOIN #{ExpertAgileData.table_name} ead " \
+                           "ON ead.issue_id = #{Issue.table_name}.id")
+                    .where(:root_id => bounds.values.map(&:first).uniq)
+                    .where.not(:tracker_id => tracker_ids)
+                    .pluck("#{Issue.table_name}.root_id", "#{Issue.table_name}.lft",
+                           "#{Issue.table_name}.rgt", "#{IssueStatus.table_name}.is_closed",
+                           'ead.story_points')
+        epics.each do |epic|
+          epic_root, epic_lft, epic_rgt = bounds[epic.id]
+          next if epic_root.nil?
+
+          inside = rows.select { |root, lft, rgt, _, _| root == epic_root && lft > epic_lft && rgt < epic_rgt }
+          closed = inside.select { |row| ActiveModel::Type::Boolean.new.cast(row[3]) }
+          result[epic.id] = Progress.new(inside.size, closed.size,
+                                         inside.sum { |row| row[4].to_i }, closed.sum { |row| row[4].to_i })
+        end
+        result
       end
 
       # The same answer as `nearest`, as an SQL expression over the issues

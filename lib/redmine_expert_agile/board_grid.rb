@@ -133,7 +133,10 @@ module RedmineExpertAgile
     # The same totals the page renders, so the two cannot disagree.
     def swimlane_summaries
       swimlanes.map do |swimlane|
-        swimlane_totals(swimlane).merge(:id => swimlane_dom_id(swimlane))
+        summary = swimlane_totals(swimlane).merge(:id => swimlane_dom_id(swimlane))
+        progress = epic_progress(swimlane)
+        summary[:progress] = progress if progress
+        summary
       end
     end
 

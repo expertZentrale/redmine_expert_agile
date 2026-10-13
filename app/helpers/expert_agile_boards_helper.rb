@@ -212,6 +212,24 @@ module ExpertAgileBoardsHelper
     'ea-lane-colored'
   end
 
+  # How far an epic is along, as a small bar with its percentage. The numbers
+  # behind it are in the title; a move refreshes all three through
+  # `expert_agile_epic_progress_data` and the board script.
+  def expert_agile_epic_progress(progress)
+    return nil if progress.nil?
+
+    data = expert_agile_epic_progress_data(progress)
+    content_tag(:span, :class => 'ea-epic-progress', :title => data[:title],
+                       :style => "--ea-progress: #{data[:percent]}%;") do
+      content_tag(:span, '', :class => 'ea-epic-progress-bar') +
+        content_tag(:span, "#{data[:percent]} %", :class => 'ea-epic-progress-text')
+    end
+  end
+
+  def expert_agile_epic_progress_data(progress)
+    { :percent => progress.percent, :title => progress.title }
+  end
+
   # A lane's title. An epic lane links to its epic, like the epic badge does.
   def expert_agile_swimlane_label(swimlane)
     return l(:label_expert_agile_swimlane_none_value) if swimlane.nil?
