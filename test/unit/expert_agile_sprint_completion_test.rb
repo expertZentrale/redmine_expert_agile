@@ -201,4 +201,37 @@ class ExpertAgileSprintCompletionTest < ActiveSupport::TestCase
     assert_not_includes run.visible_open_issues.map(&:id), hidden.id
     assert_includes run.open_issues.map(&:id), hidden.id, 'the move still covers it'
   end
+
+  def test_a_target_closed_meanwhile_is_refused
+    stale = completion
+    stale.next_sprint # looked up now ...
+    ExpertAgileSprint.where(:id => @next.id).update_all(:status => ExpertAgileSprint::STATUS_CLOSED) # ... closed since
+
+    assert_not stale.complete('next', :activate => true)
+    assert @next.reload.closed?
+    assert_equal @sprint.id, sprint_of(@open_a)
+  end
+
+  # A done issue stays in its completed sprint; reopened, it leaves it.
+  def test_reopening_an_issue_takes_it_out_of_a_closed_sprint
+    completion.complete('next')
+    assert_equal @sprint.id, sprint_of(@done)
+
+    @done.reload.init_journal(@admin)
+    @done.status_id = IssueStatus.where(:is_closed => false).first.id
+    @done.save!
+
+    assert_nil sprint_of(@done)
+    detail = @done.journals.last.details.detect { |d| d.prop_key == 'expert_agile_sprint_id' }
+    assert_equal @sprint.id.to_s, detail.old_value
+    assert_nil detail.value
+  end
+
+  def test_reopening_an_issue_of_an_open_sprint_keeps_it_there
+    @open_a.update_column(:status_id, IssueStatus.where(:is_closed => true).first.id)
+    @open_a.reload.status_id = IssueStatus.where(:is_closed => false).first.id
+    @open_a.save!
+
+    assert_equal @sprint.id, sprint_of(@open_a)
+  end
 end

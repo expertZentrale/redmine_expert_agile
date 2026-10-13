@@ -98,6 +98,17 @@ module RedmineExpertAgile
         destination = resolve_target(target, new_sprint_attributes)
         raise ActiveRecord::Rollback if destination == :invalid
 
+        # An existing target is locked and read again before anything moves
+        # into it: it was looked up before the lock, and another request may
+        # have closed it, or activated a different sprint, in between.
+        if destination && destination.persisted? && destination != @new_sprint
+          destination.lock!
+          unless destination.open? || destination.active?
+            invalid_target
+            raise ActiveRecord::Rollback
+          end
+        end
+
         open_issues.each { |issue| move(issue, destination) }
         raise ActiveRecord::Rollback if @refusals.any?
 

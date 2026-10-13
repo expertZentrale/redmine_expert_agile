@@ -23,6 +23,13 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   nicht verschieben, wird nichts geschrieben und die Seite nennt jede Ablehnung. Auch als
   `POST …/expert_agile_sprints/:id/complete.json`.
 
+### Behoben
+
+- **Ein wieder geoeffnetes Ticket liess offene Arbeit in einem geschlossenen Sprint.** Ein
+  abgeschlossener Sprint behaelt die in ihm erledigten Tickets; wurde eines davon spaeter wieder
+  geoeffnet, blieb es in diesem Sprint. Jetzt verlaesst es beim Wiedereroeffnen den geschlossenen
+  Sprint und geht zurueck ins Backlog, vermerkt in seiner Historie.
+
 ## [0.8.0] - 2026-10-13
 
 ### Hinzugefuegt

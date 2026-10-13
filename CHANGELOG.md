@@ -22,6 +22,12 @@ notes from the section matching the pushed tag.
   validation; if a single issue cannot move, nothing is written and the page lists each refusal.
   Also as `POST …/expert_agile_sprints/:id/complete.json`.
 
+### Fixed
+
+- **A reopened issue left open work in a closed sprint.** A completed sprint keeps the issues done in
+  it; reopening one of them later kept it in that sprint. Reopening now takes the issue out of a
+  closed sprint and back to the backlog, recorded in its history.
+
 ## [0.8.0] - 2026-10-13
 
 ### Added
