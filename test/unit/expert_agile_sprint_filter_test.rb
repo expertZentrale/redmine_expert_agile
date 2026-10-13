@@ -113,7 +113,42 @@ class ExpertAgileSprintFilterTest < ActiveSupport::TestCase
 
     query.group_by = 'expert_agile_sprint'
     counts = query.result_count_by_group
-    assert_equal 1, counts['Sprint A']
-    assert_equal 1, counts['Sprint B']
+    assert_equal 1, counts[@active]
+    assert_equal 1, counts[@next]
+    assert_equal @active, column.group_value(@in_active)
+  end
+
+  # Names are unique only within a project; a cross-project list must not
+  # merge two projects' "Sprint A" into one group.
+  def test_same_named_sprints_of_two_projects_stay_two_groups
+    other = Project.find(2)
+    other.enable_module!(:expert_agile)
+    twin = ExpertAgileSprint.create!(:project => other, :name => 'Sprint A',
+                                     :start_date => Date.new(2026, 2, 1), :end_date => Date.new(2026, 2, 14))
+    elsewhere = Issue.generate!(:project => other)
+    elsewhere.expert_agile_data!.update!(:sprint_id => twin.id)
+
+    query = IssueQuery.new(:name => '_')
+    query.add_filter('expert_agile_sprint_id', '*', [''])
+    query.group_by = 'expert_agile_sprint'
+    counts = query.result_count_by_group
+
+    assert_equal 1, counts[@active]
+    assert_equal 1, counts[twin]
+  end
+
+  def test_the_column_costs_no_query_per_row
+    query = IssueQuery.new(:name => '_', :project => @project)
+    query.column_names = [:subject, :expert_agile_sprint, :story_points]
+    column = query.available_columns.detect { |c| c.name == :expert_agile_sprint }
+    rows = query.issues
+
+    count = 0
+    counter = ->(*, payload) { count += 1 unless %w(SCHEMA TRANSACTION).include?(payload[:name]) || payload[:cached] }
+    ActiveSupport::Notifications.subscribed(counter, 'sql.active_record') do
+      rows.each { |issue| column.value(issue); issue.story_points }
+    end
+
+    assert_equal 0, count
   end
 end

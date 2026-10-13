@@ -1,11 +1,12 @@
 # The issue list's "Sprint" column: shows, sorts and groups by the sprint an
 # issue is planned into.
 #
-# The value is the sprint's name, not the sprint record, and that is what the
-# column groups by in SQL as well. Redmine counts the issues of each group with
-# one GROUP BY over `group_by_statement` and then looks every row's group up by
-# its `group_value`; both sides have to produce the same key, or each group
-# header shows no count.
+# Groups by the sprint itself, not by its name: names are unique only within a
+# project, and the column is offered on cross-project lists too. Redmine counts
+# each group with one GROUP BY over `group_by_statement` (the sprint id here)
+# and looks every row's group up by `group_value` (the sprint record);
+# IssueQueryPatch turns the counted ids into the same records, see
+# `group_records`.
 #
 # QueryColumn is defined inside app/models/query.rb, which Zeitwerk loads only
 # for the constant Query; naming Query first makes QueryColumn exist whatever
@@ -27,13 +28,29 @@ module RedmineExpertAgile
     end
 
     # Core groups by the column's name, which is no column of the issues
-    # table here; the sprint's name is.
+    # table here.
     def group_by_statement
-      self.class.sprint_sql('name')
+      "(SELECT ead.sprint_id FROM #{ExpertAgileData.table_name} ead WHERE ead.issue_id = #{Issue.table_name}.id)"
+    end
+
+    # Through the agile data row: IssueQueryPatch preloads it with its sprint
+    # for the whole page, which a has_one :through would not pick up.
+    def self.sprint_of(issue)
+      data = issue.expert_agile_data
+      data && data.sprint
+    end
+
+    def group_value(issue)
+      self.class.sprint_of(issue)
+    end
+
+    # The counted group keys as the records `group_value` answers with.
+    def group_records(ids)
+      ExpertAgileSprint.where(:id => ids).index_by(&:id)
     end
 
     def value_object(issue)
-      sprint = issue.expert_agile_sprint
+      sprint = self.class.sprint_of(issue)
       sprint && sprint.name
     end
 

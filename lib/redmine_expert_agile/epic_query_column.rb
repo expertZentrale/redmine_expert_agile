@@ -18,10 +18,15 @@ module RedmineExpertAgile
     end
 
     # Core groups in SQL by the column's name, which is no column of the
-    # issues table; the board itself groups the loaded cards in Ruby and never
-    # asks, but anything grouping in the database gets the nearest epic.
+    # issues table. The board groups its loaded cards in Ruby and never asks;
+    # anything grouping in the database counts by the nearest epic's id, which
+    # IssueQueryPatch turns back into the epic `group_value` answers with.
     def group_by_statement
       RedmineExpertAgile::Epics.nearest_epic_sql
+    end
+
+    def group_records(ids)
+      Issue.where(:id => ids).index_by(&:id)
     end
 
     def value_object(issue)

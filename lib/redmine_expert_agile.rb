@@ -37,6 +37,23 @@ module RedmineExpertAgile
       {}
     end
 
+    # Preloads associations onto records already loaded, across the Rails
+    # versions Redmine runs on. Decided by version, not by probing the
+    # constructor: Rails 6.1's takes an optional keyword too, so an arity
+    # test picked the 7.0 call there.
+    def preload(records, associations)
+      records = Array(records)
+      return records if records.empty?
+
+      preloader = ActiveRecord::Associations::Preloader
+      if ActiveRecord.version >= Gem::Version.new('7.0')
+        preloader.new(:records => records, :associations => associations).call
+      else
+        preloader.new.preload(records, associations) # Rails 6.1 (Redmine 5.x)
+      end
+      records
+    end
+
     def setting(key)
       settings[key.to_s]
     end

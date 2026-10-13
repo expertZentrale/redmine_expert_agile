@@ -92,6 +92,36 @@ module RedmineExpertAgile
         end
         base.send(filters_visibility, :initialize_available_filters)
 
+        # The list's rows carry their agile data and sprint, so the story
+        # points and sprint columns cost one query for the page, not one per
+        # row. `issues` is aliased by both RedmineUP plugins — captured here
+        # for the reason at the top of this file.
+        original_issues = base.instance_method(:issues)
+        base.send(:define_method, :issues) do |*args|
+          rows = original_issues.bind(self).call(*args)
+          if has_column?(:expert_agile_sprint)
+            RedmineExpertAgile.preload(rows, :expert_agile_data => :sprint)
+          elsif has_column?(:story_points)
+            RedmineExpertAgile.preload(rows, :expert_agile_data)
+          end
+          rows
+        end
+
+        # A column grouped by a record's id in SQL hands back the records, so
+        # the counts are keyed the way its group_value looks them up. Core does
+        # the same only for custom fields.
+        original_grouped = base.instance_method(:grouped_query)
+        grouped_visibility = base.private_method_defined?(:grouped_query) ? :private : :public
+        base.send(:define_method, :grouped_query) do |&block|
+          result = original_grouped.bind(self).call(&block)
+          column = group_by_column
+          next result unless result.is_a?(Hash) && column.respond_to?(:group_records)
+
+          records = column.group_records(result.keys.compact)
+          result.each_with_object({}) { |(key, value), mapped| mapped[key.nil? ? nil : records[key.to_i]] = value }
+        end
+        base.send(grouped_visibility, :grouped_query)
+
         base.instance_variable_set(:@expert_agile_query_patched, true)
       end
 
