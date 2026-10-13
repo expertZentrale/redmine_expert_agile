@@ -9,7 +9,7 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.9.0] - 2026-10-13
 
 ### Hinzugefuegt
 
@@ -25,8 +25,8 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   ist, und verschiebt die offenen Tickets in den naechsten Sprint, zurueck ins Backlog oder in einen
   direkt angelegten neuen Sprint (Name hochgezaehlt, Daten anschliessend). Danach wird der Sprint
   geschlossen und auf Wunsch das Ziel zum aktiven Sprint, sodass ein Board, das dem aktiven Sprint
-  folgt, es sofort zeigt. Jedes Ticket wird wie im Planer verschoben — mit Journaleintrag, unter dem
-  Recht *Backlog verwalten* und der eigenen Validierung des Tickets; laesst sich ein einziges Ticket
+  folgt, es sofort zeigt. Jedes Ticket wird wie im Planer verschoben — mit Journaleintrag, unter den
+  Rechten *Backlog verwalten* und *Tickets bearbeiten* und der eigenen Validierung des Tickets; laesst sich ein einziges Ticket
   nicht verschieben, wird nichts geschrieben und die Seite nennt jede Ablehnung. Auch als
   `POST …/expert_agile_sprints/:id/complete.json`.
 

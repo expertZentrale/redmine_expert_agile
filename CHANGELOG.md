@@ -9,7 +9,7 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [Unreleased]
+## [0.9.0] - 2026-10-13
 
 ### Added
 
@@ -24,8 +24,8 @@ notes from the section matching the pushed tag.
   moves the open issues to the next sprint, back to the backlog, or into a new sprint created on the
   spot (name counted up, dates following on). It closes the sprint and, if asked, makes the target
   the active sprint, so a board following the active sprint shows it right away. Every issue moves
-  like a planner move — journaled, under the *Manage backlog* permission and the issue's own
-  validation; if a single issue cannot move, nothing is written and the page lists each refusal.
+  like a planner move — journaled, under the *Manage backlog* and *Edit issues* permissions and the
+  issue's own validation; if a single issue cannot move, nothing is written and the page lists each refusal.
   Also as `POST …/expert_agile_sprints/:id/complete.json`.
 
 ### Fixed
