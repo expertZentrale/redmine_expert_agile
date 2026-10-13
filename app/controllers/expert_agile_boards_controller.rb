@@ -543,6 +543,15 @@ class ExpertAgileBoardsController < ApplicationController
                                 :formats => [:html]),
       :columns => @query.board_columns.map(&:to_h)
     }
+    # A story's card counts its subtasks, done and open. Moving a subtask can
+    # change that count, so the story's card comes along, drawn afresh.
+    if @issue.parent_id && @query.has_column?(:subtasks) && (parent = Issue.visible.find_by(:id => @issue.parent_id))
+      payload[:relatedCards] = [{
+        :issueId => parent.id,
+        :card => render_to_string(:partial => 'expert_agile_boards/issue_card',
+                                  :locals => { :issue => parent }, :formats => [:html])
+      }]
+    end
     # The card goes into the cell of the lane it now belongs to, and the lane
     # bands are refreshed. A move can change the lane without being dropped
     # into another one: claiming a card on a board grouped by assignee does.

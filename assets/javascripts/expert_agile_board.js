@@ -194,6 +194,17 @@
       makeDraggable(fresh);
       placeInLane(fresh, payload);
     }
+    /* Other cards the move changed — a story counting the subtask that just
+     * moved. Swapped in place: they did not move, only their content did. */
+    (payload.relatedCards || []).forEach(function (related) {
+      var old = document.getElementById('ea-card-' + related.issueId);
+      if (!old) { return; }
+      var holder = document.createElement('div');
+      holder.innerHTML = related.card;
+      var replacement = holder.firstElementChild;
+      old.parentNode.replaceChild(replacement, old);
+      makeDraggable(replacement);
+    });
     updateColumns(payload.columns);
     updateLaneTotals(payload.totals, payload.containerId, payload.progress);
     updateSwimlanes(payload.lanes);

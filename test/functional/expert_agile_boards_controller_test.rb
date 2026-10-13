@@ -369,6 +369,21 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'dl.ea-card-fields dt', :text => l(:label_expert_agile_subtasks), :count => 0
   end
 
+  def test_moving_a_subtask_redraws_its_storys_card
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :subject => 'Story')
+    subtask = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => story.id)
+    closed = IssueStatus.where(:is_closed => true).detect { |status| subtask.new_statuses_allowed_to(User.find(2)).include?(status) }
+    skip 'workflow offers no closed status' if closed.nil?
+
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :c => %w(tracker subtasks) }
+    put :update, :params => { :id => subtask.id, :status_id => closed.id }, :format => :js
+
+    assert_response :success
+    related = JSON.parse(response.body)['relatedCards']
+    assert_equal [story.id], related.map { |card| card['issueId'] }
+    assert_includes related.first['card'], l(:label_expert_agile_subtasks_done, :closed => 1, :total => 1)
+  end
+
   def test_the_epic_options_stay_away_while_epics_are_off
     with_agile_settings('epic_tracker_ids' => '') do
       get :index, :params => { :project_id => @project.id }
