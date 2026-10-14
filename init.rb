@@ -182,6 +182,20 @@ Redmine::Plugin.register :redmine_expert_agile do
        { :controller => 'expert_agile_boards', :action => 'index' },
        agile_menu_options
 
+  # The same board across every project the user may see. Without this entry the
+  # `expert_agile/board` route is reachable only by typing the URL, although it
+  # exists for exactly this, authorize_global guards it, and saving a global
+  # board redirects to it.
+  global_menu_options = { :caption => :label_expert_agile_board, :after => :gantt,
+                          :if => proc {
+                            User.current.allowed_to?(:view_expert_agile_board, nil,
+                                                     :global => true)
+                          } }
+  global_menu_options[:plugin] = :redmine_expert_agile if Redmine::VERSION::MAJOR >= 6
+  menu :application_menu, :expert_agile_global,
+       { :controller => 'expert_agile_boards', :action => 'index' },
+       global_menu_options
+
   charts_menu_options = { :caption => :label_expert_agile_charts, :after => :expert_agile,
                           :param => :project_id }
   charts_menu_options[:plugin] = :redmine_expert_agile if Redmine::VERSION::MAJOR >= 6

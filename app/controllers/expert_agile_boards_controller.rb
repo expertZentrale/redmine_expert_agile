@@ -2,7 +2,11 @@
 class ExpertAgileBoardsController < ApplicationController
   menu_item :expert_agile
 
-  before_action :find_project_by_project_id, :only => [:index, :create_issue]
+  # Only where the URL names a project. The global board deliberately has none,
+  # and find_project_by_project_id answers Project.find(nil) with a 404 — which
+  # made the global route unreachable although authorize_global guards it.
+  before_action :find_project_by_project_id, :only => [:index, :create_issue],
+                :if => -> { params[:project_id].present? }
   before_action :find_issue_for_board, :only => [:update, :edit_issue, :update_issue,
                                                  :issue_tooltip, :agile_data, :update_agile_data]
   # Every action but the board page is authorised against the issue's own

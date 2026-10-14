@@ -9,6 +9,24 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Fixed
+
+- **The global board was unreachable.** `/expert_agile/board`, the board across every project the
+  user may see, answered 404 for everyone. `find_project_by_project_id` ran on the board action
+  unconditionally, and with no project in the URL it resolves `Project.find(nil)` and renders 404
+  — so the route that `authorize_global` guards on the very next line, that the README describes,
+  and that the queries controller redirects to after a global board is saved, could never be
+  opened. The filter now runs only where the URL names a project.
+
+### Added
+
+- **A menu entry for the global board.** It sits in the application menu, next to Projects,
+  Activity and Issues, for anyone holding *View agile board* in at least one project. Before,
+  nothing in the interface linked to the global board: it could only be reached by typing the
+  URL, which is why the 404 above went unnoticed.
+
 ## [0.9.0] - 2026-10-13
 
 ### Added

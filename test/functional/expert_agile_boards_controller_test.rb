@@ -34,6 +34,31 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'div.ea-card'
   end
 
+  def test_index_without_a_project_renders_the_global_board
+    get :index
+
+    assert_response :success
+    assert_select 'div#ea-board'
+    assert_select 'th.ea-column-header'
+  end
+
+  def test_the_global_board_carries_issues_of_more_than_one_project
+    other = Project.find(5)
+    other.enable_module!(:expert_agile)
+    unless Member.exists?(:project_id => other.id, :user_id => 2)
+      Member.create!(:project => other, :principal => User.find(2), :roles => [@role])
+    end
+
+    get :index
+
+    assert_response :success
+    ids = css_select('div.ea-card').map { |c| c['id'][/\d+/].to_i }
+    assert ids.any?, 'the global board rendered no cards at all'
+    projects = Issue.where(:id => ids).distinct.pluck(:project_id)
+    assert projects.size > 1,
+           "expected cards from several projects, got #{projects.inspect}"
+  end
+
   def test_index_emits_a_json_island_and_no_inline_script_of_our_own
     get :index, :params => { :project_id => @project.id }
 
