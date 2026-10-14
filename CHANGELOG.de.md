@@ -9,6 +9,25 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Behoben
+
+- **Das globale Board war nicht erreichbar.** `/expert_agile/board`, das Board ueber alle
+  Projekte, die ein Benutzer sehen darf, antwortete fuer jeden mit 404.
+  `find_project_by_project_id` lief ohne Bedingung auf der Board-Aktion, und ohne Projekt in der
+  URL loest das `Project.find(nil)` auf und rendert 404. Damit war die Route, die eine Zeile
+  weiter `authorize_global` absichert, die die README beschreibt und auf die der
+  Query-Controller nach dem Speichern eines globalen Boards weiterleitet, nie zu oeffnen. Der
+  Filter laeuft jetzt nur noch dort, wo die URL ein Projekt nennt.
+
+### Hinzugefuegt
+
+- **Ein Menuepunkt fuer das globale Board.** Er steht im Anwendungsmenue neben Projekte,
+  Aktivitaet und Tickets, fuer jeden mit dem Recht *Agile-Board ansehen* in mindestens einem
+  Projekt. Bisher verlinkte nichts in der Oberflaeche auf das globale Board: man kam nur ueber
+  die getippte URL hin, weshalb die 404 oben unbemerkt blieb.
+
 ## [0.9.0] - 2026-10-13
 
 ### Hinzugefuegt
