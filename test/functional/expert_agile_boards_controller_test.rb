@@ -59,6 +59,15 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
            "expected cards from several projects, got #{projects.inspect}"
   end
 
+  def test_the_application_menu_entry_is_marked_selected_on_the_global_board
+    get :index
+
+    assert_response :success
+    # Redmine marks an entry selected only when current_menu_item equals its
+    # name, so this fails the moment the two drift apart again.
+    assert_select '#main-menu a.expert-agile.selected'
+  end
+
   def test_index_emits_a_json_island_and_no_inline_script_of_our_own
     get :index, :params => { :project_id => @project.id }
 

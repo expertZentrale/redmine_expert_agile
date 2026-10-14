@@ -192,7 +192,10 @@ Redmine::Plugin.register :redmine_expert_agile do
                                                      :global => true)
                           } }
   global_menu_options[:plugin] = :redmine_expert_agile if Redmine::VERSION::MAJOR >= 6
-  menu :application_menu, :expert_agile_global,
+  # Same name as the project entry on purpose: a menu item is marked selected
+  # when `current_menu_item` equals its name, and the controller reports
+  # `:expert_agile` on both. Names only have to be unique within one menu.
+  menu :application_menu, :expert_agile,
        { :controller => 'expert_agile_boards', :action => 'index' },
        global_menu_options
 
