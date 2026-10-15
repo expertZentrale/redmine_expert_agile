@@ -1,0 +1,15 @@
+h3. redmine_expert_agile 0.9.1 — 2026-10-14
+
+The global board can be opened again, and the menu links to it.
+
+h4. Fixed
+
+* *The global board was unreachable.* @/expert_agile/board@, the board across every project a user may see, answered 404 for everyone: the project lookup ran on it although the URL names no project. It now runs only where the URL names a project, so the global board — and the redirect after saving a global board — opens again.
+
+h4. Added
+
+* *A menu entry for the global board.* It sits in the application menu next to Projects, Activity and Issues, for anyone holding *View agile board* in at least one project.
+
+h4. Upgrade notes
+
+No migrations, no new settings and no new gems. Replace the plugin directory and restart.
