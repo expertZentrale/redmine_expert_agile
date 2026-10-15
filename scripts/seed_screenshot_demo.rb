@@ -59,8 +59,8 @@ end
 # both carry the label a reader sees. Tracker names are the same in both
 # languages on purpose — "Story"/"Bug"/"Task" are the words German agile teams
 # use too, and "Fehler"/"Aufgabe" would collide with trackers that already exist
-# on a German installation.
-TRACKER_LABELS = { 'story' => 'Story', 'bug' => 'Bug', 'task' => 'Task' }.freeze
+# on a German installation. "Epic" is the epic tracker the plugin setting names.
+TRACKER_LABELS = { 'story' => 'Story', 'bug' => 'Bug', 'task' => 'Task', 'epic' => 'Epic' }.freeze
 STATUS_LABELS = {
   'en' => { 'backlog' => 'Backlog', 'todo' => 'To do', 'progress' => 'In Progress',
             'review' => 'Dev: Review', 'test' => 'Dev: Test', 'done' => 'Done',
@@ -264,10 +264,13 @@ abort 'no givable role available' if role.nil?
 # Every ordered pair of demo statuses, so a card can be dragged anywhere on the
 # board. Redmine resolves an admin's allowed transitions against all roles, so
 # one role's worth of rows is enough for the capture user — the demo members get
-# the same role, so it is enough for them too.
+# the same role, so it is enough for them too. Per tracker, so a tracker added
+# by a later revision of this script gets its rows on a re-run as well.
 workflow_ids = Array(backup['workflow_ids'])
-if workflow_ids.empty?
-  rows = trackers.values.flat_map do |tracker|
+covered = WorkflowTransition.where(:id => workflow_ids).distinct.pluck(:tracker_id)
+missing = trackers.values.reject { |tracker| covered.include?(tracker.id) }
+if missing.any?
+  rows = missing.flat_map do |tracker|
     statuses.values.flat_map do |from|
       statuses.values.filter_map do |to|
         next if from.id == to.id
@@ -351,7 +354,8 @@ Setting.plugin_redmine_expert_agile = (Setting.plugin_redmine_expert_agile || {}
   'default_card_columns' => 'tracker,assigned_to,done_ratio',
   'card_description_length' => '140',
   'sp_values' => '0,1,2,3,5,8,13,20,40,100',
-  'trackers_for_sp' => ''
+  'trackers_for_sp' => '',
+  'epic_tracker_ids' => [trackers['epic'].id.to_s] # default none — epics are off otherwise
 )
 # The capture browser must reach no external host, and the English pass needs
 # the per-user language to be honoured.
@@ -361,7 +365,7 @@ Setting.ui_theme = ''
 # Redmine keys its settings cache on the newest updated_on, so the running web
 # container picks all of this up on its next request — no restart needed.
 Setting.clear_cache
-say 'global settings written (story points on, sprints on, stock theme, gravatar off)'
+say 'global settings written (story points on, sprints on, epics on, stock theme, gravatar off)'
 
 # --- sprints and versions ------------------------------------------------------
 
@@ -633,6 +637,58 @@ history_issues = []
 end
 say "history issues: #{history_issues.size}"
 
+# Cohort D — epics, and one story broken down into subtasks. An epic is an issue
+# of the epic tracker; an issue belongs to the nearest epic above it in the
+# subtask tree, so everything here is plain parent assignment.
+EPIC_PLAN = [['Faster checkout', 'progress'], ['Search that finds things', 'progress'],
+             ['Self-service administration', 'todo']].freeze
+epics = EPIC_PLAN.map do |subject, target|
+  seed_issue!(
+    :project => project, :tracker => trackers['epic'], :author => user, :assignee => nil,
+    :subject => subject, :statuses => statuses, :path => PATH, :target => target,
+    :created_at => business_moment(workday_back(rand(40..60)))
+  )
+end
+
+# Through the model, not update_all: the nested set and the parent's derived
+# dates and done ratio are maintained by Issue's own callbacks. No journal is
+# written, because none is initialised.
+def adopt!(child, parent)
+  child.reload
+  child.parent_issue_id = parent.id
+  child.save!
+end
+
+# Bugs stay outside the epics, and every fourth story too, so the epic lanes
+# end in a "no epic" lane that is not empty.
+non_bugs = ->(list) { list.reject { |issue| issue.tracker_id == trackers['bug'].id } }
+non_bugs.call(board_issues).each_with_index do |issue, index|
+  adopt!(issue, epics[index % 2]) unless (index % 4) == 3
+end
+non_bugs.call(backlog_issues).each_with_index { |issue, index| adopt!(issue, epics[index % 3]) }
+# Done work under the first two epics, so their progress bars are not at zero.
+non_bugs.call(history_issues).first(6).each_with_index { |issue, index| adopt!(issue, epics[index % 2]) }
+
+# A story in progress, broken down into subtasks in three different columns: its
+# card counts them, and each subtask card names the story it belongs to.
+story = board_issues.map(&:reload).find do |issue|
+  issue.tracker_id == trackers['story'].id && issue.status_id == statuses['progress'].id && issue.parent_id
+end
+subtasks = [%w[Design done], %w[Implementation progress], %w[Tests todo]].map do |label, target|
+  subtask = seed_issue!(
+    :project => project, :tracker => trackers['task'], :author => user,
+    :assignee => story.assigned_to || team.first, :subject => "#{story.subject}: #{label.downcase}",
+    :statuses => statuses, :path => PATH, :target => target,
+    :created_at => business_moment(workday_back(rand(6..8))),
+    :closed_at => target == 'done' ? business_moment(workday_back(2)) : nil,
+    :done_ratio => { 'done' => 100, 'progress' => 50 }.fetch(target, 0), :estimated_hours => 4
+  )
+  adopt!(subtask, story)
+  subtask
+end
+board_issues.concat(subtasks)
+say "epics: #{epics.map(&:id).inspect}, story ##{story.id} with subtasks #{subtasks.map(&:id).inspect}"
+
 # --- agile data: rank, story points, sprint ------------------------------------
 
 SP_VALUES = [1, 2, 3, 5, 8, 13].freeze
@@ -657,6 +713,8 @@ backlog_issues.each_with_index do |issue, index|
 end
 rows.each_slice(500) { |slice| ExpertAgileData.insert_all(slice) }
 say "agile data rows: #{rows.size}"
+# The story carries the estimate; its subtasks are the breakdown, not more points.
+ExpertAgileData.where(:issue_id => subtasks.map(&:id)).update_all(:story_points => nil)
 
 # A handful of next-sprint and next-version commitments, so the planner shows
 # populated lanes rather than one full backlog and four empty targets.
@@ -704,7 +762,7 @@ ALL_STATUSES = { 'status_id' => { :operator => '*', :values => [''] } }.freeze
 board = ExpertAgileQuery.new(:name => 'Sprint board', :project => project, :user => user,
                              :visibility => Query::VISIBILITY_PUBLIC)
 board.filters = ALL_STATUSES.deep_dup
-board.column_names = %i[tracker assigned_to done_ratio]
+board.column_names = %i[tracker epic assigned_to done_ratio subtasks]
 board.board_status_ids = board_statuses.map(&:id)
 board.wip_limits = { statuses['progress'].id => [2, 8], statuses['review'].id => [nil, 4],
                      statuses['test'].id => [nil, 6] }
@@ -724,6 +782,25 @@ lanes.board_type = 'scrum'
 lanes.show_avatar = '0'
 lanes.swimlane_field = 'assigned_to'
 lanes.save!
+
+by_epic = ExpertAgileQuery.new(:name => 'Sprint board by epic', :project => project, :user => user,
+                               :visibility => Query::VISIBILITY_PUBLIC)
+by_epic.filters = ALL_STATUSES.deep_dup
+by_epic.column_names = %i[tracker assigned_to done_ratio subtasks]
+by_epic.board_status_ids = board_statuses.map(&:id)
+by_epic.wip_limits = board.wip_limits
+by_epic.color_base = 'tracker'
+by_epic.board_type = 'scrum'
+by_epic.show_avatar = '0'
+by_epic.swimlane_field = 'epic'
+by_epic.save!
+
+epic_planning = ExpertAgileBacklogQuery.new(:name => 'Epic planning', :project => project, :user => user,
+                                            :visibility => Query::VISIBILITY_PUBLIC)
+epic_planning.filters = { 'status_id' => { :operator => 'o', :values => [''] } }
+epic_planning.column_names = %i[tracker epic assigned_to]
+epic_planning.container_type = 'epic'
+epic_planning.save!
 
 mine = ExpertAgileQuery.new(:name => 'My open bugs', :project => project, :user => user,
                             :visibility => Query::VISIBILITY_PRIVATE)
@@ -747,9 +824,8 @@ def chart_query!(project, user, name, chart, unit, interval, from, to, filters =
   query
 end
 
-# A sprint burndown has to name its issues explicitly: charts are scoped by
-# ordinary issue filters, and the plugin has no sprint filter — a sprint is a
-# row in its own table, not an issue attribute Redmine's query layer knows.
+# The sprint burndown names its issues explicitly, so the chart keeps showing
+# the sprint's commitment whatever is planned into or out of it later.
 burndown = chart_query!(project, user, 'Sprint 24 burndown', 'burndown', 'story_points', 'day',
                         sprint_active.start_date, sprint_active.end_date,
                         'issue_id' => { :operator => '=',
@@ -759,7 +835,8 @@ velocity = chart_query!(project, user, 'Velocity, last 60 days', 'velocity', 'is
 flow = chart_query!(project, user, 'Cumulative flow, last 60 days', 'cumulative_flow', 'issues',
                     'day', TODAY_D - 59, TODAY_D)
 
-say "saved boards: #{[board, lanes, mine].map(&:id).inspect}, " \
+say "saved boards: #{[board, lanes, by_epic, mine].map(&:id).inspect}, " \
+    "backlogs: #{[epic_planning].map(&:id).inspect}, " \
     "charts: #{[burndown, velocity, flow].map(&:id).inspect}"
 
 # --- summary ---------------------------------------------------------------------
@@ -769,6 +846,10 @@ say 'done.'
 say "capture user #{LOGIN} password=#{password}"
 say "board       #{base}/projects/#{IDENT}/expert_agile/board?query_id=#{board.id}"
 say "swimlanes   #{base}/projects/#{IDENT}/expert_agile/board?query_id=#{lanes.id}"
+say "epic lanes  #{base}/projects/#{IDENT}/expert_agile/board?query_id=#{by_epic.id}"
+say "epics       #{base}/projects/#{IDENT}/expert_agile/epics"
+say "epic plan   #{base}/projects/#{IDENT}/expert_agile/backlog?query_id=#{epic_planning.id}"
+say "complete    #{base}/projects/#{IDENT}/expert_agile_sprints/#{sprint_active.id}/complete"
 say "backlog     #{base}/projects/#{IDENT}/expert_agile/backlog"
 say "sprints     #{base}/projects/#{IDENT}/settings/expert_agile_sprints"
 say "burndown    #{base}/projects/#{IDENT}/expert_agile/charts?query_id=#{burndown.id}"

@@ -81,8 +81,9 @@ Status verlangtes Pflichtfeld, wird weiterhin nach dem Ablegen abgelehnt — mit
 ![Agile-Board mit fuenf Statusspalten: Zu erledigen, In Arbeit, eine gemeinsame Dev-Ueberschrift
 ueber den Unterspalten Review und Test sowie Fertig. Jede Spaltenueberschrift traegt ihre
 Kartenzahl und WIP-Grenze, Review ist hervorgehoben, weil dort fuenf Karten gegen eine Grenze von
-vier stehen, und die Karten zeigen Ticketnummer, Tracker, Titel, Bearbeiter, Story Points und
-Fortschritt](docs/screenshots/de/01-board.png)
+vier stehen, und die Karten zeigen Ticketnummer, Tracker, Epic-Badge, Titel, Bearbeiter, Story
+Points und Fortschritt; eine Story in Arbeit zaehlt ihre Unteraufgaben, und jede Unteraufgabe nennt
+ihre Story](docs/screenshots/de/01-board.png)
 
 Swimlanes gruppieren das Board nach einem Datensatz, zu dem die Tickets gehoeren: Projekt,
 Tracker, Status, Prioritaet, Autor, Bearbeiter, Kategorie oder Zielversion. Dasselbe Board laesst
@@ -96,7 +97,8 @@ Projekts, eine Version, in die es geplant werden darf). Ein Zug, der Swimlane un
 wechselt, wird als eine Aenderung gespeichert oder als eine abgelehnt. Swimlanes nach Projekt,
 Tracker, Status oder Autor sind nur zum Lesen: andere Swimlanes sind beim Ziehen gesperrt.
 
-Ein Board traegt die Tickets seiner Unterprojekte, das globale Board traegt alles. Ob eine Karte
+Ein Board traegt die Tickets seiner Unterprojekte, das globale Board (*Agile-Board* im
+Anwendungsmenue) traegt alles. Ob eine Karte
 gezogen werden darf, ist deshalb eine Frage an das Projekt der Karte, nicht an das Projekt, dessen
 Board angezeigt wird. Eine Karte aus einem Projekt, in dem Sie keine Karten verschieben duerfen,
 wird angezeigt, laesst sich aber nicht ziehen.
@@ -131,6 +133,17 @@ eines anderen Epics zu ziehen verschiebt sie dorthin. Im Backlog-Planer plant *E
 Jede Epic-Lane und die Ticketseite des Epics zeigen seinen Fortschritt. Das Kartenfeld *Unteraufgaben* klappt die Unteraufgaben einer Story auf
 ihrer Karte auf, und der Reiter *Epics* zeigt jedes Epic mit Stories und Unteraufgaben als Baum.
 
+![Sprint-Board nach Epic gruppiert: eine Swimlane je Epic mit dem Fortschrittsbalken des Epics im
+Kopf und eine letzte Lane fuer Tickets ohne Epic. Eine Story in Arbeit zeigt "Erledigte
+Unteraufgaben: 1/3", ihre Unteraufgaben stehen in ihren eigenen Spalten](docs/screenshots/de/12-board-epics.png)
+
+![Reiter Epics: jedes Epic mit Status, Fortschrittsbalken und erledigten Tickets und Story Points
+ueber einer Tabelle seiner Stories; die Unteraufgaben einer Story stehen eingerueckt darunter](docs/screenshots/de/13-epics.png)
+
+![Backlog-Planer im Reiter Epics: Stories ohne Epic links, daneben eine Lane je offenem Epic mit
+Ticketzahl, Story-Point-Summe und Fortschritt im Kopf; jede Karte traegt ihr
+Epic-Badge](docs/screenshots/de/14-backlog-epics.png)
+
 ### Sprints
 
 Sprints sind datierte Behaelter mit eigenem Lebenszyklus — offen, aktiv, abgeschlossen —, die in
@@ -154,9 +167,16 @@ WIP-Limits](docs/screenshots/de/11-sprint-board.png)
 Auch die Ticketliste kennt den Sprint: ein Filter **Sprint** (ein Sprint, *Aktiver Sprint*,
 irgendeiner oder keiner) und eine Spalte **Sprint**, die sortiert, gruppiert und in den CSV-Export geht.
 
+![Redmines Ticketliste, gefiltert auf offene Stories im aktiven und im naechsten Sprint, nach der
+Spalte Sprint in Sprint 24 und Sprint 25 gruppiert, mit einer Spalte Story Points](docs/screenshots/de/16-issue-list-sprint.png)
+
 Am Ende einer Iteration verschiebt **Sprint abschliessen** (Sprint-Liste oder Sprint-Lane im
 Planer) die offenen Tickets in den naechsten Sprint, ins Backlog oder in einen neuen Sprint, schliesst
 den Sprint und kann das Ziel zum aktiven Sprint machen — in einem Schritt.
+
+![Seite Sprint abschliessen: wie viele Tickets erledigt und noch offen sind samt Story Points, die
+offenen Tickets als Liste und die Wahl zwischen naechstem Sprint, Backlog oder einem neuen Sprint
+mit vorgeschlagenem Namen und Datum, dazu "Ziel-Sprint zum aktiven Sprint machen"](docs/screenshots/de/15-sprint-complete.png)
 
 ### Backlog-Planer
 
@@ -209,9 +229,9 @@ achtzehn Palettenfarben](docs/screenshots/de/09-card-colors.png)
 
 ### Konfiguration
 
-![Plugin-Einstellungen mit fuenf Abschnitten — Board, Farben, Schaetzungen, Sprints und
+![Plugin-Einstellungen mit sechs Abschnitten — Board, Farben, Schaetzungen, Epics, Sprints und
 Diagramme — mit den Standard-Kartenfeldern, dem Board-Limit, der Farbbasis, der Schaetzeinheit,
-der Story-Point-Skala, den Sprint-Schaltern und den Diagramm-Vorgaben](docs/screenshots/de/10-settings.png)
+der Story-Point-Skala, den Epic-Trackern, den Sprint-Schaltern und den Diagramm-Vorgaben](docs/screenshots/de/10-settings.png)
 
 Die REST-API hat keine eigene Oberflaeche — siehe [API.md](API.md).
 

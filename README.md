@@ -73,7 +73,8 @@ the new status, is still refused after the drop, with the reason.
 ![Agile board with five status columns: To do, In Progress, a merged Dev header spanning the
 Review and Test sub-columns, and Done. Each column header carries its card count and WIP limit,
 Review is highlighted for holding five cards against a limit of four, and the cards show issue
-id, tracker, subject, assignee, story points and percent done](docs/screenshots/en/01-board.png)
+id, tracker, epic badge, subject, assignee, story points and percent done; a story in progress
+counts its subtasks, and each subtask card names its story](docs/screenshots/en/01-board.png)
 
 Swimlanes group the board by a record the issues belong to: project, tracker, status, priority,
 author, assignee, category or target version. The same board can be read per assignee, per tracker
@@ -86,7 +87,8 @@ issue's own validation (a category of its project, a version it may be planned i
 changes both lane and column is saved as one change or refused as one. Lanes by project, tracker,
 status or author are for reading only: other lanes are blocked while a card is dragged.
 
-A board carries its subprojects' issues, and the global board carries everything — so whether a
+A board carries its subprojects' issues, and the global board (*Agile board* in the application
+menu) carries everything — so whether a
 card may be dragged is a question about that card's own project, not about the one whose board is
 on screen. A card from a project where you may not move cards is shown but not draggable.
 
@@ -118,6 +120,17 @@ moves it there. In the backlog planner, *Epics* plans stories into epics the sam
 Every epic lane and the epic's issue page show its progress. The *Subtasks* card field folds a story's subtasks out on its card,
 and the *Epics* tab shows each epic with its stories and subtasks as a tree.
 
+![Sprint board grouped by epic: one swimlane per epic, headed by the epic's progress bar, and a
+last lane for issues without an epic. A story in progress shows "Subtasks done: 1/3", and its
+subtasks sit in their own columns](docs/screenshots/en/12-board-epics.png)
+
+![Epics tab: each epic with its status, a progress bar and the issues and story points done,
+above a table of its stories; a story's subtasks are indented beneath it](docs/screenshots/en/13-epics.png)
+
+![Backlog planner on the Epics tab: stories without an epic on the left, one lane per open epic
+beside it, each headed by its issue count, story point total and progress; every card carries its
+epic badge](docs/screenshots/en/14-backlog-epics.png)
+
 ### Sprints
 
 Sprints are dated containers with their own lifecycle — open, active, closed — managed in the
@@ -140,9 +153,16 @@ limits](docs/screenshots/en/11-sprint-board.png)
 The issue list knows the sprint too: a **Sprint** filter (a sprint, *Active sprint*, any or none)
 and a **Sprint** column that sorts, groups and exports to CSV.
 
+![Redmine's issue list filtered to open stories in the active sprint and the next one, grouped by
+the Sprint column into Sprint 24 and Sprint 25, with a Story points column](docs/screenshots/en/16-issue-list-sprint.png)
+
 At the end of an iteration, **Complete sprint** (sprint list or the sprint's lane in the planner)
 moves the open issues to the next sprint, the backlog or a new sprint, closes the sprint and can make
 the target the active one — in one step.
+
+![Complete sprint page: how many issues are done and still open with their story points, the
+open issues listed, and the choice between the next sprint, the backlog or a new sprint with a
+suggested name and dates, plus "Make the target sprint the active one"](docs/screenshots/en/15-sprint-complete.png)
 
 ### Backlog planner
 
@@ -191,9 +211,9 @@ palette swatches](docs/screenshots/en/09-card-colors.png)
 
 ### Configuration
 
-![Plugin settings with five sections — Board, Colors, Estimates, Sprints and Charts — holding the
-default card fields, board item limit, colour base, estimation unit, story point scale, sprint
-switches and chart defaults](docs/screenshots/en/10-settings.png)
+![Plugin settings with six sections — Board, Colors, Estimates, Epics, Sprints and Charts —
+holding the default card fields, board item limit, colour base, estimation unit, story point
+scale, epic trackers, sprint switches and chart defaults](docs/screenshots/en/10-settings.png)
 
 The REST API has no screen of its own — see [API.md](API.md).
 
