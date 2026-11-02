@@ -1,8 +1,9 @@
 # Deutsches Locale fuer redmine_expert_agile.
 #
-# Diese Datei zeilenweise mit en.yml synchron halten — gleiche Keys, gleiche
-# Reihenfolge. Hinweis: "expert" ist der Firmenname und bleibt in jedem
-# sichtbaren Text klein geschrieben, auch am Anfang eines Labels.
+# Diese Datei zeilenweise mit jeder anderen Locale-Datei (en, es, fr, it, pt,
+# pt-BR) synchron halten — gleiche Keys, gleiche Reihenfolge.
+# Hinweis: "expert" ist der Firmenname und bleibt in jedem sichtbaren Text
+# klein geschrieben, auch am Anfang eines Labels.
 de:
   # --- Projektmodule --------------------------------------------------
   project_module_expert_agile: expert Agile

@@ -23,9 +23,11 @@ the plugin name, i18n values, menu captions, README and CHANGELOG. Never "Expert
 the start of a sentence or label. Code identifiers keep normal casing (`ExpertAgileQuery`,
 `RedmineExpertAgile`, `expert_agile_data`).
 
-**Language policy:** **code comments are English**. **i18n stays bilingual**
-(`config/locales/en.yml` + `de.yml`, kept key-for-key and line-for-line in sync) and the plugin
-UI is German. Docs are **English-first with a German mirror kept in sync**: `README.md` (EN) /
+**Language policy:** **code comments are English**. **i18n covers seven languages**
+(`config/locales/{en,de,es,fr,it,pt,pt-BR}.yml`, kept key-for-key and line-for-line in sync with
+`en.yml`, the source; `test/unit/locale_files_test.rb` enforces it). Every new or changed key goes
+into all seven files in the same change: write en and de, then translate the rest from en using the
+terms Redmine core uses in that language. The production UI is German. Docs are **English-first with a German mirror kept in sync**: `README.md` (EN) /
 `README.de.md` (DE), and `CHANGELOG.md` (EN, authoritative — release notes are generated from
 it) / `CHANGELOG.de.md` (DE).
 

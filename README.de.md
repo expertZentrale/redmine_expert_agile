@@ -13,6 +13,7 @@ Benoetigt **Redmine 5.0 oder neuer**. Lizenziert unter der **GPL-2.0-or-later**
 - [Funktionen](#funktionen)
 - [Bildschirmfotos](#bildschirmfotos)
 - [REST-API](API.md)
+- [Sprachen](#sprachen)
 - [Installation](#installation)
 - [Konfiguration](#konfiguration)
 - [Berechtigungen](#berechtigungen)
@@ -234,6 +235,17 @@ Diagramme — mit den Standard-Kartenfeldern, dem Board-Limit, der Farbbasis, de
 der Story-Point-Skala, den Epic-Trackern, den Sprint-Schaltern und den Diagramm-Vorgaben](docs/screenshots/de/10-settings.png)
 
 Die REST-API hat keine eigene Oberflaeche — siehe [API.md](API.md).
+
+## Sprachen
+
+Die Oberflaeche gibt es auf Englisch, Deutsch, Spanisch, Franzoesisch, Italienisch und Portugiesisch
+(`en`, `de`, `es`, `fr`, `it`, `pt`, `pt-BR`). Redmine zeigt jedem Benutzer die Sprache aus seinem
+Konto oder die Standardsprache unter *Administration » Konfiguration » Anzeige*; fuer jede andere
+Sprache faellt es auf Englisch zurueck. Diese Dokumentation gibt es auf Englisch und Deutsch.
+
+Korrekturen von Muttersprachlern sind als Pull-Request auf `config/locales/<sprache>.yml`
+willkommen. `test/unit/locale_files_test.rb` prueft, dass jede Sprache jeden Schluessel aus `en.yml`
+hat, in derselben Reihenfolge und mit denselben `%{…}`-Platzhaltern.
 
 ## Installation
 

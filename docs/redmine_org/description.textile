@@ -24,6 +24,11 @@ A few deliberate choices, because they affect correctness rather than taste:
 * *No inline JavaScript.* Views render markup; data reaches the browser through a JSON island. The board works under a @script-src 'self'@ content security policy.
 * *No global monkeypatching* of @ActiveRecord::Base@ or @ApplicationController@.
 
+h3. Languages
+
+* User interface: English, German, Spanish, French, Italian and Portuguese (Portugal and Brazil); other languages fall back to English.
+* Documentation: English and German.
+
 h3. Requirements
 
 * Redmine 5.0 or newer (tested against 5.1, 6.0, 6.1 and 7.0)

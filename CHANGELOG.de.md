@@ -9,6 +9,18 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Hinzugefuegt
+
+- **Spanisch, Franzoesisch, Italienisch und Portugiesisch.** Die Oberflaeche gibt es in sieben
+  Sprachen: `es`, `fr`, `it`, `pt` (Portugal) und `pt-BR` (Brasilien) neben Englisch und Deutsch.
+  Redmine zeigt jedem Benutzer die Sprache seines Kontos (oder die Standardsprache, wenn sie fuer
+  angemeldete Benutzer erzwungen ist) und faellt fuer jede andere auf Englisch zurueck.
+- **Die Sprachdateien werden getestet.** `test/unit/locale_files_test.rb` schlaegt fehl, wenn einer
+  Sprache ein Schluessel aus `en.yml` fehlt, sie einen hat, den `en.yml` nicht hat, die Reihenfolge
+  abweicht oder ein `%{…}`-Platzhalter verloren geht.
+
 ## [0.9.1] - 2026-10-14
 
 ### Behoben
