@@ -47,8 +47,9 @@ Redmine checkout — no Gemfile or `rake` at the repo root. Redmine comes from a
 10. **Plain `def ... end`** — Redmine 5.x runs on Ruby 2.7, where endless methods are a syntax
     error.
 11. **Every settings key gets a declared default in `init.rb`** — no defaults hidden in readers.
-12. **Code comments in English; i18n bilingual** (`en.yml` + `de.yml` key-for-key in sync); UI
-    German. `CHANGELOG.md`/`README.md` are authoritative, `.de.md` are mirrors kept in sync.
+12. **Code comments in English; i18n in seven languages** (`en`, `de`, `es`, `fr`, `it`, `pt`,
+    `pt-BR`; every key in every file, same order as `en.yml`, enforced by
+    `test/unit/locale_files_test.rb`); UI German. `CHANGELOG.md`/`README.md` are authoritative, `.de.md` are mirrors kept in sync.
 
 ## Commands
 

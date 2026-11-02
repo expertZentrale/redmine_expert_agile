@@ -12,6 +12,7 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
 - [Features](#features)
 - [Screenshots](#screenshots)
 - [REST API](API.md)
+- [Languages](#languages)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Permissions](#permissions)
@@ -216,6 +217,17 @@ holding the default card fields, board item limit, colour base, estimation unit,
 scale, epic trackers, sprint switches and chart defaults](docs/screenshots/en/10-settings.png)
 
 The REST API has no screen of its own — see [API.md](API.md).
+
+## Languages
+
+The user interface ships in English, German, Spanish, French, Italian and Portuguese (`en`, `de`,
+`es`, `fr`, `it`, `pt`, `pt-BR`). Redmine shows each user the language set in their account, or the
+default language under *Administration » Settings » Display*; for any other language it falls back
+to English. This documentation is kept in English and German.
+
+Corrections from native speakers are welcome as a pull request on `config/locales/<language>.yml`.
+`test/unit/locale_files_test.rb` checks that every language has every key of `en.yml`, in the same
+order and with the same `%{…}` placeholders.
 
 ## Installation
 

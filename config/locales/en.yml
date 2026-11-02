@@ -1,6 +1,7 @@
 # English locale for redmine_expert_agile.
 #
-# Keep this file line-for-line in sync with de.yml — same keys, same order.
+# Keep this file line-for-line in sync with every other locale file (de, es,
+# fr, it, pt, pt-BR) — same keys, same order.
 # Note: "expert" is the company name and stays lowercase in every user-facing
 # value, including at the start of a label.
 en:
