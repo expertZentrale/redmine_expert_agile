@@ -17,8 +17,9 @@ notes from the section matching the pushed tag.
   `pt` (Portugal) and `pt-BR` (Brazil) next to English and German. Redmine shows each user the
   language of their account (or the default language, when it is forced for logged-in users) and
   falls back to English for any other.
-- **The locale files are tested.** `test/unit/locale_files_test.rb` fails when a language lacks a key
-  of `en.yml`, has one `en.yml` does not, orders them differently, or loses a `%{…}` placeholder.
+- **The locale files are tested.** `test/unit/locale_files_test.rb` fails when a language lacks a
+  key of `en.yml`, has one that `en.yml` does not, orders them differently, or loses a `%{…}`
+  placeholder.
 
 ## [0.9.1] - 2026-10-14
 
