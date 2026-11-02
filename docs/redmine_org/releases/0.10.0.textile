@@ -1,0 +1,11 @@
+h3. redmine_expert_agile 0.10.0 — 2026-11-02
+
+The board, backlog, charts and settings now speak Spanish, French, Italian and Portuguese as well.
+
+h4. Added
+
+* *Spanish, French, Italian and Portuguese.* The user interface ships in seven languages: English, German, Spanish, French, Italian, Portuguese (Portugal) and Portuguese (Brazil). Redmine shows each user the language of their account; other languages fall back to English. The terms follow Redmine's own translations, so the plugin reads like the screens around it.
+
+h4. Upgrade notes
+
+No migrations, no new settings and no new gems. Replace the plugin directory and restart.
