@@ -18,6 +18,7 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
 - [Permissions](#permissions)
 - [Development](#development)
 - [License](#license)
+- [Third-party components](#third-party-components)
 
 ## Features
 
@@ -317,3 +318,41 @@ docker-compose -f docker-compose.screenshots.yml --profile seed run --build --rm
 
 GPL-2.0-or-later. This plugin is an independent, clean-room implementation; it contains no code
 from any other agile plugin.
+
+## Third-party components
+
+The plugin bundles the following components under their own licenses. Their license banners are
+kept intact in the shipped files.
+
+| Component | Version | License | Copyright | Path |
+|-----------|---------|---------|-----------|------|
+| [Chart.js](https://www.chartjs.org) | 4.4.7 | MIT | © 2024 Chart.js Contributors | `assets/javascripts/chart.umd.min.js` |
+| [Coloris](https://coloris.js.org) | 0.25.0 | MIT | © 2021 Momo Bassit | `assets/javascripts/coloris.min.js`, `assets/stylesheets/coloris.min.css` |
+
+Both are served locally from the plugin's assets — no CDN request is made at runtime. Chart.js is
+only loaded on the charts page, Coloris only on the colour settings page.
+
+<details>
+<summary>MIT License — applies to both components, each with its copyright line above</summary>
+
+```text
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+</details>
