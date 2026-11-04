@@ -39,10 +39,21 @@ module RedmineExpertAgile
                                   :caption => :label_expert_agile_sprint)
     end
 
+    # The agile data row the grouped count joins in (one per issue, unique
+    # index), see IssueQueryPatch's joins_for_order_statement.
+    GROUP_JOIN_ALIAS = 'ead_group'
+
+    def self.group_join
+      "LEFT OUTER JOIN #{ExpertAgileData.table_name} #{GROUP_JOIN_ALIAS} " \
+        "ON #{GROUP_JOIN_ALIAS}.issue_id = #{Issue.table_name}.id"
+    end
+
     # Core groups by the column's name, which is no column of the issues
-    # table here.
+    # table here. A column of the joined row, not a correlated subquery:
+    # MySQL (ONLY_FULL_GROUP_BY) does not take a subquery in the select list
+    # for the same expression in GROUP BY and refuses the count.
     def group_by_statement
-      "(SELECT ead.sprint_id FROM #{ExpertAgileData.table_name} ead WHERE ead.issue_id = #{Issue.table_name}.id)"
+      "#{GROUP_JOIN_ALIAS}.sprint_id"
     end
 
     # Through the agile data row: IssueQueryPatch preloads it with its sprint
