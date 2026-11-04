@@ -4,7 +4,8 @@
 # RedmineUP plugin's /agile routes while both are installed.
 #
 # Note the board update route carries the issue id in the path rather than in
-# the body, so it can be authorised and cached at the routing layer.
+# the body: the controller finds the issue, and authorises against its project,
+# before it reads the move.
 RedmineApp::Application.routes.draw do
   # --- Board ------------------------------------------------------------
   get 'projects/:project_id/expert_agile/board', :to => 'expert_agile_boards#index',
