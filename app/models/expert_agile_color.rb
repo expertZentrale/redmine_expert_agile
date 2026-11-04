@@ -79,9 +79,7 @@ class ExpertAgileColor < ExpertAgileApplicationRecord
   end
 
   # What the admin screen offers, keyed by the name that appears in the URL.
-  # Resolving through this map is what stops `Object.const_get(params[...])`
-  # from being reachable at all — RedmineUP does exactly that const_get on user
-  # input and relies on a later respond_to? check to limit the damage.
+  # Resolving through this map means no constant lookup ever runs on user input.
   COLORABLE_CLASSES = {
     'project' => 'Project',
     'tracker' => 'Tracker',
@@ -120,8 +118,8 @@ class ExpertAgileColor < ExpertAgileApplicationRecord
   # A deterministic palette entry for any record with an id — used for
   # assignees, and as the fallback for containers nobody has coloured by hand.
   # Picking from the palette rather than deriving a hex value from the login
-  # (what RedmineUP does) guarantees the result is readable: a hash-derived
-  # colour can land on near-white or near-black.
+  # guarantees the result is readable: a hash-derived colour can land on
+  # near-white or near-black.
   def self.for_principal(record)
     return nil if record.nil? || !record.respond_to?(:id) || record.id.nil?
 

@@ -3,9 +3,8 @@ module RedmineExpertAgile
     # Common shape for every chart: a date axis, a unit, and a Chart.js-ready
     # payload.
     #
-    # Colours are fixed per series. RedmineUP falls back to
-    # [rand(255), rand(255), rand(255)] when no colour is given, so a chart
-    # changes colour on every reload.
+    # Colours are fixed per series, so a chart keeps its colours across
+    # reloads.
     class Base
       UNIT_ISSUES = 'issues'.freeze
       UNIT_HOURS = 'hours'.freeze

@@ -83,9 +83,8 @@ class ExpertAgileBoardsController < ApplicationController
         return render_move_error(l(:error_expert_agile_status_not_editable), :forbidden)
       end
       unless status_allowed?(target_status_id)
-        # Enforced explicitly. RedmineUP infers rejection by checking whether
-        # the attribute still changed after safe_attributes= ran, comparing with
-        # to_i — so any non-numeric attribute compares 0 == 0 and always passes.
+        # Enforced explicitly, before the save, rather than inferred afterwards
+        # from which attributes changed.
         return render_move_error(status_transition_error(target_status_id),
                                  :unprocessable_entity,
                                  :hint => status_transition_hint,
@@ -140,8 +139,8 @@ class ExpertAgileBoardsController < ApplicationController
         raise ActiveRecord::Rollback
       end
 
-      # Same transaction as the issue save: RedmineUP writes ranks in a separate
-      # one, so a failed rank write leaves the card in its new column unranked.
+      # Same transaction as the issue save, so a failed rank write cannot leave
+      # the card in its new column unranked.
       RedmineExpertAgile::BoardPositions.place!(
         @issue,
         :prev_issue => board_issue(params[:prev_id]),
@@ -178,9 +177,8 @@ class ExpertAgileBoardsController < ApplicationController
 
   # Write agile data for one issue.
   #
-  # RedmineUP exposes agile data read-only, so story points and sprint
-  # assignment can only be set through nested attributes on the issue endpoint.
-  # This makes it a first-class operation.
+  # Story points and sprint assignment are a first-class operation here, not
+  # only reachable through nested attributes on the issue endpoint.
   def update_agile_data
     # The same rule the issue form applies to these fields: `editable?` is
     # already true for a user who may only add notes.
@@ -240,9 +238,8 @@ class ExpertAgileBoardsController < ApplicationController
   #
   # Note this is display state only. What a *move* is allowed to do never comes
   # from here: the target status is checked against
-  # `issue.new_statuses_allowed_to` and the issue's own permissions. That is the
-  # part RedmineUP gets wrong — there the session query decides which columns
-  # exist for the move itself.
+  # `issue.new_statuses_allowed_to` and the issue's own permissions; the session
+  # query never decides which columns exist for the move itself.
   # The page carries the board's id, and the board can be deleted or turned
   # private while that page is still open. Refusing the move over that would be
   # answering the wrong question: which board is on screen only decides the
@@ -339,8 +336,8 @@ class ExpertAgileBoardsController < ApplicationController
   end
 
   # Only what is needed to rebuild the board, not the whole options blob.
-  # RedmineUP stores the entire serialized options hash plus every filter in the
-  # cookie session, which a large filter set can push past the 4 KB limit.
+  # The whole serialized options hash plus every filter could push the cookie
+  # session past its 4 KB limit on a large filter set.
   def store_board_session_state
     session[SESSION_KEY] = {
       :project_id => @query.project_id,
@@ -584,9 +581,8 @@ class ExpertAgileBoardsController < ApplicationController
     payload
   end
 
-  # A plain JSON contract. RedmineUP returns an HTML partial on success and a
-  # JSON array on failure, both declared as format.html, and the client has to
-  # sniff which it got.
+  # A plain JSON contract for success and failure alike, so the client never
+  # has to sniff whether it got HTML or JSON.
   # Where CardMoveResponses puts the refusals it takes over from Redmine.
   def render_card_move_refusal(message, status)
     render_move_error(message, status)

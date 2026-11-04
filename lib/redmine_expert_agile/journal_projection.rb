@@ -1,12 +1,10 @@
 # Reconstructs the historical state of a set of issues from their journals.
 #
 # This is the part of a chart engine that decides whether charts are usable at
-# scale. RedmineUP's cumulative flow chart eager-loads every journal and journal
-# detail for the whole scope, then, for every date in the period and every
-# issue, re-filters and re-sorts that issue's details inside the inner loop —
-# O(dates x issues x journals), with the sort in the innermost position. It is
-# why they impose a 1000-item cap (which, as shipped, checks chart names that no
-# longer exist and so never actually fires).
+# scale. Eager-loading every journal and detail for the whole scope and then,
+# for every date in the period and every issue, re-filtering and re-sorting
+# that issue's details is O(dates x issues x journals), with the sort in the
+# innermost position.
 #
 # Here the journals are read once, in one query, and projected in a single pass
 # into a per-issue timeline of checkpoints. Answering "what was issue X on day

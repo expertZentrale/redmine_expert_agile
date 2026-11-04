@@ -35,8 +35,7 @@ class ExpertAgileColorsController < ApplicationController
   private
 
   # The container class comes from the URL, so it is resolved through an
-  # explicit whitelist. RedmineUP does `Object.const_get(params[:object_type].camelcase)`
-  # here and relies on a later `respond_to?('color')` check to catch the damage.
+  # explicit whitelist: no constant lookup ever runs on user input.
   def find_container_class
     @container_class = ExpertAgileColor.container_class(params[:container_type])
     render_404 if @container_class.nil?

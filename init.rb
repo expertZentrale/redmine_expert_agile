@@ -51,9 +51,8 @@ Redmine::Plugin.register :redmine_expert_agile do
   requires_redmine :version_or_higher => '5.0'
   url 'https://github.com/expertZentrale/redmine_expert_agile'
 
-  # Every default is declared here on purpose. The RedmineUP plugin declares
-  # only one default and hides the rest in reader methods, so a fresh install
-  # has an almost empty settings hash and every `.to_i > 0` check silently
+  # Every default is declared here on purpose, so a fresh install has a
+  # complete settings hash and no `.to_i > 0` check on a missing key silently
   # reads as false. All values are strings ('0'/'1' for booleans), matching
   # the convention used by redmine_expert_helpdesk.
   settings :partial => 'settings/expert_agile_settings',
@@ -244,8 +243,6 @@ end
 RedmineExpertAgile::Patches::IssuePatch.apply!
 
 # Colour support goes only into the models that can actually be coloured.
-# RedmineUP mixes its equivalent into ActiveRecord::Base, i.e. every model in
-# the instance.
 [Project, Tracker, IssuePriority, IssueStatus].each do |model|
   model.include(RedmineExpertAgile::Colorable) unless model.included_modules.include?(RedmineExpertAgile::Colorable)
 end

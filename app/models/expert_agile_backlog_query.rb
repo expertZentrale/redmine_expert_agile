@@ -1,10 +1,9 @@
 # The backlog planner: an unplanned backlog plus one lane per container.
 #
-# Parameterised over the container kind rather than duplicated per kind.
-# RedmineUP ships AgileSprintsQuery and AgileVersionsQuery, ~10 KB each and
-# ~90% identical; everything that actually differs between planning into a
-# sprint and planning into a version is isolated in the four small methods at
-# the bottom of this class.
+# Parameterised over the container kind rather than duplicated per kind:
+# everything that actually differs between planning into a sprint and planning
+# into a version is isolated in the four small methods at the bottom of this
+# class.
 class ExpertAgileBacklogQuery < ExpertAgileQuery
   # Reading a saved backlog needs the backlog permission, not the board one it
   # would otherwise inherit — the two are separate project modules, so a project

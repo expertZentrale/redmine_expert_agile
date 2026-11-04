@@ -3,10 +3,9 @@
 # Redmine merges the defaults declared in init.rb into
 # Setting.plugin_redmine_expert_agile, so the readers here only cast — they do
 # not carry fallback values. Keeping the defaults in exactly one place (init.rb)
-# is deliberate: the RedmineUP plugin declares one default and hides the rest in
-# readers like this file, which means the stored settings hash and the effective
-# configuration disagree, and a `.to_i > 0` check on an undeclared key silently
-# reads as false.
+# is deliberate: defaults hidden in readers would make the stored settings hash
+# and the effective configuration disagree, and a `.to_i > 0` check on an
+# undeclared key would silently read as false.
 #
 # Plain `def ... end` throughout: Redmine 5.x still runs on Ruby 2.7, where
 # endless method definitions are a syntax error and would break plugin loading.

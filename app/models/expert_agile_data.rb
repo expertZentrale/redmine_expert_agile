@@ -30,8 +30,8 @@ class ExpertAgileData < ExpertAgileApplicationRecord
   validate :sprint_available_to_issue_project, :if => :will_save_change_to_sprint_id?
 
   # Issues that have never been placed on a board sort last, deterministically.
-  # A COALESCE sentinel (what RedmineUP uses) both defeats the index and leaves
-  # unranked issues in arbitrary order relative to each other.
+  # A COALESCE sentinel would both defeat the index and leave unranked issues
+  # in arbitrary order relative to each other.
   scope :ranked, -> { where.not(:position => nil) }
 
   # The sprint lives on this row, not on Issue, so a sprint change would be

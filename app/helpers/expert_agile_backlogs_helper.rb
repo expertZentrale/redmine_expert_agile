@@ -1,8 +1,7 @@
 module ExpertAgileBacklogsHelper
   # Configuration for the shared drag & drop script, in the same shape the
   # board emits. Only the endpoint and the parameter name differ, which is what
-  # lets one script drive both screens — RedmineUP ships two divergent
-  # initSortable implementations with different payloads.
+  # lets one script drive both screens.
   def expert_agile_backlog_data(query, project)
     {
       :mode => 'backlog',

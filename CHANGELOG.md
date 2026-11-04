@@ -17,6 +17,11 @@ notes from the section matching the pushed tag.
   names Chart.js, the @kurkle/color library inside it and Coloris with version, copyright line and
   path, and carries the MIT License text.
 
+### Changed
+
+- **Wording.** The README and the plugin description call the plugin an independent
+  implementation, and code comments explain the design without comparing it to other plugins.
+
 ## [0.10.0] - 2026-11-02
 
 ### Added

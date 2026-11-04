@@ -11,9 +11,8 @@
 # is a SystemStackError on the first query. Calling an explicitly captured
 # UnboundMethod is immune to ordering and to chaining.
 #
-# Deliberately does NOT touch the database at load time. RedmineUP guards the
-# equivalent patch with `ActiveRecord::Base.connection.tables.include?(...)`,
-# which opens a connection while classes are still loading and breaks
+# Deliberately does NOT touch the database at load time: checking for the
+# table while classes are still loading opens a connection and breaks
 # `rake db:create` on an empty database. The column and filter are declared
 # unconditionally; they only hit the table when a query actually runs.
 module RedmineExpertAgile

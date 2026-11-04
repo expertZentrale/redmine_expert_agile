@@ -1,9 +1,7 @@
 # Gives a model an optional agile card colour.
 #
 # Included explicitly into the handful of models that need it — Issue, Project,
-# Tracker, IssuePriority, IssueStatus — and nowhere else. RedmineUP mixes the
-# equivalent into `ActiveRecord::Base`, i.e. into every model in the entire
-# Redmine instance, plugins included.
+# Tracker, IssuePriority, IssueStatus — and nowhere else.
 module RedmineExpertAgile
   module Colorable
     def self.included(base)

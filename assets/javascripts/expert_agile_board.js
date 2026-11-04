@@ -4,10 +4,9 @@
  * inline <script> blocks, so the board runs under `script-src 'self'`.
  *
  * The client's job is deliberately small: report which card moved, into which
- * column, and which two cards it landed between. The server computes the rank.
- * RedmineUP re-indexes the whole column in the browser and PUTs every card's
- * new index, which loses concurrent moves and corrupts order against cards that
- * are paginated out of view.
+ * column, and which two cards it landed between. The server computes the rank,
+ * so concurrent moves are not lost and cards paginated out of view keep their
+ * order.
  */
 (function () {
   'use strict';
@@ -96,8 +95,7 @@
   /* One implementation drives both the board and the backlog planner. The two
    * differ only in the endpoint and in what the drop target means — a status
    * on the board, a sprint or version in the planner — so both are read from
-   * the JSON island. RedmineUP carries two separate initSortable
-   * implementations with divergent payloads. */
+   * the JSON island. */
   function submitMove(card, cell, from) {
     var issueId = card.getAttribute('data-issue-id');
     var dropId = cell.getAttribute('data-drop-id');

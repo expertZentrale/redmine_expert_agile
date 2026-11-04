@@ -2,8 +2,7 @@
 #
 # Subclasses IssueQuery rather than Query: every issue filter, every column,
 # `statement`, `project_statement` and the whole visibility model then come from
-# core unchanged. RedmineUP subclasses Query and re-implements all of it, which
-# is most of why their query model is 26 KB.
+# core unchanged.
 #
 # The board's own settings ride in the serialized `options` column, so a saved
 # board is one row in Redmine's `queries` table with no extra schema.
@@ -59,8 +58,8 @@ class ExpertAgileQuery < IssueQuery
 
   # {status_id => [min, max]}, either bound optional.
   #
-  # Stored as a real hash of integer pairs, not RedmineUP's "2-7" string that
-  # has to be re-parsed with a regex on every render.
+  # Stored as a real hash of integer pairs, not as a string that would have to
+  # be re-parsed on every render.
   def wip_limits
     stored = options[:wip_limits] || {}
     stored = stored.to_unsafe_h if stored.respond_to?(:to_unsafe_h)

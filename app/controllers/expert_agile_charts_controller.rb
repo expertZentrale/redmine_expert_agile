@@ -77,7 +77,7 @@ class ExpertAgileChartsController < ApplicationController
 
   # Historical series are immutable for past dates, so caching them is free
   # correctness-wise as long as the key covers everything that could change the
-  # result. RedmineUP caches nothing.
+  # result.
   def cached_chart_data
     return compute_chart_data unless RedmineExpertAgile.chart_cache?
 

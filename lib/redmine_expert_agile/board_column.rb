@@ -1,10 +1,9 @@
 # One column of the board: an issue status plus the aggregates and WIP state
 # that the header renders.
 #
-# A plain value object on purpose. RedmineUP stuffs instance variables and
-# *defines singleton methods* onto each IssueStatus record inside a loop
-# (`def s.over_wp_limit?` ...), which invalidates Ruby's method cache on every
-# board render and makes the status objects impossible to cache or compare.
+# A plain value object on purpose: nothing is attached to the IssueStatus
+# records themselves, so they stay cacheable and comparable, and no singleton
+# methods invalidate Ruby's method cache on a board render.
 module RedmineExpertAgile
   class BoardColumn
     attr_reader :status, :issue_count, :estimated_hours, :story_points, :wip_min, :wip_max

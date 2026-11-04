@@ -110,8 +110,8 @@ class ExpertAgileColorTest < ActiveSupport::TestCase
 
   def test_colorable_is_not_mixed_into_every_model
     # The concern goes only into the models that can be coloured. Mixing it into
-    # ActiveRecord::Base (what RedmineUP does) would give every model in the
-    # instance an expert_agile_color association.
+    # ActiveRecord::Base would give every model in the instance an
+    # expert_agile_color association.
     assert Tracker.included_modules.include?(RedmineExpertAgile::Colorable)
     assert Project.included_modules.include?(RedmineExpertAgile::Colorable)
     # Issue used to be in this list, back when a card could be coloured one
@@ -216,8 +216,8 @@ class ExpertAgileColorTest < ActiveSupport::TestCase
     second = RedmineExpertAgile::CardColor.for(@issue, 'assignee')
 
     assert_equal first, second, 'the same person always gets the same colour'
-    # Deriving a hex value from the login, as RedmineUP does, can land on
-    # near-white or near-black; drawing from the palette cannot.
+    # Deriving a hex value from the login can land on near-white or near-black;
+    # drawing from the palette cannot.
     assert_includes ExpertAgileColor::SWATCHES, first
   end
 

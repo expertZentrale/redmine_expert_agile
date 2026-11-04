@@ -17,6 +17,12 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Drittanbietern* fuehrt Chart.js, die darin enthaltene Bibliothek @kurkle/color und Coloris mit
   Version, Copyright-Zeile und Pfad auf und enthaelt den Text der MIT-Lizenz.
 
+### Geaendert
+
+- **Formulierungen.** README und Plugin-Beschreibung nennen das Plugin eine unabhaengige
+  Implementierung, und die Code-Kommentare begruenden das Design ohne Vergleich mit anderen
+  Plugins.
+
 ## [0.10.0] - 2026-11-02
 
 ### Hinzugefuegt
