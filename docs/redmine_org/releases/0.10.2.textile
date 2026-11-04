@@ -1,0 +1,9 @@
+h3. redmine_expert_agile 0.10.2 — 2026-11-04
+
+h4. Fixed
+
+* *Grouping the issue list by sprint works on MySQL.* A list grouped by *Sprint* failed with an error on MySQL, whose default @ONLY_FULL_GROUP_BY@ mode refused the group count. The count now joins the issue's agile data instead of reading the sprint through a subquery. Nothing changes on MariaDB and PostgreSQL.
+
+h4. Upgrade notes
+
+No migrations. Replace the plugin directory and restart.
