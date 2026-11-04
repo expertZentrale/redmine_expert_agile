@@ -1,0 +1,15 @@
+h3. redmine_expert_agile 0.10.1 — 2026-11-04
+
+Documentation only: the README credits the bundled third-party components.
+
+h4. Added
+
+* *Third-party components.* The README lists Chart.js, the @kurkle/color@ library inside it and the Coloris colour picker with version, copyright line and path, and includes the MIT License text.
+
+h4. Changed
+
+* *Wording.* The README and the plugin description call the plugin an independent implementation.
+
+h4. Upgrade notes
+
+No migrations, no new settings and no new gems. Replace the plugin directory and restart.
