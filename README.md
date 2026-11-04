@@ -327,13 +327,14 @@ kept intact in the shipped files.
 | Component | Version | License | Copyright | Path |
 |-----------|---------|---------|-----------|------|
 | [Chart.js](https://www.chartjs.org) | 4.4.7 | MIT | © 2024 Chart.js Contributors | `assets/javascripts/chart.umd.min.js` |
+| [@kurkle/color](https://github.com/kurkle/color) | 0.3.2 | MIT | © 2023 Jukka Kurkela | bundled inside `assets/javascripts/chart.umd.min.js` |
 | [Coloris](https://coloris.js.org) | 0.25.0 | MIT | © 2021 Momo Bassit | `assets/javascripts/coloris.min.js`, `assets/stylesheets/coloris.min.css` |
 
-Both are served locally from the plugin's assets — no CDN request is made at runtime. Chart.js is
+They are served locally from the plugin's assets — no CDN request is made at runtime. Chart.js is
 only loaded on the charts page, Coloris only on the colour settings page.
 
 <details>
-<summary>MIT License — applies to both components, each with its copyright line above</summary>
+<summary>MIT License — applies to all three components, each with its copyright line above</summary>
 
 ```text
 Permission is hereby granted, free of charge, to any person obtaining a copy

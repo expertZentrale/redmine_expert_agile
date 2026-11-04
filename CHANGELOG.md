@@ -11,10 +11,11 @@ notes from the section matching the pushed tag.
 
 ## [Unreleased]
 
-### Fixed
+### Added
 
 - **The README lists the bundled third-party components.** A new *Third-party components* section
-  names Chart.js and Coloris with version, copyright line and path, and carries the MIT License text.
+  names Chart.js, the @kurkle/color library inside it and Coloris with version, copyright line and
+  path, and carries the MIT License text.
 
 ## [0.10.0] - 2026-11-02
 

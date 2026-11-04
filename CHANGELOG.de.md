@@ -11,11 +11,11 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ## [Unreleased]
 
-### Behoben
+### Hinzugefuegt
 
 - **Das README nennt die mitgelieferten Fremdkomponenten.** Ein neuer Abschnitt *Komponenten von
-  Drittanbietern* fuehrt Chart.js und Coloris mit Version, Copyright-Zeile und Pfad auf und enthaelt
-  den Text der MIT-Lizenz.
+  Drittanbietern* fuehrt Chart.js, die darin enthaltene Bibliothek @kurkle/color und Coloris mit
+  Version, Copyright-Zeile und Pfad auf und enthaelt den Text der MIT-Lizenz.
 
 ## [0.10.0] - 2026-11-02
 
