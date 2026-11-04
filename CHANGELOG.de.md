@@ -9,6 +9,14 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Hinzugefuegt
+
+- **Das README nennt die mitgelieferten Fremdkomponenten.** Ein neuer Abschnitt *Komponenten von
+  Drittanbietern* fuehrt Chart.js, die darin enthaltene Bibliothek @kurkle/color und Coloris mit
+  Version, Copyright-Zeile und Pfad auf und enthaelt den Text der MIT-Lizenz.
+
 ## [0.10.0] - 2026-11-02
 
 ### Hinzugefuegt

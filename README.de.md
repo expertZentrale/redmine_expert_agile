@@ -19,6 +19,7 @@ Benoetigt **Redmine 5.0 oder neuer**. Lizenziert unter der **GPL-2.0-or-later**
 - [Berechtigungen](#berechtigungen)
 - [Entwicklung](#entwicklung)
 - [Lizenz](#lizenz)
+- [Komponenten von Drittanbietern](#komponenten-von-drittanbietern)
 
 ## Funktionen
 
@@ -339,3 +340,42 @@ docker-compose -f docker-compose.screenshots.yml --profile seed run --build --rm
 
 GPL-2.0-or-later. Dieses Plugin ist eine unabhaengige Clean-Room-Implementierung und enthaelt
 keinen Code aus anderen Agile-Plugins.
+
+## Komponenten von Drittanbietern
+
+Das Plugin bringt die folgenden Komponenten unter deren eigenen Lizenzen mit. Die Lizenz-Header
+bleiben in den ausgelieferten Dateien erhalten.
+
+| Komponente | Version | Lizenz | Copyright | Pfad |
+|------------|---------|--------|-----------|------|
+| [Chart.js](https://www.chartjs.org) | 4.4.7 | MIT | © 2024 Chart.js Contributors | `assets/javascripts/chart.umd.min.js` |
+| [@kurkle/color](https://github.com/kurkle/color) | 0.3.2 | MIT | © 2023 Jukka Kurkela | in `assets/javascripts/chart.umd.min.js` enthalten |
+| [Coloris](https://coloris.js.org) | 0.25.0 | MIT | © 2021 Momo Bassit | `assets/javascripts/coloris.min.js`, `assets/stylesheets/coloris.min.css` |
+
+Sie werden lokal aus den Plugin-Assets ausgeliefert — zur Laufzeit erfolgt **kein** CDN-Aufruf.
+Chart.js wird nur auf der Diagrammseite geladen, Coloris nur auf der Seite der Farbeinstellungen.
+
+<details>
+<summary>MIT-Lizenz — gilt fuer alle drei Komponenten, jeweils mit ihrer Copyright-Zeile oben (Lizenztext im englischen Original)</summary>
+
+```text
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+</details>
