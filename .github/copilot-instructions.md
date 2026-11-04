@@ -34,7 +34,8 @@ Redmine checkout — no Gemfile or `rake` at the repo root. Redmine comes from a
    use UnboundMethod capture (`original = base.instance_method(:foo)` + `define_method` calling
    `original.bind(self).call`). RedmineUP plugins use `alias_method` pairs; a prepended `super`
    gets captured as their "original" and recurses into itself (`SystemStackError`). Already
-   confirmed for `IssueQuery#available_columns`/`#issues`/`#initialize_available_filters`,
+   confirmed for `IssueQuery#available_columns`/`#issues`/`#initialize_available_filters`/
+   `#joins_for_order_statement`,
    `IssuesController#parse_params_for_bulk_update`, `ProjectsHelper#project_settings_tabs`,
    `Issue#css_classes`, `Journal#css_classes`. Check with
    `grep -rn "alias_method :<name>," --include='*.rb' ../redmine_agile ../redmine_contacts*`
@@ -147,7 +148,9 @@ of the release commit:
   The issue list's sprint filter (`expert_agile_sprint_id`, `active` resolved at query time) and
   column (`SprintQueryColumn`) come from `IssueQueryPatch`. A QueryColumn grouped in SQL must
   override `group_by_statement` — core groups by the column's name otherwise — and its
-  `group_value` must equal the SQL key, or the group counts come back empty.
+  `group_value` must equal the SQL key, or the group counts come back empty. Group by a plain
+  column of a joined row (`ead_group.sprint_id`, joined through `joins_for_order_statement`),
+  never by a correlated subquery: MySQL's `ONLY_FULL_GROUP_BY` refuses the count, MariaDB does not.
   Completing a sprint is `RedmineExpertAgile::SprintCompletion` (`ExpertAgileSprintsController#complete`):
   open issues move like a planner move (journaled, `manage_expert_agile_backlog`, the issue's own
   validation), then the sprint closes and the target may be activated — one transaction; a single

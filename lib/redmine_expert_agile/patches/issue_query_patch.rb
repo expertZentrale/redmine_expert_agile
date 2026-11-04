@@ -126,6 +126,20 @@ module RedmineExpertAgile
         end
         base.send(grouped_visibility, :grouped_query)
 
+        # Core asks for the joins a group or sort needs by handing in its SQL,
+        # the way it joins users for the assignee; grouping by sprint names
+        # the joined agile data row. Aliased by both RedmineUP plugins too.
+        original_joins = base.instance_method(:joins_for_order_statement)
+        joins_visibility = base.private_method_defined?(:joins_for_order_statement) ? :private : :public
+        sprint_column = RedmineExpertAgile::SprintQueryColumn
+        base.send(:define_method, :joins_for_order_statement) do |order_options|
+          joins = original_joins.bind(self).call(order_options)
+          next joins unless order_options.to_s.include?("#{sprint_column::GROUP_JOIN_ALIAS}.")
+
+          [joins, sprint_column.group_join].compact.join(' ')
+        end
+        base.send(joins_visibility, :joins_for_order_statement)
+
         base.instance_variable_set(:@expert_agile_query_patched, true)
       end
 

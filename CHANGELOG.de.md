@@ -17,6 +17,14 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Redmine-Version auf MariaDB aus und fuer die aelteste und die neueste (5.1 und 7.0) zusaetzlich auf
   MySQL 8.4 und PostgreSQL 17.
 
+### Behoben
+
+- **Die Ticketliste laesst sich auf MySQL nach Sprint gruppieren.** Die Gruppenzaehlung las den
+  Sprint ueber eine Unterabfrage, die MySQL im Standardmodus `ONLY_FULL_GROUP_BY` ablehnt
+  (MariaDB und PostgreSQL akzeptieren sie); eine nach *Sprint* gruppierte Liste brach deshalb mit
+  einem Fehler ab. Die Zaehlung verbindet jetzt die Agile-Daten des Tickets per Join. Auf MariaDB
+  und PostgreSQL aendert sich nichts.
+
 ## [0.10.1] - 2026-11-04
 
 ### Hinzugefuegt

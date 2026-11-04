@@ -17,6 +17,13 @@ notes from the section matching the pushed tag.
   Redmine version and, for the oldest and the newest (5.1 and 7.0), on MySQL 8.4 and PostgreSQL 17
   as well.
 
+### Fixed
+
+- **Grouping the issue list by sprint works on MySQL.** The group counts read the sprint through
+  a subquery that MySQL refuses under its default `ONLY_FULL_GROUP_BY` mode (MariaDB and
+  PostgreSQL accept it), so a list grouped by *Sprint* failed with an error. The count now joins
+  the issue's agile data row instead. Nothing changes on MariaDB and PostgreSQL.
+
 ## [0.10.1] - 2026-11-04
 
 ### Added
