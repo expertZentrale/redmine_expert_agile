@@ -1,8 +1,6 @@
 /* Agile board styles.
  *
  * Loaded only on the plugin's own pages, not from a global layout hook.
- * RedmineUP injects its 18.8 KB stylesheet into every page of the instance
- * whether or not the agile module is enabled anywhere.
  */
 
 .ea-board {

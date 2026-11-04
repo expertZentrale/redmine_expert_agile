@@ -4,7 +4,7 @@
 # UnboundMethod capture rather than prepend + super, for the same reason as
 # IssueQueryPatch: RedmineUP's redmine_agile aliases
 # IssuesController#parse_params_for_bulk_update, and a prepended `super` gets
-# captured into their `_without_agile` alias, producing infinite recursion.
+# captured into that alias chain, producing infinite recursion.
 module RedmineExpertAgile
   module Patches
     module IssuesControllerPatch

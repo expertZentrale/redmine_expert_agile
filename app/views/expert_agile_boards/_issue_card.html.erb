@@ -1,7 +1,5 @@
-<%# One card. Markup only: no <script>, no inline handlers.
-    RedmineUP's equivalent carries six separate inline <script> blocks and is
-    re-injected over AJAX and WebSocket as raw html_safe, which makes any
-    meaningful content security policy impossible. %>
+<%# One card. Markup only: no <script>, no inline handlers, so the board works
+    under a strict content security policy. %>
 <div class="<%= expert_agile_card_classes(issue, @query) %>"<%= expert_agile_style_attribute(expert_agile_card_style(issue, @query)) %>
      id="ea-card-<%= issue.id %>"
      data-issue-id="<%= issue.id %>"

@@ -3,9 +3,8 @@
 # Everything is namespaced under /expert_agile so nothing collides with the
 # RedmineUP plugin's /agile routes while both are installed.
 #
-# Note the board update route carries the issue id in the path. RedmineUP uses
-# `PUT /agile/board` with the id in the body, which cannot be authorised or
-# cached at the routing layer.
+# Note the board update route carries the issue id in the path rather than in
+# the body, so it can be authorised and cached at the routing layer.
 RedmineApp::Application.routes.draw do
   # --- Board ------------------------------------------------------------
   get 'projects/:project_id/expert_agile/board', :to => 'expert_agile_boards#index',
@@ -71,9 +70,8 @@ RedmineApp::Application.routes.draw do
        :as => 'update_expert_agile_colors'
 
   # --- REST API ---------------------------------------------------------
-  # Read and write agile data for one issue. RedmineUP exposes read only, so
-  # story points and sprint assignment can only be set through nested issue
-  # attributes; this endpoint makes it a first-class operation.
+  # Read and write agile data for one issue, so story points and sprint
+  # assignment do not have to go through nested issue attributes.
   # Spelled out rather than nested in a `member` block: the GET and the PUT
   # share a path, and two auto-named routes on the same path raise
   # "Invalid route name, already in use".

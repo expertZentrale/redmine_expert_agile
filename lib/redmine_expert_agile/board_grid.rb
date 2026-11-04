@@ -71,8 +71,7 @@ module RedmineExpertAgile
     # When each board issue last changed status, as {issue_id => Time}.
     #
     # One grouped query for the whole board. Asking per card would be an N+1
-    # over the journals, which is the shape that makes RedmineUP's "in status"
-    # card field expensive.
+    # over the journals.
     def status_changed_at
       @status_changed_at ||= begin
         ids = board_issues.map(&:id)

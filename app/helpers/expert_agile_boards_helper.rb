@@ -6,11 +6,9 @@ module ExpertAgileBoardsHelper
   # list of {:label, :colspan, :rowspan, :column} cells, where :column is set
   # only on leaf cells.
   #
-  # Only *adjacent* runs are merged. RedmineUP keys header nodes by name and
-  # only checks the last one, so two "Dev:" columns separated by an unrelated
-  # column produce two separate "Dev" headers that look like a rendering bug.
-  # Merging runs keeps the column order the user configured and makes the
-  # grouping predictable.
+  # Only *adjacent* runs are merged: two "Dev:" columns separated by an
+  # unrelated column get a "Dev" header each. That keeps the column order the
+  # user configured and makes the grouping predictable.
   def expert_agile_header_rows(columns)
     depth = columns.map { |column| column.path.size }.max.to_i
     depth = 1 if depth < 1

@@ -276,9 +276,8 @@ class ExpertAgileChartsTest < ActiveSupport::TestCase
   # --- Query -------------------------------------------------------------
 
   def test_chart_query_stores_the_date_range_explicitly
-    # Not recovered by regex-scraping generated SQL, which is how the RedmineUP
-    # equivalent does it and why any change to Redmine's sql_for_field breaks
-    # every chart there.
+    # Not recovered by regex-scraping generated SQL, which would break with any
+    # change to Redmine's sql_for_field.
     query = ExpertAgileChartsQuery.new(:name => '_', :project => @project)
     query.date_from = '2026-01-01'
     query.date_to = '2026-01-31'

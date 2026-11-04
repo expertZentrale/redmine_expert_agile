@@ -9,8 +9,9 @@ A Redmine plugin (`redmine_expert_agile`, Redmine 5.0+) providing agile boards: 
 board on Redmine's query system, story points, sprints with a backlog planner, and burndown /
 burnup / velocity / cumulative-flow / cycle-time charts.
 
-It is a clean-room replacement for RedmineUP Agile PRO (`plugins/redmine_agile`, GPLv3). That
-plugin was read for behaviour only; no code was copied. This plugin is GPL-2.0-or-later.
+It is an independent replacement for RedmineUP Agile PRO (`plugins/redmine_agile`, GPLv3). That
+plugin served as a reference for behaviour only; no code was copied. This plugin is
+GPL-2.0-or-later.
 
 Developed inside the parent `redmine-expert` deployment repo (`../../`), which is **not** a
 Redmine checkout — no Gemfile or `rake` at the repo root. Redmine comes from a Docker image.
@@ -47,6 +48,9 @@ Redmine checkout — no Gemfile or `rake` at the repo root. Redmine comes from a
 10. **Plain `def ... end`** — Redmine 5.x runs on Ruby 2.7, where endless methods are a syntax
     error.
 11. **Every settings key gets a declared default in `init.rb`** — no defaults hidden in readers.
+11b. **Comments explain our design on its own terms** — never describe, quote or judge how
+    RedmineUP (or any other plugin) implements a feature; notes on running alongside it (aliased
+    methods, name collisions, routes) are fine. Never copy its code.
 12. **Code comments in English; i18n in seven languages** (`en`, `de`, `es`, `fr`, `it`, `pt`,
     `pt-BR`; every key in every file, same order as `en.yml`, enforced by
     `test/unit/locale_files_test.rb`); UI German. `CHANGELOG.md`/`README.md` are authoritative, `.de.md` are mirrors kept in sync.

@@ -5,9 +5,9 @@ require 'bigdecimal'
 # A move reports only the dragged card and the two cards it landed between; the
 # new rank is the midpoint of its neighbours and exactly one row is written.
 #
-# This is the deliberate departure from RedmineUP, where the browser re-indexes
-# a whole column to 0..n-1 and PUTs the entire map, and the server writes one
-# row per card. That design has two defects this one does not:
+# This deliberately avoids the scheme where the browser re-indexes a whole
+# column to 0..n-1 and PUTs the entire map, and the server writes one row per
+# card. That design has two defects this one does not:
 #
 #   * Two people dragging in the same column at the same time overwrite each
 #     other's ranks — every row is rewritten from a snapshot the client took

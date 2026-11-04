@@ -41,4 +41,4 @@ h3. Links
 * "Changelog":https://github.com/expertZentrale/redmine_expert_agile/blob/main/CHANGELOG.md
 * "REST API reference":https://github.com/expertZentrale/redmine_expert_agile/blob/main/API.md
 
-Licensed under the GPL-2.0-or-later. This is an independent, clean-room implementation and contains no code from any other agile plugin.
+Licensed under the GPL-2.0-or-later. This is an independent implementation and contains no code from any other agile plugin.

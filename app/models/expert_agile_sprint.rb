@@ -142,8 +142,7 @@ class ExpertAgileSprint < ExpertAgileApplicationRecord
   # The projects that may use this sprint.
   #
   # Expressed as nested-set ranges through ActiveRecord rather than by
-  # interpolating lft/rgt into a SQL string, which is how the RedmineUP
-  # equivalent is written.
+  # interpolating lft/rgt into a SQL string.
   def shared_projects
     return Project.where(:id => project_id) if project.nil? || sharing == SHARING_NONE
 

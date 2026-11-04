@@ -2,9 +2,8 @@ require File.expand_path('../../test_helper', __FILE__)
 
 # Fractional board ranking.
 #
-# These are the cases that motivated not copying RedmineUP's dense-integer,
-# client-computed scheme: concurrent moves, and moves in a column whose lower
-# half is paginated away.
+# These are the cases that rule out a dense-integer, client-computed scheme:
+# concurrent moves, and moves in a column whose lower half is paginated away.
 class BoardPositionsTest < ActiveSupport::TestCase
   fixtures :projects, :users, :members, :member_roles, :roles,
            :enabled_modules, :trackers, :projects_trackers, :issue_statuses,

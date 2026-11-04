@@ -338,8 +338,8 @@ docker-compose -f docker-compose.screenshots.yml --profile seed run --build --rm
 
 ## Lizenz
 
-GPL-2.0-or-later. Dieses Plugin ist eine unabhaengige Clean-Room-Implementierung und enthaelt
-keinen Code aus anderen Agile-Plugins.
+GPL-2.0-or-later. Dieses Plugin ist eine unabhaengige Implementierung und enthaelt keinen Code
+aus anderen Agile-Plugins.
 
 ## Komponenten von Drittanbietern
 

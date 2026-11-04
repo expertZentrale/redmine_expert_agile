@@ -3,14 +3,11 @@
  * Reads the endpoint from the #ea-chart-data JSON island, fetches the series,
  * and draws them with the Chart.js build vendored alongside this file.
  *
- * Chart.js is shipped by this plugin rather than borrowed from a sibling
- * plugin's asset directory: RedmineUP's charts depend on the `redmineup`
- * companion plugin having been installed and having put a Chart global on the
- * page, which is a runtime dependency nothing declares.
+ * Chart.js is shipped by this plugin rather than borrowed from another plugin's
+ * asset directory or from a Chart global some other plugin put on the page:
+ * either would be a runtime dependency nothing declares.
  *
- * Chart.js v4 option shapes throughout. The RedmineUP code mixes v2
- * (options.tooltips, options.legend) with v3+ (Chart.defaults.font) — a
- * half-finished migration.
+ * Chart.js v4 option shapes throughout.
  */
 (function () {
   'use strict';

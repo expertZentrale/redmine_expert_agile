@@ -34,10 +34,9 @@ class ExpertAgileChartsQuery < ExpertAgileQuery
 
   # The date range is stored as two explicit values.
   #
-  # RedmineUP recovers it by regex-scraping the *generated SQL* of a synthetic
-  # filter for `\d{4}-\d{2}-\d{2}` — so any change to Redmine's sql_for_field
-  # output silently breaks every chart. There is no reason for the range to be
-  # anything other than what it is: two dates.
+  # It is never recovered from generated SQL, which would silently break with
+  # any change to Redmine's sql_for_field output. The range is what it is: two
+  # dates.
   # The longest range one chart covers. The x axis has a bucket per interval
   # step and every history chart replays each issue per bucket, so an
   # unbounded range let a single request (the charts permission is a read
@@ -84,10 +83,6 @@ class ExpertAgileChartsQuery < ExpertAgileQuery
   # replaying ones walk each issue per bucket, and the counting ones (velocity,
   # cycle time) still load every issue in full, which on the global charts
   # page is every issue the viewer can see.
-  #
-  # RedmineUP's equivalent guard tests chart keys ('work_burndown',
-  # 'hours_velocity') that no longer exist in their registry, so the cap it
-  # advertises never actually fires.
   def too_many_items?
     chart_scope.count > RedmineExpertAgile.chart_items_limit
   end

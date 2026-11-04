@@ -8,9 +8,9 @@ A **Redmine plugin** (`redmine_expert_agile`) providing agile boards: a Kanban/S
 built on Redmine's own query system, story points, sprints with a backlog planner, and
 burndown / burnup / velocity / cumulative-flow / cycle-time charts. Requires Redmine 5.0+.
 
-It is a **clean-room replacement for RedmineUP Agile PRO** (`plugins/redmine_agile`, GPLv3,
-paid per-server licence). That plugin was read for behaviour only — no code was copied, and
-this plugin is GPL-2.0-or-later like its siblings.
+It is an **independent replacement for RedmineUP Agile PRO** (`plugins/redmine_agile`, GPLv3,
+paid per-server licence). That plugin served as a reference for behaviour only — no code was
+copied, and this plugin is GPL-2.0-or-later like its siblings.
 
 This plugin is developed **inside the parent `redmine-expert` deployment repo** (two levels up,
 `../../`), which packages plugins, themes and Docker/Kubernetes config. **This repo is NOT a
@@ -74,9 +74,9 @@ it) / `CHANGELOG.de.md` (DE).
 - **No global monkeypatching.** Colour support is a `RedmineExpertAgile::Colorable` concern
   included explicitly into the models that need it, never into `ActiveRecord::Base`; helpers are
   included where used, never into `ApplicationController`.
-- **Never touch the database connection at load time.** RedmineUP's `issue_query_patch.rb` calls
-  `ActiveRecord::Base.connection.tables` during class loading, which breaks `rake db:create` on
-  a virgin database.
+- **Never touch the database connection at load time.** Calling
+  `ActiveRecord::Base.connection.tables` during class loading breaks `rake db:create` on a
+  virgin database.
 - **No inline `<script>`.** Views render markup only; Ruby→JS data crosses through a JSON island
   (`<script type="application/json" id="ea-...">`) read by a static asset. The board must work
   under `script-src 'self'`.
@@ -85,6 +85,9 @@ it) / `CHANGELOG.de.md` (DE).
   are a syntax error.
 - **Every settings key gets a declared default in `init.rb`.** Do not hide defaults in reader
   methods.
+- **Comments explain our design on its own terms.** Do not describe, quote or judge how RedmineUP
+  (or any other plugin) implements a feature; notes on running alongside it (aliased methods,
+  name collisions, routes) are fine. Never copy its code — it is a reference for behaviour only.
 
 ## Development workflow (Docker)
 
@@ -195,8 +198,8 @@ fallback values, because the defaults live in `init.rb`.
 `{issue_id, target_status_id, prev_id, next_id}`; the server computes the midpoint and writes a
 single row inside the same transaction as the issue save.
 `RedmineExpertAgile::BoardPositions` rebalances a column when the neighbour gap gets too small.
-This is a deliberate departure from RedmineUP, where the browser re-indexes the whole column on
-every drop — which corrupts ordering under concurrent drags and against cards paginated out of
+This deliberately avoids re-indexing the whole column in the browser on every drop, which
+corrupts ordering under concurrent drags and against cards paginated out of
 view.
 
 ### Query layer
