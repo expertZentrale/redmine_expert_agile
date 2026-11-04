@@ -9,13 +9,15 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
-## [0.10.2] - 2026-11-04
+## [Unreleased]
 
 ### Changed
 
 - **The tests also run on MySQL and PostgreSQL.** CI runs the suite on MariaDB for every supported
   Redmine version and, for the oldest and the newest (5.1 and 7.0), on MySQL 8.4 and PostgreSQL 17
   as well.
+
+## [0.10.2] - 2026-11-04
 
 ### Fixed
 
