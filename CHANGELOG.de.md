@@ -9,6 +9,16 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Behoben
+
+- **Die Ticketliste laesst sich auf MySQL nach Sprint gruppieren.** Die Gruppenzaehlung las den
+  Sprint ueber eine Unterabfrage, die MySQL im Standardmodus `ONLY_FULL_GROUP_BY` ablehnt
+  (MariaDB und PostgreSQL akzeptieren sie); eine nach *Sprint* gruppierte Liste brach deshalb mit
+  einem Fehler ab. Die Zaehlung verbindet jetzt die Agile-Daten des Tickets per Join. Auf MariaDB
+  und PostgreSQL aendert sich nichts.
+
 ## [0.10.1] - 2026-11-04
 
 ### Hinzugefuegt

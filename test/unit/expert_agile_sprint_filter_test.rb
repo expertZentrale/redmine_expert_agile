@@ -192,6 +192,21 @@ class ExpertAgileSprintFilterTest < ActiveSupport::TestCase
     assert_equal 1, counts[twin]
   end
 
+  # MySQL (ONLY_FULL_GROUP_BY) refuses the count when the sprint is a
+  # correlated subquery; MariaDB accepts it, so the shape is pinned here too.
+  # The join must neither drop issues never planned nor count one twice.
+  def test_the_group_count_joins_the_agile_data_row
+    query = IssueQuery.new(:name => '_', :project => @project)
+    query.group_by = 'expert_agile_sprint'
+    sql = query.send(:base_group_scope).to_sql
+
+    assert_includes sql, "LEFT OUTER JOIN #{ExpertAgileData.table_name} ead_group"
+    assert_match(/GROUP BY [`"]?ead_group[`"]?\.[`"]?sprint_id/, sql)
+    counts = query.result_count_by_group
+    assert_equal query.issue_count, counts.values.sum
+    assert_equal 1, counts[@active]
+  end
+
   def test_the_board_and_the_planner_do_not_offer_the_sprint_column
     names = ExpertAgileQuery.new(:project => @project).available_columns.map(&:name)
 

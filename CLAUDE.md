@@ -64,6 +64,7 @@ it) / `CHANGELOG.de.md` (DE).
   | `IssueQuery#available_columns` | redmine_agile, redmine_contacts_helpdesk |
   | `IssueQuery#issues` | redmine_agile, redmine_contacts_helpdesk |
   | `IssueQuery#initialize_available_filters` | redmine_agile |
+  | `IssueQuery#joins_for_order_statement` | redmine_agile, redmine_contacts_helpdesk |
   | `IssuesController#parse_params_for_bulk_update` | redmine_agile |
   | `ProjectsHelper#project_settings_tabs` | redmine_agile, redmine_contacts, redmine_contacts_helpdesk |
   | `Issue#css_classes` | redmine_agile |
@@ -266,7 +267,9 @@ through `ExpertAgileQuery#card_story` / `#card_subtasks`, batch-loaded by `load_
 The issue list's sprint filter (`expert_agile_sprint_id`, `active` resolved at query time) and
 column (`SprintQueryColumn`) come from `IssueQueryPatch`. A QueryColumn grouped in SQL must
 override `group_by_statement` — core groups by the column's name otherwise — and its
-`group_value` must equal the SQL key, or the group counts come back empty.
+`group_value` must equal the SQL key, or the group counts come back empty. Group by a plain
+column of a joined row (`ead_group.sprint_id`, joined through `joins_for_order_statement`),
+never by a correlated subquery: MySQL's `ONLY_FULL_GROUP_BY` refuses the count, MariaDB does not.
 Completing a sprint is `RedmineExpertAgile::SprintCompletion` (`ExpertAgileSprintsController#complete`):
 open issues move like a planner move (journaled, `manage_expert_agile_backlog`, the issue's own
 validation), then the sprint closes and the target may be activated — one transaction; a single
