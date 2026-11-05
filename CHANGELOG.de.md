@@ -9,6 +9,14 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Geaendert
+
+- **Die Tests laufen auch auf MySQL und PostgreSQL.** Die CI fuehrt die Suite fuer jede unterstuetzte
+  Redmine-Version auf MariaDB aus und fuer die aelteste und die neueste (5.1 und 7.0) zusaetzlich auf
+  MySQL 8.4 und PostgreSQL 17.
+
 ## [0.10.2] - 2026-11-04
 
 ### Behoben
