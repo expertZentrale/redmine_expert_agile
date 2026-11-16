@@ -11,6 +11,27 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **Karten auf dem Board haben Redmines Kontextmenue fuer Tickets.** Ein Rechtsklick auf eine
+  Karte (auch auf Nummer und Betreff) oder ein Klick auf ihre Aktionen-Schaltflaeche (⋯) oeffnet
+  das Kontextmenue der
+  Ticketliste, mit den Eintraegen, die Ihre Rollen und der Workflow fuer dieses Ticket erlauben:
+  Status, Tracker, Prioritaet, Zielversion, Zugewiesen an, Kategorie, % erledigt,
+  benutzerdefinierte Felder, Bearbeiten, Kopieren, Zeit buchen und Loeschen. Strg-Klick und
+  Umschalt-Klick waehlen mehrere Karten fuer eine Aenderung aus. Ein im Menue geaendertes Feld wird
+  ueber Redmines Sammelbearbeitung gespeichert, danach zeichnet sich das Board an Ort und Stelle
+  neu und behaelt seine Scrollposition, statt die Seite neu zu laden: Die Karte wandert in ihre
+  neue Spalte oder Swimlane oder verschwindet vom Board, wenn sie nicht mehr zu den Filtern passt.
+  Eine abgelehnte Aenderung wird mit Redmines Begruendung gemeldet. Bearbeiten, Kopieren, Zeit
+  buchen und Loeschen funktionieren wie in der Ticketliste und kehren zum Board zurueck.
+  ([#77](https://github.com/expertZentrale/redmine_expert_agile/issues/77))
+
+### Behoben
+
+- **Die README nennt keine Backlog-Spalte auf dem Board mehr.** Das Board hat keine; Tickets
+  werden im Backlog-Planer, einer eigenen Seite, in Sprints eingeplant.
+
 ### Geaendert
 
 - **Die Tests laufen auch auf MySQL und PostgreSQL.** Die CI fuehrt die Suite fuer jede unterstuetzte

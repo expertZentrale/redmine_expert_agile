@@ -37,6 +37,28 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     assert_response :success
   end
 
+  # The board sends the context menu's field entries itself and redraws from
+  # the page it is redirected to. That depends on the board's own address
+  # passing as a back_url — for one card the entries update the issue, for
+  # several they go to bulk_update.
+  def test_an_update_from_the_board_context_menu_returns_to_the_board
+    board = "/projects/#{@project.identifier}/expert_agile/board?set_filter=1"
+    patch :update, :params => { :id => @issue.id, :ids => [@issue.id], :issue => { :priority_id => 6 },
+                                :back_url => board }
+
+    assert_redirected_to board
+    assert_equal 6, @issue.reload.priority_id
+  end
+
+  def test_bulk_update_from_the_board_context_menu_returns_to_the_board
+    board = "/projects/#{@project.identifier}/expert_agile/board?set_filter=1"
+    patch :bulk_update, :params => { :ids => [@issue.id], :issue => { :priority_id => 6 },
+                                     :back_url => board }
+
+    assert_redirected_to board
+    assert_equal 6, @issue.reload.priority_id
+  end
+
   def test_issue_show_renders_with_story_points_enabled
     with_agile_settings('story_points_on' => '1') do
       @issue.story_points = 5

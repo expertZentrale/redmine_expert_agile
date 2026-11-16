@@ -15,6 +15,14 @@
   </p>
 <% end %>
 
+<%# Redmine's own issue context menu on the cards. context_menu.js reads the
+    menu's address from the form around the card and sends the form along,
+    which carries the ids[] of the selected cards and back_url, so the menu's
+    actions return to this board even where a proxy strips the Referer.
+    Nothing submits this form; it only holds those fields. %>
+<% context_menu %>
+<%= content_tag(:form, :id => 'ea-board-form', :data => { :cm_url => issues_context_menu_path }) do %>
+<%= hidden_field_tag 'back_url', url_for(:params => request.query_parameters), :id => nil %>
 <div id="ea-board"
      class="ea-board"
      data-ea-board="1">
@@ -85,6 +93,7 @@
     </tbody>
   </table>
 </div>
+<% end %>
 
 <%# JSON island: read by expert_agile_board.js, never executed as script. %>
 <script type="application/json" id="ea-board-data"><%= expert_agile_board_data(@query, @project).html_safe %></script>

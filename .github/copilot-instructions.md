@@ -128,6 +128,18 @@ of the release commit:
   carries `swimlaneId` and every lane's totals (`BoardGrid#swimlane_summaries`, the same numbers
   the page renders). Never add a field to the allowlist that a drag should not set (project,
   tracker, author, dates).
+- **Card context menu** is Redmine's own (core `context_menu.js` via the `context_menu` helper):
+  the board sits in `form#ea-board-form` with `data-cm-url` and a `back_url` field, each card is
+  `.hascontextmenu` with a hidden `ids[]` checkbox, and `link_to_context_menu` gives keyboard and
+  touch access. Core decides the entries, permissions and workflow — never build a menu of our own
+  or filter its entries. The board script only intercepts the menu's PATCH field links
+  (`/issues/:id` for one card, `/issues/bulk_update` for several) in the capture phase, sends them
+  with `fetch`, and redraws from the board page the redirect to `back_url` returns (`swapBoard`:
+  thead, tbody and the JSON island, keeping the table and its pinned head). A refusal is the
+  edit/bulk edit form; its `#errorExplanation` is shown as text. Every other entry stays core's.
+  Core leaves a right click on any link to the browser; a right click on the card's **own** links
+  (`.ea-card-id`, `.ea-card-subject`) is re-dispatched on the card so the subject opens the menu,
+  while links to other issues (epic, story, subtasks, field values) keep the browser's menu.
 - **Epics** (`lib/redmine_expert_agile/epics.rb`): an epic is an issue of a tracker in the
   `epic_tracker_ids` setting (empty = off); an issue belongs to the nearest epic ancestor in the
   subtask tree. No table or custom field of its own. `Epics.nearest(issues, user)` answers a whole

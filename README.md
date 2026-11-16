@@ -23,9 +23,8 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
 ## Features
 
 - **Board** — columns from issue statuses, drag & drop, swimlanes, advisory WIP limits,
-  configurable card fields, sub-columns via a shared status name prefix, a backlog column, and
-  saved boards. Boards are Redmine queries, so every filter, grouping and visibility rule you
-  already know applies.
+  configurable card fields, sub-columns via a shared status name prefix, and saved boards. Boards
+  are Redmine queries, so every filter, grouping and visibility rule you already know applies.
 - **Story points** — stored per issue, offered as a configurable value list (modified Fibonacci
   by default), restrictable to selected trackers, available as an issue list column and filter.
 - **Sprints** — a first-class entity with start and end dates, an open/active/closed lifecycle,
@@ -93,6 +92,17 @@ A board carries its subprojects' issues, and the global board (*Agile board* in 
 menu) carries everything — so whether a
 card may be dragged is a question about that card's own project, not about the one whose board is
 on screen. A card from a project where you may not move cards is shown but not draggable.
+
+Right-clicking a card, its number and subject included, opens Redmine's issue context menu, the
+same one the issue list has; the actions button (⋯) on the card opens it from the keyboard or on a
+touch screen. Links on the card to other issues (epic, story, subtasks) keep the browser's own
+menu. It offers what you
+may do with that issue under your roles and the workflow: status, tracker, priority, target
+version, assignee, category, % done and custom fields, as well as edit, copy, log time and delete.
+Ctrl-click or Shift-click selects several cards for one change. A field changed from the menu is
+saved like a bulk edit in the issue list, and the board redraws in place without losing its
+scroll position: a card whose status changed moves to its new column, and one that no longer
+matches the board's filters leaves it. When Redmine refuses the change, the board says why.
 
 A board worth keeping is saved from the options panel and reopened from the sidebar. Editing a
 saved board opens the same panel it was created with, so its filters, card fields, swimlanes,

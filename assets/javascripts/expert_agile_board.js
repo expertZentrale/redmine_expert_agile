@@ -23,6 +23,9 @@
   /* The lane the dragged card was picked up from, '' for the "no value"
    * lane; null on an ungrouped board and in the backlog planner. */
   var originLane = null;
+  /* Set by pinHeader: redraws the pinned copy of the column headers after
+   * the board was redrawn. */
+  var refreshPinnedHead = null;
 
   function readConfig() {
     var island = document.getElementById('ea-board-data');
@@ -37,6 +40,11 @@
   function csrfToken() {
     var meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute('content') : '';
+  }
+
+  function csrfParam() {
+    var meta = document.querySelector('meta[name="csrf-param"]');
+    return meta ? meta.getAttribute('content') : 'authenticity_token';
   }
 
   function cardsIn(cell) {
@@ -284,7 +292,9 @@
    * accepted in the meantime replaces the card it redrew, and re-inserting the
    * node we picked up would put a detached duplicate of it back on the board. */
   function restore(where) {
-    if (!where || !where.parent) { return; }
+    /* A parent no longer on the page belongs to a board that was redrawn
+     * since; the card there already stands where the server has it. */
+    if (!where || !where.parent || !where.parent.isConnected) { return; }
     var card = document.getElementById(where.cardId);
     if (!card) { return; }
     var before = where.nextId ? document.getElementById(where.nextId) : null;
@@ -579,7 +589,7 @@
    * the count updates and the drop marking, which query for every header of
    * a column, reach it without knowing it is there. */
   function pinHeader(root) {
-    var table = root.querySelector('.ea-board-table');
+    var table = boardTable(root);
     var head = table && table.tHead;
     if (!head) { return; }
 
@@ -603,6 +613,9 @@
      * second time. The real head stands in for the copy's height: both are
      * the same rows under the same rules. */
     function place() {
+      /* Read from the table each time: a redrawn board brings a head of
+       * its own. */
+      var head = table.tHead;
       var edge = windowTopEdge();
       var tableBox = table.getBoundingClientRect();
       var headTop = head.getBoundingClientRect().top;
@@ -635,7 +648,235 @@
      * page at a position worked out for the screen. */
     window.addEventListener('beforeprint', function () { printing = true; place(); });
     window.addEventListener('afterprint', function () { printing = false; place(); });
+    refreshPinnedHead = function () {
+      copy.replaceChild(table.tHead.cloneNode(true), copy.tHead);
+      place();
+    };
     place();
+  }
+
+  /* The board's own table. The pinned copy of the head is a table of the same
+   * class inside the board, ahead of it, so a plain lookup would find that. */
+  function boardTable(root) {
+    return root ? root.querySelector(':scope > table.ea-board-table') : null;
+  }
+
+  /* --- Context menu -----------------------------------------------------
+   *
+   * The menu is Redmine's own: context_menu.js opens it on a right click on
+   * a card, or on the card's actions link, and the server decides which
+   * entries this user may use on the selected issues. Its field entries —
+   * status, tracker, priority, version, assignee, category, done ratio,
+   * custom fields — are PATCH links that come back to this board through
+   * back_url: to the issue itself when one card is selected, to bulk_update
+   * when several are. Followed as links they reload the whole page;
+   * the board sends them itself instead and redraws from the answer, so it
+   * stays where it was scrolled to. Every other entry (edit, copy, log time,
+   * delete, watch) is left to Redmine. */
+
+  /* A right click on the card's own links, its number and its subject.
+   * Redmine's menu script leaves every link to the browser's menu, as in the
+   * issue list; on a card the subject covers most of it, so a right click
+   * would rarely reach the menu. The click is handed to the card itself,
+   * where Redmine opens its menu as for any other part of it. Links to other
+   * issues (epic, story, subtasks, field values) keep the browser's menu:
+   * Redmine's would act on the card, not on the issue the link names. */
+  function forwardCardLinkContextMenu(event) {
+    var target = event.target;
+    var link = target && target.closest ? target.closest('a') : null;
+    if (!link || !link.closest('.ea-card-id, .ea-card-subject')) { return; }
+    var card = link.closest('.ea-card.hascontextmenu');
+    var root = boardRoot();
+    if (!card || !root || !root.contains(card)) { return; }
+    event.preventDefault();
+    event.stopPropagation();
+    card.dispatchEvent(new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+      button: 2,
+      buttons: event.buttons,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      screenX: event.screenX,
+      screenY: event.screenY,
+      ctrlKey: event.ctrlKey,
+      shiftKey: event.shiftKey,
+      altKey: event.altKey,
+      metaKey: event.metaKey
+    }));
+  }
+
+  /* The address of a field entry, or null for any other link. */
+  function bulkUpdateUrl(target) {
+    var link = target && target.closest ? target.closest('#context-menu a[data-method]') : null;
+    if (!link || link.hasAttribute('data-confirm') || link.hasAttribute('data-remote')) { return null; }
+    if (String(link.getAttribute('data-method')).toLowerCase() !== 'patch') { return null; }
+    var url;
+    try {
+      url = new URL(link.getAttribute('href'), window.location.href);
+    } catch (e) {
+      return null;
+    }
+    if (url.origin !== window.location.origin || !/\/issues\/(\d+|bulk_update)$/.test(url.pathname)) {
+      return null;
+    }
+    return url.href;
+  }
+
+  /* Registered for the capture phase, so it runs before Redmine's own link
+   * handler, which would submit the link as a form. */
+  function interceptBulkUpdate(event) {
+    var url = bulkUpdateUrl(event.target);
+    if (!url) { return; }
+    event.preventDefault();
+    event.stopPropagation();
+    /* Stopping the click also kept it from Redmine's handler that closes
+     * the menu. */
+    if (typeof window.contextMenuHide === 'function') { window.contextMenuHide(); }
+    submitBulkUpdate(url);
+  }
+
+  function submitBulkUpdate(url) {
+    var body = new URLSearchParams();
+    body.append('_method', 'patch');
+    body.append(csrfParam(), csrfToken());
+
+    fetch(url, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'X-CSRF-Token': csrfToken(),
+        'Accept': 'text/html',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: body.toString()
+    }).then(function (response) {
+      return response.text().then(function (html) {
+        var page = new DOMParser().parseFromString(html, 'text/html');
+        /* The session ran out: Redmine sent the request to its sign-in page
+         * and changed nothing. */
+        if (page.getElementById('login-form')) {
+          setMessage(config.labels.sessionExpired || config.labels.changeFailed, true);
+          return;
+        }
+        /* Saved: Redmine redirected to back_url and fetch followed, so the
+         * answer already is this board after the change. Nothing is said, as
+         * after a move: the redrawn board shows it, and a notice would push
+         * the board down on every change. */
+        if (response.ok && response.redirected) {
+          setMessage('', false);
+          if (!swapBoard(page)) { refreshBoard(); }
+          return;
+        }
+        /* Refused: Redmine answers with the issue's edit form, or for several
+         * issues its bulk edit form, and the reasons. With several cards
+         * selected the others may have been saved, so the board is redrawn
+         * all the same. */
+        var refusal = response.ok ? bulkUpdateRefusal(page) : null;
+        setMessage(refusal ? refusal.error : changeRefusalMessage(response.status), true, refusal);
+        refreshBoard();
+      });
+    }).catch(function () {
+      setMessage(config.labels.changeFailed, true);
+    });
+  }
+
+  /* The reasons on the form Redmine answered a refusal with: one line per
+   * reason, under a headline naming the issues that were not saved on the
+   * bulk edit form. Taken as text only, like every other message the board
+   * shows. */
+  function bulkUpdateRefusal(page) {
+    var box = page.getElementById('errorExplanation');
+    if (!box) { return null; }
+    var headline = box.querySelector('span');
+    var reasons = Array.prototype.map.call(box.querySelectorAll('li'), function (item) {
+      return item.textContent.trim();
+    }).filter(function (text) { return text !== ''; });
+    return {
+      error: headline ? headline.textContent.trim() : config.labels.changeFailed,
+      hint: reasons.join('; ')
+    };
+  }
+
+  function changeRefusalMessage(status) {
+    if (status === 401) { return config.labels.sessionExpired || config.labels.changeFailed; }
+    if (status === 403) { return config.labels.changeNotPermitted || config.labels.changeFailed; }
+    return config.labels.changeFailed;
+  }
+
+  /* Redraws the board from a fresh copy of this page, for the answers that
+   * do not carry one. */
+  function refreshBoard() {
+    fetch(window.location.href, { credentials: 'same-origin', headers: { 'Accept': 'text/html' } })
+      .then(function (response) {
+        if (!response.ok) { throw new Error('board not loaded'); }
+        return response.text();
+      })
+      .then(function (html) {
+        if (!swapBoard(new DOMParser().parseFromString(html, 'text/html'))) {
+          throw new Error('no board on the page');
+        }
+      })
+      .catch(reportBoardStale);
+  }
+
+  /* Said in addition to whatever the board already reports, which is the
+   * more important part: what happened to the change itself. */
+  function reportBoardStale() {
+    var box = document.getElementById('ea-board-message');
+    if (!box || box.style.display === 'none' || !box.textContent) {
+      setMessage(config.labels.boardNotRefreshed, true);
+      return;
+    }
+    var line = document.createElement('div');
+    line.className = 'ea-board-message-hint';
+    line.textContent = config.labels.boardNotRefreshed;
+    box.appendChild(line);
+    box.className = 'flash error';
+  }
+
+  /* Shows a fresh render of the board in place of the one on screen: the
+   * head with its counts and WIP marks, every lane and card, and the data
+   * this script runs on. The table itself stays, and with it the board's
+   * sideways scroll, the page's scroll and the pinned head. Answers false
+   * when the page holds no board, so the caller can fetch one. */
+  function swapBoard(page) {
+    var table = boardTable(boardRoot());
+    var fresh = boardTable(page.getElementById('ea-board'));
+    var island = page.getElementById('ea-board-data');
+    var ownIsland = document.getElementById('ea-board-data');
+    if (!table || !table.tHead || !table.tBodies[0] || !fresh || !fresh.tHead || !fresh.tBodies[0] ||
+        !island || !ownIsland) {
+      return false;
+    }
+    var freshConfig;
+    try {
+      freshConfig = JSON.parse(island.textContent);
+    } catch (e) {
+      return false;
+    }
+
+    abandonDrag();
+    config = freshConfig;
+    ownIsland.textContent = island.textContent;
+    table.replaceChild(document.importNode(fresh.tHead, true), table.tHead);
+    table.replaceChild(document.importNode(fresh.tBodies[0], true), table.tBodies[0]);
+    Array.prototype.forEach.call(table.querySelectorAll('.ea-card'), makeDraggable);
+    Array.prototype.forEach.call(table.querySelectorAll('.ea-cell'), makeDroppable);
+    if (refreshPinnedHead) { refreshPinnedHead(); }
+    return true;
+  }
+
+  /* A card picked up from the board that was just replaced can no longer
+   * land anywhere; the drag ends without a move. */
+  function abandonDrag() {
+    if (dragged) { dragged.classList.remove('ea-dragging'); }
+    dragged = null;
+    origin = null;
+    allowedTargets = null;
+    originLane = null;
+    clearDropTargets();
   }
 
   function init() {
@@ -647,7 +888,13 @@
 
     Array.prototype.forEach.call(root.querySelectorAll('.ea-card'), makeDraggable);
     Array.prototype.forEach.call(root.querySelectorAll('.ea-cell'), makeDroppable);
-    if (root === boardRoot()) { pinHeader(root); }
+    if (root === boardRoot()) {
+      pinHeader(root);
+      if (document.getElementById('ea-board-form')) {
+        document.addEventListener('click', interceptBulkUpdate, true);
+        document.addEventListener('contextmenu', forwardCardLinkContextMenu, true);
+      }
+    }
   }
 
   window.ExpertAgileBoard = {

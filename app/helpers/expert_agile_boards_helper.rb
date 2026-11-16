@@ -373,7 +373,12 @@ module ExpertAgileBoardsHelper
         :transitionsNone => l(:text_expert_agile_transitions_none, :from => '%{from}'),
         :laneBlocked => query.grouped? ? l(:error_expert_agile_swimlane_not_writable,
                                            :field => query.group_by_column.caption) : nil,
-        :laneNotShown => l(:error_expert_agile_move_saved_lane_not_shown)
+        :laneNotShown => l(:error_expert_agile_move_saved_lane_not_shown),
+        # A change made through the issue context menu: the same refusals as
+        # a move, in words that do not speak of moving a card.
+        :changeFailed => l(:error_expert_agile_change_failed),
+        :changeNotPermitted => l(:error_expert_agile_change_not_permitted),
+        :boardNotRefreshed => l(:error_expert_agile_board_not_refreshed)
       }
     }.to_json
   end
