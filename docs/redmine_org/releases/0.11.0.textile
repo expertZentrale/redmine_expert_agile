@@ -1,0 +1,15 @@
+h3. redmine_expert_agile 0.11.0 — 2026-11-16
+
+Board cards open Redmine's issue context menu, so a card's priority, assignee or status can be changed without leaving the board.
+
+h4. Added
+
+* *Context menu on board cards.* Right-clicking a card, its number and subject included, or clicking the actions button (⋯) on it opens the context menu the issue list has, with the entries your roles and the workflow allow on that issue: status, tracker, priority, target version, assignee, category, % done, custom fields, edit, copy, log time and delete. Ctrl-click and Shift-click select several cards for one change. After a change the board redraws in place and keeps its scroll position: the card moves to its new column or lane, or leaves the board if it no longer matches the filters. A refused change is reported with Redmine's reason.
+
+h4. Changed
+
+* *Tested on MySQL and PostgreSQL.* The test suite runs on MariaDB for every supported Redmine version and, for 5.1 and 7.0, on MySQL 8.4 and PostgreSQL 17 as well.
+
+h4. Upgrade notes
+
+No migrations, no new settings and no new permissions. Replace the plugin directory and restart.

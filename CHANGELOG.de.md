@@ -9,22 +9,21 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
-## [Unreleased]
+## [0.11.0] - 2026-11-16
 
 ### Hinzugefuegt
 
 - **Karten auf dem Board haben Redmines Kontextmenue fuer Tickets.** Ein Rechtsklick auf eine
   Karte (auch auf Nummer und Betreff) oder ein Klick auf ihre Aktionen-Schaltflaeche (⋯) oeffnet
-  das Kontextmenue der
-  Ticketliste, mit den Eintraegen, die Ihre Rollen und der Workflow fuer dieses Ticket erlauben:
-  Status, Tracker, Prioritaet, Zielversion, Zugewiesen an, Kategorie, % erledigt,
-  benutzerdefinierte Felder, Bearbeiten, Kopieren, Zeit buchen und Loeschen. Strg-Klick und
-  Umschalt-Klick waehlen mehrere Karten fuer eine Aenderung aus. Ein im Menue geaendertes Feld wird
-  ueber Redmines Sammelbearbeitung gespeichert, danach zeichnet sich das Board an Ort und Stelle
-  neu und behaelt seine Scrollposition, statt die Seite neu zu laden: Die Karte wandert in ihre
-  neue Spalte oder Swimlane oder verschwindet vom Board, wenn sie nicht mehr zu den Filtern passt.
-  Eine abgelehnte Aenderung wird mit Redmines Begruendung gemeldet. Bearbeiten, Kopieren, Zeit
-  buchen und Loeschen funktionieren wie in der Ticketliste und kehren zum Board zurueck.
+  das Kontextmenue der Ticketliste, mit den Eintraegen, die Ihre Rollen und der Workflow fuer
+  dieses Ticket erlauben: Status, Tracker, Prioritaet, Zielversion, Zugewiesen an, Kategorie,
+  % erledigt, benutzerdefinierte Felder, Bearbeiten, Kopieren, Zeit buchen und Loeschen. Strg-Klick
+  und Umschalt-Klick waehlen mehrere Karten fuer eine Aenderung aus. Ein im Menue geaendertes Feld
+  wird genauso gespeichert wie aus der Ticketliste, danach zeichnet sich das Board an Ort und
+  Stelle neu und behaelt seine Scrollposition, statt die Seite neu zu laden: Die Karte wandert in
+  ihre neue Spalte oder Swimlane oder verschwindet vom Board, wenn sie nicht mehr zu den Filtern
+  passt. Eine abgelehnte Aenderung wird mit Redmines Begruendung gemeldet. Bearbeiten, Kopieren,
+  Zeit buchen und Loeschen funktionieren wie in der Ticketliste und kehren zum Board zurueck.
   ([#77](https://github.com/expertZentrale/redmine_expert_agile/issues/77))
 
 ### Behoben
