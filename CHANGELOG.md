@@ -11,6 +11,19 @@ notes from the section matching the pushed tag.
 
 ## [Unreleased]
 
+### Added
+
+- **Board cards have Redmine's issue context menu.** Right-clicking a card, or clicking the
+  actions button (⋯) on it, opens the context menu the issue list has, with the entries your
+  roles and the workflow allow on that issue: status, tracker, priority, target version, assignee,
+  category, % done, custom fields, edit, copy, log time and delete. Ctrl-click and Shift-click
+  select several cards for one change. A field changed from the menu is saved through Redmine's
+  bulk edit, and the board then redraws in place, keeping its scroll position, rather than
+  reloading the page: the card moves to its new column or lane, or leaves the board if it no
+  longer matches the filters. A refused change is reported with Redmine's reason. Edit, copy, log
+  time and delete work as in the issue list and come back to the board.
+  ([#77](https://github.com/expertZentrale/redmine_expert_agile/issues/77))
+
 ### Changed
 
 - **The tests also run on MySQL and PostgreSQL.** CI runs the suite on MariaDB for every supported

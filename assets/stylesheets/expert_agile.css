@@ -168,6 +168,41 @@
 .ea-card-id a { color: #6b727c; font-weight: 600; text-decoration: none; }
 .ea-card-id a:hover { text-decoration: underline; }
 
+/* The context menu's actions link, for a keyboard and a touch screen. Quiet
+ * until the card is pointed at; a touch screen has no pointing, so there it
+ * always shows. */
+.ea-card-header .icon-actions {
+  flex: none;
+  color: #6b727c;
+  opacity: 0.5;
+}
+.ea-card:hover .ea-card-header .icon-actions,
+.ea-card-header .icon-actions:focus-visible { opacity: 1; }
+.ea-card-header .icon-actions:hover { color: #1f2328; }
+.ea-card-header .icon-actions .icon-svg { stroke: currentColor; }
+@media (hover: none) {
+  .ea-card-header .icon-actions { opacity: 1; }
+}
+
+/* A card the context menu acts on. Redmine marks it .context-menu-selection,
+ * styled for the rows of the issue list: a solid blue fill and white text,
+ * forced with !important. On a card that leaves the grey header, the pills
+ * and every link unreadable, so the card keeps its own colours and is
+ * ringed instead. The overrides need !important to outrank Redmine's. */
+.ea-card.context-menu-selection,
+.ea-card.context-menu-selection:hover {
+  background-color: #e8f0fb !important;
+  color: inherit !important;
+  box-shadow: 0 0 0 2px #507aaa;
+}
+.ea-card.context-menu-selection a { color: inherit !important; }
+.ea-card.context-menu-selection .ea-card-id a,
+.ea-card.context-menu-selection .ea-card-story a,
+.ea-card.context-menu-selection .ea-card-header .icon-actions { color: #6b727c !important; }
+.ea-card.context-menu-selection .ea-card-subject a { color: #1f2328 !important; }
+.ea-card.context-menu-selection .ea-subtask-closed a { color: #8a8f98 !important; }
+.ea-card.context-menu-selection svg.icon-svg { stroke: currentColor !important; }
+
 .ea-card-tracker {
   margin-left: auto;
   padding: 0 6px;

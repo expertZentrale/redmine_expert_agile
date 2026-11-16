@@ -1,6 +1,6 @@
 <%# One card. Markup only: no <script>, no inline handlers, so the board works
     under a strict content security policy. %>
-<div class="<%= expert_agile_card_classes(issue, @query) %>"<%= expert_agile_style_attribute(expert_agile_card_style(issue, @query)) %>
+<div class="<%= expert_agile_card_classes(issue, @query) %> hascontextmenu"<%= expert_agile_style_attribute(expert_agile_card_style(issue, @query)) %>
      id="ea-card-<%= issue.id %>"
      data-issue-id="<%= issue.id %>"
      data-status-id="<%= issue.status_id %>"
@@ -13,9 +13,17 @@
          column allowed or blocked the moment the card is picked up. %>
      data-allowed-status-ids="<%= allowed %>"<% end %>>
 
+  <%# Never shown: Redmine's context menu ticks it when the card is selected
+      and sends it as one of the issues the menu acts on. %>
+  <%= check_box_tag 'ids[]', issue.id, false, :id => nil, :hidden => true,
+                    :tabindex => -1, :'aria-hidden' => 'true' %>
+
   <div class="ea-card-header">
     <span class="ea-card-id"><%= link_to("##{issue.id}", issue_path(issue)) %></span>
     <span class="ea-card-tracker"><%= issue.tracker.name %></span>
+    <%# The same menu for a keyboard and a touch screen, neither of which has
+        a right click. %>
+    <%= link_to_context_menu %>
   </div>
   <%= expert_agile_card_lineage(issue, @query) %>
 

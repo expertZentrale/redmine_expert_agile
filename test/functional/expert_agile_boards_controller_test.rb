@@ -84,6 +84,38 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'div#ea-board [onclick]', false, 'no inline event handlers'
   end
 
+  # --- Context menu ----------------------------------------------------
+  #
+  # The menu is Redmine's own context_menu.js. It needs a form around the
+  # cards that names the menu's address, one .hascontextmenu element per
+  # issue and a checkbox in it carrying the issue id — and nothing inline.
+
+  def test_index_offers_redmine_s_issue_context_menu_on_the_cards
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'script[src*=?]', 'context_menu'
+    assert_select 'form#ea-board-form[data-cm-url=?]',
+                  Rails.application.routes.url_helpers.issues_context_menu_path do
+      assert_select 'div#ea-board'
+      assert_select "div#ea-card-#{@issue.id}.hascontextmenu" do
+        assert_select 'input[type=checkbox][name=?][value=?]', 'ids[]', @issue.id.to_s
+        # A way to the menu without a right click.
+        assert_select 'a.js-contextmenu'
+      end
+    end
+  end
+
+  def test_the_context_menu_comes_back_to_the_board_it_was_opened_on
+    get :index, :params => { :project_id => @project.id, :set_filter => '1' }
+
+    assert_response :success
+    back = css_select('form#ea-board-form input[name=back_url]').first
+    assert back, 'the board form carries no back_url'
+    assert_match %r{\A/projects/(#{@project.id}|#{@project.identifier})/expert_agile/board\?}, back['value']
+    assert_includes back['value'], 'set_filter=1'
+  end
+
   # --- Options panel ---------------------------------------------------
   #
   # These go through the controller with real request parameters on purpose.
@@ -639,6 +671,18 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_equal @issue.id, payload['issueId']
     assert_includes payload['card'], "ea-card-#{@issue.id}"
     assert payload['columns'].is_a?(Array)
+  end
+
+  def test_a_card_redrawn_after_a_move_still_opens_the_context_menu
+    target = allowed_status_for(@issue)
+    skip 'workflow offers no other status' if target.nil?
+
+    put :update, :params => { :id => @issue.id, :status_id => target.id }, :format => :js
+    card = Nokogiri::HTML.fragment(JSON.parse(response.body)['card']).at_css('div.ea-card')
+
+    assert_includes card['class'].split, 'hascontextmenu'
+    assert card.at_css("input[type=checkbox][name='ids[]'][value='#{@issue.id}']"),
+           'the redrawn card has no checkbox for the context menu to select'
   end
 
   def test_update_returns_counts_taken_after_the_move
