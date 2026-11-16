@@ -14,7 +14,8 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 ### Hinzugefuegt
 
 - **Karten auf dem Board haben Redmines Kontextmenue fuer Tickets.** Ein Rechtsklick auf eine
-  Karte oder ein Klick auf ihre Aktionen-Schaltflaeche (⋯) oeffnet das Kontextmenue der
+  Karte (auch auf Nummer und Betreff) oder ein Klick auf ihre Aktionen-Schaltflaeche (⋯) oeffnet
+  das Kontextmenue der
   Ticketliste, mit den Eintraegen, die Ihre Rollen und der Workflow fuer dieses Ticket erlauben:
   Status, Tracker, Prioritaet, Zielversion, Zugewiesen an, Kategorie, % erledigt,
   benutzerdefinierte Felder, Bearbeiten, Kopieren, Zeit buchen und Loeschen. Strg-Klick und

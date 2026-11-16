@@ -105,9 +105,10 @@ gezogen werden darf, ist deshalb eine Frage an das Projekt der Karte, nicht an d
 Board angezeigt wird. Eine Karte aus einem Projekt, in dem Sie keine Karten verschieben duerfen,
 wird angezeigt, laesst sich aber nicht ziehen.
 
-Ein Rechtsklick auf eine Karte oeffnet Redmines Kontextmenue fuer Tickets, dasselbe wie in der
-Ticketliste; die Aktionen-Schaltflaeche (⋯) auf der Karte oeffnet es auch per Tastatur oder auf
-einem Touchscreen. Es bietet an, was Sie mit diesem Ticket nach Ihren Rollen und dem Workflow tun
+Ein Rechtsklick auf eine Karte, auch auf ihre Nummer und ihren Betreff, oeffnet Redmines
+Kontextmenue fuer Tickets, dasselbe wie in der Ticketliste; die Aktionen-Schaltflaeche (⋯) auf der
+Karte oeffnet es auch per Tastatur oder auf einem Touchscreen. Links der Karte auf andere Tickets
+(Epic, Story, Unteraufgaben) behalten das Menue des Browsers. Es bietet an, was Sie mit diesem Ticket nach Ihren Rollen und dem Workflow tun
 duerfen: Status, Tracker, Prioritaet, Zielversion, Zugewiesen an, Kategorie, % erledigt und
 benutzerdefinierte Felder, dazu Bearbeiten, Kopieren, Zeit buchen und Loeschen. Mit Strg-Klick oder
 Umschalt-Klick lassen sich mehrere Karten fuer eine Aenderung auswaehlen. Ein im Menue geaendertes

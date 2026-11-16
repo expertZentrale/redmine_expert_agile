@@ -674,6 +674,39 @@
    * stays where it was scrolled to. Every other entry (edit, copy, log time,
    * delete, watch) is left to Redmine. */
 
+  /* A right click on the card's own links, its number and its subject.
+   * Redmine's menu script leaves every link to the browser's menu, as in the
+   * issue list; on a card the subject covers most of it, so a right click
+   * would rarely reach the menu. The click is handed to the card itself,
+   * where Redmine opens its menu as for any other part of it. Links to other
+   * issues (epic, story, subtasks, field values) keep the browser's menu:
+   * Redmine's would act on the card, not on the issue the link names. */
+  function forwardCardLinkContextMenu(event) {
+    var target = event.target;
+    var link = target && target.closest ? target.closest('a') : null;
+    if (!link || !link.closest('.ea-card-id, .ea-card-subject')) { return; }
+    var card = link.closest('.ea-card.hascontextmenu');
+    var root = boardRoot();
+    if (!card || !root || !root.contains(card)) { return; }
+    event.preventDefault();
+    event.stopPropagation();
+    card.dispatchEvent(new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+      button: 2,
+      buttons: event.buttons,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      screenX: event.screenX,
+      screenY: event.screenY,
+      ctrlKey: event.ctrlKey,
+      shiftKey: event.shiftKey,
+      altKey: event.altKey,
+      metaKey: event.metaKey
+    }));
+  }
+
   /* The address of a field entry, or null for any other link. */
   function bulkUpdateUrl(target) {
     var link = target && target.closest ? target.closest('#context-menu a[data-method]') : null;
@@ -859,6 +892,7 @@
       pinHeader(root);
       if (document.getElementById('ea-board-form')) {
         document.addEventListener('click', interceptBulkUpdate, true);
+        document.addEventListener('contextmenu', forwardCardLinkContextMenu, true);
       }
     }
   }

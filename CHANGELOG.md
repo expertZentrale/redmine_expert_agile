@@ -13,8 +13,9 @@ notes from the section matching the pushed tag.
 
 ### Added
 
-- **Board cards have Redmine's issue context menu.** Right-clicking a card, or clicking the
-  actions button (⋯) on it, opens the context menu the issue list has, with the entries your
+- **Board cards have Redmine's issue context menu.** Right-clicking a card (its number and subject
+  included), or clicking the actions button (⋯) on it, opens the context menu the issue list has,
+  with the entries your
   roles and the workflow allow on that issue: status, tracker, priority, target version, assignee,
   category, % done, custom fields, edit, copy, log time and delete. Ctrl-click and Shift-click
   select several cards for one change. A field changed from the menu is saved through Redmine's

@@ -93,8 +93,10 @@ menu) carries everything — so whether a
 card may be dragged is a question about that card's own project, not about the one whose board is
 on screen. A card from a project where you may not move cards is shown but not draggable.
 
-Right-clicking a card opens Redmine's issue context menu, the same one the issue list has; the
-actions button (⋯) on the card opens it from the keyboard or on a touch screen. It offers what you
+Right-clicking a card, its number and subject included, opens Redmine's issue context menu, the
+same one the issue list has; the actions button (⋯) on the card opens it from the keyboard or on a
+touch screen. Links on the card to other issues (epic, story, subtasks) keep the browser's own
+menu. It offers what you
 may do with that issue under your roles and the workflow: status, tracker, priority, target
 version, assignee, category, % done and custom fields, as well as edit, copy, log time and delete.
 Ctrl-click or Shift-click selects several cards for one change. A field changed from the menu is

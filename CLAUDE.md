@@ -255,7 +255,9 @@ links (`/issues/:id` for one card, `/issues/bulk_update` for several) in the cap
 them with `fetch`, and redraws from the board page the redirect to `back_url` returns
 (`swapBoard`: thead, tbody and the JSON island, keeping the table and its pinned head). A refusal
 is the edit/bulk edit form; its `#errorExplanation` is shown as text. Every other entry stays
-core's.
+core's. Core leaves a right click on any link to the browser; a right click on the card's **own**
+links (`.ea-card-id`, `.ea-card-subject`) is re-dispatched on the card so the subject opens the
+menu, while links to other issues (epic, story, subtasks, field values) keep the browser's menu.
 
 ### Epics (`lib/redmine_expert_agile/epics.rb`)
 An epic is an issue of a tracker listed in the `epic_tracker_ids` setting (empty = off); an issue
