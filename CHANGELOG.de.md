@@ -26,6 +26,11 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   buchen und Loeschen funktionieren wie in der Ticketliste und kehren zum Board zurueck.
   ([#77](https://github.com/expertZentrale/redmine_expert_agile/issues/77))
 
+### Behoben
+
+- **Die README nennt keine Backlog-Spalte auf dem Board mehr.** Das Board hat keine; Tickets
+  werden im Backlog-Planer, einer eigenen Seite, in Sprints eingeplant.
+
 ### Geaendert
 
 - **Die Tests laufen auch auf MySQL und PostgreSQL.** Die CI fuehrt die Suite fuer jede unterstuetzte

@@ -24,9 +24,9 @@ Benoetigt **Redmine 5.0 oder neuer**. Lizenziert unter der **GPL-2.0-or-later**
 ## Funktionen
 
 - **Board** — Spalten aus Ticket-Status, Drag & Drop, Swimlanes, WIP-Limits (nur hinweisend),
-  konfigurierbare Kartenfelder, Unterspalten ueber ein gemeinsames Statusnamen-Praefix, eine
-  Backlog-Spalte und gespeicherte Boards. Boards sind Redmine-Queries — alle bekannten Filter,
-  Gruppierungen und Sichtbarkeitsregeln gelten unveraendert.
+  konfigurierbare Kartenfelder, Unterspalten ueber ein gemeinsames Statusnamen-Praefix und
+  gespeicherte Boards. Boards sind Redmine-Queries — alle bekannten Filter, Gruppierungen und
+  Sichtbarkeitsregeln gelten unveraendert.
 - **Story Points** — pro Ticket gespeichert, als konfigurierbare Werteliste angeboten
   (standardmaessig modifizierte Fibonacci-Reihe), auf ausgewaehlte Tracker begrenzbar, als
   Spalte und Filter in der Ticketliste verfuegbar.

@@ -24,6 +24,11 @@ notes from the section matching the pushed tag.
   time and delete work as in the issue list and come back to the board.
   ([#77](https://github.com/expertZentrale/redmine_expert_agile/issues/77))
 
+### Fixed
+
+- **The README no longer lists a backlog column on the board.** The board has none; issues are
+  planned into sprints in the backlog planner, a page of its own.
+
 ### Changed
 
 - **The tests also run on MySQL and PostgreSQL.** CI runs the suite on MariaDB for every supported

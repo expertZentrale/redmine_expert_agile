@@ -23,9 +23,8 @@ Requires **Redmine 5.0 or newer**. Licensed under the **GPL-2.0-or-later** (see 
 ## Features
 
 - **Board** — columns from issue statuses, drag & drop, swimlanes, advisory WIP limits,
-  configurable card fields, sub-columns via a shared status name prefix, a backlog column, and
-  saved boards. Boards are Redmine queries, so every filter, grouping and visibility rule you
-  already know applies.
+  configurable card fields, sub-columns via a shared status name prefix, and saved boards. Boards
+  are Redmine queries, so every filter, grouping and visibility rule you already know applies.
 - **Story points** — stored per issue, offered as a configurable value list (modified Fibonacci
   by default), restrictable to selected trackers, available as an issue list column and filter.
 - **Sprints** — a first-class entity with start and end dates, an open/active/closed lifecycle,
