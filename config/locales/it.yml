@@ -190,6 +190,9 @@ it:
   label_expert_agile_columns_and_limits: "Colonne e limiti WIP"
   label_expert_agile_wip_min: "Min"
   label_expert_agile_wip_max: "Max"
+  label_expert_agile_move_column_up: "Sposta %{status} in alto"
+  label_expert_agile_move_column_down: "Sposta %{status} in basso"
+  label_expert_agile_reset_column_order: "Ripristina l’ordine delle colonne"
   text_expert_agile_board_statuses_hint: "Spunta gli stati da mostrare come colonne della bacheca. Se non ne spunti nessuno, la bacheca mostra tutti gli stati aperti dei workflow di questo progetto."
   error_expert_agile_board_not_saveable: "Non hai il permesso di salvare una bacheca con questa visibilità"
 
