@@ -1,5 +1,6 @@
 # Exposes story points and the sprint as columns and filters on the core
-# issue list.
+# issue list, and the epic as a filter. The board, the planner and the charts
+# are IssueQueries too, so their filter panels offer the same filters.
 #
 # Wrapped by UnboundMethod capture, NOT prepend + super. Both RedmineUP plugins
 # installed here (`redmine_agile`, `redmine_contacts_helpdesk`) patch
@@ -48,6 +49,20 @@ module RedmineExpertAgile
         values
       end
 
+      # The open epics a query can filter by, by subject: the ones in the
+      # project and its subprojects, as the planner plans into, or every one
+      # the user may see on a cross-project list, which then names each
+      # epic's project.
+      def self.epic_filter_values(project)
+        scope = Issue.visible.open.where(:tracker_id => RedmineExpertAgile::Epics.tracker_ids)
+        scope = scope.where(:project_id => project.self_and_descendants.select(:id)) if project
+        scope.includes(:project).order(:subject).map do |epic|
+          label = "#{epic.subject} (##{epic.id})"
+          label = "#{epic.project.name} » #{label}" if project.nil?
+          [label, epic.id.to_s]
+        end
+      end
+
       def self.apply!(base = IssueQuery)
         return if base.instance_variable_get(:@expert_agile_query_patched)
 
@@ -90,6 +105,15 @@ module RedmineExpertAgile
                                  :values => lambda {
                                    RedmineExpertAgile::Patches::IssueQueryPatch.sprint_filter_values(query_project)
                                  })
+            # Asked when the filters are built, not at load time: the epic
+            # trackers are a setting read from the database.
+            if RedmineExpertAgile::Epics.enabled?
+              add_available_filter('expert_agile_epic_id',
+                                   :type => :list_optional, :name => l(:label_expert_agile_epic),
+                                   :values => lambda {
+                                     RedmineExpertAgile::Patches::IssueQueryPatch.epic_filter_values(query_project)
+                                   })
+            end
           end
         end
         base.send(filters_visibility, :initialize_available_filters)
@@ -144,6 +168,49 @@ module RedmineExpertAgile
       end
 
       module SqlMethods
+        # Everything below the chosen epics, at any depth: stories, their
+        # subtasks and the stories of an epic nested in one of them - what the
+        # epic's progress bar counts. Answered from the nested set, so the
+        # filter costs one subquery, not a walk up the tree per issue. "Any"
+        # and "none" ask whether some epic the user may see is above the
+        # issue, with the visible epics as a subquery rather than a list of
+        # ids, so the SQL stays the same size however many epics there are. A
+        # crafted id of an epic the user may not see matches nothing, so the
+        # filter never tells which readable issues sit under it.
+        def sql_for_expert_agile_epic_id_field(_field, operator, value)
+          positive = %w(= *).include?(operator)
+          tracker_ids = RedmineExpertAgile::Epics.tracker_ids
+          return(positive ? '1=0' : '1=1') if tracker_ids.empty?
+
+          if %w(* !*).include?(operator)
+            epics = Issue.visible.where(:tracker_id => tracker_ids).select(:id).to_sql
+          else
+            ids = expert_agile_visible_epic_ids(value)
+            return(positive ? '1=0' : '1=1') if ids.empty?
+
+            epics = ids.join(',')
+          end
+          "#{positive ? '' : 'NOT '}#{expert_agile_below_epics_sql(epics)}"
+        end
+
+        # Whether the issue sits somewhere below one of the given epics, from
+        # the nested set. `epics` is SQL for an IN list: checked ids joined by
+        # commas, or a subquery selecting ids.
+        def expert_agile_below_epics_sql(epics)
+          table = Issue.table_name
+          "EXISTS (SELECT 1 FROM #{table} ep WHERE ep.id IN (#{epics}) " \
+            "AND ep.root_id = #{table}.root_id AND ep.lft < #{table}.lft AND ep.rgt > #{table}.rgt)"
+        end
+
+        # Ids among the given values that are epics the user may see.
+        def expert_agile_visible_epic_ids(values)
+          tracker_ids = RedmineExpertAgile::Epics.tracker_ids
+          ids = Array(values).map(&:to_s).grep(/\A\d+\z/).map(&:to_i)
+          return [] if tracker_ids.empty? || ids.empty?
+
+          Issue.visible.where(:tracker_id => tracker_ids, :id => ids).pluck(:id)
+        end
+
         # Through the agile data row, as a subquery on issue ids like the
         # story points: an issue never planned has no row, and "not in sprint
         # X" has to keep it.

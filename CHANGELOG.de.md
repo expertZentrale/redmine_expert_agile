@@ -9,6 +9,7 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+
 ## [Unreleased]
 
 ### Hinzugefuegt
@@ -19,6 +20,16 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   den Redmine-Standard zuruecksetzen. Die WIP-Limits bleiben dem jeweiligen
   Status zugeordnet.
   ([#76](https://github.com/expertZentrale/redmine_expert_agile/issues/76))
+- **Epic-Filter.** Board, Backlog-Planer, Diagramme und Redmines Ticketliste lassen sich auf die
+  Tickets eines oder mehrerer Epics beschraenken — alles darunter, auch die Stories eines
+  verschachtelten Epics, so wie der Fortschrittsbalken des Epics zaehlt — oder auf Tickets mit
+  irgendeinem oder ohne Epic. Der Filter bietet die offenen Epics des Projekts und seiner
+  Unterprojekte an (in einer projektuebergreifenden Ticketliste alle offenen Epics, die man sehen
+  darf) und erscheint, solange in den Einstellungen Epic-Tracker gewaehlt sind. Es zaehlen nur Epics,
+  die man sehen darf; der Filter verraet also nie, welche Tickets unter einem anderen haengen.
+  Im Reiter *Epics* des Planers bleiben bei einem Filter auf bestimmte Epics auch nur deren Lanes
+  stehen, dazu die darin verschachtelter Epics; *irgendein* und *kein* Epic behalten alle Lanes zum
+  Einplanen.
 
 ## [0.11.0] - 2026-11-16
 

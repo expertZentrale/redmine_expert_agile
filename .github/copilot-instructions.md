@@ -158,7 +158,10 @@ of the release commit:
   `ExpertAgileEpicsController`) for a whole list in one visible-scoped query each; cards read them
   through `ExpertAgileQuery#card_story` / `#card_subtasks`, batch-loaded by `load_for_board`.
   The issue list's sprint filter (`expert_agile_sprint_id`, `active` resolved at query time) and
-  column (`SprintQueryColumn`) come from `IssueQueryPatch`. A QueryColumn grouped in SQL must
+  column (`SprintQueryColumn`) come from `IssueQueryPatch`, and so does the epic filter
+  (`expert_agile_epic_id`, while epics are on): everything below the chosen epics via the nested set,
+  like `Epics.progress`, with only epics the user may see counted, also for any/none; on the
+  planner's epic tab `=`/`!` also narrow the lanes (`ExpertAgileBacklogQuery#epic_lanes_filtered`). A QueryColumn grouped in SQL must
   override `group_by_statement` — core groups by the column's name otherwise — and its
   `group_value` must equal the SQL key, or the group counts come back empty. Group by a plain
   column of a joined row (`ead_group.sprint_id`, joined through `joins_for_order_statement`),
