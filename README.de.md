@@ -68,9 +68,8 @@ Alle Bildschirmfotos zeigen ein Demo-Projekt mit synthetischen Daten, aufgebaut 
 ### Board
 
 Die Spalten sind Ticketstatus, Karten werden zwischen ihnen verschoben. Status mit gemeinsamem
-Praefix — `Dev: Review` und `Dev: Test` — teilen sich eine Ueberschrift, wenn
-sie nebeneinander stehen. Eine Spalte oberhalb ihrer WIP-Grenze markiert sich
-selbst.
+Praefix — `Dev: Review` und `Dev: Test` — laufen unter einer gemeinsamen Ueberschrift zusammen,
+und eine Spalte oberhalb ihrer WIP-Grenze markiert sich selbst.
 
 Sobald eine Karte aufgenommen wird, markiert das Board jede Spalte: gruen, wohin der Workflow
 diese Karte laesst, schraffiert, wohin nicht. Die Antwort gilt pro Karte — Tracker, aktueller
