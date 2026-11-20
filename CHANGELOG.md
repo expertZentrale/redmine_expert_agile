@@ -13,6 +13,9 @@ notes from the section matching the pushed tag.
 
 ### Added
 
+- **Column order per saved Agile board.** Move issue-status columns with the
+ up/down controls under **Columns and WIP limits**, or reset the order to
+ Redmine's default. WIP limits stay with their statuses. ([#76](https://github.com/expertZentrale/redmine_expert_agile/issues/76))
 - **Epic filter.** The board, the backlog planner, the charts and Redmine's issue list can be
   narrowed to the issues of one or more epics — everything below them, including the stories of a
   nested epic, as the epic's progress bar counts them — or to issues with any epic or none. The

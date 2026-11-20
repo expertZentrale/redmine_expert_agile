@@ -190,6 +190,9 @@ de:
   label_expert_agile_columns_and_limits: Spalten und WIP-Limits
   label_expert_agile_wip_min: Min
   label_expert_agile_wip_max: Max
+  label_expert_agile_move_column_up: "%{status} nach oben verschieben"
+  label_expert_agile_move_column_down: "%{status} nach unten verschieben"
+  label_expert_agile_reset_column_order: "Spaltenreihenfolge zurücksetzen"
   text_expert_agile_board_statuses_hint: Die Status ankreuzen, die als Boardspalten erscheinen sollen. Ohne Auswahl zeigt das Board alle offenen Status der Workflows dieses Projekts.
   error_expert_agile_board_not_saveable: Sie duerfen kein Board mit dieser Sichtbarkeit speichern
 

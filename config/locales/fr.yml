@@ -190,6 +190,9 @@ fr:
   label_expert_agile_columns_and_limits: "Colonnes et limites WIP"
   label_expert_agile_wip_min: "Min"
   label_expert_agile_wip_max: "Max"
+  label_expert_agile_move_column_up: "Monter %{status}"
+  label_expert_agile_move_column_down: "Descendre %{status}"
+  label_expert_agile_reset_column_order: "Réinitialiser l’ordre des colonnes"
   text_expert_agile_board_statuses_hint: "Cochez les statuts à afficher comme colonnes du tableau. Si aucun n'est coché, le tableau affiche tous les statuts ouverts des workflows de ce projet."
   error_expert_agile_board_not_saveable: "Vous n'êtes pas autorisé à enregistrer un tableau avec cette visibilité"
 

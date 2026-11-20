@@ -14,6 +14,12 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ### Hinzugefuegt
 
+- **Spaltenreihenfolge pro gespeichertem Agile-Board.** Unter
+  **Spalten und WIP-Limits** lassen sich Statusspalten mit den
+  Pfeil-Schaltflaechen verschieben. Die Reihenfolge laesst sich auf
+  den Redmine-Standard zuruecksetzen. Die WIP-Limits bleiben dem jeweiligen
+  Status zugeordnet.
+  ([#76](https://github.com/expertZentrale/redmine_expert_agile/issues/76))
 - **Epic-Filter.** Board, Backlog-Planer, Diagramme und Redmines Ticketliste lassen sich auf die
   Tickets eines oder mehrerer Epics beschraenken — alles darunter, auch die Stories eines
   verschachtelten Epics, so wie der Fortschrittsbalken des Epics zaehlt — oder auf Tickets mit

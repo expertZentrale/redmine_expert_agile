@@ -163,6 +163,24 @@ class ExpertAgileBoardsControllerTest < Redmine::ControllerTest
     assert_select 'th.ea-column-header.ea-wip-over'
   end
 
+  def test_custom_column_order_is_applied_to_headers_and_cells_and_stays_in_session
+    first, second, third, hidden = IssueStatus.sorted.first(4).map { |status| status.id.to_s }
+    get :index, :params => { :project_id => @project.id, :set_filter => '1',
+                             :board_status_ids => [first, second, third],
+                             :board_column_order => "#{hidden},#{second},invalid,#{first},#{second},999999",
+                             :wip_limits => { second => %w(1 3) } }
+
+    assert_response :success
+    assert_equal [second, first, third], css_select('th[data-column-id]').map { |header| header['data-column-id'] }
+    assert_equal [second, first, third], css_select('td.ea-cell').map { |cell| cell['data-column-id'] }
+    assert_select 'th[data-column-id=?] .ea-column-wip', second, :text => '1-3'
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_equal [second, first, third], css_select('th[data-column-id]').map { |header| header['data-column-id'] }
+  end
+
   def test_applied_options_survive_a_reload
     # The options panel is a GET form, so without session persistence every
     # setting would live only in the URL and vanish the moment the page was
