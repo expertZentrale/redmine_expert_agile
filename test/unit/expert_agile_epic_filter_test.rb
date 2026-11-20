@@ -105,7 +105,11 @@ class ExpertAgileEpicFilterTest < ActiveSupport::TestCase
   end
 
   def test_the_filter_offers_the_open_epics_of_the_project
-    @search.update_column(:status_id, IssueStatus.where(:is_closed => true).first.id)
+    # A status of its own: depending on the test order, a fixture status has
+    # been seen not to count as closed here (see the epics controller test).
+    done = IssueStatus.create!(:name => 'Epic done', :is_closed => true)
+    @search.update_column(:status_id, done.id)
+    assert_not Issue.open.where(:id => @search.id).exists?
     values = with_agile_settings('epic_tracker_ids' => [EPIC_TRACKER.to_s]) do
       IssueQuery.new(:name => '_', :project => @project).available_filters['expert_agile_epic_id'][:values]
     end
