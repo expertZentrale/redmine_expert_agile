@@ -59,9 +59,9 @@ All screenshots show a demo project with synthetic data, built by
 
 ### Board
 
-Columns are issue statuses and cards are dragged between them. Statuses sharing a prefix —
-`Dev: Review` and `Dev: Test` — are merged under one header, and a column over its WIP limit
-flags itself.
+Columns are issue statuses and cards are dragged between them. Statuses sharing
+a prefix - `Dev: Review` and `Dev: Test` - are merged under one header when
+adjacent. A column over its WIP limit flags itself.
 
 Picking a card up marks every column at once: green where the workflow lets that card go,
 striped where it does not. The answer is per card — tracker, current status, your roles, whether
@@ -108,6 +108,11 @@ A board worth keeping is saved from the options panel and reopened from the side
 saved board opens the same panel it was created with, so its filters, card fields, swimlanes,
 colouring, status columns and WIP limits can all be changed — and Edit takes whatever is currently
 applied along with it, so it opens the board as it is on screen rather than as it was last saved.
+
+Under **Columns and WIP limits**, use the up/down buttons to reorder status columns before saving.
+The order applies only to that board. **Reset column order** restores the Redmine default.
+Statuses with a shared prefix, such as `Dev: Review` and `Dev: Test`, share a header only while
+they are next to each other.
 
 ![The same board grouped into swimlanes by assignee: one labelled band per team member plus a
 band for unassigned issues, each spanning all five status columns](docs/screenshots/en/02-board-swimlanes.png)

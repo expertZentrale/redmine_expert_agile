@@ -9,6 +9,17 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+## [Unreleased]
+
+### Hinzugefuegt
+
+- **Spaltenreihenfolge pro gespeichertem Agile-Board.** Unter
+  **Spalten und WIP-Limits** lassen sich Statusspalten mit den
+  Pfeil-Schaltflaechen verschieben. Die Reihenfolge laesst sich auf
+  den Redmine-Standard zuruecksetzen. Die WIP-Limits bleiben dem jeweiligen
+  Status zugeordnet.
+  ([#76](https://github.com/expertZentrale/redmine_expert_agile/issues/76))
+
 ## [0.11.0] - 2026-11-16
 
 ### Hinzugefuegt

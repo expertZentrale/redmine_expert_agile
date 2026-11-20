@@ -9,6 +9,14 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Added
+
+- **Column order per saved Agile board.** Move issue-status columns with the
+ up/down controls under **Columns and WIP limits**, or reset the order to
+ Redmine's default. WIP limits stay with their statuses. ([#76](https://github.com/expertZentrale/redmine_expert_agile/issues/76))
+
 ## [0.11.0] - 2026-11-16
 
 ### Added
