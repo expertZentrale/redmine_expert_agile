@@ -147,6 +147,12 @@ eines anderen Epics zu ziehen verschiebt sie dorthin. Im Backlog-Planer plant *E
 Jede Epic-Lane und die Ticketseite des Epics zeigen seinen Fortschritt. Das Kartenfeld *Unteraufgaben* klappt die Unteraufgaben einer Story auf
 ihrer Karte auf, und der Reiter *Epics* zeigt jedes Epic mit Stories und Unteraufgaben als Baum.
 
+Der Filter **Epic** beschraenkt Board, Backlog-Planer, Diagramme und Redmines Ticketliste auf die
+Tickets eines oder mehrerer Epics — alles darunter, auch die Stories eines verschachtelten Epics,
+so wie der Fortschrittsbalken zaehlt — oder auf Tickets mit irgendeinem oder ohne Epic. Angeboten
+werden die offenen Epics des Projekts und seiner Unterprojekte; in einer projektuebergreifenden
+Ticketliste alle offenen Epics, die man sehen darf.
+
 ![Sprint-Board nach Epic gruppiert: eine Swimlane je Epic mit dem Fortschrittsbalken des Epics im
 Kopf und eine letzte Lane fuer Tickets ohne Epic. Eine Story in Arbeit zeigt "Erledigte
 Unteraufgaben: 1/3", ihre Unteraufgaben stehen in ihren eigenen Spalten](docs/screenshots/de/12-board-epics.png)

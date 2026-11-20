@@ -9,6 +9,17 @@ All notable changes to this plugin are documented here. The format follows
 This file is authoritative: the release workflow generates the GitHub release
 notes from the section matching the pushed tag.
 
+## [Unreleased]
+
+### Added
+
+- **Epic filter.** The board, the backlog planner, the charts and Redmine's issue list can be
+  narrowed to the issues of one or more epics — everything below them, including the stories of a
+  nested epic, as the epic's progress bar counts them — or to issues with any epic or none. The
+  filter offers the open epics of the project and its subprojects (on a cross-project issue list,
+  every open epic you may see) and is there while epic trackers are chosen in the settings. Only
+  epics you may see count, so the filter never reveals which issues sit under one you may not.
+
 ## [0.11.0] - 2026-11-16
 
 ### Added

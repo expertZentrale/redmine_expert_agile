@@ -132,6 +132,12 @@ moves it there. In the backlog planner, *Epics* plans stories into epics the sam
 Every epic lane and the epic's issue page show its progress. The *Subtasks* card field folds a story's subtasks out on its card,
 and the *Epics* tab shows each epic with its stories and subtasks as a tree.
 
+The **Epic** filter narrows the board, the backlog planner, the charts and Redmine's issue list to
+the issues of one or more epics — everything below them, including the stories of a nested epic,
+just as the progress bar counts them — or to issues with any epic or none. It offers the open
+epics of the project and its subprojects; on a cross-project issue list, every open epic you may
+see.
+
 ![Sprint board grouped by epic: one swimlane per epic, headed by the epic's progress bar, and a
 last lane for issues without an epic. A story in progress shows "Subtasks done: 1/3", and its
 subtasks sit in their own columns](docs/screenshots/en/12-board-epics.png)

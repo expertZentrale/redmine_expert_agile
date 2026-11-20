@@ -9,6 +9,19 @@ Projekt verwendet [Semantic Versioning](https://semver.org/lang/de/).
 Massgeblich ist die englische [CHANGELOG.md](CHANGELOG.md) — daraus erzeugt der
 Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
+
+## [Unreleased]
+
+### Hinzugefuegt
+
+- **Epic-Filter.** Board, Backlog-Planer, Diagramme und Redmines Ticketliste lassen sich auf die
+  Tickets eines oder mehrerer Epics beschraenken — alles darunter, auch die Stories eines
+  verschachtelten Epics, so wie der Fortschrittsbalken des Epics zaehlt — oder auf Tickets mit
+  irgendeinem oder ohne Epic. Der Filter bietet die offenen Epics des Projekts und seiner
+  Unterprojekte an (in einer projektuebergreifenden Ticketliste alle offenen Epics, die man sehen
+  darf) und erscheint, solange in den Einstellungen Epic-Tracker gewaehlt sind. Es zaehlen nur Epics,
+  die man sehen darf; der Filter verraet also nie, welche Tickets unter einem anderen haengen.
+
 ## [0.11.0] - 2026-11-16
 
 ### Hinzugefuegt
