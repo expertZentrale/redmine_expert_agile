@@ -68,8 +68,9 @@ Alle Bildschirmfotos zeigen ein Demo-Projekt mit synthetischen Daten, aufgebaut 
 ### Board
 
 Die Spalten sind Ticketstatus, Karten werden zwischen ihnen verschoben. Status mit gemeinsamem
-Praefix — `Dev: Review` und `Dev: Test` — laufen unter einer gemeinsamen Ueberschrift zusammen,
-und eine Spalte oberhalb ihrer WIP-Grenze markiert sich selbst.
+Praefix — `Dev: Review` und `Dev: Test` — teilen sich eine Ueberschrift, wenn
+sie nebeneinander stehen. Eine Spalte oberhalb ihrer WIP-Grenze markiert sich
+selbst.
 
 Sobald eine Karte aufgenommen wird, markiert das Board jede Spalte: gruen, wohin der Workflow
 diese Karte laesst, schraffiert, wohin nicht. Die Antwort gilt pro Karte — Tracker, aktueller
@@ -123,6 +124,11 @@ Optionsfeld, mit dem es angelegt wurde: Filter, Kartenfelder, Swimlanes, Einfaer
 Statusspalten und WIP-Grenzen lassen sich alle aendern. "Bearbeiten" nimmt ausserdem mit, was
 gerade angewandt ist — das Board oeffnet sich also so, wie es auf dem Bildschirm steht, und nicht
 so, wie es zuletzt gespeichert wurde.
+
+Unter **Spalten und WIP-Limits** lassen sich Statusspalten vor dem Speichern mit den Pfeil-Schaltflaechen
+nach oben oder unten verschieben. Die Reihenfolge gilt nur fuer dieses Board. **Spaltenreihenfolge
+zurücksetzen** stellt die Redmine-Standardreihenfolge wieder her. Status mit gleichem Praefix, etwa
+`Dev: Review` und `Dev: Test`, teilen sich nur dann eine Ueberschrift, wenn sie nebeneinander stehen.
 
 ![Dasselbe Board, in Swimlanes nach Bearbeiter gruppiert: ein beschriftetes Band je Teammitglied
 plus ein Band fuer nicht zugewiesene Tickets, jedes ueber alle fuenf Statusspalten](docs/screenshots/de/02-board-swimlanes.png)

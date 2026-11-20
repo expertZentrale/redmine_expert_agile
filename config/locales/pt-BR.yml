@@ -190,6 +190,9 @@ pt-BR:
   label_expert_agile_columns_and_limits: "Colunas e limites de WIP"
   label_expert_agile_wip_min: "Mín"
   label_expert_agile_wip_max: "Máx"
+  label_expert_agile_move_column_up: "Mover %{status} para cima"
+  label_expert_agile_move_column_down: "Mover %{status} para baixo"
+  label_expert_agile_reset_column_order: "Redefinir a ordem das colunas"
   text_expert_agile_board_statuses_hint: "Marque as situações a exibir como colunas do quadro. Sem nenhuma marcada, o quadro exibe todas as situações abertas dos fluxos de trabalho deste projeto."
   error_expert_agile_board_not_saveable: "Você não tem permissão para salvar um quadro com esta visibilidade"
 

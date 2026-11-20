@@ -78,6 +78,33 @@ class ExpertAgileQueriesControllerTest < Redmine::ControllerTest
     assert_equal 'tracker', reloaded.color_base
   end
 
+  def test_column_order_is_saved_per_board_and_can_be_reset
+    default_order = IssueStatus.sorted.first(2).map(&:id)
+    custom_order = default_order.reverse
+    selection = { :board_status_ids => default_order.map(&:to_s) }
+    post :create, :params => board_params(selection.merge(:board_column_order => custom_order.join(',')))
+    ordered_board = ExpertAgileQuery.order(:id).last
+    post :create, :params => board_params(selection)
+    other_board = ExpertAgileQuery.order(:id).last
+
+    assert_equal custom_order, ordered_board.reload.board_columns.map(&:id)
+    assert_empty other_board.reload.board_column_order
+    assert_equal default_order, other_board.board_columns.map(&:id)
+
+    get :edit, :params => { :id => ordered_board.id }
+
+    assert_response :success
+    assert_select 'input[name=?][value=?]', 'board_column_order', custom_order.join(',')
+    assert_equal custom_order, css_select('.ea-status-row').first(2).map { |row| row['data-status-id'].to_i }
+
+    put :update, :params => { :id => ordered_board.id, :board_column_order => '' }.merge(selection)
+
+    assert_redirected_to project_expert_agile_board_path(@project, :query_id => ordered_board.id)
+    reloaded = ExpertAgileQuery.find(ordered_board.id)
+    assert_empty reloaded.board_column_order
+    assert_equal default_order, reloaded.board_columns.map(&:id)
+  end
+
   def test_destroy
     post :create, :params => board_params
     query = ExpertAgileQuery.order(:id).last

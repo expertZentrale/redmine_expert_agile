@@ -190,6 +190,9 @@ en:
   label_expert_agile_columns_and_limits: Columns and WIP limits
   label_expert_agile_wip_min: Min
   label_expert_agile_wip_max: Max
+  label_expert_agile_move_column_up: "Move %{status} up"
+  label_expert_agile_move_column_down: "Move %{status} down"
+  label_expert_agile_reset_column_order: "Reset column order"
   text_expert_agile_board_statuses_hint: Tick the statuses to show as board columns. With none ticked the board shows every open status of this project's workflows.
   error_expert_agile_board_not_saveable: You are not allowed to save a board of this visibility
 

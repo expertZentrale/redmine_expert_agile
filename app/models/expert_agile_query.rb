@@ -56,6 +56,29 @@ class ExpertAgileQuery < IssueQuery
     options[:board_status_ids] = Array(ids).map(&:to_i).reject(&:zero?)
   end
 
+  def board_column_order
+    options[:board_column_order] || []
+  end
+
+  def board_column_order=(ids)
+    ids = Array(ids).map(&:to_s).grep(/\A[1-9][0-9]*\z/).map(&:to_i).uniq
+    if ids.empty?
+      options.delete(:board_column_order)
+    else
+      options[:board_column_order] = ids
+    end
+    @board_columns = nil
+  end
+
+  # Use the custom order for known statuses and keep all remaining statuses
+  # in their default order. The order never decides which columns are shown.
+  def order_board_statuses(statuses)
+    return statuses if board_column_order.empty?
+
+    remaining = statuses.index_by(&:id)
+    board_column_order.filter_map { |id| remaining.delete(id) } + remaining.values
+  end
+
   # {status_id => [min, max]}, either bound optional.
   #
   # Stored as a real hash of integer pairs, not as a string that would have to
@@ -158,7 +181,7 @@ class ExpertAgileQuery < IssueQuery
 
   # The board-specific settings, as a small plain hash, for stashing in the
   # session between requests. Deliberately not the whole `options` blob.
-  BOARD_SESSION_KEYS = %i(board_status_ids wip_limits color_base board_type
+  BOARD_SESSION_KEYS = %i(board_status_ids board_column_order wip_limits color_base board_type
                           show_avatar sprint_id backlog_enabled hide_epics).freeze
 
   # Read through this rather than the constant, so a subclass with settings of
@@ -191,6 +214,7 @@ class ExpertAgileQuery < IssueQuery
   # the settings core knows nothing about.
   def apply_board_params(params)
     self.board_status_ids = params[:board_status_ids] if params.key?(:board_status_ids)
+    self.board_column_order = params[:board_column_order].to_s.split(',') if params.key?(:board_column_order)
     self.wip_limits = params[:wip_limits] if params.key?(:wip_limits)
     self.color_base = params[:color_base] if params[:color_base].present?
     self.board_type = params[:board_type] if params[:board_type].present?
@@ -441,7 +465,7 @@ class ExpertAgileQuery < IssueQuery
       points = story_points_by_status
       limits = wip_limits
 
-      board_statuses.map do |status|
+      order_board_statuses(board_statuses).map do |status|
         min, max = limits[status.id]
         RedmineExpertAgile::BoardColumn.new(
           :status => status,

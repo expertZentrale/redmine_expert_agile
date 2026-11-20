@@ -93,25 +93,43 @@
         <p class="ea-hint"><%= l(:text_expert_agile_board_statuses_hint) %></p>
         <% selected = @query.board_statuses.map(&:id) %>
         <% limits = @query.wip_limits %>
+        <% statuses = expert_agile_selectable_statuses(@query) %>
+        <% default_positions = statuses.map(&:id).each_with_index.to_h %>
         <%= hidden_field_tag 'board_status_ids[]', '' %>
+        <%= hidden_field_tag 'board_column_order', @query.board_column_order.join(',') %>
         <div class="ea-status-grid">
           <span class="ea-status-grid-head"><%= l(:field_status) %></span>
           <span class="ea-status-grid-head"><%= l(:label_expert_agile_wip_min) %></span>
           <span class="ea-status-grid-head"><%= l(:label_expert_agile_wip_max) %></span>
-          <% expert_agile_selectable_statuses(@query).each do |status| %>
-            <label class="ea-status-name<%= ' ea-status-closed' if status.is_closed? %>">
-              <%= check_box_tag 'board_status_ids[]', status.id,
-                                selected.include?(status.id), :id => "ea_status_#{status.id}" %>
-              <%= h status.name %>
-            </label>
-            <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][0],
-                               :size => 2, :id => nil, :class => 'ea-wip-input' %>
-            <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][1],
-                               :size => 2, :id => nil, :class => 'ea-wip-input' %>
+          <span class="ea-status-grid-head"></span>
+          <% @query.order_board_statuses(statuses).each do |status| %>
+            <div class="ea-status-row" data-status-id="<%= status.id %>" data-default-position="<%= default_positions[status.id] %>">
+              <label class="ea-status-name<%= ' ea-status-closed' if status.is_closed? %>">
+                <%= check_box_tag 'board_status_ids[]', status.id,
+                                  selected.include?(status.id), :id => "ea_status_#{status.id}" %>
+                <%= h status.name %>
+              </label>
+              <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][0],
+                                 :size => 2, :id => nil, :class => 'ea-wip-input' %>
+              <%= text_field_tag "wip_limits[#{status.id}][]", limits[status.id] && limits[status.id][1],
+                                 :size => 2, :id => nil, :class => 'ea-wip-input' %>
+              <span class="ea-status-order" hidden>
+                <%= button_tag '↑', :type => 'button', :name => nil, :data => { :ea_move => 'up' },
+                               :aria => { :label => l(:label_expert_agile_move_column_up, :status => status.name) } %>
+                <%= button_tag '↓', :type => 'button', :name => nil, :data => { :ea_move => 'down' },
+                               :aria => { :label => l(:label_expert_agile_move_column_down, :status => status.name) } %>
+              </span>
+            </div>
           <% end %>
         </div>
+        <%= button_tag l(:label_expert_agile_reset_column_order), :type => 'button', :name => nil,
+                       :class => 'ea-column-order-reset', :hidden => true %>
       </section>
 
     </div>
   </div>
 </fieldset>
+
+<% content_for :header_tags do %>
+  <%= javascript_include_tag 'expert_agile_column_order', :plugin => 'redmine_expert_agile' %>
+<% end %>

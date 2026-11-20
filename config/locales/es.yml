@@ -190,6 +190,9 @@ es:
   label_expert_agile_columns_and_limits: "Columnas y límites WIP"
   label_expert_agile_wip_min: "Mín"
   label_expert_agile_wip_max: "Máx"
+  label_expert_agile_move_column_up: "Subir %{status}"
+  label_expert_agile_move_column_down: "Bajar %{status}"
+  label_expert_agile_reset_column_order: "Restablecer el orden de las columnas"
   text_expert_agile_board_statuses_hint: "Marque los estados que se mostrarán como columnas del tablero. Si no marca ninguno, el tablero muestra todos los estados abiertos de los flujos de trabajo de este proyecto."
   error_expert_agile_board_not_saveable: "No tiene permiso para guardar un tablero con esta visibilidad"
 
