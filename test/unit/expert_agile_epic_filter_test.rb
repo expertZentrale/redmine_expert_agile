@@ -74,6 +74,19 @@ class ExpertAgileEpicFilterTest < ActiveSupport::TestCase
     assert_equal [@checkout, @search, @loose].map(&:id).sort, ids_for('!*', ['']).sort
   end
 
+  # Any/none select the visible epics in a subquery: the SQL must not grow
+  # with the number of epics.
+  def test_any_epic_does_not_list_every_epic_id
+    sql = with_agile_settings('epic_tracker_ids' => [EPIC_TRACKER.to_s]) do
+      query = IssueQuery.new(:name => '_', :project => @project)
+      query.add_filter('expert_agile_epic_id', '*', [''])
+      query.statement
+    end
+
+    assert_match(/ep\.id IN \(SELECT/, sql)
+    assert_no_match(/ep\.id IN \(\d/, sql)
+  end
+
   def test_junk_values_match_nothing
     assert_empty ids_for('=', ['abc', ''])
     assert_equal ours.sort, ids_for('!', ['abc']).sort

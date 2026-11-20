@@ -167,7 +167,8 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
     if epic_ids.empty?
       operator == '=' ? scope.none : scope
     else
-      lanes = "#{Issue.table_name}.id IN (#{epic_ids.join(',')}) OR #{expert_agile_below_epics_sql(epic_ids)}"
+      ids = epic_ids.join(',')
+      lanes = "#{Issue.table_name}.id IN (#{ids}) OR #{expert_agile_below_epics_sql(ids)}"
       operator == '=' ? scope.where(lanes) : scope.where.not(lanes)
     end
   end

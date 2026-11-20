@@ -173,42 +173,42 @@ module RedmineExpertAgile
         # epic's progress bar counts. Answered from the nested set, so the
         # filter costs one subquery, not a walk up the tree per issue. "Any"
         # and "none" ask whether some epic the user may see is above the
-        # issue; a crafted id of an epic the user may not see matches nothing,
-        # so the filter never tells which readable issues sit under it.
+        # issue, with the visible epics as a subquery rather than a list of
+        # ids, so the SQL stays the same size however many epics there are. A
+        # crafted id of an epic the user may not see matches nothing, so the
+        # filter never tells which readable issues sit under it.
         def sql_for_expert_agile_epic_id_field(_field, operator, value)
           positive = %w(= *).include?(operator)
-          epic_ids = if %w(* !*).include?(operator)
-                       expert_agile_visible_epic_ids
-                     else
-                       expert_agile_visible_epic_ids(value)
-                     end
-          return(positive ? '1=0' : '1=1') if epic_ids.empty?
+          tracker_ids = RedmineExpertAgile::Epics.tracker_ids
+          return(positive ? '1=0' : '1=1') if tracker_ids.empty?
 
-          "#{positive ? '' : 'NOT '}#{expert_agile_below_epics_sql(epic_ids)}"
+          if %w(* !*).include?(operator)
+            epics = Issue.visible.where(:tracker_id => tracker_ids).select(:id).to_sql
+          else
+            ids = expert_agile_visible_epic_ids(value)
+            return(positive ? '1=0' : '1=1') if ids.empty?
+
+            epics = ids.join(',')
+          end
+          "#{positive ? '' : 'NOT '}#{expert_agile_below_epics_sql(epics)}"
         end
 
-        # Whether the issue sits somewhere below one of the given epics (ids
-        # already checked), from the nested set.
-        def expert_agile_below_epics_sql(epic_ids)
+        # Whether the issue sits somewhere below one of the given epics, from
+        # the nested set. `epics` is SQL for an IN list: checked ids joined by
+        # commas, or a subquery selecting ids.
+        def expert_agile_below_epics_sql(epics)
           table = Issue.table_name
-          "EXISTS (SELECT 1 FROM #{table} ep WHERE ep.id IN (#{epic_ids.map(&:to_i).join(',')}) " \
+          "EXISTS (SELECT 1 FROM #{table} ep WHERE ep.id IN (#{epics}) " \
             "AND ep.root_id = #{table}.root_id AND ep.lft < #{table}.lft AND ep.rgt > #{table}.rgt)"
         end
 
-        # Ids of the epics the user may see, all of them or those among the
-        # given values.
-        def expert_agile_visible_epic_ids(values = nil)
+        # Ids among the given values that are epics the user may see.
+        def expert_agile_visible_epic_ids(values)
           tracker_ids = RedmineExpertAgile::Epics.tracker_ids
-          return [] if tracker_ids.empty?
+          ids = Array(values).map(&:to_s).grep(/\A\d+\z/).map(&:to_i)
+          return [] if tracker_ids.empty? || ids.empty?
 
-          scope = Issue.visible.where(:tracker_id => tracker_ids)
-          unless values.nil?
-            ids = Array(values).map(&:to_s).grep(/\A\d+\z/).map(&:to_i)
-            return [] if ids.empty?
-
-            scope = scope.where(:id => ids)
-          end
-          scope.pluck(:id)
+          Issue.visible.where(:tracker_id => tracker_ids, :id => ids).pluck(:id)
         end
 
         # Through the agile data row, as a subquery on issue ids like the
