@@ -21,6 +21,9 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Unterprojekte an (in einer projektuebergreifenden Ticketliste alle offenen Epics, die man sehen
   darf) und erscheint, solange in den Einstellungen Epic-Tracker gewaehlt sind. Es zaehlen nur Epics,
   die man sehen darf; der Filter verraet also nie, welche Tickets unter einem anderen haengen.
+  Im Reiter *Epics* des Planers bleiben bei einem Filter auf bestimmte Epics auch nur deren Lanes
+  stehen, dazu die darin verschachtelter Epics; *irgendein* und *kein* Epic behalten alle Lanes zum
+  Einplanen.
 
 ## [0.11.0] - 2026-11-16
 

@@ -151,7 +151,9 @@ Der Filter **Epic** beschraenkt Board, Backlog-Planer, Diagramme und Redmines Ti
 Tickets eines oder mehrerer Epics — alles darunter, auch die Stories eines verschachtelten Epics,
 so wie der Fortschrittsbalken zaehlt — oder auf Tickets mit irgendeinem oder ohne Epic. Angeboten
 werden die offenen Epics des Projekts und seiner Unterprojekte; in einer projektuebergreifenden
-Ticketliste alle offenen Epics, die man sehen darf.
+Ticketliste alle offenen Epics, die man sehen darf. Im Reiter *Epics* des Planers bleiben bei
+einem Filter auf bestimmte Epics auch nur deren Lanes stehen (und die darin verschachtelter Epics);
+*irgendein* und *kein* Epic behalten alle Lanes als Ablageziele.
 
 ![Sprint-Board nach Epic gruppiert: eine Swimlane je Epic mit dem Fortschrittsbalken des Epics im
 Kopf und eine letzte Lane fuer Tickets ohne Epic. Eine Story in Arbeit zeigt "Erledigte

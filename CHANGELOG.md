@@ -19,6 +19,8 @@ notes from the section matching the pushed tag.
   filter offers the open epics of the project and its subprojects (on a cross-project issue list,
   every open epic you may see) and is there while epic trackers are chosen in the settings. Only
   epics you may see count, so the filter never reveals which issues sit under one you may not.
+  On the planner's *Epics* tab, filtering to some epics also leaves only their lanes, and those of
+  epics nested in them; *any* and *none* keep every lane to plan into.
 
 ## [0.11.0] - 2026-11-16
 

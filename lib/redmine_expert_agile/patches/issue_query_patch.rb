@@ -176,7 +176,6 @@ module RedmineExpertAgile
         # issue; a crafted id of an epic the user may not see matches nothing,
         # so the filter never tells which readable issues sit under it.
         def sql_for_expert_agile_epic_id_field(_field, operator, value)
-          table = Issue.table_name
           positive = %w(= *).include?(operator)
           epic_ids = if %w(* !*).include?(operator)
                        expert_agile_visible_epic_ids
@@ -185,9 +184,15 @@ module RedmineExpertAgile
                      end
           return(positive ? '1=0' : '1=1') if epic_ids.empty?
 
-          below = "SELECT 1 FROM #{table} ep WHERE ep.id IN (#{epic_ids.join(',')}) " \
-                  "AND ep.root_id = #{table}.root_id AND ep.lft < #{table}.lft AND ep.rgt > #{table}.rgt"
-          "#{positive ? '' : 'NOT '}EXISTS (#{below})"
+          "#{positive ? '' : 'NOT '}#{expert_agile_below_epics_sql(epic_ids)}"
+        end
+
+        # Whether the issue sits somewhere below one of the given epics (ids
+        # already checked), from the nested set.
+        def expert_agile_below_epics_sql(epic_ids)
+          table = Issue.table_name
+          "EXISTS (SELECT 1 FROM #{table} ep WHERE ep.id IN (#{epic_ids.map(&:to_i).join(',')}) " \
+            "AND ep.root_id = #{table}.root_id AND ep.lft < #{table}.lft AND ep.rgt > #{table}.rgt)"
         end
 
         # Ids of the epics the user may see, all of them or those among the

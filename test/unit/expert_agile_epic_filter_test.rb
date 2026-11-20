@@ -131,4 +131,34 @@ class ExpertAgileEpicFilterTest < ActiveSupport::TestCase
     end
     assert_equal [@nested_story, @search_story].map(&:id).sort, backlog.sort
   end
+
+  def epic_lanes(operator, values)
+    with_agile_settings('epic_tracker_ids' => [EPIC_TRACKER.to_s]) do
+      query = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
+      query.container_type = ExpertAgileBacklogQuery::CONTAINER_EPIC
+      query.add_filter('expert_agile_epic_id', operator, values) if operator
+      query.containers.map(&:id) & ours
+    end
+  end
+
+  # Filtered to an epic, the planner's epic tab shows that epic and the ones
+  # nested in it, not a row of empty lanes for all the others.
+  def test_the_planner_shows_the_lanes_of_the_filtered_epics
+    all = [@checkout, @nested, @search].map(&:id).sort
+
+    assert_equal all, epic_lanes(nil, nil).sort
+    assert_equal [@checkout, @nested].map(&:id).sort, epic_lanes('=', [@checkout.id.to_s]).sort
+    assert_equal [@nested.id], epic_lanes('=', [@nested.id.to_s])
+    assert_equal [@search.id], epic_lanes('!', [@checkout.id.to_s])
+    assert_empty epic_lanes('=', ['abc'])
+  end
+
+  # "Any" and "none" keep every lane: they are where the issues without an
+  # epic get planned into.
+  def test_any_and_no_epic_keep_every_lane
+    all = [@checkout, @nested, @search].map(&:id).sort
+
+    assert_equal all, epic_lanes('*', ['']).sort
+    assert_equal all, epic_lanes('!*', ['']).sort
+  end
 end

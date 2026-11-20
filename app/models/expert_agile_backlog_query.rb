@@ -148,10 +148,28 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
   def available_epics
     return [] unless project
 
-    Issue.visible.open
-         .where(:tracker_id => RedmineExpertAgile::Epics.tracker_ids)
-         .where(:project_id => project.self_and_descendants.select(:id))
-         .order(:subject).to_a
+    scope = Issue.visible.open
+                 .where(:tracker_id => RedmineExpertAgile::Epics.tracker_ids)
+                 .where(:project_id => project.self_and_descendants.select(:id))
+    epic_lanes_filtered(scope).order(:subject).to_a
+  end
+
+  # The epic filter decides the lanes as well as the cards: filtered to some
+  # epics, the planner shows their lanes and those of epics nested in them,
+  # filtered away from some epics it drops those lanes, since nothing in them
+  # could match. "Any epic" and "no epic" keep every lane, which are then
+  # the drop targets for planning the issues without one.
+  def epic_lanes_filtered(scope)
+    operator = operator_for('expert_agile_epic_id')
+    return scope unless %w(= !).include?(operator)
+
+    epic_ids = expert_agile_visible_epic_ids(values_for('expert_agile_epic_id'))
+    if epic_ids.empty?
+      operator == '=' ? scope.none : scope
+    else
+      lanes = "#{Issue.table_name}.id IN (#{epic_ids.join(',')}) OR #{expert_agile_below_epics_sql(epic_ids)}"
+      operator == '=' ? scope.where(lanes) : scope.where.not(lanes)
+    end
   end
 
   # Planning into epics moves stories: issues straight under an epic, or

@@ -136,7 +136,8 @@ The **Epic** filter narrows the board, the backlog planner, the charts and Redmi
 the issues of one or more epics — everything below them, including the stories of a nested epic,
 just as the progress bar counts them — or to issues with any epic or none. It offers the open
 epics of the project and its subprojects; on a cross-project issue list, every open epic you may
-see.
+see. On the planner's *Epics* tab, filtering to some epics also leaves only their lanes (and those
+of epics nested in them); *any* and *none* keep every lane as a drop target.
 
 ![Sprint board grouped by epic: one swimlane per epic, headed by the epic's progress bar, and a
 last lane for issues without an epic. A story in progress shows "Subtasks done: 1/3", and its
