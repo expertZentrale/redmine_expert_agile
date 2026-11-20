@@ -1,0 +1,12 @@
+h3. redmine_expert_agile 0.12.0 — 2026-11-20
+
+Each saved board keeps its own column order, and an *Epic* filter narrows the board, the backlog planner, the charts and the issue list to one or more epics.
+
+h4. Added
+
+* *Column order per saved board.* Under _Columns and WIP limits_ in the board options, the up/down buttons move status columns, and _Reset column order_ restores Redmine's order. The order applies to that board only, and WIP limits stay with their statuses. Statuses sharing a prefix share one header only while they stand next to each other. Contributed by ntenev.
+* *Epic filter.* The board, the backlog planner, the charts and Redmine's issue list (REST API included) can be narrowed to the issues of one or more epics, meaning everything below them as the epic's progress bar counts it, or to issues with any epic or none. The filter offers the open epics of the project and its subprojects and appears while epic trackers are chosen. Only epics the user may see count. On the planner's _Epics_ tab, filtering to some epics also leaves only their lanes.
+
+h4. Upgrade notes
+
+No migrations, no new settings and no new permissions. Replace the plugin directory and restart.
