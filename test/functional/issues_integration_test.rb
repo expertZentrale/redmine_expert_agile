@@ -286,6 +286,67 @@ class IssuesIntegrationTest < Redmine::ControllerTest
   end
 
 
+  # The sidebar's "Epics and stories" list, followed: the epic tree's data
+  # and assets come with it.
+  def test_the_epic_tree_list_names_its_epics
+    epic = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Epic on the list')
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic.id)
+
+    params = RedmineExpertAgile::IssueTree.tree_list_params.merge(:project_id => @project.id, :per_page => 100)
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => params
+    end
+
+    assert_response :success
+    assert_select 'table.issues tr#issue-' + story.id.to_s + '.idnt-1'
+    data = JSON.parse(css_select('script#ea-issue-tree-data').first.text)
+    assert_equal l(:label_expert_agile_epic_progress_issues, :closed => 0, :total => 1),
+                 data['epics'][epic.id.to_s]['progress']
+    assert_equal epic.id.to_s, data['members'][story.id.to_s]
+    scripts = css_select('script[src]').map { |script| script['src'] }
+    assert scripts.any? { |src| src =~ %r{redmine_expert_agile/.*expert_agile_issue_tree[-.].*js} }, scripts.inspect
+    sheets = css_select('link[rel=stylesheet]').map { |link| link['href'] }
+    assert sheets.any? { |href| href =~ %r{redmine_expert_agile/.*expert_agile_issue_tree[-.].*css} }, sheets.inspect
+  end
+
+  def test_an_issue_list_in_another_order_gets_no_epic_tree
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => { :project_id => @project.id, :set_filter => '1', :sort => 'id:desc' }
+    end
+
+    assert_response :success
+    assert_select 'script#ea-issue-tree-data', 0
+  end
+
+  def test_without_epic_trackers_the_issue_list_gets_no_epic_tree
+    get :index, :params => { :project_id => @project.id, :set_filter => '1', :sort => 'parent' }
+
+    assert_response :success
+    assert_select 'script#ea-issue-tree-data', 0
+  end
+
+  def test_the_issue_sidebar_offers_the_epic_tree_where_the_project_plans_with_epics
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => { :project_id => @project.id }
+    end
+
+    assert_response :success
+    assert_select '#sidebar ul.expert-agile-epic-views a[href*="sort=parent"]',
+                  :text => l(:label_expert_agile_epic_view_tree)
+  end
+
+  def test_the_issue_sidebar_offers_no_epic_tree_without_the_agile_modules
+    @project.disable_module!(:expert_agile)
+    @project.disable_module!(:expert_agile_backlog)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => { :project_id => @project.id }
+    end
+
+    assert_response :success
+    assert_select '.expert-agile-epic-views', 0
+  end
+
   # The issue list with the sprint filter and column: a core page, so it is
   # rendered here like every other page the plugin touches.
   def test_the_issue_list_filters_and_shows_the_sprint

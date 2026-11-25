@@ -11,6 +11,20 @@ notes from the section matching the pushed tag.
 
 ## [Unreleased]
 
+### Added
+
+- **Epic tree on the issue list.** Sorted by *Parent task*, Redmine's issue list highlights
+  epics: each epic row is tinted in the epic's colour (the same as its badge on the board), shows
+  how many of its issues are done and folds its rows away; *Collapse all epics* folds them all at
+  once, and the browser remembers what is folded. Tree lines replace the indent arrows, and every
+  issue below an epic carries a bar in its colour, also when a filter leaves the epic itself off
+  the list. A list in any other order is left as it was. No migration, no setting.
+- **Epics and stories in the issue sidebar.** Projects with the Agile board or the backlog
+  planner and an epic tracker get an *Epic views* section in the issue sidebar. *Epics and stories*
+  opens the issue list with every status, sorted by parent task, with the Tracker, Status, Subject,
+  Assignee, Sprint and % done columns. It is a link, not a saved query: nothing to set up, and
+  projects that plan without epics do not see it.
+
 ## [0.12.0] - 2026-11-20
 
 ### Added

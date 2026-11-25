@@ -176,6 +176,12 @@ de:
   label_expert_agile_story_arrow: "↳"
   label_expert_agile_epics_show_closed: "Geschlossene Epics anzeigen (%{count})"
   label_expert_agile_epics_hide_closed: Geschlossene Epics ausblenden
+  label_expert_agile_epic_views: "Epic-Ansichten"
+  label_expert_agile_epic_view_tree: "Epics und Stories"
+  label_expert_agile_epic_collapse: "Einklappen"
+  label_expert_agile_epic_expand: "Ausklappen"
+  label_expert_agile_epics_collapse_all: "Alle Epics einklappen"
+  label_expert_agile_epics_expand_all: "Alle Epics ausklappen"
   text_expert_agile_epic_empty: In dieses Epic ist noch nichts eingeplant.
   text_expert_agile_no_epics: Noch keine offenen Epics. Legen Sie ein Ticket eines Epic-Trackers an, um hinein zu planen.
   error_expert_agile_epic_not_editable: Sie duerfen das uebergeordnete Ticket dieses Tickets nicht aendern

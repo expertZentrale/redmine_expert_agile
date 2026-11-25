@@ -176,6 +176,12 @@ en:
   label_expert_agile_story_arrow: "↳"
   label_expert_agile_epics_show_closed: "Show closed epics (%{count})"
   label_expert_agile_epics_hide_closed: Hide closed epics
+  label_expert_agile_epic_views: Epic views
+  label_expert_agile_epic_view_tree: Epics and stories
+  label_expert_agile_epic_collapse: Collapse
+  label_expert_agile_epic_expand: Expand
+  label_expert_agile_epics_collapse_all: Collapse all epics
+  label_expert_agile_epics_expand_all: Expand all epics
   text_expert_agile_epic_empty: Nothing planned into this epic yet.
   text_expert_agile_no_epics: No open epics yet. Create an issue of an epic tracker to plan into it.
   error_expert_agile_epic_not_editable: You are not allowed to change the parent of this issue

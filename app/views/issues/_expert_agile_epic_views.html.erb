@@ -1,0 +1,8 @@
+<%# Ready-made issue lists of a project that plans with epics. Plain links:
+    nothing is saved, so there is nothing to create or keep up to date, and
+    a new project has them as soon as it plans with expert Agile. %>
+<h3><%= l(:label_expert_agile_epic_views) %></h3>
+<ul class="queries expert-agile-epic-views">
+  <li><%= link_to l(:label_expert_agile_epic_view_tree),
+                  project_issues_path(project, RedmineExpertAgile::IssueTree.tree_list_params) %></li>
+</ul>

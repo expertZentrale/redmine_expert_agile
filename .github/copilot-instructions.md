@@ -166,6 +166,13 @@ of the release commit:
   `group_value` must equal the SQL key, or the group counts come back empty. Group by a plain
   column of a joined row (`ead_group.sprint_id`, joined through `joins_for_order_statement`),
   never by a correlated subquery: MySQL's `ONLY_FULL_GROUP_BY` refuses the count, MariaDB does not.
+  The epic tree on core's issue list is `RedmineExpertAgile::IssueTree`: on a list sorted by parent task
+  first (`applies?`), `view_issues_index_bottom` puts the page's epic rows (colour, progress) and every
+  other row's nearest epic into the `ea-issue-tree-data` island, two queries per page;
+  `expert_agile_issue_tree.js` only decorates core's rows (`idnt-N` depth, tree lines, folding), never
+  adds or moves one. `view_issues_sidebar_planning_bottom` links *Epics and stories* (`tree_list_params`)
+  in projects with an agile module and an epic tracker — a link, not a saved query, because a public
+  query is either one project's or every project's.
   Completing a sprint is `RedmineExpertAgile::SprintCompletion` (`ExpertAgileSprintsController#complete`):
   open issues move like a planner move (journaled, `manage_expert_agile_backlog`, the issue's own
   validation), then the sprint closes and the target may be activated — one transaction; a single
