@@ -1,0 +1,22 @@
+h3. redmine_expert_agile 0.13.0 — 2026-11-25
+
+The backlog planner gains an epic panel and a list layout, and Redmine's issue list shows the epic tree.
+
+h4. Added
+
+* *Epic panel in the backlog planner.* On the _Sprints_ and _Versions_ tabs the project's open epics stand beside the lanes, with their colour and progress. Clicking one narrows the planner to it (it sets the _Epic_ filter; _Without epic_ and _All issues_ as well). Dropping a card onto an epic hangs the issue under it, onto _Without epic_ takes it out of its epic, with the checks of the _Epics_ tab; the card stays in its sprint or version.
+* *List layout for the backlog planner.* Next to the columns, _List_ stacks the lanes at full width, sprints first and backlog last, with one row per issue, and folds each lane down to its header. The switch sits beside _Sprints / Versions / Epics_, stays for the session and is saved with a planner. The new setting _Default planner layout_ decides how a planner starts.
+* *Redmine's issue context menu on planner cards*, as on the board: right click or the ⋯ button; the planner redraws in place after a change.
+* *Epic tree on the issue list.* Sorted by _Parent task_ and not grouped, Redmine's issue list tints each epic row in the epic's colour, shows how many of its issues are done and folds its rows away; tree lines replace the indent arrows, and every issue below an epic carries a bar in its colour.
+* *Epics and stories in the issue sidebar.* Projects with the Agile board or the backlog planner and an epic tracker get an _Epic views_ section with a ready-made list: every status, sorted by parent task, with tracker, status, subject, assignee, sprint and % done. It is a link, not a saved query, so there is nothing to set up.
+
+h4. Changed
+
+* *Epics are no longer cards in the backlog planner by default*, as on the board, since the epic panel lists them. _Hide epics as cards_ in the planner options brings them back.
+* *The Epic card field is a default card field* (@tracker,epic,assigned_to@). The badge only shows while epics are on.
+
+h4. Upgrade notes
+
+No migrations and no new permissions. Replace the plugin directory and restart.
+
+One new setting, _Default planner layout_ (columns unless changed). If you saved your own _Default card fields_, they stay as they are: add @epic@ there to get the epic badge on boards and planners without a field selection of their own. Existing planners hide epic cards unless _Hide epics as cards_ is switched off in their options.
