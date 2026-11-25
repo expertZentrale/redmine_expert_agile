@@ -13,6 +13,18 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ### Hinzugefuegt
 
+- **Epic-Baum in der Ticketliste.** Nach *Uebergeordnetes Ticket* sortiert, hebt Redmines
+  Ticketliste die Epics hervor: Jede Epic-Zeile ist in der Farbe des Epics hinterlegt (derselben wie
+  sein Badge auf dem Board), zeigt, wie viele seiner Tickets erledigt sind, und klappt ihre Zeilen
+  ein; *Alle Epics einklappen* klappt alle auf einmal ein, und der Browser merkt sich, was
+  eingeklappt ist. Baumlinien ersetzen die Einrueckungspfeile, und jedes Ticket unter einem Epic
+  traegt einen Balken in dessen Farbe, auch wenn ein Filter das Epic selbst aus der Liste nimmt.
+  Eine anders sortierte oder gruppierte Liste bleibt, wie sie war. Keine Migration, keine Einstellung.
+- **Epics und Stories in der Seitenleiste der Ticketliste.** Projekte mit Agile-Board oder
+  Backlog-Planer und einem Epic-Tracker bekommen den Abschnitt *Epic-Ansichten*. *Epics und
+  Stories* oeffnet die Ticketliste mit allen Status, sortiert nach uebergeordnetem Ticket, mit den
+  Spalten Tracker, Status, Thema, Zugewiesen an, Sprint und % erledigt. Das ist ein Link, keine
+  gespeicherte Abfrage: nichts einzurichten, und Projekte ohne Epics sehen ihn nicht.
 - **Epic-Leiste im Backlog-Planer.** Solange Epics eingeschaltet sind, zeigen die Reiter *Sprints*
   und *Versionen* die offenen Epics des Projekts neben den Bahnen, mit Farbe und Fortschritt. Ein
   Klick setzt den Filter *Epic* (auch *Ohne Epic* und *Alle Tickets*), Bahnen und Summen folgen ihm;

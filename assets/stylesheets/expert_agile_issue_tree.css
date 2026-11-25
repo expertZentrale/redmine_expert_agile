@@ -1,0 +1,95 @@
+/* Epics on Redmine's issue list (expert_agile_issue_tree.js).
+ *
+ * Theme-neutral on purpose: an epic's tint is laid over whatever background
+ * the theme gives a row (status colours, odd/even, dark themes), and the tree
+ * lines take the row's own text colour. The epic's hue arrives inline as
+ * --ea-epic, one rule reads it.
+ *
+ * The tree lines sit where core draws its indent arrow: core indents level N
+ * by 8 + 16 * N px, the line of level k runs at 16 * k - 6 px. */
+
+table.ea-issue-tree tr.issue td.subject { position: relative; }
+table.ea-issue-tree tr.idnt td.subject { background-image: none; }
+
+.ea-tree-guides { position: absolute; inset-block: 0; inset-inline-start: 0; width: 0; pointer-events: none; }
+.ea-tree-guide {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--ea-tree-level) * 16px - 6px);
+  border-inline-start: 1px solid #b8bec6;
+  border-inline-start-color: color-mix(in srgb, currentColor 32%, transparent);
+}
+.ea-tree-branch::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  inset-inline-start: 0;
+  width: 9px;
+  border-top: 1px solid #b8bec6;
+  border-top-color: color-mix(in srgb, currentColor 32%, transparent);
+}
+.ea-tree-last { inset-block-end: 50%; }
+.ea-tree-last::after { top: 100%; }
+
+/* The epic's own row: tinted, bold, a full-strength bar at the start. */
+table.ea-issue-tree tr.ea-epic-row > td,
+table.ea-issue-tree tr.ea-epic-row.idnt > td.subject {
+  background-image: linear-gradient(color-mix(in srgb, var(--ea-epic, #8a919b) 16%, transparent),
+                                    color-mix(in srgb, var(--ea-epic, #8a919b) 16%, transparent));
+}
+table.ea-issue-tree tr.ea-epic-row > td:first-child { box-shadow: inset 4px 0 0 var(--ea-epic, #8a919b); }
+table.ea-issue-tree tr.ea-epic-row > td.subject,
+table.ea-issue-tree tr.ea-epic-row > td.subject a { font-weight: bold; }
+
+/* Every row below an epic: a lighter bar in the epic's colour, also where
+ * the epic itself is filtered off the list. */
+table.ea-issue-tree tr.ea-epic-member > td:first-child {
+  box-shadow: inset 4px 0 0 color-mix(in srgb, var(--ea-epic, #8a919b) 55%, transparent);
+}
+
+.ea-epic-meta { font-weight: normal; font-size: 0.9em; opacity: 0.75; margin-inline-start: 0.6em; white-space: nowrap; }
+
+.ea-tree-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin: 0 4px 0 0;
+  margin-inline: 0 4px;
+  padding: 0;
+  vertical-align: middle;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.ea-tree-toggle:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+.ea-tree-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+.ea-tree-toggle::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+.ea-tree-toggle[aria-expanded="false"]::before { margin-top: 0; transform: rotate(-45deg); }
+[dir="rtl"] .ea-tree-toggle[aria-expanded="false"]::before { transform: rotate(135deg); }
+
+table.ea-issue-tree tr.ea-tree-hidden { display: none; }
+
+.ea-issue-tree-actions { margin: 0.4em 0; text-align: end; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ea-tree-toggle::before { transition: none; }
+}
+
+/* On paper every row shows, and the buttons are of no use. */
+@media print {
+  table.ea-issue-tree tr.ea-tree-hidden { display: table-row; }
+  .ea-tree-toggle, .ea-issue-tree-actions { display: none; }
+}

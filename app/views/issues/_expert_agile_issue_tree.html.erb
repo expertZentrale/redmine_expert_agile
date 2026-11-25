@@ -1,0 +1,7 @@
+<%# The issue list's epics for expert_agile_issue_tree.js: markup only, the
+    script reads the island and decorates core's rows. %>
+<script type="application/json" id="ea-issue-tree-data"><%= data.to_json.html_safe %></script>
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'expert_agile_issue_tree', :plugin => 'redmine_expert_agile' %>
+  <%= javascript_include_tag 'expert_agile_issue_tree', :plugin => 'redmine_expert_agile' %>
+<% end %>
