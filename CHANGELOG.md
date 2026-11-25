@@ -11,6 +11,8 @@ notes from the section matching the pushed tag.
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-25
+
 ### Added
 
 - **Epic tree on the issue list.** Sorted by *Parent task*, Redmine's issue list highlights

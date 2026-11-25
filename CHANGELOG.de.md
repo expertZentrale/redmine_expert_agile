@@ -11,6 +11,8 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-25
+
 ### Hinzugefuegt
 
 - **Epic-Baum in der Ticketliste.** Nach *Uebergeordnetes Ticket* sortiert, hebt Redmines

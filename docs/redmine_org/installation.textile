@@ -31,7 +31,7 @@ h3. Permissions
 | expert Agile | View agile charts | Open the charts page |
 | expert Agile | Manage sprints | Create, edit, close and complete sprints |
 | expert Agile Backlog | View backlog | Open the backlog planner, filter it, open a saved backlog |
-| expert Agile Backlog | Manage backlog | Plan issues into sprints and versions, also the sprint field on the issue form |
+| expert Agile Backlog | Manage backlog | Plan issues into sprints, versions and epics, also the sprint field on the issue form |
 
 Moving a story between epics — on the board or in the planner — sets its parent task, so it also needs Redmine's own *Manage subtasks* permission.
 
@@ -45,6 +45,8 @@ h3. Configuration
 * *Chart item limit* (default 1000) and *chart cache duration* (default 60 minutes) bound the cost of every chart. A chart over more issues than the limit says so instead of drawing.
 
 * *Epic trackers* (default: none) switch epics on. Issues of the chosen trackers are epics; leaving the selection empty keeps the feature, its card fields, swimlane, planner view and *Epics* tab out of sight.
+* *Default card fields* (default: @tracker,epic,assigned_to@) are the fields of every board and planner without a selection of its own; the epic badge only shows while epics are on.
+* *Default planner layout* (default: columns) is how the backlog planner shows its lanes unless a saved planner or the user chose otherwise.
 
 Card colours for trackers, priorities and statuses are managed from the *Colors* section of that settings page, which links to the screen that assigns them.
 
