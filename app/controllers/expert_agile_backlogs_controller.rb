@@ -97,6 +97,12 @@ class ExpertAgileBacklogsController < ApplicationController
   # in its sprint or version lane; the answer says whether it still passes
   # the planner's filters, an epic filter above all.
   def update_epic
+    # Only from a planner that shows the panel: without it there is no epic
+    # to drop onto, and "without epic" would be a way to cut any story loose
+    # that the screen never offered.
+    unless @query.epic_panel?
+      return render_planning_error(l(:error_expert_agile_epic_not_available), :unprocessable_entity)
+    end
     unless User.current.allowed_to?(:manage_expert_agile_backlog, @issue.project)
       return render_planning_error(
         l(:error_expert_agile_move_not_permitted_in_project, :project => @issue.project.name),

@@ -811,6 +811,61 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_equal l(:error_expert_agile_epic_lane_epic), JSON.parse(response.body)['error']
   end
 
+  # Without a panel there is nothing to drop onto, so a crafted request
+  # cannot cut a story loose either.
+  def test_no_epic_drop_where_the_planner_shows_no_panel
+    _epic_a, _epic_b, story = epics!
+
+    with_epics do
+      put :update_epic, :params => { :project_id => @project.id, :id => story.id, :epic_id => '',
+                                     :container_type => 'epic' }, :format => :js
+    end
+    assert_response :unprocessable_entity
+
+    put :update_epic, :params => { :project_id => @project.id, :id => story.id, :epic_id => '',
+                                   :container_type => 'sprint' }, :format => :js
+    assert_response :unprocessable_entity
+    assert_not_nil story.reload.parent_id
+  end
+
+  # The script sends the planner as it is on screen with every move. A saved
+  # planner narrowed to an epic on the panel is that epic, not what it saved.
+  def test_the_page_tells_the_script_the_planner_as_it_is_on_screen
+    epic_a, _epic_b, _story = epics!
+    saved = saved_backlog!(:container_type => 'sprint')
+
+    with_epics do
+      get :index, :params => { :project_id => @project.id, :query_id => saved.id, :set_filter => '1',
+                               :container_type => 'sprint', :f => ['expert_agile_epic_id', ''],
+                               :op => { 'expert_agile_epic_id' => '=' },
+                               :v => { 'expert_agile_epic_id' => [epic_a.id.to_s] } }
+    end
+
+    state = JSON.parse(css_select('#ea-board-data').first.text)['stateParams']
+    assert_equal saved.id, state['query_id']
+    assert_equal '1', state['set_filter']
+    assert_equal [epic_a.id.to_s], state['v']['expert_agile_epic_id']
+  end
+
+  def test_a_move_on_a_tweaked_saved_planner_is_counted_as_on_screen
+    epic_a, _epic_b, story = epics!
+    loose = Issue.generate!(:project => @project, :tracker_id => 1)
+    sprint = sprint!
+    loose.expert_agile_data!.update!(:sprint_id => sprint.id)
+    saved = saved_backlog!(:container_type => 'sprint')
+
+    with_epics do
+      put :update, :params => { :project_id => @project.id, :id => story.id, :container_id => sprint.id,
+                                :query_id => saved.id, :set_filter => '1', :container_type => 'sprint',
+                                :f => ['expert_agile_epic_id', ''], :op => { 'expert_agile_epic_id' => '=' },
+                                :v => { 'expert_agile_epic_id' => [epic_a.id.to_s] } }, :format => :js
+    end
+
+    assert_response :success
+    # The loose issue in the same sprint is outside the epic on screen.
+    assert_equal 1, JSON.parse(response.body)['totals']['container']['issue_count']
+  end
+
   def test_dropping_on_an_epic_needs_the_right_to_manage_subtasks
     _epic_a, epic_b, story = epics!
     @role.remove_permission!(:manage_subtasks)

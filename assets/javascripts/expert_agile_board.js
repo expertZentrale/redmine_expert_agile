@@ -37,6 +37,23 @@
     }
   }
 
+  /* Nested request parameters the way Rails reads them: f[]=…,
+   * op[field]=…, v[field][]=…. */
+  function appendParams(body, value, name) {
+    if (value === null || value === undefined) { return; }
+    if (Array.isArray(value)) {
+      value.forEach(function (item) { appendParams(body, item, name + '[]'); });
+      return;
+    }
+    if (typeof value === 'object') {
+      Object.keys(value).forEach(function (key) {
+        appendParams(body, value[key], name ? name + '[' + key + ']' : key);
+      });
+      return;
+    }
+    body.append(name, String(value));
+  }
+
   function csrfToken() {
     var meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute('content') : '';
@@ -113,14 +130,20 @@
     body.append(config.dropParam, dropId === null ? '' : dropId);
     body.append('prev_id', around.prev);
     body.append('next_id', around.next);
-    if (config.queryId) { body.append('query_id', config.queryId); }
+    /* The planner sends itself as it is on screen, saved id included; the
+     * board names its saved query only. */
+    if (config.stateParams) {
+      appendParams(body, config.stateParams, '');
+    } else if (config.queryId) {
+      body.append('query_id', config.queryId);
+    }
     /* Which board the card sits on. On a parent project's board the card can
      * belong to a subproject, and the counts the server answers with have to
      * be the board's, not that subproject's. Empty means the global board. */
     if (config.mode === 'board') {
       body.append('board_project_id', config.projectId === null || config.projectId === undefined ? '' : config.projectId);
     }
-    if (config.containerType) { body.append('container_type', config.containerType); }
+    if (config.containerType && !config.stateParams) { body.append('container_type', config.containerType); }
     /* What the lanes on screen are grouped by, so the answer refreshes those
      * lanes. The lane itself only when the card left its own: that drop sets
      * the field, and only then. */
@@ -269,8 +292,7 @@
     body.append('epic_id', epicId || '');
     /* The planner on screen, so the answer can tell whether the card still
      * passes its filters. */
-    if (config.queryId) { body.append('query_id', config.queryId); }
-    if (config.containerType) { body.append('container_type', config.containerType); }
+    appendParams(body, config.stateParams || {}, '');
     var saved = false;
 
     fetch(config.epicUpdateUrlTemplate.replace('__ID__', card.getAttribute('data-issue-id')), {
@@ -1086,9 +1108,19 @@
     Array.prototype.forEach.call(fresh.childNodes, function (node) {
       root.appendChild(document.importNode(node, true));
     });
+    /* A change can open or close the last epic, so the panel may come or
+     * go as well as change. */
     var panel = epicPanel();
     var freshPanel = page.getElementById('ea-epic-panel');
-    if (panel && freshPanel) { panel.parentNode.replaceChild(document.importNode(freshPanel, true), panel); }
+    var planner = root.closest('.ea-planner');
+    if (panel && freshPanel) {
+      panel.parentNode.replaceChild(document.importNode(freshPanel, true), panel);
+    } else if (panel) {
+      panel.parentNode.removeChild(panel);
+    } else if (freshPanel && planner) {
+      planner.insertBefore(document.importNode(freshPanel, true), planner.firstChild);
+    }
+    if (planner) { planner.classList.toggle('ea-planner-with-panel', !!freshPanel); }
     initPlanner(root);
     return true;
   }

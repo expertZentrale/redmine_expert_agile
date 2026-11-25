@@ -21,6 +21,11 @@ module ExpertAgileBacklogsHelper
                                    update_epic_expert_agile_backlog_issue_path(:project_id => project,
                                                                                :id => '__ID__')
                                  end),
+      # The planner as it is on screen, sent with every move: a saved planner
+      # can be tweaked for the page (an epic chosen on the panel), and the
+      # answer's totals and whether the card still shows have to be worked
+      # out against that, not against the planner as saved.
+      :stateParams => expert_agile_planner_state_params(query),
       # Which lanes are folded is remembered per browser, apart for every
       # planner kind: a sprint and a version may share an id.
       :laneStoragePrefix => "expert_agile.planner.#{project.id}.#{query.container_type}",
@@ -72,13 +77,19 @@ module ExpertAgileBacklogsHelper
 
   # The planner as it is, with the epic filter of one panel entry in place
   # of its own: every other filter, the card fields, the colours and the
-  # layout stay. A saved planner keeps its id, so the entry tweaks it for
-  # this request the way Apply does, without writing anything back.
+  # layout stay.
   def expert_agile_epic_panel_params(query, entry)
     filters = query.filters.reject { |field, _| field == 'expert_agile_epic_id' }
     epic_filter = expert_agile_epic_panel_filter(entry)
     filters = filters.merge('expert_agile_epic_id' => epic_filter) if epic_filter
+    expert_agile_planner_state_params(query, filters)
+  end
 
+  # Everything that makes up the planner on screen, as request parameters
+  # (by default with its own filters). A saved planner keeps its id, so the
+  # parameters tweak it for one request the way Apply does, without writing
+  # anything back.
+  def expert_agile_planner_state_params(query, filters = query.filters)
     params = {
       :set_filter => '1',
       :container_type => query.container_type,
