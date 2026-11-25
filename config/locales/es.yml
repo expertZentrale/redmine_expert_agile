@@ -195,6 +195,7 @@ es:
   label_expert_agile_swimlanes: "Swimlanes"
   label_expert_agile_show_avatar: "Mostrar el avatar del asignado"
   label_expert_agile_hide_epics: "Ocultar las épicas en el tablero"
+  label_expert_agile_planner_hide_epics: "Ocultar las épicas como tarjetas"
   label_expert_agile_columns_and_limits: "Columnas y límites WIP"
   label_expert_agile_wip_min: "Mín"
   label_expert_agile_wip_max: "Máx"

@@ -195,6 +195,7 @@ en:
   label_expert_agile_swimlanes: Swimlanes
   label_expert_agile_show_avatar: Show assignee avatar
   label_expert_agile_hide_epics: Hide epics on the board
+  label_expert_agile_planner_hide_epics: Hide epics as cards
   label_expert_agile_columns_and_limits: Columns and WIP limits
   label_expert_agile_wip_min: Min
   label_expert_agile_wip_max: Max

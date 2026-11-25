@@ -39,6 +39,17 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 - **Redmines Ticket-Kontextmenue auf den Karten des Planers**, wie auf dem Board: Rechtsklick oder
   der ⋯-Knopf; der Planer zeichnet sich nach einer Aenderung an Ort und Stelle neu.
 
+### Geaendert
+
+- **Epics sind im Backlog-Planer standardmaessig keine Karten mehr.** Auf den Reitern *Sprints* und
+  *Versionen* listet die Epic-Leiste sie, daher bleiben die Epics selbst — wie auf dem Board — aus den
+  Bahnen. *Epics als Karten ausblenden* in den Planer-Optionen holt sie zurueck, etwa um ein Epic in
+  eine Version zu ziehen; ein gespeicherter Planer behaelt die Wahl.
+- **Das Kartenfeld Epic ist ein Standard-Kartenfeld.** Die Einstellung *Standard-Kartenfelder* ist
+  jetzt standardmaessig `tracker,epic,assigned_to`; das Badge erscheint nur, solange Epics
+  eingeschaltet sind. Eine Installation, die eigene Standard-Kartenfelder gespeichert hat, behaelt
+  diese — dort `epic` ergaenzen, damit Boards und Planer ohne eigene Feldauswahl das Badge zeigen.
+
 ## [0.12.0] - 2026-11-20
 
 ### Hinzugefuegt

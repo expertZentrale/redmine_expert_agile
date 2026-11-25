@@ -195,6 +195,7 @@ it:
   label_expert_agile_swimlanes: "Swimlane"
   label_expert_agile_show_avatar: "Mostra l'avatar dell'assegnatario"
   label_expert_agile_hide_epics: "Nascondi le epic sulla bacheca"
+  label_expert_agile_planner_hide_epics: "Nascondi le epic come schede"
   label_expert_agile_columns_and_limits: "Colonne e limiti WIP"
   label_expert_agile_wip_min: "Min"
   label_expert_agile_wip_max: "Max"

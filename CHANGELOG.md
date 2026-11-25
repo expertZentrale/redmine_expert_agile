@@ -37,6 +37,17 @@ notes from the section matching the pushed tag.
 - **Redmine's issue context menu on planner cards**, as on the board: right click or the ⋯ button;
   the planner redraws in place after a change.
 
+### Changed
+
+- **Epics are no longer cards in the backlog planner by default.** On the *Sprints* and *Versions*
+  tabs the epic panel lists them, so — as on the board — the epics themselves stay off the lanes.
+  *Hide epics as cards* in the planner options brings them back, for instance to drag an epic into a
+  version; a saved planner keeps the choice.
+- **The Epic card field is a default card field.** The *Default card fields* setting now defaults to
+  `tracker,epic,assigned_to`; the badge only shows while epics are on. An installation that saved
+  its own default card fields keeps them — add `epic` there to get the badge on boards and planners
+  without a field selection of their own.
+
 ## [0.12.0] - 2026-11-20
 
 ### Added

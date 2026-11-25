@@ -129,9 +129,9 @@ points dropdown set to 2 and a Sprint dropdown set to Sprint 24](docs/screenshot
 
 Epics group stories the way Jira does, on top of Redmine's own subtask tree. Pick the epic
 trackers in the plugin settings (*Epics*); an issue then belongs to the nearest epic above it, so
-an epic's stories are its subtasks and their subtasks belong to it as well. Switch on the **Epic**
-card field and every card on the board and in the backlog shows its epic as a coloured badge, one
-colour per epic. The epics themselves stay off the board unless *Hide epics on the board* is
+an epic's stories are its subtasks and their subtasks belong to it as well. The **Epic**
+card field, one of the default card fields, shows every card's epic on the board and in the backlog
+as a coloured badge, one colour per epic. The epics themselves stay off the board unless *Hide epics on the board* is
 switched off in the board options. Group the board by *Epic* for one swimlane per epic; dropping a story into another epic's lane
 moves it there. In the backlog planner, *Epics* plans stories into epics the same way.
 Every epic lane and the epic's issue page show its progress. The *Subtasks* card field folds a story's subtasks out on its card,
@@ -229,6 +229,8 @@ on the page follow — *Without epic* shows the issues that belong to none, and 
 *Without epic* to take it out of its epic; the card stays in its sprint or version, and leaves the
 screen only if it no longer passes the filter. It is the change the *Epics* tab makes, with the
 same checks: the right to manage subtasks, and a story's subtask or an epic is refused by name.
+As on the board, the epics themselves are not cards here, since the panel lists them; *Hide epics as
+cards* in the options brings them back, for instance to drag an epic into a version.
 
 **Columns or list.** *Columns* is the layout above. *List* stacks the lanes at full width, the
 sprints first and the backlog last, with one row per issue, which reads better with long subjects.
