@@ -187,6 +187,12 @@ class ExpertAgileBacklogsController < ApplicationController
 
         session.delete(SESSION_KEY)
         fallback = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
+        # The planner sends itself as it is on screen with every move, so the
+        # filters it was showing still decide the ranks and totals.
+        if params[:set_filter].present?
+          fallback.build_from_params(params)
+          fallback.apply_board_params(params)
+        end
         # Which containers are being planned into travels with the request, and
         # a fresh query defaults to sprints. Without carrying it, a move made
         # on the version planner would look for its version among the sprints

@@ -866,6 +866,28 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_equal 1, JSON.parse(response.body)['totals']['container']['issue_count']
   end
 
+  # A saved planner deleted while its page is open: the move still counts
+  # what the page was showing, from the state the page sends along.
+  def test_a_move_on_a_deleted_saved_planner_keeps_the_filters_on_screen
+    epic_a, _epic_b, story = epics!
+    loose = Issue.generate!(:project => @project, :tracker_id => 1)
+    sprint = sprint!
+    loose.expert_agile_data!.update!(:sprint_id => sprint.id)
+    saved = saved_backlog!(:container_type => 'sprint')
+    id = saved.id
+    saved.destroy
+
+    with_epics do
+      put :update, :params => { :project_id => @project.id, :id => story.id, :container_id => sprint.id,
+                                :query_id => id, :set_filter => '1', :container_type => 'sprint',
+                                :f => ['expert_agile_epic_id', ''], :op => { 'expert_agile_epic_id' => '=' },
+                                :v => { 'expert_agile_epic_id' => [epic_a.id.to_s] } }, :format => :js
+    end
+
+    assert_response :success
+    assert_equal 1, JSON.parse(response.body)['totals']['container']['issue_count']
+  end
+
   def test_dropping_on_an_epic_needs_the_right_to_manage_subtasks
     _epic_a, epic_b, story = epics!
     @role.remove_permission!(:manage_subtasks)
