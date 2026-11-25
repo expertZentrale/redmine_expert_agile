@@ -160,6 +160,26 @@ Ticketliste alle offenen Epics, die man sehen darf. Im Reiter *Epics* des Planer
 einem Filter auf bestimmte Epics auch nur deren Lanes stehen (und die darin verschachtelter Epics);
 *irgendein* und *kein* Epic behalten alle Lanes als Ablageziele.
 
+Nach *Uebergeordnetes Ticket* sortiert, **zeigt Redmines Ticketliste den Epic-Baum**: Jede
+Epic-Zeile ist in der Farbe des Epics hinterlegt (derselben wie sein Badge auf dem Board), zeigt,
+wie viele seiner Tickets erledigt sind, und klappt ihre Zeilen mit dem Pfeil vor dem Thema ein.
+*Alle Epics einklappen* klappt alle auf einmal ein, und der Browser merkt sich, was eingeklappt ist.
+Baumlinien ersetzen die Einrueckungspfeile, und jedes Ticket unter einem Epic traegt einen Balken in
+dessen Farbe — auch wenn ein Filter das Epic selbst aus der Liste nimmt. Eine anders sortierte oder
+gruppierte Liste bleibt, wie Redmine sie zeichnet.
+
+Projekte mit Agile-Board oder Backlog-Planer und einem Epic-Tracker bekommen in der Seitenleiste
+der Ticketliste den Abschnitt **Epic-Ansichten**. *Epics und Stories* oeffnet die Ticketliste mit
+allen Status, sortiert nach uebergeordnetem Ticket, mit den Spalten Tracker, Status, Thema,
+Zugewiesen an, Sprint und % erledigt. Das ist ein Link, keine gespeicherte Abfrage: Es gibt nichts
+einzurichten, und Projekte ohne Epics sehen ihn nicht. Wer die Liste anpasst, kann sie wie gewohnt
+als eigene Abfrage speichern.
+
+![Redmines Ticketliste, geoeffnet ueber "Epics und Stories" im Abschnitt Epic-Ansichten der
+Seitenleiste: jede Epic-Zeile in ihrer Farbe hinterlegt, mit "Erledigte Tickets: 6/16" neben dem
+Thema, darunter ihre Stories und deren Aufgaben an Baumlinien mit einem Balken in der Farbe des
+Epics, das letzte Epic eingeklappt. Ueber der Liste steht "Alle Epics einklappen"](docs/screenshots/de/17-issue-list-epics.png)
+
 ![Sprint-Board nach Epic gruppiert: eine Swimlane je Epic mit dem Fortschrittsbalken des Epics im
 Kopf und eine letzte Lane fuer Tickets ohne Epic. Eine Story in Arbeit zeigt "Erledigte
 Unteraufgaben: 1/3", ihre Unteraufgaben stehen in ihren eigenen Spalten](docs/screenshots/de/12-board-epics.png)

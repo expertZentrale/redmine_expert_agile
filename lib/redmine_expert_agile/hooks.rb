@@ -65,6 +65,30 @@ module RedmineExpertAgile
       out
     end
 
+    # The epic tree on an issue list sorted by parent task: the rows' epics
+    # as a JSON island, read by expert_agile_issue_tree.js. A list in any
+    # other order, or without epics, gets nothing.
+    def view_issues_index_bottom(context = {})
+      query = context[:query]
+      return '' unless RedmineExpertAgile::IssueTree.applies?(query)
+
+      data = RedmineExpertAgile::IssueTree.data(context[:issues])
+      return '' if data.nil?
+
+      context[:hook_caller].send(:render, :partial => 'issues/expert_agile_issue_tree',
+                                          :locals => { :data => data })
+    end
+
+    # "Epics and stories" in the issue sidebar of a project that plans with
+    # epics, above the saved queries.
+    def view_issues_sidebar_planning_bottom(context = {})
+      project = context[:project]
+      return '' unless RedmineExpertAgile::IssueTree.views_offered?(project)
+
+      context[:hook_caller].send(:render, :partial => 'issues/expert_agile_epic_views',
+                                          :locals => { :project => project })
+    end
+
     # Story points in the bulk edit form.
     def view_issues_bulk_edit_details_bottom(context = {})
       issues = Array(context[:issues])

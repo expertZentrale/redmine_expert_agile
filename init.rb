@@ -26,6 +26,7 @@ require File.expand_path('../lib/redmine_expert_agile/epic_query_column', __FILE
 require File.expand_path('../lib/redmine_expert_agile/sprint_query_column', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/sprint_completion', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/hierarchy', __FILE__)
+require File.expand_path('../lib/redmine_expert_agile/issue_tree', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/journal_projection', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/move_targets', __FILE__)
 require File.expand_path('../lib/redmine_expert_agile/charts/base', __FILE__)

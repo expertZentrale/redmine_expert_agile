@@ -144,6 +144,24 @@ epics of the project and its subprojects; on a cross-project issue list, every o
 see. On the planner's *Epics* tab, filtering to some epics also leaves only their lanes (and those
 of epics nested in them); *any* and *none* keep every lane as a drop target.
 
+Sorted by *Parent task*, **Redmine's issue list shows the epic tree**: each epic row is tinted in
+the epic's colour (the same as its badge on the board), shows how many of its issues are done and
+folds its rows away with the arrow before its subject. *Collapse all epics* folds every epic at
+once, and the browser remembers what is folded. Tree lines replace the indent arrows, and every
+issue below an epic carries a bar in that epic's colour — also when a filter leaves the epic itself
+off the list. A list in any other order, or grouped, stays as Redmine draws it.
+
+Projects with the Agile board or the backlog planner and an epic tracker get an **Epic views**
+section in the issue sidebar. *Epics and stories* opens the issue list with every status, sorted by
+parent task, with the Tracker, Status, Subject, Assignee, Sprint and % done columns. It is a link,
+not a saved query: there is nothing to set up, and projects that plan without epics do not see it.
+Adjust the list and save it as a query of your own if you like.
+
+![Redmine's issue list opened from "Epics and stories" in the Epic views sidebar section: each epic
+row tinted in its colour with "Issues done: 6/16" beside its subject, its stories and their tasks
+beneath it on tree lines with a bar in the epic's colour, and the last epic folded away. "Collapse
+all epics" sits above the list](docs/screenshots/en/17-issue-list-epics.png)
+
 ![Sprint board grouped by epic: one swimlane per epic, headed by the epic's progress bar, and a
 last lane for issues without an epic. A story in progress shows "Subtasks done: 1/3", and its
 subtasks sit in their own columns](docs/screenshots/en/12-board-epics.png)
