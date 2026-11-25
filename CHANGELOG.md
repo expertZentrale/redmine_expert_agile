@@ -24,6 +24,18 @@ notes from the section matching the pushed tag.
   opens the issue list with every status, sorted by parent task, with the Tracker, Status, Subject,
   Assignee, Sprint and % done columns. It is a link, not a saved query: nothing to set up, and
   projects that plan without epics do not see it.
+- **Epic panel in the backlog planner.** While epics are on, the *Sprints* and *Versions* tabs
+  show the project's open epics beside the lanes, with their colour and progress. Clicking one sets
+  the *Epic* filter (*Without epic* and *All issues* as well), so lanes and totals follow; dropping a
+  card onto an epic hangs the issue under it, onto *Without epic* takes it out of its epic, with the
+  checks of the *Epics* tab. The card stays in its sprint or version.
+- **List layout for the backlog planner.** Next to the columns, *List* stacks the lanes at full
+  width — sprints first, backlog last — with one row per issue, and folds each lane down to its
+  header. The switch sits beside *Sprints / Versions / Epics*, sticks for the session and is saved
+  with a planner; the new setting *Default planner layout* picks the layout a planner starts in
+  (columns by default).
+- **Redmine's issue context menu on planner cards**, as on the board: right click or the ⋯ button;
+  the planner redraws in place after a change.
 
 ## [0.12.0] - 2026-11-20
 

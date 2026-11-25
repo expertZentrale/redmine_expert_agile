@@ -242,6 +242,34 @@ Ticket ist geplant oder nicht.
 Bahn pro verfuegbarem Sprint, jede mit Ticketzahl, Story-Point-Summe, Zeitraum und Restlaufzeit in
 der Kopfzeile](docs/screenshots/de/03-backlog.png)
 
+**Epic-Leiste.** Solange Epics eingeschaltet sind, zeigen die Reiter *Sprints* und *Versionen* die
+offenen Epics des Projekts in einer Leiste neben den Bahnen, jedes mit seiner Farbe und seinem
+Fortschritt. Ein Klick auf ein Epic beschraenkt den Planer darauf — der Eintrag setzt den Filter
+*Epic*, Bahnen, Summen und alles andere auf der Seite folgen ihm —, *Ohne Epic* zeigt die Tickets,
+die zu keinem gehoeren, und ein zweiter Klick oder *Alle Tickets* hebt den Filter wieder auf. Eine
+Karte auf ein Epic gezogen haengt das Ticket darunter, auf *Ohne Epic* gezogen loest sie es aus
+seinem Epic; die Karte bleibt in ihrem Sprint oder ihrer Version und verschwindet nur, wenn sie
+nicht mehr zum Filter passt. Das ist dieselbe Aenderung wie im Reiter *Epics*, mit denselben
+Pruefungen: das Recht, Unteraufgaben zu verwalten, und Unteraufgaben einer Story sowie Epics werden
+mit Begruendung abgelehnt.
+
+**Spalten oder Liste.** *Spalten* ist die oben beschriebene Ansicht. *Liste* stellt die Bahnen in
+voller Breite untereinander, die Sprints zuerst und den Backlog zuletzt, mit einer Zeile je Ticket,
+was sich mit langen Titeln besser liest. Jede Bahn klappt mit dem Pfeil vor ihrem Namen auf ihre
+Kopfzeile zusammen, und eine Karte, die auf die Kopfzeile einer eingeklappten Bahn gezogen wird,
+landet an deren Ende. Der Umschalter steht neben *Sprints / Versionen / Epics*; die Wahl bleibt fuer
+die Sitzung erhalten und wird mit einem Planer gespeichert. In welcher Ansicht ein Planer startet,
+bestimmt die Plugin-Einstellung *Standardansicht des Backlog-Planers* (sonst Spalten).
+
+Wie auf dem Board oeffnet ein Rechtsklick auf eine Karte oder ihr ⋯-Knopf **Redmines eigenes
+Kontextmenue** — Status, Zuweisung, Version und der Rest, mit denselben Rechten wie in der
+Ticketliste —, und der Planer zeichnet sich nach einer Aenderung an Ort und Stelle neu.
+
+![Backlog-Planer in der Listenansicht: links die Epic-Leiste mit Farbe und Fortschritt je Epic;
+Sprint 24 auf seine Kopfzeile eingeklappt, darunter Sprint 25 und der Backlog in voller Breite mit
+einer Zeile je Ticket — Nummer, Tracker, Thema, Epic-Badge, Status, Zugewiesen an, Story
+Points](docs/screenshots/de/18-backlog-epic-panel.png)
+
 ### Diagramme
 
 Burndown und Burnup rekonstruieren den Ticketverlauf aus den Journalen. Gemessene Linien enden am
@@ -344,7 +372,7 @@ Pro Rolle unter *Administration → Rollen und Rechte* vergeben.
 | expert Agile | Agile-Diagramme ansehen | Diagrammseite oeffnen |
 | expert Agile | Sprints verwalten | Sprints anlegen, bearbeiten und schliessen |
 | expert Agile Backlog | Backlog ansehen | Backlog-Planer oeffnen |
-| expert Agile Backlog | Backlog verwalten | Tickets Sprints und Versionen zuordnen, auch das Sprintfeld im Ticketformular |
+| expert Agile Backlog | Backlog verwalten | Tickets Sprints, Versionen und Epics zuordnen, auch das Sprintfeld im Ticketformular |
 
 ## Entwicklung
 

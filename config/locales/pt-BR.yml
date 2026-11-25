@@ -48,6 +48,8 @@ pt-BR:
   label_expert_agile_auto_assign_on_move: "Atribuir a mim ao mover um cartão"
   text_expert_agile_auto_assign_on_move: "Vale somente para tarefas não atribuídas cuja situação realmente muda"
   label_expert_agile_minimize_closed: "Recolher colunas fechadas"
+  label_expert_agile_planner_default_layout: "Visão padrão do planejador"
+  text_expert_agile_planner_default_layout: "Como o planejador do backlog mostra suas raias, a menos que um planejador salvo ou o usuário tenham escolhido outra"
 
   # --- Settings: colors -----------------------------------------------
   label_expert_agile_color_base: "Colorir cartões por"
@@ -207,6 +209,14 @@ pt-BR:
   text_expert_agile_no_sprints: "Nenhuma sprint ainda. Crie uma para começar a planejar."
   text_expert_agile_no_versions: "Este projeto não tem versões abertas para planejar."
   text_expert_agile_drop_issues_here: "Arraste tarefas para cá para planejá-las"
+  label_expert_agile_planner_layout_columns: "Colunas"
+  label_expert_agile_planner_layout_list: "Lista"
+  label_expert_agile_lane_collapse: "Recolher"
+  label_expert_agile_lane_expand: "Expandir"
+  label_expert_agile_epic_panel_all: "Todas as tarefas"
+  label_expert_agile_epic_panel_none: "Sem épico"
+  text_expert_agile_card_hidden_by_filter: "Salvo. A tarefa não corresponde mais ao filtro e foi ocultada."
+  error_expert_agile_epic_not_available: "Este planejador não pode planejar neste épico"
   label_expert_agile_days_remaining: "faltam %{count} d"
 
   # --- Charts ---------------------------------------------------------

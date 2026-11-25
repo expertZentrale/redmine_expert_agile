@@ -665,6 +665,154 @@
  * reads the same on both screens. */
 .ea-backlog-lane.ea-lane-colored .ea-backlog-lane-header { border-left-color: var(--ea-accent); }
 
+/* Both switches on one line: what to plan into, and how to lay it out. */
+.ea-backlog-switches { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 10px; }
+.ea-backlog-switches .ea-backlog-switch { margin-bottom: 0; }
+
+/* --- Epic panel ------------------------------------------------------------
+ * Beside the sprint and version lanes. Each entry filters the planner; the
+ * epics and "without epic" also take a dropped card. The epic's colour comes
+ * inline as --ea-accent, the same hue as its badge on the cards. */
+.ea-planner-with-panel {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.ea-planner-lanes { min-width: 0; margin: 0; }
+
+.ea-epic-panel {
+  position: sticky;
+  top: 8px;
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 6px;
+  border: 1px solid #d3d9e0;
+  border-radius: 5px;
+  background: #fbfcfd;
+}
+.ea-epic-panel-title { margin: 2px 6px 6px; font-size: 1em; }
+.ea-epic-panel-list { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.ea-epic-panel-epics { margin-top: 6px; padding-top: 6px; border-top: 1px solid #e3e7ec; }
+
+.ea-epic-panel-item {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  align-items: center;
+  gap: 3px 8px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: inherit;
+  text-decoration: none;
+}
+.ea-epic-panel-item:hover { background: #eef2f6; text-decoration: none; }
+.ea-epic-panel-item[aria-current="true"] { background: #e2edf9; border-color: #3d7ec4; }
+.ea-epic-panel-swatch {
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border-radius: 3px;
+  background: var(--ea-accent, #b9bec6);
+}
+.ea-epic-panel-none .ea-epic-panel-swatch { background: transparent; border: 2px dashed #9aa3ad; }
+.ea-epic-panel-name {
+  display: -webkit-box;
+  overflow: hidden;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.ea-epic-panel-item .ea-epic-progress { grid-column: 2; margin-left: 0; }
+
+/* While a card is dragged: the entries that take it. */
+.ea-epic-panel-active [data-epic-drop] { outline: 1px dashed #9dbde8; outline-offset: -1px; }
+.ea-epic-panel-item.ea-epic-drop-hover { background: #e8f0fb; box-shadow: inset 0 0 0 2px #3d7ec4; }
+
+/* --- List layout -------------------------------------------------------------
+ * The lanes one under another at full width, the sprints first and the
+ * backlog last, each card a single row. Same cards and fields as the columns,
+ * laid out by CSS alone. */
+.ea-lane-toggle { display: none; }
+
+.ea-backlog.ea-backlog-list { flex-direction: column; align-items: stretch; overflow-x: visible; }
+.ea-backlog-list .ea-backlog-lane { flex: none; width: 100%; min-width: 0; }
+.ea-backlog-list .ea-backlog-lane-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+.ea-backlog-list .ea-backlog-lane-title { justify-content: flex-start; align-items: center; }
+.ea-backlog-list .ea-backlog-lane-meta { display: inline; margin-top: 0; }
+.ea-backlog-list .ea-backlog-lane-complete { margin-left: auto; }
+.ea-backlog-list .ea-backlog-lane-header .ea-epic-progress { margin-left: 0; }
+/* Stacked, the page scrolls rather than each lane: a scroll box inside the
+ * page's own reads badly, and a long lane folds instead. */
+.ea-backlog-list .ea-backlog-drop { min-height: 40px; max-height: none; overflow-y: visible; padding: 6px; }
+
+.ea-backlog-list .ea-lane-toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.ea-backlog-list .ea-lane-toggle:hover { background: #e3e7ec; }
+.ea-backlog-list .ea-lane-toggle::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+.ea-backlog-list .ea-lane-folded .ea-lane-toggle::before { margin-top: 0; transform: rotate(-45deg); }
+.ea-backlog-list .ea-lane-folded .ea-backlog-drop { display: none; }
+.ea-backlog-list .ea-lane-folded .ea-backlog-lane-header { border-bottom: 0; }
+.ea-backlog-list .ea-lane-drop-hover .ea-backlog-lane-header { background: #e8f0fb; box-shadow: inset 0 0 0 2px #9dbde8; }
+
+.ea-backlog-list .ea-backlog-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  margin-bottom: 4px;
+  padding: 4px 8px;
+}
+.ea-backlog-list .ea-backlog-card > .ea-card-header,
+.ea-backlog-list .ea-backlog-card > .ea-card-footer { display: contents; }
+.ea-backlog-list .ea-card-id { order: 1; }
+.ea-backlog-list .ea-card-tracker { order: 2; }
+.ea-backlog-list .ea-card-subject { order: 3; flex: 1 1 240px; min-width: 0; margin: 0; }
+.ea-backlog-list .ea-card-epic,
+.ea-backlog-list .ea-card-story { order: 4; max-width: 240px; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ea-backlog-list .ea-card-status { order: 5; }
+.ea-backlog-list .ea-card-assignee { order: 6; }
+.ea-backlog-list .ea-card-story-points,
+.ea-backlog-list .ea-card-hours,
+.ea-backlog-list .ea-card-done { order: 7; }
+.ea-backlog-list .ea-card-header .icon-actions { order: 8; }
+.ea-backlog-list .ea-backlog-card > .ea-card-subtasks,
+.ea-backlog-list .ea-backlog-card > .ea-card-description,
+.ea-backlog-list .ea-backlog-card > .ea-card-fields { order: 9; flex-basis: 100%; }
+
+@media (max-width: 899px) {
+  .ea-planner-with-panel { grid-template-columns: minmax(0, 1fr); }
+  .ea-epic-panel { position: static; max-height: none; }
+}
+
 /* --- Epic progress -----------------------------------------------------
  * A thin bar with its percentage, in an epic's lane header and on the epic
  * itself. The share done arrives inline as --ea-progress; the lane's own

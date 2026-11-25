@@ -71,6 +71,9 @@ Redmine::Plugin.register :redmine_expert_agile do
              'allow_create_card'       => '0',
              'auto_assign_on_move'     => '0',
              'minimize_closed'         => '0',
+             # columns | list — how the backlog planner lays out its lanes
+             # unless a saved planner or the user's last choice says otherwise.
+             'planner_default_layout'  => 'columns',
 
              # --- Colors ------------------------------------------------
              # none | tracker | priority | status | assignee | project | issue | spent_time
@@ -223,7 +226,7 @@ Redmine::Plugin.register :redmine_expert_agile do
                  :expert_agile_backlog_queries => [:index] },
                :read => true
     permission :manage_expert_agile_backlog,
-               { :expert_agile_backlogs => [:update] },
+               { :expert_agile_backlogs => [:update, :update_epic] },
                :require => :member
   end
 

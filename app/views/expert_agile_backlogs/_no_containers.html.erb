@@ -1,0 +1,8 @@
+<%# Shown in place of the lanes when there is nothing to plan into yet. %>
+<div class="ea-backlog-empty nodata">
+  <%= l(@query.sprints? ? :text_expert_agile_no_sprints : (@query.epics? ? :text_expert_agile_no_epics : :text_expert_agile_no_versions)) %>
+  <% if @query.sprints? && User.current.allowed_to?(:manage_expert_agile_sprints, @project) %>
+    <%= link_to l(:label_expert_agile_sprint_new),
+                new_project_expert_agile_sprint_path(@project), :class => 'icon icon-add' %>
+  <% end %>
+</div>

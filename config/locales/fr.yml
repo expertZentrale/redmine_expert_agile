@@ -48,6 +48,8 @@ fr:
   label_expert_agile_auto_assign_on_move: "M'assigner la carte déplacée"
   text_expert_agile_auto_assign_on_move: "S'applique uniquement aux demandes non assignées dont le statut change réellement"
   label_expert_agile_minimize_closed: "Replier les colonnes fermées"
+  label_expert_agile_planner_default_layout: "Vue par défaut du planificateur"
+  text_expert_agile_planner_default_layout: "Comment le planificateur du backlog affiche ses couloirs, sauf si un planificateur enregistré ou l'utilisateur en a choisi une autre"
 
   # --- Settings: colors -----------------------------------------------
   label_expert_agile_color_base: "Colorer les cartes selon"
@@ -207,6 +209,14 @@ fr:
   text_expert_agile_no_sprints: "Aucun sprint pour l'instant. Créez-en un pour commencer à planifier."
   text_expert_agile_no_versions: "Ce projet n'a aucune version ouverte dans laquelle planifier."
   text_expert_agile_drop_issues_here: "Glissez des demandes ici pour les planifier"
+  label_expert_agile_planner_layout_columns: "Colonnes"
+  label_expert_agile_planner_layout_list: "Liste"
+  label_expert_agile_lane_collapse: "Plier"
+  label_expert_agile_lane_expand: "Déplier"
+  label_expert_agile_epic_panel_all: "Toutes les demandes"
+  label_expert_agile_epic_panel_none: "Sans epic"
+  text_expert_agile_card_hidden_by_filter: "Enregistré. La demande ne correspond plus au filtre et est masquée."
+  error_expert_agile_epic_not_available: "Ce planificateur ne peut pas planifier dans cet epic"
   label_expert_agile_days_remaining: "%{count} j restants"
 
   # --- Charts ---------------------------------------------------------

@@ -275,6 +275,15 @@ writes `parent_issue_id` (`WRITABLE_SWIMLANES['epic']`), re-read from `parent_id
 points) in one query; `ExpertAgileQuery#epic_progress` batches it over `epics_on_screen` (board epic
 lanes, planner epic containers). The planner's `epic` container writes `parent_issue_id` and shows
 only issues straight under an epic or under nothing.
+The sprint and version tabs carry an epic panel (`_epic_panel`, `panel_epics`: open visible epics of the
+project tree, not narrowed by the epic filter). Its entries are links that set the `expert_agile_epic_id`
+filter (`expert_agile_epic_panel_params` rebuilds the whole planner state, saved id included), and drop
+targets for `#update_epic`, which writes `parent_issue_id` with the epic tab's checks (`safe_attribute?`,
+`Epics.lane_refusal`, target must be in `panel_epics`), re-reads `parent_id` and answers whether the card
+still passes the filters (`shows_issue?`). `planner_layout` (`columns`|`list`) is a query option like
+`container_type` — a plain switch link, kept in the session, a request-only tweak on a saved planner,
+defaulting to the `planner_default_layout` setting; the list layout is CSS over the same card partial.
+Planner cards open core's context menu like board cards; `swapBacklog` redraws lanes, panel and island.
 `RedmineExpertAgile::Hierarchy` answers `children`, `parents` and `descendant_rows` (epic overview,
 `ExpertAgileEpicsController`) for a whole list in one visible-scoped query each; cards read them
 through `ExpertAgileQuery#card_story` / `#card_subtasks`, batch-loaded by `load_for_board`.

@@ -221,6 +221,31 @@ issue sits in the workflow, since an issue is planned or it is not.
 available sprint beside it, each headed by its issue count, story point total, date range and
 days remaining](docs/screenshots/en/03-backlog.png)
 
+**Epic panel.** While epics are on, the *Sprints* and *Versions* tabs show the project's open epics
+in a panel beside the lanes, each with its colour and progress. Clicking an epic narrows the
+planner to it — the entry sets the *Epic* filter, so the lanes, their totals and everything else
+on the page follow — *Without epic* shows the issues that belong to none, and a second click or
+*All issues* lifts the filter again. Drop a card onto an epic to hang the issue under it, or onto
+*Without epic* to take it out of its epic; the card stays in its sprint or version, and leaves the
+screen only if it no longer passes the filter. It is the change the *Epics* tab makes, with the
+same checks: the right to manage subtasks, and a story's subtask or an epic is refused by name.
+
+**Columns or list.** *Columns* is the layout above. *List* stacks the lanes at full width, the
+sprints first and the backlog last, with one row per issue, which reads better with long subjects.
+Each lane folds down to its header with the arrow before its name, and a card dropped on a folded
+lane's header lands at its end. The switch sits beside *Sprints / Versions / Epics*; the choice
+stays for the session and is saved with a planner. Which layout a planner starts in is the plugin
+setting *Default planner layout* (columns unless changed).
+
+As on the board, a right click on a card, or its ⋯ button, opens **Redmine's own issue context
+menu** — status, assignee, version and the rest, with the same permissions as in the issue list —
+and the planner redraws in place after a change.
+
+![Backlog planner in the list layout: the epic panel on the left with each epic's colour and
+progress; Sprint 24 folded to its header, Sprint 25 and the backlog below it at full width with one
+row per issue — number, tracker, subject, epic badge, status, assignee, story
+points](docs/screenshots/en/18-backlog-epic-panel.png)
+
 ### Charts
 
 Burndown and burnup replay the issue history from the journals. Measured lines stop at today; the
@@ -318,7 +343,7 @@ Granted per role under *Administration → Roles and permissions*.
 | expert Agile | View agile charts | Open the charts page |
 | expert Agile | Manage sprints | Create, edit and close sprints |
 | expert Agile Backlog | View backlog | Open the backlog planner |
-| expert Agile Backlog | Manage backlog | Plan issues into sprints and versions, also the sprint field on the issue form |
+| expert Agile Backlog | Manage backlog | Plan issues into sprints, versions and epics, also the sprint field on the issue form |
 
 ## Development
 

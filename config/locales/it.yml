@@ -48,6 +48,8 @@ it:
   label_expert_agile_auto_assign_on_move: "Assegna a me quando sposto una scheda"
   text_expert_agile_auto_assign_on_move: "Vale solo per le segnalazioni non assegnate il cui stato cambia effettivamente"
   label_expert_agile_minimize_closed: "Comprimi le colonne chiuse"
+  label_expert_agile_planner_default_layout: "Vista predefinita del pianificatore"
+  text_expert_agile_planner_default_layout: "Come il pianificatore del backlog mostra le sue corsie, salvo che un pianificatore salvato o l'utente abbiano scelto diversamente"
 
   # --- Settings: colors -----------------------------------------------
   label_expert_agile_color_base: "Colora le schede per"
@@ -207,6 +209,14 @@ it:
   text_expert_agile_no_sprints: "Ancora nessuno sprint. Creane uno per iniziare a pianificare."
   text_expert_agile_no_versions: "Questo progetto non ha versioni aperte in cui pianificare."
   text_expert_agile_drop_issues_here: "Trascina qui le segnalazioni per pianificarle"
+  label_expert_agile_planner_layout_columns: "Colonne"
+  label_expert_agile_planner_layout_list: "Elenco"
+  label_expert_agile_lane_collapse: "Comprimi"
+  label_expert_agile_lane_expand: "Espandi"
+  label_expert_agile_epic_panel_all: "Tutte le segnalazioni"
+  label_expert_agile_epic_panel_none: "Senza epic"
+  text_expert_agile_card_hidden_by_filter: "Salvato. La segnalazione non corrisponde più al filtro ed è nascosta."
+  error_expert_agile_epic_not_available: "Questo pianificatore non può pianificare in questa epic"
   label_expert_agile_days_remaining: "%{count} g rimanenti"
 
   # --- Charts ---------------------------------------------------------

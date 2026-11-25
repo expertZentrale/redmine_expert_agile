@@ -25,6 +25,19 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Stories* oeffnet die Ticketliste mit allen Status, sortiert nach uebergeordnetem Ticket, mit den
   Spalten Tracker, Status, Thema, Zugewiesen an, Sprint und % erledigt. Das ist ein Link, keine
   gespeicherte Abfrage: nichts einzurichten, und Projekte ohne Epics sehen ihn nicht.
+- **Epic-Leiste im Backlog-Planer.** Solange Epics eingeschaltet sind, zeigen die Reiter *Sprints*
+  und *Versionen* die offenen Epics des Projekts neben den Bahnen, mit Farbe und Fortschritt. Ein
+  Klick setzt den Filter *Epic* (auch *Ohne Epic* und *Alle Tickets*), Bahnen und Summen folgen ihm;
+  eine Karte auf ein Epic gezogen haengt das Ticket darunter, auf *Ohne Epic* loest sie es aus
+  seinem Epic, mit den Pruefungen des Reiters *Epics*. Die Karte bleibt in ihrem Sprint oder ihrer
+  Version.
+- **Listenansicht im Backlog-Planer.** Neben den Spalten stellt *Liste* die Bahnen in voller Breite
+  untereinander — Sprints zuerst, Backlog zuletzt — mit einer Zeile je Ticket und klappt jede Bahn
+  auf ihre Kopfzeile zusammen. Der Umschalter steht neben *Sprints / Versionen / Epics*, bleibt fuer
+  die Sitzung erhalten und wird mit einem Planer gespeichert; die neue Einstellung
+  *Standardansicht des Backlog-Planers* bestimmt, wie ein Planer startet (sonst Spalten).
+- **Redmines Ticket-Kontextmenue auf den Karten des Planers**, wie auf dem Board: Rechtsklick oder
+  der ⋯-Knopf; der Planer zeichnet sich nach einer Aenderung an Ort und Stelle neu.
 
 ## [0.12.0] - 2026-11-20
 

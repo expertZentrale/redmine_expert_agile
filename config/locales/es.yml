@@ -48,6 +48,8 @@ es:
   label_expert_agile_auto_assign_on_move: "Asignarme al mover una tarjeta"
   text_expert_agile_auto_assign_on_move: "Solo se aplica a peticiones sin asignar cuyo estado cambia realmente"
   label_expert_agile_minimize_closed: "Contraer las columnas cerradas"
+  label_expert_agile_planner_default_layout: "Vista predeterminada del planificador"
+  text_expert_agile_planner_default_layout: "Cómo muestra el planificador del backlog sus carriles, salvo que un planificador guardado o el usuario elijan otra cosa"
 
   # --- Settings: colors -----------------------------------------------
   label_expert_agile_color_base: "Colorear tarjetas por"
@@ -207,6 +209,14 @@ es:
   text_expert_agile_no_sprints: "Aún no hay sprints. Cree uno para empezar a planificar."
   text_expert_agile_no_versions: "Este proyecto no tiene versiones abiertas en las que planificar."
   text_expert_agile_drop_issues_here: "Arrastre peticiones aquí para planificarlas"
+  label_expert_agile_planner_layout_columns: "Columnas"
+  label_expert_agile_planner_layout_list: "Lista"
+  label_expert_agile_lane_collapse: "Contraer"
+  label_expert_agile_lane_expand: "Expandir"
+  label_expert_agile_epic_panel_all: "Todas las peticiones"
+  label_expert_agile_epic_panel_none: "Sin épica"
+  text_expert_agile_card_hidden_by_filter: "Guardado. La petición ya no coincide con el filtro y se oculta."
+  error_expert_agile_epic_not_available: "Este planificador no puede planificar en esta épica"
   label_expert_agile_days_remaining: "quedan %{count} d"
 
   # --- Charts ---------------------------------------------------------
