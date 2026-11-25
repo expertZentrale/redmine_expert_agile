@@ -19,7 +19,7 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   ein; *Alle Epics einklappen* klappt alle auf einmal ein, und der Browser merkt sich, was
   eingeklappt ist. Baumlinien ersetzen die Einrueckungspfeile, und jedes Ticket unter einem Epic
   traegt einen Balken in dessen Farbe, auch wenn ein Filter das Epic selbst aus der Liste nimmt.
-  Eine anders sortierte Liste bleibt, wie sie war. Keine Migration, keine Einstellung.
+  Eine anders sortierte oder gruppierte Liste bleibt, wie sie war. Keine Migration, keine Einstellung.
 - **Epics und Stories in der Seitenleiste der Ticketliste.** Projekte mit Agile-Board oder
   Backlog-Planer und einem Epic-Tracker bekommen den Abschnitt *Epic-Ansichten*. *Epics und
   Stories* oeffnet die Ticketliste mit allen Status, sortiert nach uebergeordnetem Ticket, mit den

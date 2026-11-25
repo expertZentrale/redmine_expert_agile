@@ -14,19 +14,22 @@
 module RedmineExpertAgile
   module IssueTree
     class << self
-      # Whether a list is in tree order. Any other order tears an epic's
-      # stories apart, and the list is left as core draws it.
+      # Whether a list is one tree: sorted by parent task first and not
+      # grouped. Any other order tears an epic's stories apart, and a grouped
+      # list cuts the tree at every group head, so either is left as core
+      # draws it.
       def applies?(query)
-        RedmineExpertAgile::Epics.enabled? && query.is_a?(IssueQuery) &&
+        RedmineExpertAgile::Epics.enabled? && query.is_a?(IssueQuery) && !query.grouped? &&
           query.sort_criteria.first_key == 'parent'
       end
 
       # The epics and epic members among the given rows, for the JSON island.
       # Nil when there is neither, so a list without epics gets nothing.
       #
-      # Two queries for the whole page whatever its size: the nearest epics
-      # of the rows and the progress of the epic rows. Both only count what
-      # the user may see.
+      # The same three queries for the whole page whatever its size: the
+      # nearest epics of the rows, then the epic rows' bounds in the tree and
+      # what lies below them (Epics.progress). All only count what the user
+      # may see.
       def data(issues, user = User.current)
         issues = Array(issues)
         epic_rows = issues.select { |issue| RedmineExpertAgile::Epics.epic?(issue) }

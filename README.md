@@ -149,7 +149,7 @@ the epic's colour (the same as its badge on the board), shows how many of its is
 folds its rows away with the arrow before its subject. *Collapse all epics* folds every epic at
 once, and the browser remembers what is folded. Tree lines replace the indent arrows, and every
 issue below an epic carries a bar in that epic's colour — also when a filter leaves the epic itself
-off the list. A list in any other order stays as Redmine draws it.
+off the list. A list in any other order, or grouped, stays as Redmine draws it.
 
 Projects with the Agile board or the backlog planner and an epic tracker get an **Epic views**
 section in the issue sidebar. *Epics and stories* opens the issue list with every status, sorted by

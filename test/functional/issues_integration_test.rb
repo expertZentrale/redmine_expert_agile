@@ -318,6 +318,16 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     assert_select 'script#ea-issue-tree-data', 0
   end
 
+  def test_a_grouped_issue_list_gets_no_epic_tree
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :index, :params => { :project_id => @project.id, :set_filter => '1', :sort => 'parent',
+                               :group_by => 'tracker' }
+    end
+
+    assert_response :success
+    assert_select 'script#ea-issue-tree-data', 0
+  end
+
   def test_without_epic_trackers_the_issue_list_gets_no_epic_tree
     get :index, :params => { :project_id => @project.id, :set_filter => '1', :sort => 'parent' }
 

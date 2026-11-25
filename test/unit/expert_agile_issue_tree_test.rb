@@ -56,6 +56,14 @@ class ExpertAgileIssueTreeTest < ActiveSupport::TestCase
     end
   end
 
+  # Group heads cut the tree into pieces; a grouped list stays as it is.
+  def test_a_grouped_list_is_not_a_tree
+    query = query_sorted_by([%w(parent asc)])
+    query.group_by = 'tracker'
+
+    with_epics { assert_not RedmineExpertAgile::IssueTree.applies?(query) }
+  end
+
   def test_without_epic_trackers_no_list_is_a_tree
     assert_not RedmineExpertAgile::IssueTree.applies?(query_sorted_by([%w(parent asc)]))
   end

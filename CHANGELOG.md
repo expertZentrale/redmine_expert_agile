@@ -18,7 +18,7 @@ notes from the section matching the pushed tag.
   how many of its issues are done and folds its rows away; *Collapse all epics* folds them all at
   once, and the browser remembers what is folded. Tree lines replace the indent arrows, and every
   issue below an epic carries a bar in its colour, also when a filter leaves the epic itself off
-  the list. A list in any other order is left as it was. No migration, no setting.
+  the list. A list in any other order, or grouped, is left as it was. No migration, no setting.
 - **Epics and stories in the issue sidebar.** Projects with the Agile board or the backlog
   planner and an epic tracker get an *Epic views* section in the issue sidebar. *Epics and stories*
   opens the issue list with every status, sorted by parent task, with the Tracker, Status, Subject,

@@ -165,8 +165,8 @@ Epic-Zeile ist in der Farbe des Epics hinterlegt (derselben wie sein Badge auf d
 wie viele seiner Tickets erledigt sind, und klappt ihre Zeilen mit dem Pfeil vor dem Thema ein.
 *Alle Epics einklappen* klappt alle auf einmal ein, und der Browser merkt sich, was eingeklappt ist.
 Baumlinien ersetzen die Einrueckungspfeile, und jedes Ticket unter einem Epic traegt einen Balken in
-dessen Farbe — auch wenn ein Filter das Epic selbst aus der Liste nimmt. Eine anders sortierte Liste
-bleibt, wie Redmine sie zeichnet.
+dessen Farbe — auch wenn ein Filter das Epic selbst aus der Liste nimmt. Eine anders sortierte oder
+gruppierte Liste bleibt, wie Redmine sie zeichnet.
 
 Projekte mit Agile-Board oder Backlog-Planer und einem Epic-Tracker bekommen in der Seitenleiste
 der Ticketliste den Abschnitt **Epic-Ansichten**. *Epics und Stories* oeffnet die Ticketliste mit
