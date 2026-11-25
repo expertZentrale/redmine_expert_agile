@@ -350,6 +350,40 @@ class ExpertAgileBacklogQueryTest < ActiveSupport::TestCase
     end
   end
 
+  # Like the board: the epics themselves are not cards unless asked for.
+  def test_the_planner_leaves_the_epics_out_of_its_cards_unless_asked
+    epic = Issue.generate!(:project => @project, :tracker_id => 2)
+
+    with_epics do
+      query = query_for('sprint')
+      assert query.hide_epics?
+      assert_not_includes query.backlog_issues.map(&:id), epic.id
+      assert_equal query.backlog_issues.size, query.totals_for(nil)[:issue_count]
+
+      query.apply_board_params(:hide_epics => '0')
+      assert_includes query.backlog_issues.map(&:id), epic.id
+    end
+  end
+
+  # The epic badge is a card field a fresh board or planner has without
+  # anyone choosing it, as long as epics are on; without epic trackers the
+  # field is not offered and drops out of the defaults.
+  def test_the_epic_badge_is_a_default_card_field_while_epics_are_on
+    default = RedmineExpertAgile.declared_defaults['default_card_columns']
+    assert_includes default.split(','), 'epic'
+
+    with_agile_settings('default_card_columns' => default, 'epic_tracker_ids' => ['2']) do
+      [ExpertAgileBacklogQuery, ExpertAgileQuery].each do |klass|
+        assert_includes klass.new(:name => '_', :project => @project).card_columns.map(&:name), :epic, klass.name
+      end
+    end
+    with_agile_settings('default_card_columns' => default, 'epic_tracker_ids' => '') do
+      names = ExpertAgileBacklogQuery.new(:name => '_', :project => @project).card_columns.map(&:name)
+      assert_not_includes names, :epic
+      assert_includes names, :assigned_to
+    end
+  end
+
   def test_shows_issue_follows_the_filters
     epic = Issue.generate!(:project => @project, :tracker_id => 2)
     story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic.id)

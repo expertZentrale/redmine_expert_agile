@@ -195,6 +195,7 @@ fr:
   label_expert_agile_swimlanes: "Swimlanes"
   label_expert_agile_show_avatar: "Afficher l'avatar de l'assigné"
   label_expert_agile_hide_epics: "Masquer les epics sur le tableau"
+  label_expert_agile_planner_hide_epics: "Masquer les epics en tant que cartes"
   label_expert_agile_columns_and_limits: "Colonnes et limites WIP"
   label_expert_agile_wip_min: "Min"
   label_expert_agile_wip_max: "Max"

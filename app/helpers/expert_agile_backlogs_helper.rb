@@ -96,6 +96,7 @@ module ExpertAgileBacklogsHelper
       :planner_layout => query.planner_layout,
       :color_base => query.color_base,
       :show_avatar => query.show_avatar? ? '1' : '0',
+      :hide_epics => query.hide_epics? ? '1' : '0',
       # The trailing blank keeps the list present when no filter is left, so
       # Redmine applies none rather than its defaults.
       :f => filters.keys + [''],

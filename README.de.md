@@ -145,8 +145,8 @@ Auswahlfeld Story Points mit dem Wert 2 und ein Auswahlfeld Sprint mit Sprint 24
 Epics buendeln Stories wie in Jira, auf Grundlage von Redmines eigenem Unteraufgaben-Baum. In den
 Plugin-Einstellungen (*Epics*) werden die Epic-Tracker gewaehlt; ein Ticket gehoert dann zum
 naechsten Epic ueber ihm. Die Stories eines Epics sind also seine Unteraufgaben, und deren
-Unteraufgaben gehoeren ebenfalls dazu. Mit dem Kartenfeld **Epic** zeigt jede Karte auf dem Board
-und im Backlog ihr Epic als farbiges Badge, eine Farbe je Epic. Die Epics selbst stehen nicht auf
+Unteraufgaben gehoeren ebenfalls dazu. Das Kartenfeld **Epic**, eines der Standard-Kartenfelder, zeigt
+auf dem Board und im Backlog an jeder Karte ihr Epic als farbiges Badge, eine Farbe je Epic. Die Epics selbst stehen nicht auf
 dem Board, solange *Epics auf dem Board ausblenden* in den Board-Optionen eingeschaltet ist. Wird das Board nach *Epic* gruppiert, entsteht eine Swimlane je Epic; eine Story in die Lane
 eines anderen Epics zu ziehen verschiebt sie dorthin. Im Backlog-Planer plant *Epics* Stories auf dieselbe Weise in Epics.
 Jede Epic-Lane und die Ticketseite des Epics zeigen seinen Fortschritt. Das Kartenfeld *Unteraufgaben* klappt die Unteraufgaben einer Story auf
@@ -252,6 +252,9 @@ seinem Epic; die Karte bleibt in ihrem Sprint oder ihrer Version und verschwinde
 nicht mehr zum Filter passt. Das ist dieselbe Aenderung wie im Reiter *Epics*, mit denselben
 Pruefungen: das Recht, Unteraufgaben zu verwalten, und Unteraufgaben einer Story sowie Epics werden
 mit Begruendung abgelehnt.
+Wie auf dem Board stehen die Epics selbst hier nicht als Karten, die Leiste listet sie ja;
+*Epics als Karten ausblenden* in den Optionen holt sie zurueck, etwa um ein Epic in eine Version zu
+ziehen.
 
 **Spalten oder Liste.** *Spalten* ist die oben beschriebene Ansicht. *Liste* stellt die Bahnen in
 voller Breite untereinander, die Sprints zuerst und den Backlog zuletzt, mit einer Zeile je Ticket,

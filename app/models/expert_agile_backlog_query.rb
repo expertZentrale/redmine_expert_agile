@@ -118,7 +118,7 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
   # Whether an issue still passes the planner's filters, after a change made
   # it from the planner. One that no longer does leaves the screen.
   def shows_issue?(issue)
-    base_scope.where(:id => issue.id).exists?
+    epic_filtered(base_scope).where(:id => issue.id).exists?
   end
 
   # The planner's own part of the options panel. Redmine's build_from_params
@@ -187,9 +187,11 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
   private
 
   # The planner ignores the board's status columns: an issue is planned
-  # regardless of where it sits in the workflow.
+  # regardless of where it sits in the workflow. Epics are left out of the
+  # cards like on the board (hide_epics, on unless switched off): the epic
+  # panel lists them, and as cards they would stand there twice.
   def planning_scope
-    base_scope.eager_load(:status, :tracker, :priority, :assigned_to, :expert_agile_data)
+    epic_filtered(base_scope).eager_load(:status, :tracker, :priority, :assigned_to, :expert_agile_data)
   end
 
   def filter_by_term(scope, term)

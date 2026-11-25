@@ -930,6 +930,22 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_not_equal epic_b.id, story.reload.parent_id
   end
 
+  def test_the_epic_cards_are_hidden_unless_the_options_bring_them_back
+    epic_a, _epic_b, story = epics!
+
+    with_epics { get :index, :params => { :project_id => @project.id, :container_type => 'sprint' } }
+    assert_select "#ea-card-#{story.id}"
+    assert_select "#ea-card-#{epic_a.id}", 0
+    assert_select 'input[type=checkbox][name=hide_epics][checked=checked]'
+    assert_equal '1', JSON.parse(css_select('#ea-board-data').first.text)['stateParams']['hide_epics']
+
+    with_epics do
+      get :index, :params => { :project_id => @project.id, :set_filter => '1', :container_type => 'sprint',
+                               :hide_epics => '0' }
+    end
+    assert_select "#ea-card-#{epic_a.id}"
+  end
+
   # --- Layout ----------------------------------------------------------------
 
   def test_columns_by_default_with_the_backlog_first
