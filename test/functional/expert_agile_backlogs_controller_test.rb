@@ -111,7 +111,9 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     get :index, :params => { :project_id => @project.id, :container_type => 'version' }
 
     assert_response :success
-    assert_select '.ea-backlog-switch a.selected', :count => 1
+    # One container kind and one layout are marked, each in its own switch.
+    assert_select '.ea-backlog-container-switch a.selected', :count => 1
+    assert_select '.ea-backlog-layout-switch a.selected', :count => 1
   end
 
   def test_version_lanes_are_offered
@@ -647,5 +649,252 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
 
     assert_response :forbidden
     assert_not_equal version.id, @issue.reload.fixed_version_id
+  end
+
+  # --- Epic panel ----------------------------------------------------------
+
+  def with_epics(&block)
+    with_agile_settings('epic_tracker_ids' => ['2'], &block)
+  end
+
+  def panel_link_params(selector)
+    Rack::Utils.parse_nested_query(URI(css_select(selector).first['href']).query)
+  end
+
+  def test_the_sprint_planner_shows_the_open_epics_in_its_panel
+    epic_a, epic_b, _story = epics!
+    closed_epic = Issue.generate!(:project => @project, :tracker_id => 2, :status_id => 5)
+
+    with_epics { get :index, :params => { :project_id => @project.id, :container_type => 'sprint' } }
+
+    assert_response :success
+    assert_select '#ea-epic-panel .ea-epic-panel-all[aria-current=true]'
+    assert_select '#ea-epic-panel .ea-epic-panel-none[data-epic-drop=""]'
+    assert_select '#ea-epic-panel .ea-epic-panel-epic[data-epic-drop=?] .ea-epic-progress', epic_a.id.to_s
+    assert_select '#ea-epic-panel .ea-epic-panel-epic[data-epic-drop=?]', epic_b.id.to_s
+    assert_select "#ea-epic-panel [data-epic-drop='#{closed_epic.id}']", 0
+    data = JSON.parse(css_select('#ea-board-data').first.text)
+    assert_includes data['epicUpdateUrlTemplate'], '/epic'
+  end
+
+  def test_no_epic_panel_on_the_epics_tab_or_without_epic_trackers
+    epics!
+
+    with_epics { get :index, :params => { :project_id => @project.id, :container_type => 'epic' } }
+    assert_select '#ea-epic-panel', 0
+
+    get :index, :params => { :project_id => @project.id, :container_type => 'sprint' }
+    assert_select '#ea-epic-panel', 0
+    assert_nil JSON.parse(css_select('#ea-board-data').first.text)['epicUpdateUrlTemplate']
+  end
+
+  def test_an_epic_entry_filters_the_planner_to_its_epic
+    epic_a, _epic_b, story = epics!
+    loose = Issue.generate!(:project => @project, :tracker_id => 1, :subject => 'Loose')
+
+    with_epics { get :index, :params => { :project_id => @project.id, :container_type => 'sprint' } }
+    params = panel_link_params(".ea-epic-panel-epic[data-epic-drop='#{epic_a.id}']")
+    assert_equal '=', params['op']['expert_agile_epic_id']
+    assert_equal [epic_a.id.to_s], params['v']['expert_agile_epic_id']
+    assert_equal 'sprint', params['container_type']
+
+    with_epics { get :index, :params => params.merge('project_id' => @project.id) }
+
+    assert_response :success
+    assert_select "#ea-card-#{story.id}"
+    assert_select "#ea-card-#{loose.id}", 0
+    assert_select ".ea-epic-panel-epic[data-epic-drop='#{epic_a.id}'][aria-current=true]"
+    # The chosen entry leads back to every issue.
+    back = panel_link_params(".ea-epic-panel-epic[data-epic-drop='#{epic_a.id}']")
+    assert_nil back.fetch('op', {})['expert_agile_epic_id']
+  end
+
+  def test_the_without_epic_entry_keeps_the_other_filters
+    epics!
+
+    with_epics do
+      get :index, :params => { :project_id => @project.id, :set_filter => '1', :container_type => 'sprint',
+                               :f => ['tracker_id'], :op => { 'tracker_id' => '=' }, :v => { 'tracker_id' => ['1'] } }
+    end
+    params = panel_link_params('.ea-epic-panel-none')
+
+    assert_equal '!*', params['op']['expert_agile_epic_id']
+    assert_equal '=', params['op']['tracker_id']
+    assert_equal ['1'], params['v']['tracker_id']
+  end
+
+  # --- Dropping a card onto an epic ------------------------------------------
+
+  def put_epic(issue, epic_id, extra = {})
+    with_epics do
+      put :update_epic, :params => { :project_id => @project.id, :id => issue.id, :epic_id => epic_id,
+                                     :container_type => 'sprint' }.merge(extra), :format => :js
+    end
+  end
+
+  def test_a_card_dropped_on_an_epic_becomes_its_story
+    epic_a, epic_b, story = epics!
+
+    put_epic(story, epic_b.id)
+
+    assert_response :success
+    assert_equal epic_b.id, story.reload.parent_id
+    body = JSON.parse(response.body)
+    assert_equal true, body['shown']
+    assert_equal epic_b.id, body['epicId']
+    assert_includes body['card'], "ea-card-#{story.id}"
+    assert_equal l(:label_expert_agile_epic_progress_issues, :closed => 0, :total => 1),
+                 body['panelProgress'][epic_b.id.to_s]['title']
+    assert_equal l(:label_expert_agile_epic_progress_issues, :closed => 0, :total => 0),
+                 body['panelProgress'][epic_a.id.to_s]['title']
+    assert story.journals.last.details.any? { |detail| detail.prop_key == 'parent_id' }
+  end
+
+  def test_a_card_dropped_on_without_epic_leaves_its_epic
+    _epic_a, _epic_b, story = epics!
+
+    put_epic(story, '')
+
+    assert_response :success
+    assert_nil story.reload.parent_id
+  end
+
+  def test_the_card_stays_in_its_sprint_and_its_totals_come_back
+    _epic_a, epic_b, story = epics!
+    sprint = sprint!
+    story.expert_agile_data!.update!(:sprint_id => sprint.id)
+
+    put_epic(story, epic_b.id)
+
+    body = JSON.parse(response.body)
+    assert_equal sprint.id, story.reload.expert_agile_data.sprint_id
+    assert_equal sprint.id, body['containerId']
+    assert_equal 1, body['totals']['container']['issue_count']
+  end
+
+  def test_a_card_moved_out_of_the_filtered_epic_leaves_the_screen
+    epic_a, epic_b, story = epics!
+
+    put_epic(story, epic_b.id, :set_filter => '1', :f => ['expert_agile_epic_id'],
+                               :op => { 'expert_agile_epic_id' => '=' },
+                               :v => { 'expert_agile_epic_id' => [epic_a.id.to_s] })
+
+    assert_response :success
+    assert_equal false, JSON.parse(response.body)['shown']
+  end
+
+  def test_an_epic_outside_the_panel_is_refused
+    epic_a, _epic_b, story = epics!
+    closed_epic = Issue.generate!(:project => @project, :tracker_id => 2, :status_id => 5)
+    foreign = Issue.generate!(:project => Project.find(2), :tracker_id => 2)
+    plain = Issue.generate!(:project => @project, :tracker_id => 1)
+
+    [closed_epic, foreign, plain].each do |target|
+      put_epic(story, target.id)
+      assert_response :unprocessable_entity
+      assert_equal l(:error_expert_agile_epic_not_available), JSON.parse(response.body)['error']
+    end
+    assert_equal epic_a.id, story.reload.parent_id
+  end
+
+  def test_a_story_subtask_or_an_epic_is_refused_by_name
+    epic_a, epic_b, story = epics!
+    subtask = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => story.id)
+
+    put_epic(subtask, epic_b.id)
+    assert_response :unprocessable_entity
+    assert_equal l(:error_expert_agile_epic_lane_subtask), JSON.parse(response.body)['error']
+    assert_equal story.id, subtask.reload.parent_id
+
+    put_epic(epic_a, epic_b.id)
+    assert_response :unprocessable_entity
+    assert_equal l(:error_expert_agile_epic_lane_epic), JSON.parse(response.body)['error']
+  end
+
+  def test_dropping_on_an_epic_needs_the_right_to_manage_subtasks
+    _epic_a, epic_b, story = epics!
+    @role.remove_permission!(:manage_subtasks)
+
+    put_epic(story, epic_b.id)
+
+    assert_response :forbidden
+    assert_equal l(:error_expert_agile_epic_not_editable), JSON.parse(response.body)['error']
+  end
+
+  def test_dropping_on_an_epic_needs_the_planning_permission
+    _epic_a, epic_b, story = epics!
+    @role.remove_permission!(:manage_expert_agile_backlog)
+
+    put_epic(story, epic_b.id)
+
+    assert_response :forbidden
+    assert_not_equal epic_b.id, story.reload.parent_id
+  end
+
+  # --- Layout ----------------------------------------------------------------
+
+  def test_columns_by_default_with_the_backlog_first
+    sprint!
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_select '#ea-backlog.ea-backlog-list', 0
+    assert_select '.ea-backlog-layout-switch a.selected', :text => l(:label_expert_agile_planner_layout_columns)
+    assert_includes css_select('#ea-backlog > .ea-backlog-lane').first['class'], 'ea-backlog-source'
+  end
+
+  def test_the_setting_can_make_the_list_the_default
+    sprint!
+
+    with_agile_settings('planner_default_layout' => 'list') do
+      get :index, :params => { :project_id => @project.id }
+    end
+
+    assert_select '#ea-backlog.ea-backlog-list'
+    assert_select '.ea-backlog-layout-switch a.selected', :text => l(:label_expert_agile_planner_layout_list)
+    assert_includes css_select('#ea-backlog > .ea-backlog-lane').last['class'], 'ea-backlog-source'
+    assert_select '.ea-backlog-lane[data-lane-key] .ea-lane-toggle', :minimum => 2
+  end
+
+  def test_the_layout_switch_sticks_through_the_session
+    get :index, :params => { :project_id => @project.id }
+    get :index, :params => { :project_id => @project.id, :planner_layout => 'list' }
+    assert_select '#ea-backlog.ea-backlog-list'
+
+    get :index, :params => { :project_id => @project.id }
+
+    assert_select '#ea-backlog.ea-backlog-list'
+    assert_select 'form#ea_query_form input[type=hidden][name=?][value=?]', 'planner_layout', 'list'
+  end
+
+  def test_the_layout_switch_on_a_saved_planner_applies_to_the_request_only
+    saved = saved_backlog!
+
+    get :index, :params => { :project_id => @project.id, :query_id => saved.id, :planner_layout => 'list' }
+
+    assert_select '#ea-backlog.ea-backlog-list'
+    assert_nil saved.reload.options[:planner_layout], 'the tweak is not written back'
+  end
+
+  def test_a_saved_planner_opens_in_its_own_layout
+    saved = saved_backlog!
+    saved.planner_layout = 'list'
+    saved.save!
+
+    get :index, :params => { :project_id => @project.id, :query_id => saved.id }
+
+    assert_select '#ea-backlog.ea-backlog-list'
+  end
+
+  # --- Context menu ------------------------------------------------------------
+
+  def test_planner_cards_open_redmines_context_menu
+    get :index, :params => { :project_id => @project.id }
+
+    assert_response :success
+    assert_select 'form#ea-board-form[data-cm-url=?]', '/issues/context_menu'
+    assert_select 'form#ea-board-form input[type=hidden][name=back_url]'
+    assert_select "form#ea-board-form #ea-card-#{@issue.id}.hascontextmenu input[type=checkbox][name=?]", 'ids[]'
+    assert_select "#ea-card-#{@issue.id} .ea-card-header .js-contextmenu"
   end
 end

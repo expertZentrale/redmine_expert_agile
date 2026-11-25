@@ -12,6 +12,7 @@
 module RedmineExpertAgile
   COLOR_BASES = %w(none tracker priority status assignee project spent_time).freeze
   ESTIMATE_UNITS = %w(hours story_points).freeze
+  PLANNER_LAYOUTS = %w(columns list).freeze
 
   class << self
     # Stored settings, with any key the administrator has never saved filled in
@@ -125,6 +126,12 @@ module RedmineExpertAgile
     def estimate_units
       units = setting(:estimate_units).to_s
       ESTIMATE_UNITS.include?(units) ? units : 'hours'
+    end
+
+    # How a planner without a layout of its own shows its lanes.
+    def planner_default_layout
+      layout = setting(:planner_default_layout).to_s
+      PLANNER_LAYOUTS.include?(layout) ? layout : 'columns'
     end
 
     def use_story_points?

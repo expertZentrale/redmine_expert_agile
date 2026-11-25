@@ -48,6 +48,8 @@ de:
   label_expert_agile_auto_assign_on_move: Beim Verschieben mir zuweisen
   text_expert_agile_auto_assign_on_move: Gilt nur fuer nicht zugewiesene Tickets, deren Status sich tatsaechlich aendert
   label_expert_agile_minimize_closed: Geschlossene Spalten einklappen
+  label_expert_agile_planner_default_layout: "Standardansicht des Backlog-Planers"
+  text_expert_agile_planner_default_layout: "So zeigt der Backlog-Planer seine Lanes, solange ein gespeicherter Planer oder der Benutzer nichts anderes gewählt hat"
 
   # --- Einstellungen: Farben ------------------------------------------
   label_expert_agile_color_base: Karten faerben nach
@@ -201,6 +203,14 @@ de:
   text_expert_agile_no_sprints: Noch keine Sprints vorhanden. Legen Sie einen an, um zu planen.
   text_expert_agile_no_versions: Dieses Projekt hat keine offenen Versionen zum Planen.
   text_expert_agile_drop_issues_here: Tickets zum Planen hierher ziehen
+  label_expert_agile_planner_layout_columns: "Spalten"
+  label_expert_agile_planner_layout_list: "Liste"
+  label_expert_agile_lane_collapse: "Einklappen"
+  label_expert_agile_lane_expand: "Ausklappen"
+  label_expert_agile_epic_panel_all: "Alle Tickets"
+  label_expert_agile_epic_panel_none: "Ohne Epic"
+  text_expert_agile_card_hidden_by_filter: "Gespeichert. Das Ticket passt nicht mehr zum Filter und wird ausgeblendet."
+  error_expert_agile_epic_not_available: "In dieses Epic kann dieser Planer nicht planen"
   label_expert_agile_days_remaining: "noch %{count} T"
 
   # --- Diagramme ------------------------------------------------------

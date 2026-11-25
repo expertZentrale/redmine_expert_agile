@@ -41,6 +41,9 @@ RedmineApp::Application.routes.draw do
       :as => 'project_expert_agile_backlog'
   put 'projects/:project_id/expert_agile/backlog/issues/:id', :to => 'expert_agile_backlogs#update',
       :as => 'update_expert_agile_backlog_issue'
+  # A card dropped onto an epic of the planner's epic panel.
+  put 'projects/:project_id/expert_agile/backlog/issues/:id/epic', :to => 'expert_agile_backlogs#update_epic',
+      :as => 'update_epic_expert_agile_backlog_issue'
   get 'projects/:project_id/expert_agile/backlog/load_more', :to => 'expert_agile_backlogs#load_more',
       :as => 'load_more_expert_agile_backlog'
   get 'projects/:project_id/expert_agile/backlog/autocomplete', :to => 'expert_agile_backlogs#autocomplete',

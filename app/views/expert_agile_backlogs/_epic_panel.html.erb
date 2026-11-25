@@ -1,0 +1,49 @@
+<%# The epic panel beside the sprint and version lanes. Every entry is a link
+    that sets the planner's epic filter — the same one the filter panel offers —
+    so the lanes, their totals and "load more" all agree with it. Clicking the
+    entry already chosen goes back to all issues.
+
+    The epics and "without epic" are drop targets as well: a card dropped on
+    one is hung under that epic (expert_agile_board.js, #update_epic). Markup
+    only. %>
+<% selection = expert_agile_epic_panel_selection(@query) %>
+<aside class="ea-epic-panel" id="ea-epic-panel" aria-label="<%= l(:label_expert_agile_epic_plural) %>">
+  <h3 class="ea-epic-panel-title"><%= l(:label_expert_agile_epic_plural) %></h3>
+  <ul class="ea-epic-panel-list">
+    <li>
+      <%= link_to backlog_path_for(@project, expert_agile_epic_panel_params(@query, nil)),
+                  :class => 'ea-epic-panel-item ea-epic-panel-all',
+                  :'aria-current' => (selection == :all ? 'true' : nil) do %>
+        <span class="ea-epic-panel-swatch" aria-hidden="true"></span>
+        <span class="ea-epic-panel-name"><%= l(:label_expert_agile_epic_panel_all) %></span>
+      <% end %>
+    </li>
+    <li>
+      <%= link_to backlog_path_for(@project, expert_agile_epic_panel_params(@query, selection == :none ? nil : :none)),
+                  :class => 'ea-epic-panel-item ea-epic-panel-none',
+                  :'aria-current' => (selection == :none ? 'true' : nil),
+                  :data => { :epic_drop => '' } do %>
+        <span class="ea-epic-panel-swatch" aria-hidden="true"></span>
+        <span class="ea-epic-panel-name"><%= l(:label_expert_agile_epic_panel_none) %></span>
+      <% end %>
+    </li>
+  </ul>
+  <ul class="ea-epic-panel-list ea-epic-panel-epics">
+    <% @query.panel_epics.each do |epic| %>
+      <% chosen = selection == epic.id %>
+      <li>
+        <%= link_to backlog_path_for(@project, expert_agile_epic_panel_params(@query, chosen ? nil : epic)),
+                    :class => 'ea-epic-panel-item ea-epic-panel-epic',
+                    :title => "#{epic.tracker.name} ##{epic.id}: #{epic.subject}",
+                    :style => ExpertAgileColor.css_variables(ExpertAgileColor.for_principal(epic),
+                                                             ExpertAgileColor::LANE_TINT),
+                    :'aria-current' => (chosen ? 'true' : nil),
+                    :data => { :epic_drop => epic.id } do %>
+          <span class="ea-epic-panel-swatch" aria-hidden="true"></span>
+          <span class="ea-epic-panel-name"><%= epic.subject %></span>
+          <%= expert_agile_epic_progress(@query.epic_progress(epic)) %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+</aside>

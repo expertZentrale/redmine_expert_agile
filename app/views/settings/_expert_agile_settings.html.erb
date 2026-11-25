@@ -45,6 +45,15 @@
     <%= hidden_field_tag 'settings[minimize_closed]', '0' %>
     <%= check_box_tag 'settings[minimize_closed]', '1', @settings['minimize_closed'].to_s == '1' %>
   </p>
+
+  <p>
+    <label for="settings_planner_default_layout"><%= l(:label_expert_agile_planner_default_layout) %></label>
+    <%= select_tag 'settings[planner_default_layout]',
+                   options_for_select(RedmineExpertAgile::PLANNER_LAYOUTS.map { |layout|
+                                        [l("label_expert_agile_planner_layout_#{layout}"), layout]
+                                      }, @settings['planner_default_layout']) %>
+    <em class="info"><%= l(:text_expert_agile_planner_default_layout) %></em>
+  </p>
 </fieldset>
 
 <fieldset class="box tabular">

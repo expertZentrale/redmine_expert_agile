@@ -48,6 +48,8 @@ en:
   label_expert_agile_auto_assign_on_move: Assign to me when moving a card
   text_expert_agile_auto_assign_on_move: Only applies to unassigned issues whose status actually changes
   label_expert_agile_minimize_closed: Collapse closed columns
+  label_expert_agile_planner_default_layout: Default planner layout
+  text_expert_agile_planner_default_layout: How the backlog planner shows its lanes unless a saved planner or the user chose otherwise
 
   # --- Settings: colors -----------------------------------------------
   label_expert_agile_color_base: Color cards by
@@ -201,6 +203,14 @@ en:
   text_expert_agile_no_sprints: No sprints yet. Create one to start planning.
   text_expert_agile_no_versions: This project has no open versions to plan into.
   text_expert_agile_drop_issues_here: Drag issues here to plan them
+  label_expert_agile_planner_layout_columns: Columns
+  label_expert_agile_planner_layout_list: List
+  label_expert_agile_lane_collapse: Collapse
+  label_expert_agile_lane_expand: Expand
+  label_expert_agile_epic_panel_all: All issues
+  label_expert_agile_epic_panel_none: Without epic
+  text_expert_agile_card_hidden_by_filter: Saved. The issue no longer matches the filter and is hidden.
+  error_expert_agile_epic_not_available: This epic is not one this planner can plan into
   label_expert_agile_days_remaining: "%{count} d left"
 
   # --- Charts ---------------------------------------------------------

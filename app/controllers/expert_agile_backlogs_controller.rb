@@ -5,7 +5,7 @@ class ExpertAgileBacklogsController < ApplicationController
   before_action :find_project_by_project_id
   before_action :authorize
   before_action :retrieve_backlog_query
-  before_action :find_issue_for_planning, :only => [:update]
+  before_action :find_issue_for_planning, :only => [:update, :update_epic]
 
   helper :queries
   helper :expert_agile_boards
@@ -91,6 +91,55 @@ class ExpertAgileBacklogsController < ApplicationController
     end
   end
 
+  # A card dropped onto an epic of the epic panel: the issue's parent becomes
+  # that epic, or nothing for "without epic" — what the epics tab does when a
+  # card is dropped into an epic lane, held to the same checks. The card stays
+  # in its sprint or version lane; the answer says whether it still passes
+  # the planner's filters, an epic filter above all.
+  def update_epic
+    unless User.current.allowed_to?(:manage_expert_agile_backlog, @issue.project)
+      return render_planning_error(
+        l(:error_expert_agile_move_not_permitted_in_project, :project => @issue.project.name),
+        :forbidden
+      )
+    end
+    unless @issue.safe_attribute?('parent_issue_id', User.current)
+      return render_planning_error(l(:error_expert_agile_epic_not_editable), :forbidden)
+    end
+    if (refusal = RedmineExpertAgile::Epics.lane_refusal(@issue))
+      return render_planning_error(l("error_expert_agile_epic_lane_#{refusal}"), :unprocessable_entity)
+    end
+
+    epic = @query.panel_epic_for(params[:epic_id])
+    if params[:epic_id].present? && epic.nil?
+      return render_planning_error(l(:error_expert_agile_epic_not_available), :unprocessable_entity)
+    end
+
+    Issue.transaction do
+      @issue.init_journal(User.current)
+      @issue.parent_issue_id = epic && epic.id
+      unless @issue.save
+        reason = @issue.errors.full_messages.join(', ')
+        reason = l(:error_expert_agile_move_failed) if reason.blank?
+        render_planning_error(reason, :unprocessable_entity)
+        raise ActiveRecord::Rollback
+      end
+      # A callback may have put the old parent back; the answer must say
+      # where the issue really hangs.
+      if @issue.reload.parent_id != (epic && epic.id)
+        render_planning_error(l(:error_expert_agile_move_failed), :unprocessable_entity)
+        raise ActiveRecord::Rollback
+      end
+    end
+    return if performed?
+
+    lane = @query.container_for(current_container_id)
+    respond_to do |format|
+      format.js { render :json => epic_payload(epic, lane) }
+      format.html { redirect_to project_expert_agile_backlog_path(@project) }
+    end
+  end
+
   def load_more
     @container = @query.container_for(params[:container_id])
     @issues = @container ? @query.issues_for(@container) : @query.backlog_issues
@@ -128,7 +177,7 @@ class ExpertAgileBacklogsController < ApplicationController
         # move it is not, because which backlog is on screen only decides the
         # cards the new rank is measured against, never whether the card may
         # move at all.
-        raise ActiveRecord::RecordNotFound unless action_name == 'update'
+        raise ActiveRecord::RecordNotFound unless %w(update update_epic).include?(action_name)
 
         session.delete(SESSION_KEY)
         fallback = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
@@ -148,11 +197,13 @@ class ExpertAgileBacklogsController < ApplicationController
         @query.build_from_params(params)
         @query.apply_board_params(params)
       end
-      # The sprint/version switch is a plain link, so it arrives without
-      # set_filter. Honouring it here is what keeps the switch working on a saved
-      # backlog; like every other tweak on this path it is not written back, so
-      # the next bare request shows the backlog as it was saved.
+      # The sprint/version switch and the layout switch are plain links, so
+      # they arrive without set_filter. Honouring them here is what keeps them
+      # working on a saved backlog; like every other tweak on this path they
+      # are not written back, so the next bare request shows the backlog as it
+      # was saved.
       @query.container_type = params[:container_type] if params[:container_type].present?
+      @query.planner_layout = params[:planner_layout] if params[:planner_layout].present?
       session[SESSION_KEY] = { :id => @query.id, :project_id => @query.project_id }
     elsif params[:set_filter].present? || session_state_stale?
       @query = ExpertAgileBacklogQuery.new(:name => '_', :project => @project)
@@ -161,23 +212,29 @@ class ExpertAgileBacklogsController < ApplicationController
       store_backlog_session_state
     else
       @query = restore_backlog_from_session
-      apply_switched_container_type
+      apply_switched_view
     end
     @query
   end
 
-  # The sprint/version switch is a plain link carrying the container type and
-  # nothing else, so it never reaches the set_filter branch once a session
-  # exists — which is every click after the first page view. Honouring it here
-  # is what keeps the switch working at all, and storing it back makes it stick
-  # the way an applied filter does. A saved backlog is left alone: like every
-  # other tweak on that path, the switch applies to this request only.
-  def apply_switched_container_type
-    return if params[:container_type].blank?
-    return if params[:container_type] == @query.container_type
-
-    @query.container_type = params[:container_type]
-    store_backlog_session_state unless @query.persisted?
+  # The sprint/version switch and the columns/list switch are plain links
+  # carrying their one value and nothing else, so they never reach the
+  # set_filter branch once a session exists — which is every click after the
+  # first page view. Honouring them here is what keeps the switches working at
+  # all, and storing them back makes them stick the way an applied filter does.
+  # A saved backlog is left alone: like every other tweak on that path, a
+  # switch applies to this request only.
+  def apply_switched_view
+    changed = false
+    if params[:container_type].present? && params[:container_type] != @query.container_type
+      @query.container_type = params[:container_type]
+      changed = true
+    end
+    if params[:planner_layout].present? && params[:planner_layout] != @query.planner_layout
+      @query.planner_layout = params[:planner_layout]
+      changed = true
+    end
+    store_backlog_session_state if changed && !@query.persisted?
   end
 
   # Through `visible`, so a guessed id cannot open somebody else's private
@@ -316,10 +373,36 @@ class ExpertAgileBacklogsController < ApplicationController
       },
       # Every epic lane's progress: a story leaving one epic for another
       # changes both, and the answer names only the one it landed in.
-      :progress => @query.epics_on_screen.each_with_object({}) do |epic, acc|
-        acc[epic.id] = helpers.expert_agile_epic_progress_data(@query.epic_progress(epic))
-      end
+      :progress => @query.epics? ? epic_progress_on_screen : {},
+      :panelProgress => @query.epic_panel? ? epic_progress_on_screen : {}
     }
+  end
+
+  # The answer to a drop onto the epic panel: the redrawn card, whether it
+  # still passes the filters, the totals of its lane and of the backlog (a
+  # card leaving the screen changes them) and the progress of every epic on
+  # the panel, the one it left included.
+  def epic_payload(epic, lane)
+    {
+      :issueId => @issue.id,
+      :epicId => epic && epic.id,
+      :shown => @query.shows_issue?(@issue),
+      :card => render_to_string(:partial => 'expert_agile_backlogs/issue_card',
+                                :locals => { :issue => @issue },
+                                :formats => [:html]),
+      :containerId => lane && lane.id,
+      :totals => {
+        :container => lane ? @query.totals_for(lane) : nil,
+        :backlog => @query.totals_for(nil)
+      },
+      :panelProgress => epic_progress_on_screen
+    }
+  end
+
+  def epic_progress_on_screen
+    @query.epics_on_screen.each_with_object({}) do |epic, acc|
+      acc[epic.id] = helpers.expert_agile_epic_progress_data(@query.epic_progress(epic))
+    end
   end
 
   # Where CardMoveResponses puts the refusals it takes over from Redmine.

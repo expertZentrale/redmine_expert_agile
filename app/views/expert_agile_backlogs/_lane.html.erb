@@ -2,9 +2,15 @@
 <% totals = @query.totals_for(container) %>
 <% name = container.is_a?(Issue) ? "##{container.id} #{container.subject}" : container.to_s %>
 <% issues = container ? @query.issues_for(container) : @query.backlog_issues %>
-<div class="ea-backlog-lane <%= container ? expert_agile_swimlane_color_class(container) : 'ea-backlog-source' %>"<%= expert_agile_style_attribute(expert_agile_swimlane_style(container)) if container %>>
+<div class="ea-backlog-lane <%= container ? expert_agile_swimlane_color_class(container) : 'ea-backlog-source' %>"<%= expert_agile_style_attribute(expert_agile_swimlane_style(container)) if container %>
+     data-lane-key="<%= container ? container.id : 'backlog' %>">
   <h3 class="ea-backlog-lane-header" data-container-id="<%= container && container.id %>">
     <span class="ea-backlog-lane-title">
+      <%# Folds the lane down to its header. Only in the list layout, where the
+          lanes stand one under another; the script remembers the choice. %>
+      <button type="button" class="ea-lane-toggle" aria-expanded="true"
+              title="<%= l(:label_expert_agile_lane_collapse) %>"
+              aria-label="<%= l(:label_expert_agile_lane_collapse) %>"></button>
       <span class="ea-backlog-lane-name" title="<%= container ? h(name) : l(:label_expert_agile_backlog) %>">
         <%= container ? h(name) : l(:label_expert_agile_backlog) %>
       </span>

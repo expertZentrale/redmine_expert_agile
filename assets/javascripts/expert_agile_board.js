@@ -214,6 +214,192 @@
     updateColumns(payload.columns);
     updateLaneTotals(payload.totals, payload.containerId, payload.progress);
     updateSwimlanes(payload.lanes);
+    applyPanelProgress(payload.panelProgress);
+  }
+
+  /* --- Epic panel (backlog planner) ---------------------------------------
+   *
+   * Beside the sprint and version lanes the planner lists its epics. Their
+   * entries are links that filter the planner, and drop targets: a card let go
+   * on an epic is hung under it (#update_epic), on "without epic" it leaves
+   * its epic. The card stays in its lane; it only leaves the screen when it no
+   * longer passes the planner's filters, an epic filter above all. */
+
+  function epicPanel() {
+    return document.getElementById('ea-epic-panel');
+  }
+
+  function applyPanelProgress(progress) {
+    var panel = epicPanel();
+    if (!progress || !panel) { return; }
+    Object.keys(progress).forEach(function (id) {
+      applyEpicProgress(panel.querySelector('[data-epic-drop="' + id + '"]'), progress[id]);
+    });
+  }
+
+  function makeEpicDroppable(item) {
+    item.addEventListener('dragover', function (event) {
+      if (!dragged) { return; }
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      /* The card is not going into another lane: it goes back where it was
+       * while the pointer is over the panel. */
+      if (!atOrigin(dragged)) { restore(origin); }
+      item.classList.add('ea-epic-drop-hover');
+    });
+    item.addEventListener('dragleave', function () {
+      item.classList.remove('ea-epic-drop-hover');
+    });
+    item.addEventListener('drop', function (event) {
+      event.preventDefault();
+      item.classList.remove('ea-epic-drop-hover');
+      if (!dragged) { return; }
+      var card = dragged;
+      dragged = null;
+      origin = null;
+      allowedTargets = null;
+      originLane = null;
+      clearDropTargets();
+      submitEpicMove(card, item.getAttribute('data-epic-drop'));
+    });
+  }
+
+  function submitEpicMove(card, epicId) {
+    var body = new URLSearchParams();
+    body.append('epic_id', epicId || '');
+    /* The planner on screen, so the answer can tell whether the card still
+     * passes its filters. */
+    if (config.queryId) { body.append('query_id', config.queryId); }
+    if (config.containerType) { body.append('container_type', config.containerType); }
+    var saved = false;
+
+    fetch(config.epicUpdateUrlTemplate.replace('__ID__', card.getAttribute('data-issue-id')), {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: {
+        'X-CSRF-Token': csrfToken(),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'text/javascript',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: body.toString()
+    }).then(function (response) {
+      if (response.ok) {
+        saved = true;
+        return response.json().then(applyEpicMove);
+      }
+      return response.text().then(function (text) {
+        var payload = null;
+        try { payload = JSON.parse(text); } catch (e) { payload = null; }
+        if (!payload || !payload.error) { payload = { error: refusalMessage(response.status) }; }
+        setMessage(payload.error, true, payload);
+      });
+    }).catch(function () {
+      setMessage(saved ? config.labels.saveNotShown : config.labels.moveFailed, true);
+    });
+  }
+
+  function applyEpicMove(payload) {
+    setMessage('', false);
+    var card = document.getElementById('ea-card-' + payload.issueId);
+    if (card && payload.shown === false) {
+      card.parentNode.removeChild(card);
+      setMessage(config.labels.cardHiddenByFilter, false);
+    } else if (card && payload.card) {
+      var holder = document.createElement('div');
+      holder.innerHTML = payload.card;
+      var fresh = holder.firstElementChild;
+      card.parentNode.replaceChild(fresh, card);
+      makeDraggable(fresh);
+    }
+    updateLaneTotals(payload.totals, payload.containerId, null);
+    applyPanelProgress(payload.panelProgress);
+  }
+
+  /* --- Folding lanes (backlog planner, list layout) -----------------------
+   *
+   * In the list layout the lanes stand one under another, and a sprint that
+   * is planned can be folded down to its header. Which lanes are folded is
+   * remembered per browser. A folded lane still takes a card dropped on its
+   * header, at its end. */
+
+  function laneStorageKey(lane) {
+    return config.laneStoragePrefix + '.' + lane.getAttribute('data-lane-key');
+  }
+
+  function setLaneFolded(lane, folded) {
+    var button = lane.querySelector('.ea-lane-toggle');
+    lane.classList.toggle('ea-lane-folded', folded);
+    if (!button) { return; }
+    button.setAttribute('aria-expanded', String(!folded));
+    var label = folded ? config.labels.expand : config.labels.collapse;
+    if (label) {
+      button.setAttribute('aria-label', label);
+      button.title = label;
+    }
+  }
+
+  function setupLane(root, lane) {
+    var list = root.classList.contains('ea-backlog-list');
+    var button = lane.querySelector('.ea-lane-toggle');
+    if (button && list && config.laneStoragePrefix) {
+      var folded = false;
+      try { folded = window.localStorage.getItem(laneStorageKey(lane)) === '1'; } catch (e) { folded = false; }
+      setLaneFolded(lane, folded);
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var fold = !lane.classList.contains('ea-lane-folded');
+        setLaneFolded(lane, fold);
+        try {
+          if (fold) {
+            window.localStorage.setItem(laneStorageKey(lane), '1');
+          } else {
+            window.localStorage.removeItem(laneStorageKey(lane));
+          }
+        } catch (e) { /* storage unavailable: the fold lasts for this page */ }
+      });
+    }
+
+    var header = lane.querySelector('.ea-backlog-lane-header');
+    var cell = lane.querySelector('.ea-cell');
+    if (!header || !cell) { return; }
+    header.addEventListener('dragover', function (event) {
+      if (!dragged || !lane.classList.contains('ea-lane-folded')) { return; }
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      if (!atOrigin(dragged)) { restore(origin); }
+      lane.classList.add('ea-lane-drop-hover');
+    });
+    header.addEventListener('dragleave', function () {
+      lane.classList.remove('ea-lane-drop-hover');
+    });
+    header.addEventListener('drop', function (event) {
+      lane.classList.remove('ea-lane-drop-hover');
+      if (!dragged || !lane.classList.contains('ea-lane-folded')) { return; }
+      event.preventDefault();
+      var card = dragged;
+      var from = origin;
+      dragged = null;
+      origin = null;
+      allowedTargets = null;
+      originLane = null;
+      clearDropTargets();
+      (cell.querySelector('.ea-cell-issues') || cell).appendChild(card);
+      submitMove(card, cell, from);
+    });
+  }
+
+  function initPlanner(root) {
+    Array.prototype.forEach.call(root.querySelectorAll('.ea-card'), makeDraggable);
+    Array.prototype.forEach.call(root.querySelectorAll('.ea-cell'), makeDroppable);
+    Array.prototype.forEach.call(root.querySelectorAll('.ea-backlog-lane'), function (lane) {
+      setupLane(root, lane);
+    });
+    var panel = epicPanel();
+    if (panel && config.epicUpdateUrlTemplate && config.editable) {
+      Array.prototype.forEach.call(panel.querySelectorAll('[data-epic-drop]'), makeEpicDroppable);
+    }
   }
 
   /* The lane of a board cell, or null where cells carry none. */
@@ -369,6 +555,8 @@
       allowedTargets = allowedStatusIds(card);
       card.classList.add('ea-dragging');
       markDropTargets(card);
+      var panel = epicPanel();
+      if (panel && config.epicUpdateUrlTemplate) { panel.classList.add('ea-epic-panel-active'); }
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', card.getAttribute('data-issue-id'));
     });
@@ -452,6 +640,8 @@
   }
 
   function clearDropTargets() {
+    var panel = epicPanel();
+    if (panel) { panel.classList.remove('ea-epic-panel-active'); }
     var root = boardRoot();
     if (!root) { return; }
     root.classList.remove('ea-drag-active');
@@ -686,7 +876,7 @@
     var link = target && target.closest ? target.closest('a') : null;
     if (!link || !link.closest('.ea-card-id, .ea-card-subject')) { return; }
     var card = link.closest('.ea-card.hascontextmenu');
-    var root = boardRoot();
+    var root = boardRoot() || document.getElementById('ea-backlog');
     if (!card || !root || !root.contains(card)) { return; }
     event.preventDefault();
     event.stopPropagation();
@@ -766,7 +956,7 @@
          * the board down on every change. */
         if (response.ok && response.redirected) {
           setMessage('', false);
-          if (!swapBoard(page)) { refreshBoard(); }
+          if (!swapScreen(page)) { refreshBoard(); }
           return;
         }
         /* Refused: Redmine answers with the issue's edit form, or for several
@@ -814,7 +1004,7 @@
         return response.text();
       })
       .then(function (html) {
-        if (!swapBoard(new DOMParser().parseFromString(html, 'text/html'))) {
+        if (!swapScreen(new DOMParser().parseFromString(html, 'text/html'))) {
           throw new Error('no board on the page');
         }
       })
@@ -868,6 +1058,41 @@
     return true;
   }
 
+  function swapScreen(page) {
+    return boardRoot() ? swapBoard(page) : swapBacklog(page);
+  }
+
+  /* The planner's counterpart: every lane and card, the epic panel with its
+   * progress, and the data this script runs on, in place of the ones on
+   * screen. The page and its scroll stay. */
+  function swapBacklog(page) {
+    var root = document.getElementById('ea-backlog');
+    var fresh = page.getElementById('ea-backlog');
+    var island = page.getElementById('ea-board-data');
+    var ownIsland = document.getElementById('ea-board-data');
+    if (!root || !fresh || !island || !ownIsland) { return false; }
+    var freshConfig;
+    try {
+      freshConfig = JSON.parse(island.textContent);
+    } catch (e) {
+      return false;
+    }
+
+    abandonDrag();
+    config = freshConfig;
+    ownIsland.textContent = island.textContent;
+    root.className = fresh.className;
+    while (root.firstChild) { root.removeChild(root.firstChild); }
+    Array.prototype.forEach.call(fresh.childNodes, function (node) {
+      root.appendChild(document.importNode(node, true));
+    });
+    var panel = epicPanel();
+    var freshPanel = page.getElementById('ea-epic-panel');
+    if (panel && freshPanel) { panel.parentNode.replaceChild(document.importNode(freshPanel, true), panel); }
+    initPlanner(root);
+    return true;
+  }
+
   /* A card picked up from the board that was just replaced can no longer
    * land anywhere; the drag ends without a move. */
   function abandonDrag() {
@@ -886,14 +1111,16 @@
     var root = document.getElementById('ea-board') || document.getElementById('ea-backlog');
     if (!root) { return; }
 
-    Array.prototype.forEach.call(root.querySelectorAll('.ea-card'), makeDraggable);
-    Array.prototype.forEach.call(root.querySelectorAll('.ea-cell'), makeDroppable);
     if (root === boardRoot()) {
+      Array.prototype.forEach.call(root.querySelectorAll('.ea-card'), makeDraggable);
+      Array.prototype.forEach.call(root.querySelectorAll('.ea-cell'), makeDroppable);
       pinHeader(root);
-      if (document.getElementById('ea-board-form')) {
-        document.addEventListener('click', interceptBulkUpdate, true);
-        document.addEventListener('contextmenu', forwardCardLinkContextMenu, true);
-      }
+    } else {
+      initPlanner(root);
+    }
+    if (document.getElementById('ea-board-form')) {
+      document.addEventListener('click', interceptBulkUpdate, true);
+      document.addEventListener('contextmenu', forwardCardLinkContextMenu, true);
     }
   }
 

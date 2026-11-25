@@ -5,10 +5,13 @@
     No `type` field: nothing reads params[:type], and the query controller
     decides the class from `query_class`. %>
 
-<%# Which containers are being planned into is chosen by the switch above, a
-    pair of links outside this form. Without carrying it here, applying a filter
-    on the version backlog would silently drop back to sprints. %>
+<%# Which containers are being planned into, and whether as columns or as a
+    list, is chosen by the switches above, links outside this form. Without
+    carrying them here, applying a filter on the version backlog would silently
+    drop back to sprints, and a list back to columns. Saving a planner stores
+    both. %>
 <%= hidden_field_tag 'container_type', @query.container_type %>
+<%= hidden_field_tag 'planner_layout', @query.planner_layout %>
 
 <div id="query_form_with_buttons" class="hide-when-print">
   <div id="query_form_content">

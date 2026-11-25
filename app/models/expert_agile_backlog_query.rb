@@ -24,10 +24,11 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
     RedmineExpertAgile::Epics.enabled? ? CONTAINER_TYPES : CONTAINER_TYPES - [CONTAINER_EPIC]
   end
 
-  # Which containers are being planned into is display state like any other
-  # panel setting, so it has to survive a request the same way.
+  # Which containers are being planned into, and whether as columns or as a
+  # list, is display state like any other panel setting, so it has to survive
+  # a request the same way.
   def self.session_option_keys
-    super + [:container_type]
+    super + [:container_type, :planner_layout]
   end
 
   def container_type
@@ -47,14 +48,82 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
     container_type == CONTAINER_EPIC
   end
 
-  # The planner's epic lanes show their progress, like the board's.
+  LAYOUT_COLUMNS = 'columns'.freeze
+  LAYOUT_LIST = 'list'.freeze
+
+  # Lanes side by side, or one under the other with a row per issue. A
+  # planner that never chose follows the plugin setting, so changing that
+  # setting reaches every planner nobody has set up otherwise.
+  def planner_layout
+    value = options[:planner_layout].to_s
+    RedmineExpertAgile::PLANNER_LAYOUTS.include?(value) ? value : RedmineExpertAgile.planner_default_layout
+  end
+
+  # Anything but a known layout leaves the planner as it was.
+  def planner_layout=(value)
+    value = value.to_s
+    options[:planner_layout] = value if RedmineExpertAgile::PLANNER_LAYOUTS.include?(value)
+  end
+
+  def list_layout?
+    planner_layout == LAYOUT_LIST
+  end
+
+  # The lanes in the order they are drawn. As columns the backlog leads, as
+  # the source cards are taken from; as a list it closes the page, below the
+  # sprints a planning session works through. nil stands for the backlog.
+  def lanes
+    list_layout? ? containers + [nil] : [nil] + containers
+  end
+
+  # The epic panel beside the sprint and version lanes: the open epics the
+  # planner's issues may belong to. Not on the epics tab, whose lanes are
+  # the epics already.
+  def epic_panel?
+    !epics? && panel_epics.any?
+  end
+
+  # Open epics of the project and its subprojects that the user may see, by
+  # subject — the epics tab's lanes without the epic filter, which on this
+  # panel is what an entry sets rather than what narrows the list.
+  def panel_epics
+    @panel_epics ||= if project && RedmineExpertAgile::Epics.enabled?
+                       # With the tracker: every entry names it in its title.
+                       open_epics_scope.includes(:tracker).order(:subject).to_a
+                     else
+                       []
+                     end
+  end
+
+  # Resolves an id from the request to an epic of the panel. Anything else —
+  # a closed epic, one from an unrelated project, one the user may not see,
+  # an issue that is no epic — is nil, so a crafted id cannot hang a card
+  # under it.
+  def panel_epic_for(id)
+    return nil if id.blank?
+
+    panel_epics.detect { |epic| epic.id.to_s == id.to_s }
+  end
+
+  # The epics whose progress the page shows, answered in one query: the
+  # epics tab's lanes, or the panel's epics.
   def epics_on_screen
-    epics? ? containers : []
+    if epics?
+      containers
+    else
+      epic_panel? ? panel_epics : []
+    end
+  end
+
+  # Whether an issue still passes the planner's filters, after a change made
+  # it from the planner. One that no longer does leaves the screen.
+  def shows_issue?(issue)
+    base_scope.where(:id => issue.id).exists?
   end
 
   # The planner's own part of the options panel. Redmine's build_from_params
   # covers filters, card fields and sorting; the inherited implementation covers
-  # colouring and the avatar. Only the container kind is left.
+  # colouring and the avatar. Only the container kind and the layout are left.
   #
   # The board settings the parent also reads — status columns, WIP limits — are
   # inert here: the panel never offers them and `planning_scope` ignores where an
@@ -62,6 +131,7 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
   def apply_board_params(params)
     super
     self.container_type = params[:container_type] if params[:container_type].present?
+    self.planner_layout = params[:planner_layout] if params[:planner_layout].present?
     self
   end
 
@@ -148,10 +218,13 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
   def available_epics
     return [] unless project
 
-    scope = Issue.visible.open
-                 .where(:tracker_id => RedmineExpertAgile::Epics.tracker_ids)
-                 .where(:project_id => project.self_and_descendants.select(:id))
-    epic_lanes_filtered(scope).order(:subject).to_a
+    epic_lanes_filtered(open_epics_scope).order(:subject).to_a
+  end
+
+  def open_epics_scope
+    Issue.visible.open
+         .where(:tracker_id => RedmineExpertAgile::Epics.tracker_ids)
+         .where(:project_id => project.self_and_descendants.select(:id))
   end
 
   # The epic filter decides the lanes as well as the cards: filtered to some
