@@ -195,6 +195,7 @@ de:
   label_expert_agile_swimlanes: Swimlanes
   label_expert_agile_show_avatar: Avatar des Bearbeiters anzeigen
   label_expert_agile_hide_epics: Epics auf dem Board ausblenden
+  label_expert_agile_planner_hide_epics: "Epics als Karten ausblenden"
   label_expert_agile_columns_and_limits: Spalten und WIP-Limits
   label_expert_agile_wip_min: Min
   label_expert_agile_wip_max: Max

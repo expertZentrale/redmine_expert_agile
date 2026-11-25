@@ -60,7 +60,9 @@ Redmine::Plugin.register :redmine_expert_agile do
            :default => {
              # --- Board -------------------------------------------------
              # Card fields shown by default on a new board (comma separated).
-             'default_card_columns'    => 'tracker,assigned_to',
+             # The epic badge only shows while epics are on; without epic
+             # trackers the field is not offered and simply drops out.
+             'default_card_columns'    => 'tracker,epic,assigned_to',
              # Cards rendered per column before "load more" kicks in.
              'issues_per_column'       => '10',
              # Hard cap on issues pulled into one board render.

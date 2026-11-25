@@ -350,6 +350,21 @@ class ExpertAgileBacklogQueryTest < ActiveSupport::TestCase
     end
   end
 
+  # Like the board: the epics themselves are not cards unless asked for.
+  def test_the_planner_leaves_the_epics_out_of_its_cards_unless_asked
+    epic = Issue.generate!(:project => @project, :tracker_id => 2)
+
+    with_epics do
+      query = query_for('sprint')
+      assert query.hide_epics?
+      assert_not_includes query.backlog_issues.map(&:id), epic.id
+      assert_equal query.backlog_issues.size, query.totals_for(nil)[:issue_count]
+
+      query.apply_board_params(:hide_epics => '0')
+      assert_includes query.backlog_issues.map(&:id), epic.id
+    end
+  end
+
   def test_shows_issue_follows_the_filters
     epic = Issue.generate!(:project => @project, :tracker_id => 2)
     story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic.id)
