@@ -888,6 +888,28 @@ class ExpertAgileBacklogsControllerTest < Redmine::ControllerTest
     assert_equal 1, JSON.parse(response.body)['totals']['container']['issue_count']
   end
 
+  # Switching tabs or layout on a saved planner narrowed on the panel keeps
+  # the epic it was narrowed to.
+  def test_the_switches_keep_the_planner_as_it_is_on_screen
+    epic_a, _epic_b, _story = epics!
+    saved = saved_backlog!(:container_type => 'sprint')
+
+    with_epics do
+      get :index, :params => { :project_id => @project.id, :query_id => saved.id, :set_filter => '1',
+                               :container_type => 'sprint', :f => ['expert_agile_epic_id', ''],
+                               :op => { 'expert_agile_epic_id' => '=' },
+                               :v => { 'expert_agile_epic_id' => [epic_a.id.to_s] } }
+    end
+
+    [['.ea-backlog-container-switch a', 'container_type', 'version'],
+     ['.ea-backlog-layout-switch a', 'planner_layout', 'list']].each do |selector, key, value|
+      link = css_select(selector).detect { |a| Rack::Utils.parse_nested_query(URI(a['href']).query)[key] == value }
+      params = Rack::Utils.parse_nested_query(URI(link['href']).query)
+      assert_equal saved.id.to_s, params['query_id']
+      assert_equal [epic_a.id.to_s], params['v']['expert_agile_epic_id'], selector
+    end
+  end
+
   def test_dropping_on_an_epic_needs_the_right_to_manage_subtasks
     _epic_a, epic_b, story = epics!
     @role.remove_permission!(:manage_subtasks)

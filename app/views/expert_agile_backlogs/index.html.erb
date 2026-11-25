@@ -4,33 +4,30 @@
 <%# The container switch and the layout switch stay pairs of links rather than
     moving into the options panel: they are the settings worth a single click,
     and the panel carries both as hidden fields so applying a filter keeps
-    them. Each link carries the other switch's value too, so a saved planner
-    tweaked for this request keeps the tweak. %>
+    them. Each link carries the planner as it is on screen and changes one
+    value, so a saved planner tweaked for this request — an epic chosen on the
+    panel — keeps the tweak. %>
 <div class="ea-backlog-switches">
+  <% state = expert_agile_planner_state_params(@query) %>
   <div class="ea-backlog-switch ea-backlog-container-switch">
     <%= link_to l(:label_expert_agile_sprint_plural),
-                backlog_path_for(@project, :container_type => 'sprint', :planner_layout => @query.planner_layout,
-                                           :query_id => @query.id),
+                backlog_path_for(@project, state.merge(:container_type => 'sprint')),
                 :class => (@query.sprints? ? 'selected' : nil) %>
     <%= link_to l(:label_version_plural),
-                backlog_path_for(@project, :container_type => 'version', :planner_layout => @query.planner_layout,
-                                           :query_id => @query.id),
+                backlog_path_for(@project, state.merge(:container_type => 'version')),
                 :class => (@query.container_type == 'version' ? 'selected' : nil) %>
     <% if RedmineExpertAgile::Epics.enabled? %>
       <%= link_to l(:label_expert_agile_epic_plural),
-                  backlog_path_for(@project, :container_type => 'epic', :planner_layout => @query.planner_layout,
-                                             :query_id => @query.id),
+                  backlog_path_for(@project, state.merge(:container_type => 'epic')),
                   :class => (@query.epics? ? 'selected' : nil) %>
     <% end %>
   </div>
   <div class="ea-backlog-switch ea-backlog-layout-switch">
     <%= link_to l(:label_expert_agile_planner_layout_columns),
-                backlog_path_for(@project, :planner_layout => 'columns', :container_type => @query.container_type,
-                                           :query_id => @query.id),
+                backlog_path_for(@project, state.merge(:planner_layout => 'columns')),
                 :class => (@query.list_layout? ? nil : 'selected') %>
     <%= link_to l(:label_expert_agile_planner_layout_list),
-                backlog_path_for(@project, :planner_layout => 'list', :container_type => @query.container_type,
-                                           :query_id => @query.id),
+                backlog_path_for(@project, state.merge(:planner_layout => 'list')),
                 :class => (@query.list_layout? ? 'selected' : nil) %>
   </div>
 </div>
