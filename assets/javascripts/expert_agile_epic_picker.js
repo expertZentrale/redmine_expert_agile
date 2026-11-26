@@ -124,7 +124,7 @@
     this.search.setAttribute('aria-label', this.data.labels.search);
     this.search.setAttribute('role', 'combobox');
     this.search.setAttribute('aria-autocomplete', 'list');
-    this.search.setAttribute('aria-expanded', 'true');
+    this.search.setAttribute('aria-expanded', 'false');
     this.search.setAttribute('aria-controls', LIST_ID);
     this.list = el('ul', 'ea-epic-picker-list');
     this.list.id = LIST_ID;
@@ -248,6 +248,7 @@
     }
     this.pop.hidden = false;
     this.button.setAttribute('aria-expanded', 'true');
+    this.search.setAttribute('aria-expanded', 'true');
     this.holder.classList.add('ea-open');
     this.drawList();
     this.search.focus({ preventScroll: true });
@@ -276,6 +277,8 @@
     this.isOpen = false;
     this.pop.hidden = true;
     this.button.setAttribute('aria-expanded', 'false');
+    this.search.setAttribute('aria-expanded', 'false');
+    this.search.removeAttribute('aria-activedescendant');
     this.holder.classList.remove('ea-open');
     if (refocus) { this.button.focus(); }
   };
