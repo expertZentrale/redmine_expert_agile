@@ -68,7 +68,9 @@ module RedmineExpertAgile
         out << caller.send(:render, :partial => 'issues/expert_agile_story_points',
                                     :locals => { :issue => issue })
       end
-      if agile_issue?(issue) && RedmineExpertAgile::Epics.epic?(issue)
+      # Wherever the project plans with epics, board or planner alike, as the
+      # issue form's epic picker.
+      if RedmineExpertAgile::Epics.epic?(issue) && RedmineExpertAgile::Epics.planned_in?(issue.project)
         out << caller.send(:render, :partial => 'issues/expert_agile_epic_progress',
                                     :locals => { :epic => issue,
                                                  :progress => RedmineExpertAgile::Epics.progress([issue])[issue.id],

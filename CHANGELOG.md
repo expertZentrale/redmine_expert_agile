@@ -25,6 +25,11 @@ notes from the section matching the pushed tag.
   starts with the epic's tracker. It comes back to the epic. Shown to users who may add issues and
   manage subtasks.
 
+### Changed
+
+- **An epic's progress on its page** now also shows in projects that plan with the backlog planner
+  only, like the epic picker; it used to need the Agile board module.
+
 ## [0.13.0] - 2026-11-25
 
 ### Added

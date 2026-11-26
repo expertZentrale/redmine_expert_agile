@@ -27,6 +27,11 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   dem Tracker des Epics. Danach geht es zurueck zum Epic. Sichtbar fuer alle, die Tickets anlegen
   und Unteraufgaben verwalten duerfen.
 
+### Geaendert
+
+- **Der Fortschritt eines Epics auf seiner Seite** erscheint jetzt auch in Projekten, die nur mit
+  dem Backlog-Planer planen, wie die Epic-Auswahl; bisher brauchte er das Modul Agile-Board.
+
 ## [0.13.0] - 2026-11-25
 
 ### Hinzugefuegt

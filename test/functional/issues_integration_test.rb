@@ -295,6 +295,20 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     assert_equal "/issues/#{epic.id}", query['back_url']
   end
 
+  # A project that only plans in the backlog planner plans with epics too.
+  def test_an_epic_shows_its_progress_and_the_link_with_only_the_planner
+    @project.disable_module!(:expert_agile)
+    epic = Issue.generate!(:project => @project, :tracker_id => 2)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :show, :params => { :id => epic.id }
+    end
+
+    assert_response :success
+    assert_select '.expert-agile-epic-progress .ea-epic-progress'
+    assert_select '.expert-agile-epic-progress a.expert-agile-epic-new-issue'
+  end
+
   def test_an_epic_offers_no_new_issue_to_a_user_who_may_not_set_the_parent_task
     epic = Issue.generate!(:project => @project, :tracker_id => 2)
     Role.find(1).remove_permission!(:manage_subtasks)
