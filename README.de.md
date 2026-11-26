@@ -183,6 +183,10 @@ gewohnt; wie dieses Feld braucht sie das Recht *Unteraufgaben verwalten*. Eine U
 Story zeigt ihr Epic ohne Auswahl: Sie gehoert ueber die Story dazu, zum Verschieben das
 uebergeordnete Ticket aendern. Epics selbst bekommen keine Auswahl.
 
+![Formular "Neues Ticket" mit geoeffneter Epic-Auswahl unter "Uebergeordnetes Ticket": ein
+Suchfeld, "Kein Epic" und die offenen Epics des Projekts, jedes mit Farbe, Nummer und einem
+Fortschrittsbalken mit den erledigten Tickets, etwa 6/18](docs/screenshots/de/19-issue-form-epic-picker.png)
+
 ![Redmines Ticketliste, geoeffnet ueber "Epics und Stories" im Abschnitt Epic-Ansichten der
 Seitenleiste: jede Epic-Zeile in ihrer Farbe hinterlegt, mit "Erledigte Tickets: 6/16" neben dem
 Thema, darunter ihre Stories und deren Aufgaben an Baumlinien mit einem Balken in der Farbe des

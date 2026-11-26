@@ -164,6 +164,10 @@ task*, so saving, permissions and the history work as before; like that field, i
 *Manage subtasks* permission. A subtask of a story shows its epic without a choice: it belongs to
 the epic through the story, so change the parent task to move it. Epics themselves get no picker.
 
+![New issue form with the Epic picker open under Parent task: a search field, "No epic" and the
+project's open epics, each with its colour, number and a progress bar with the issues done, such
+as 6/18](docs/screenshots/en/19-issue-form-epic-picker.png)
+
 ![Redmine's issue list opened from "Epics and stories" in the Epic views sidebar section: each epic
 row tinted in its colour with "Issues done: 6/16" beside its subject, its stories and their tasks
 beneath it on tree lines with a bar in the epic's colour, and the last epic folded away. "Collapse
