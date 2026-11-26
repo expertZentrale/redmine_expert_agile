@@ -1,0 +1,186 @@
+/* The epic picker on Redmine's issue form (expert_agile_epic_picker.js).
+ *
+ * Theme-neutral on purpose: the script copies the look of the theme's own
+ * text fields into --ea-picker-bg/-fg/-border/-radius, and everything else
+ * is drawn from currentColor. An epic's hue arrives inline as --ea-epic,
+ * the share done as --ea-progress, one rule reads each. */
+
+.ea-epic-picker-row[hidden] { display: none; }
+
+.ea-epic-picker {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.ea-epic-swatch {
+  flex: none;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--ea-epic, #8a919b);
+}
+.ea-epic-swatch-none {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.ea-epic-picker-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  max-width: 100%;
+  margin: 0;
+  padding: 2px 26px 2px 8px;
+  border: 1px solid var(--ea-picker-border, #ccc);
+  border-radius: var(--ea-picker-radius, 3px);
+  background: var(--ea-picker-bg, #fff);
+  color: var(--ea-picker-fg, inherit);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.ea-epic-picker-button::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 10px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  opacity: 0.6;
+  transform: translateY(-70%) rotate(45deg);
+}
+.ea-epic-picker-button:focus-visible,
+.ea-epic-picker-search:focus-visible {
+  outline: 2px solid Highlight;
+  outline: 2px solid -webkit-focus-ring-color;
+  outline-offset: 1px;
+}
+
+.ea-epic-picker-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ea-epic-picker-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85em;
+  opacity: 0.8;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ea-epic-picker-bar {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+  overflow: hidden;
+}
+.ea-epic-picker-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--ea-progress, 0%);
+  background: var(--ea-epic, #4f9d69);
+}
+
+/* The list: solid, above the rest of the form, and fixed to the viewport
+ * (the script places it at the button), because core's form rows clip
+ * whatever overflows them. */
+.ea-epic-picker-pop {
+  position: fixed;
+  z-index: 20;
+  top: 0;
+  left: 0;
+  width: 26em;
+  max-width: calc(100vw - 32px);
+  padding: 6px;
+  border: 1px solid var(--ea-picker-border, #ccc);
+  border-radius: 6px;
+  background: var(--ea-picker-bg, #fff);
+  color: var(--ea-picker-fg, inherit);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  box-sizing: border-box;
+}
+.ea-epic-picker-pop[hidden] { display: none; }
+
+.ea-epic-picker-search {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 6px;
+}
+
+.ea-epic-picker-list {
+  max-height: 16em;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.ea-epic-picker-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1px 8px;
+  margin: 0;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.ea-epic-picker-option .ea-epic-swatch { grid-row: 1; }
+.ea-epic-picker-option-subject {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ea-epic-picker-option-meta {
+  grid-column: 2;
+  font-size: 0.85em;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ea-epic-picker-option .ea-epic-picker-progress { grid-column: 3; grid-row: 1 / span 2; }
+.ea-epic-picker-option-none .ea-epic-picker-option-subject { font-style: italic; }
+.ea-epic-picker-option[aria-selected="true"] {
+  background: color-mix(in srgb, var(--ea-epic, currentColor) 14%, transparent);
+  font-weight: bold;
+}
+.ea-epic-picker-option.ea-active {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, currentColor 40%, transparent);
+}
+
+.ea-epic-picker-empty {
+  padding: 5px 8px;
+  opacity: 0.7;
+}
+
+/* An issue under a story: the epic it belongs to, no choice. */
+.ea-epic-picker-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+}
+.ea-epic-picker-hint {
+  font-size: 0.9em;
+  opacity: 0.75;
+}

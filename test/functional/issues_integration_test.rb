@@ -357,6 +357,74 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     assert_select '.expert-agile-epic-views', 0
   end
 
+  # The epic picker on the issue form: its row, data and assets where the
+  # project plans with epics. The script draws it; core's form stays intact.
+  def test_the_new_issue_form_offers_the_epic_picker
+    epic = Issue.generate!(:project => @project, :tracker_id => 2, :subject => 'Epic for the form')
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :new, :params => { :project_id => @project.id, :issue => { :tracker_id => 1 } }
+    end
+
+    assert_response :success
+    assert_select 'form#issue-form p#ea-epic-picker[hidden] label#ea-epic-picker-label',
+                  :text => l(:label_expert_agile_epic)
+    assert_select 'form#issue-form input#issue_parent_issue_id'
+    data = JSON.parse(css_select('script#ea-epic-picker-data').first.text)
+    assert_includes data['epics'].map { |entry| entry['id'] }, epic.id.to_s
+    assert_nil data['current']
+    assert_epic_picker_assets
+  end
+
+  def test_the_edit_form_of_a_story_has_its_epic_chosen
+    epic = Issue.generate!(:project => @project, :tracker_id => 2)
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :edit, :params => { :id => story.id }
+    end
+
+    assert_response :success
+    assert_equal epic.id.to_s, JSON.parse(css_select('script#ea-epic-picker-data').first.text)['current']
+  end
+
+  # Core redraws the form whenever the parent task changes, and the picker
+  # comes back with it: here only showing the epic of the story chosen.
+  def test_the_redrawn_form_shows_the_epic_through_a_story
+    epic = Issue.generate!(:project => @project, :tracker_id => 2)
+    story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic.id)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      post :new, :params => { :project_id => @project.id, :issue => { :tracker_id => 1, :parent_issue_id => story.id } },
+                 :format => 'js', :xhr => true
+    end
+
+    assert_response :success
+    assert_includes response.body, 'ea-epic-picker-data'
+    assert_match(/via\\?":\\?"#{story.id}\\?"/, response.body)
+  end
+
+  # No picker on an epic, but its assets: switching the tracker to a story
+  # redraws the form without loading the page again.
+  def test_an_epic_form_has_no_picker_but_its_assets
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :new, :params => { :project_id => @project.id, :issue => { :tracker_id => 2 } }
+    end
+
+    assert_response :success
+    assert_select '#ea-epic-picker', 0
+    assert_epic_picker_assets
+  end
+
+  def test_without_epics_the_issue_form_is_cores
+    get :new, :params => { :project_id => @project.id, :issue => { :tracker_id => 1 } }
+
+    assert_response :success
+    assert_select '#ea-epic-picker', 0
+    scripts = css_select('script[src]').map { |script| script['src'] }
+    assert scripts.none? { |src| src.include?('expert_agile_epic_picker') }, scripts.inspect
+  end
+
   # The issue list with the sprint filter and column: a core page, so it is
   # rendered here like every other page the plugin touches.
   def test_the_issue_list_filters_and_shows_the_sprint
@@ -399,5 +467,13 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     journal = Journal.create!(:journalized => @issue, :user => User.find(1), :notes => 'Planned')
     JournalDetail.create!(:journal => journal, :property => 'attr',
                           :prop_key => 'expert_agile_sprint_id', :value => sprint.id.to_s)
+  end
+
+  # Redmine 5 serves plugin_assets/<plugin>/..., 6 and later digested names.
+  def assert_epic_picker_assets
+    scripts = css_select('script[src]').map { |script| script['src'] }
+    assert scripts.any? { |src| src =~ %r{redmine_expert_agile/.*expert_agile_epic_picker[-.].*js} }, scripts.inspect
+    sheets = css_select('link[rel=stylesheet]').map { |link| link['href'] }
+    assert sheets.any? { |href| href =~ %r{redmine_expert_agile/.*expert_agile_epic_picker[-.].*css} }, sheets.inspect
   end
 end

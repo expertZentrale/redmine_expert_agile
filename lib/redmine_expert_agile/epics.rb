@@ -45,6 +45,25 @@ module RedmineExpertAgile
         issue.present? && tracker_ids.include?(issue.tracker_id)
       end
 
+      # Whether a project plans with epics: it uses an agile module and has
+      # an epic tracker of its own. Only there do the issue sidebar and the
+      # issue form offer anything about epics; most projects of an instance
+      # plan without them.
+      def planned_in?(project)
+        return false if project.nil? || !enabled?
+        return false unless project.module_enabled?(:expert_agile) || project.module_enabled?(:expert_agile_backlog)
+
+        project.trackers.where(:id => tracker_ids).exists?
+      end
+
+      # The open epics of a project and its subprojects that the user may
+      # see: the planner's epic panel and the issue form's epic picker.
+      def open_scope(project, user = User.current)
+        Issue.visible(user).open
+             .where(:tracker_id => tracker_ids)
+             .where(:project_id => project.self_and_descendants.select(:id))
+      end
+
       # {epic_id => progress} for every given epic, in one query.
       #
       # Counts everything below the epic except epics — stories, their

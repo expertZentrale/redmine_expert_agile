@@ -181,8 +181,15 @@ of the release commit:
   page whatever its size;
   `expert_agile_issue_tree.js` only decorates core's rows (`idnt-N` depth, tree lines, folding), never
   adds or moves one. `view_issues_sidebar_planning_bottom` links *Epics and stories* (`tree_list_params`)
-  in projects with an agile module and an epic tracker — a link, not a saved query, because a public
-  query is either one project's or every project's.
+  in projects with an agile module and an epic tracker (`Epics.planned_in?`) — a link, not a saved query,
+  because a public query is either one project's or every project's.
+  The issue form's epic picker is `RedmineExpertAgile::EpicPicker` (`view_issues_form_details_bottom`, same
+  projects, `safe_attribute?('parent_issue_id')`, never on an epic): its island lists `Epics.open_scope`
+  narrowed by core's `valid_parent_project?`, and `expert_agile_epic_picker.js` only writes
+  `#issue_parent_issue_id` and fires its change event, so core's form update saves nothing and redraws the
+  picker from the server. Never save the epic through a path of our own. An issue under a non-epic parent only
+  shows its epic (`via`), as `Epics.lane_refusal` refuses such a card. The partial brings its assets
+  wherever epics are on, because core swaps the form without a page load when tracker or project change.
   Completing a sprint is `RedmineExpertAgile::SprintCompletion` (`ExpertAgileSprintsController#complete`):
   open issues move like a planner move (journaled, `manage_expert_agile_backlog`, the issue's own
   validation), then the sprint closes and the target may be activated — one transaction; a single

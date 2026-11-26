@@ -11,6 +11,16 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
 
 ## [Unreleased]
 
+### Hinzugefuegt
+
+- **Epic-Auswahl im Ticketformular.** In Projekten mit Agile-Board oder Backlog-Planer und einem
+  Epic-Tracker zeigt das Ticketformular direkt unter *Uebergeordnetes Ticket* eine *Epic*-Auswahl:
+  die offenen Epics des Projekts und seiner Unterprojekte mit Farbe und Fortschritt, durchsuchbar
+  nach Titel oder Nummer, dazu *Kein Epic*. Die Auswahl fuellt *Uebergeordnetes Ticket* aus,
+  Speichern, Rechte (*Unteraufgaben verwalten*) und Historie bleiben also Redmines. Eine
+  Unteraufgabe einer Story zeigt ihr Epic ohne Auswahl, weil sie ueber die Story dazugehoert; ein
+  Epic bekommt keine Auswahl. Keine Migration, keine Einstellung.
+
 ## [0.13.0] - 2026-11-25
 
 ### Hinzugefuegt

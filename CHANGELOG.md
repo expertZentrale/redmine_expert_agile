@@ -11,6 +11,15 @@ notes from the section matching the pushed tag.
 
 ## [Unreleased]
 
+### Added
+
+- **Epic picker on the issue form.** In projects with the Agile board or the backlog planner and
+  an epic tracker, the issue form shows an *Epic* picker right under *Parent task*: the open epics
+  of the project and its subprojects with their colour and progress, searchable by title or
+  number, and *No epic*. Picking one fills in *Parent task*, so saving, permissions (*Manage
+  subtasks*) and the history stay Redmine's. A subtask of a story shows its epic without a choice,
+  since it belongs to the epic through the story; an epic gets no picker. No migration, no setting.
+
 ## [0.13.0] - 2026-11-25
 
 ### Added

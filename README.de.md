@@ -175,6 +175,14 @@ Zugewiesen an, Sprint und % erledigt. Das ist ein Link, keine gespeicherte Abfra
 einzurichten, und Projekte ohne Epics sehen ihn nicht. Wer die Liste anpasst, kann sie wie gewohnt
 als eigene Abfrage speichern.
 
+In denselben Projekten bekommt das **Ticketformular** direkt unter *Uebergeordnetes Ticket* eine
+**Epic**-Auswahl. Sie listet die offenen Epics des Projekts und seiner Unterprojekte mit Farbe und
+Fortschritt, findet beim Tippen eines nach Titel oder Nummer und bietet ganz oben *Kein Epic*. Die
+Auswahl fuellt *Uebergeordnetes Ticket* aus, Speichern, Rechte und Historie bleiben also wie
+gewohnt; wie dieses Feld braucht sie das Recht *Unteraufgaben verwalten*. Eine Unteraufgabe einer
+Story zeigt ihr Epic ohne Auswahl: Sie gehoert ueber die Story dazu, zum Verschieben das
+uebergeordnete Ticket aendern. Epics selbst bekommen keine Auswahl.
+
 ![Redmines Ticketliste, geoeffnet ueber "Epics und Stories" im Abschnitt Epic-Ansichten der
 Seitenleiste: jede Epic-Zeile in ihrer Farbe hinterlegt, mit "Erledigte Tickets: 6/16" neben dem
 Thema, darunter ihre Stories und deren Aufgaben an Baumlinien mit einem Balken in der Farbe des
