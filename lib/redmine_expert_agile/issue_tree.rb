@@ -64,10 +64,7 @@ module RedmineExpertAgile
       # Whether a project's issue sidebar offers the epic views: where it
       # plans with expert Agile and has an epic tracker of its own.
       def views_offered?(project)
-        return false if project.nil? || !RedmineExpertAgile::Epics.enabled?
-        return false unless project.module_enabled?(:expert_agile) || project.module_enabled?(:expert_agile_backlog)
-
-        project.trackers.where(:id => RedmineExpertAgile::Epics.tracker_ids).exists?
+        RedmineExpertAgile::Epics.planned_in?(project)
       end
 
       # The issue list of the "Epics and stories" link: every status, in tree

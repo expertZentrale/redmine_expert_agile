@@ -224,9 +224,7 @@ class ExpertAgileBacklogQuery < ExpertAgileQuery
   end
 
   def open_epics_scope
-    Issue.visible.open
-         .where(:tracker_id => RedmineExpertAgile::Epics.tracker_ids)
-         .where(:project_id => project.self_and_descendants.select(:id))
+    RedmineExpertAgile::Epics.open_scope(project)
   end
 
   # The epic filter decides the lanes as well as the cards: filtered to some

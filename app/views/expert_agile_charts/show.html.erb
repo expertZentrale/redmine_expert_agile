@@ -42,14 +42,14 @@
   <p id="ea-chart-message" class="nodata" style="display:none;"></p>
 </div>
 
-<script type="application/json" id="ea-chart-data"><%= {
+<script type="application/json" id="ea-chart-data"><%= json_escape({
      :url => render_expert_agile_chart_path(
                 :project_id => @project, :chart => @query.chart,
                 :chart_unit => @query.chart_unit, :interval => @query.interval,
                 :date_from => @query.date_from, :date_to => @query.date_to,
                 :query_id => @query.id),
      :type => RedmineExpertAgile::Charts::Registry.chart_class(@query.chart).chart_type
-   }.to_json.html_safe %></script>
+   }.to_json).html_safe %></script>
 
 <% content_for :sidebar do %>
   <%= render :partial => 'expert_agile_common/sidebar',

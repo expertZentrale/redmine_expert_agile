@@ -5,7 +5,8 @@
 # JSON island, so the plugin stays usable under a `script-src 'self'` policy.
 module RedmineExpertAgile
   class Hooks < Redmine::Hook::ViewListener
-    # Story point and sprint fields on the issue create/edit form.
+    # Story point and sprint fields on the issue create/edit form, and the
+    # epic picker.
     def view_issues_form_details_bottom(context = {})
       issue = context[:issue]
       out = ''.html_safe
@@ -18,6 +19,14 @@ module RedmineExpertAgile
       if sprint_visible?(issue)
         out << caller.send(:render, :partial => 'issues/expert_agile_sprint_form',
                                     :locals => { :f => context[:form], :issue => issue })
+      end
+      # Rendered wherever epics are on, picker or not: the partial also
+      # brings the picker's assets, and core redraws the form without
+      # reloading the page when the tracker or the project changes, which
+      # can turn the picker on.
+      if RedmineExpertAgile::Epics.enabled?
+        out << caller.send(:render, :partial => 'issues/expert_agile_epic_picker',
+                                    :locals => { :data => RedmineExpertAgile::EpicPicker.data(issue) })
       end
       out
     end

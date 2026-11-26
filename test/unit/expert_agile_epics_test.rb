@@ -135,6 +135,27 @@ class ExpertAgileEpicsTest < ActiveSupport::TestCase
     assert_equal 3, progress_of(@epic.reload).issue_count
   end
 
+  # Epics of one tree asked together: each counts only what lies below it,
+  # the outer one everything.
+  def test_progress_of_epics_sharing_a_tree
+    first = Issue.generate!(:project => @project, :tracker_id => EPIC_TRACKER, :parent_issue_id => @epic.id)
+    second = Issue.generate!(:project => @project, :tracker_id => EPIC_TRACKER, :parent_issue_id => @epic.id)
+    done = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => first.id)
+    done.update_column(:status_id, IssueStatus.where(:is_closed => true).first.id)
+    done.expert_agile_data!.update!(:story_points => 5)
+    2.times { Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => second.id) }
+
+    epics = [@epic, first, second].map(&:reload)
+    progress = with_agile_settings('epic_tracker_ids' => [EPIC_TRACKER.to_s]) do
+      RedmineExpertAgile::Epics.progress(epics)
+    end
+
+    # issues, closed issues, story points, closed story points
+    assert_equal [5, 1, 5, 5], progress[@epic.id].to_a
+    assert_equal [1, 1, 5, 5], progress[first.id].to_a
+    assert_equal [2, 0, 0, 0], progress[second.id].to_a
+  end
+
   # --- Hierarchy -------------------------------------------------------
 
   def test_children_and_parents_come_for_a_whole_list_at_once

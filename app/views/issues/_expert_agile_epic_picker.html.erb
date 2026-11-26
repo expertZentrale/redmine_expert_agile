@@ -1,0 +1,16 @@
+<%# The epic picker on the issue form: markup only. expert_agile_epic_picker.js
+    reads the island, draws the picker into the row, moves the row next to
+    the parent task field and shows it; without the script the row stays
+    hidden and the parent task field works as always.
+    The assets come along even without a picker, see the hook. %>
+<% if data %>
+  <p id="ea-epic-picker" class="ea-epic-picker-row" hidden>
+    <label id="ea-epic-picker-label"><%= l(:label_expert_agile_epic) %></label>
+    <span class="ea-epic-picker"></span>
+  </p>
+  <script type="application/json" id="ea-epic-picker-data"><%= json_escape(data.to_json).html_safe %></script>
+<% end %>
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'expert_agile_epic_picker', :plugin => 'redmine_expert_agile' %>
+  <%= javascript_include_tag 'expert_agile_epic_picker', :plugin => 'redmine_expert_agile' %>
+<% end %>

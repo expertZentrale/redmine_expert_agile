@@ -216,6 +216,10 @@ en:
   label_expert_agile_lane_expand: Expand
   label_expert_agile_epic_panel_all: All issues
   label_expert_agile_epic_panel_none: Without epic
+  label_expert_agile_epic_picker_none: No epic
+  label_expert_agile_epic_picker_search: Search epics
+  text_expert_agile_epic_picker_no_match: "No open epic matches."
+  text_expert_agile_epic_picker_via: "Through #%{id}. To change the epic, change the parent task."
   text_expert_agile_card_hidden_by_filter: Saved. The issue no longer matches the filter and is hidden.
   error_expert_agile_epic_not_available: This epic is not one this planner can plan into
   label_expert_agile_days_remaining: "%{count} d left"
