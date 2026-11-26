@@ -376,6 +376,26 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     assert_epic_picker_assets
   end
 
+  # A subject is user text: it must stay inside the island, whatever it holds,
+  # also where Rails is told not to escape HTML in JSON.
+  def test_an_epic_subject_cannot_end_the_island
+    subject = '</script><b id="ea-injected">x</b>'
+    Issue.generate!(:project => @project, :tracker_id => 2, :subject => subject)
+    escape = ActiveSupport.escape_html_entities_in_json
+    ActiveSupport.escape_html_entities_in_json = false
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :new, :params => { :project_id => @project.id, :issue => { :tracker_id => 1 } }
+    end
+
+    assert_response :success
+    assert_select '#ea-injected', 0
+    data = JSON.parse(css_select('script#ea-epic-picker-data').first.text)
+    assert_includes data['epics'].map { |entry| entry['subject'] }, subject
+  ensure
+    ActiveSupport.escape_html_entities_in_json = escape
+  end
+
   def test_the_edit_form_of_a_story_has_its_epic_chosen
     epic = Issue.generate!(:project => @project, :tracker_id => 2)
     story = Issue.generate!(:project => @project, :tracker_id => 1, :parent_issue_id => epic.id)

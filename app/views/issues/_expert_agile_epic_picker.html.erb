@@ -8,7 +8,7 @@
     <label id="ea-epic-picker-label"><%= l(:label_expert_agile_epic) %></label>
     <span class="ea-epic-picker"></span>
   </p>
-  <script type="application/json" id="ea-epic-picker-data"><%= data.to_json.html_safe %></script>
+  <script type="application/json" id="ea-epic-picker-data"><%= json_escape(data.to_json).html_safe %></script>
 <% end %>
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag 'expert_agile_epic_picker', :plugin => 'redmine_expert_agile' %>

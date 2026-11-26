@@ -80,7 +80,8 @@ it) / `CHANGELOG.de.md` (DE).
   virgin database.
 - **No inline `<script>`.** Views render markup only; Ruby→JS data crosses through a JSON island
   (`<script type="application/json" id="ea-...">`) read by a static asset. The board must work
-  under `script-src 'self'`.
+  under `script-src 'self'`. An island is written as `json_escape(... .to_json).html_safe`, so a
+  subject containing `</script>` cannot end it, whatever `escape_html_entities_in_json` says.
 - **Add the next migration number when changing schema; never edit a shipped migration.**
 - **Plain `def ... end`** — Redmine 5.x still runs on Ruby 2.7, where endless method definitions
   are a syntax error.

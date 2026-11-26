@@ -43,7 +43,8 @@ Redmine checkout — no Gemfile or `rake` at the repo root. Redmine comes from a
 6. **No global monkeypatching** — no mixing into `ActiveRecord::Base` or `ApplicationController`.
 7. **Never touch the DB connection at load time.**
 8. **No inline `<script>`.** Views render markup only; pass data via a JSON island read by a
-   static asset. Must work under `script-src 'self'`.
+   static asset. Must work under `script-src 'self'`. Write an island as
+   `json_escape(... .to_json).html_safe`, so a subject containing `</script>` cannot end it.
 9. **Add the next migration number; never edit a shipped migration.** Pin
    `ActiveRecord::Migration[6.1]`.
 10. **Plain `def ... end`** — Redmine 5.x runs on Ruby 2.7, where endless methods are a syntax
