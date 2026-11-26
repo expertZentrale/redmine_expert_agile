@@ -93,18 +93,22 @@ module RedmineExpertAgile
                     .pluck("#{Issue.table_name}.root_id", "#{Issue.table_name}.lft",
                            "#{Issue.table_name}.rgt", "#{IssueStatus.table_name}.is_closed",
                            'ead.story_points')
-        # Each epic only looks at the rows of its own tree, so the work grows
-        # with the issues below the epics, not with epics times issues.
-        by_root = rows.group_by(&:first)
-        closed_cast = ActiveModel::Type::Boolean.new
+        # Below an epic lies exactly what its tree numbers between the epic's
+        # lft and rgt. So each tree's rows are sorted by lft once and summed
+        # up as they go; an epic's numbers are then the difference of two
+        # running totals, found by binary search. However many epics share a
+        # tree, nothing is scanned twice.
+        trees = rows.group_by(&:first).transform_values { |tree| running_totals(tree) }
         epics.each do |epic|
           epic_root, epic_lft, epic_rgt = bounds[epic.id]
-          next if epic_root.nil?
+          tree = trees[epic_root]
+          next if tree.nil?
 
-          inside = (by_root[epic_root] || []).select { |_, lft, rgt, _, _| lft > epic_lft && rgt < epic_rgt }
-          closed = inside.select { |row| closed_cast.cast(row[3]) }
-          result[epic.id] = Progress.new(inside.size, closed.size,
-                                         inside.sum { |row| row[4].to_i }, closed.sum { |row| row[4].to_i })
+          lfts, totals = tree
+          first = lfts.bsearch_index { |lft| lft > epic_lft } || lfts.size
+          stop = lfts.bsearch_index { |lft| lft >= epic_rgt } || lfts.size
+          below = totals[stop].zip(totals[first]).map { |upto, before| upto - before }
+          result[epic.id] = Progress.new(*below)
         end
         result
       end
@@ -166,6 +170,25 @@ module RedmineExpertAgile
           result[issue.id] = above.max_by(&:lft)
         end
         result
+      end
+
+      private
+
+      # One tree's rows ([root, lft, rgt, closed, story points]) for
+      # `progress`: their lfts in order, and running totals where entry i
+      # holds the issues, closed issues, story points and closed story points
+      # of the first i rows.
+      def running_totals(rows)
+        closed_cast = ActiveModel::Type::Boolean.new
+        sorted = rows.sort_by { |row| row[1] }
+        totals = [[0, 0, 0, 0]]
+        sorted.each do |_, _, _, closed, points|
+          done = closed_cast.cast(closed) ? 1 : 0
+          points = points.to_i
+          count, closed_count, sum, closed_sum = totals.last
+          totals << [count + 1, closed_count + done, sum + points, closed_sum + (done * points)]
+        end
+        [sorted.map { |row| row[1] }, totals]
       end
     end
   end
