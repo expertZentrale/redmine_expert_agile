@@ -276,6 +276,52 @@ class IssuesIntegrationTest < Redmine::ControllerTest
     assert hrefs.any? { |href| href =~ %r{redmine_expert_agile/.*expert_agile[-.].*css} }, hrefs.inspect
   end
 
+  # Beside the progress, a link to add an issue under the epic that starts
+  # with a tracker that is no epic and comes back to the epic.
+  def test_an_epic_offers_to_add_an_issue_under_it
+    epic = Issue.generate!(:project => @project, :tracker_id => 2)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :show, :params => { :id => epic.id }
+    end
+
+    assert_response :success
+    link = css_select('.expert-agile-epic-progress a.expert-agile-epic-new-issue').first
+    assert link, 'no link to add an issue under the epic'
+    assert_includes link.text, l(:label_expert_agile_epic_new_issue, :tracker => Tracker.find(1).name)
+    query = Rack::Utils.parse_nested_query(URI.parse(link['href']).query)
+    assert_equal "/projects/#{@project.identifier}/issues/new", URI.parse(link['href']).path
+    assert_equal({ 'parent_issue_id' => epic.id.to_s, 'tracker_id' => '1' }, query['issue'])
+    assert_equal "/issues/#{epic.id}", query['back_url']
+  end
+
+  # A project that only plans in the backlog planner plans with epics too.
+  def test_an_epic_shows_its_progress_and_the_link_with_only_the_planner
+    @project.disable_module!(:expert_agile)
+    epic = Issue.generate!(:project => @project, :tracker_id => 2)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :show, :params => { :id => epic.id }
+    end
+
+    assert_response :success
+    assert_select '.expert-agile-epic-progress .ea-epic-progress'
+    assert_select '.expert-agile-epic-progress a.expert-agile-epic-new-issue'
+  end
+
+  def test_an_epic_offers_no_new_issue_to_a_user_who_may_not_set_the_parent_task
+    epic = Issue.generate!(:project => @project, :tracker_id => 2)
+    Role.find(1).remove_permission!(:manage_subtasks)
+
+    with_agile_settings('epic_tracker_ids' => ['2']) do
+      get :show, :params => { :id => epic.id }
+    end
+
+    assert_response :success
+    assert_select '.expert-agile-epic-progress'
+    assert_select '.expert-agile-epic-new-issue', 0
+  end
+
   def test_an_ordinary_issue_shows_no_epic_progress
     with_agile_settings('epic_tracker_ids' => ['2']) do
       get :show, :params => { :id => @issue.id }

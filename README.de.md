@@ -182,6 +182,10 @@ Auswahl fuellt *Uebergeordnetes Ticket* aus, Speichern, Rechte und Historie blei
 gewohnt; wie dieses Feld braucht sie das Recht *Unteraufgaben verwalten*. Eine Unteraufgabe einer
 Story zeigt ihr Epic ohne Auswahl: Sie gehoert ueber die Story dazu, zum Verschieben das
 uebergeordnete Ticket aendern. Epics selbst bekommen keine Auswahl.
+Auf der Seite eines Epics oeffnet **Story hinzufuegen** (nach dem Tracker benannt) neben dem
+Fortschritt das Formular mit dem Epic als uebergeordnetem Ticket und dem ersten Tracker des Projekts,
+der kein Epic-Tracker ist; Redmines *Hinzufuegen* bei *Untergeordnete Tickets* beginnt dagegen mit dem
+Tracker des Epics. Danach geht es zurueck zum Epic.
 
 ![Formular "Neues Ticket" mit geoeffneter Epic-Auswahl unter "Uebergeordnetes Ticket": ein
 Suchfeld, "Kein Epic" und die offenen Epics des Projekts, jedes mit Farbe, Nummer und einem

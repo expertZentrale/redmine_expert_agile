@@ -163,6 +163,9 @@ by title or number as you type and offers *No epic* at the top. Picking an epic 
 task*, so saving, permissions and the history work as before; like that field, it needs the
 *Manage subtasks* permission. A subtask of a story shows its epic without a choice: it belongs to
 the epic through the story, so change the parent task to move it. Epics themselves get no picker.
+On an epic's own page, **Add Story** (named after the tracker) beside its progress opens the form
+with the epic as parent task and the project's first tracker that is no epic tracker — Redmine's
+*Add* under *Subtasks* starts with the epic's own tracker instead. It returns to the epic.
 
 ![New issue form with the Epic picker open under Parent task: a search field, "No epic" and the
 project's open epics, each with its colour, number and a progress bar with the issues done, such

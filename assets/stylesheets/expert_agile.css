@@ -845,6 +845,7 @@
 }
 .expert-agile-epic-progress .ea-epic-progress { margin-left: 0; }
 .expert-agile-epic-progress-detail { margin-left: 8px; color: #777; }
+.expert-agile-epic-progress .expert-agile-epic-new-issue { margin-left: 14px; white-space: nowrap; }
 
 /* --- Place in the tree -------------------------------------------------
  * Under the epic badge, a story's subtask names its story; a story lists

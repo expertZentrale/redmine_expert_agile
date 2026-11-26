@@ -19,6 +19,16 @@ notes from the section matching the pushed tag.
   number, and *No epic*. Picking one fills in *Parent task*, so saving, permissions (*Manage
   subtasks*) and the history stay Redmine's. A subtask of a story shows its epic without a choice,
   since it belongs to the epic through the story; an epic gets no picker. No migration, no setting.
+- **Add an issue under an epic from its page.** Beside an epic's progress, *Add Story* (named after
+  the tracker) opens the issue form with the epic as parent task and the project's first tracker
+  that is no epic tracker and that you may add issues with; Redmine's own *Add* under *Subtasks*
+  starts with the epic's tracker. It comes back to the epic. Shown to users who may add issues and
+  manage subtasks.
+
+### Changed
+
+- **An epic's progress on its page** now also shows in projects that plan with the backlog planner
+  only, like the epic picker; it used to need the Agile board module.
 
 ## [0.13.0] - 2026-11-25
 

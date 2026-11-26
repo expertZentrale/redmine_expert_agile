@@ -173,6 +173,7 @@ fr:
   label_expert_agile_epic_progress: "Progression"
   label_expert_agile_epic_progress_issues: "Demandes terminées : %{closed}/%{total}"
   label_expert_agile_epic_progress_points: "Story points terminés : %{closed}/%{total}"
+  label_expert_agile_epic_new_issue: "Ajouter : %{tracker}"
   label_expert_agile_subtasks: "Sous-tâches"
   label_expert_agile_subtasks_done: "Sous-tâches terminées : %{closed}/%{total}"
   label_expert_agile_story_arrow: "↳"

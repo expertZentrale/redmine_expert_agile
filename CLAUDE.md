@@ -312,6 +312,8 @@ narrowed by core's `valid_parent_project?`, and `expert_agile_epic_picker.js` on
 picker from the server. Never save the epic through a path of our own. An issue under a non-epic parent only
 shows its epic (`via`), as `Epics.lane_refusal` refuses such a card. The partial brings its assets
 wherever epics are on, because core swaps the form without a page load when tracker or project change.
+The epic page's *Add <tracker>* link (`Epics.new_issue_tracker`: first tracker of `Issue.allowed_target_trackers`
+that is no epic and keeps `parent_issue_id`, only with `add_issues` + `manage_subtasks`) opens core's form.
 Completing a sprint is `RedmineExpertAgile::SprintCompletion` (`ExpertAgileSprintsController#complete`):
 open issues move like a planner move (journaled, `manage_expert_agile_backlog`, the issue's own
 validation), then the sprint closes and the target may be activated — one transaction; a single

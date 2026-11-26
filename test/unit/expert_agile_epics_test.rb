@@ -156,6 +156,55 @@ class ExpertAgileEpicsTest < ActiveSupport::TestCase
     assert_equal [2, 0, 0, 0], progress[second.id].to_a
   end
 
+  # --- A new issue under an epic -------------------------------------------
+
+  def new_issue_tracker(user = User.find(2))
+    with_agile_settings('epic_tracker_ids' => [EPIC_TRACKER.to_s]) do
+      RedmineExpertAgile::Epics.new_issue_tracker(@epic, user)
+    end
+  end
+
+  # Redmine's order, without the epic tracker: Bug before Support request.
+  def test_a_new_issue_under_an_epic_starts_with_the_first_tracker_that_is_no_epic
+    assert_equal Tracker.find(1), new_issue_tracker
+  end
+
+  def test_a_new_issue_starts_with_a_tracker_the_user_may_add_issues_with
+    role = Role.find(1)
+    role.permissions_all_trackers = { 'add_issues' => '0' }
+    role.permissions_tracker_ids = { 'add_issues' => ['3'] }
+    role.save!
+
+    assert_equal Tracker.find(3), new_issue_tracker
+  end
+
+  # Without the parent task field the issue would not land under the epic.
+  def test_a_tracker_without_the_parent_task_field_is_skipped
+    bug = Tracker.find(1)
+    bug.core_fields = bug.core_fields - ['parent_issue_id']
+    bug.save!
+
+    assert_equal Tracker.find(3), new_issue_tracker
+  end
+
+  def test_no_tracker_for_a_user_who_may_not_set_the_parent_task
+    Role.find(1).remove_permission!(:manage_subtasks)
+
+    assert_nil new_issue_tracker
+  end
+
+  def test_no_tracker_for_a_user_who_may_not_add_issues
+    Role.find(1).remove_permission!(:add_issues)
+
+    assert_nil new_issue_tracker
+  end
+
+  def test_no_tracker_where_the_project_has_only_epic_trackers
+    @project.trackers = [Tracker.find(EPIC_TRACKER)]
+
+    assert_nil new_issue_tracker
+  end
+
   # --- Hierarchy -------------------------------------------------------
 
   def test_children_and_parents_come_for_a_whole_list_at_once
