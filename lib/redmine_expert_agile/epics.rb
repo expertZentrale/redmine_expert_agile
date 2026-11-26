@@ -93,12 +93,16 @@ module RedmineExpertAgile
                     .pluck("#{Issue.table_name}.root_id", "#{Issue.table_name}.lft",
                            "#{Issue.table_name}.rgt", "#{IssueStatus.table_name}.is_closed",
                            'ead.story_points')
+        # Each epic only looks at the rows of its own tree, so the work grows
+        # with the issues below the epics, not with epics times issues.
+        by_root = rows.group_by(&:first)
+        closed_cast = ActiveModel::Type::Boolean.new
         epics.each do |epic|
           epic_root, epic_lft, epic_rgt = bounds[epic.id]
           next if epic_root.nil?
 
-          inside = rows.select { |root, lft, rgt, _, _| root == epic_root && lft > epic_lft && rgt < epic_rgt }
-          closed = inside.select { |row| ActiveModel::Type::Boolean.new.cast(row[3]) }
+          inside = (by_root[epic_root] || []).select { |_, lft, rgt, _, _| lft > epic_lft && rgt < epic_rgt }
+          closed = inside.select { |row| closed_cast.cast(row[3]) }
           result[epic.id] = Progress.new(inside.size, closed.size,
                                          inside.sum { |row| row[4].to_i }, closed.sum { |row| row[4].to_i })
         end

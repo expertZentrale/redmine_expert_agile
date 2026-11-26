@@ -177,7 +177,7 @@ als eigene Abfrage speichern.
 
 In denselben Projekten bekommt das **Ticketformular** direkt unter *Uebergeordnetes Ticket* eine
 **Epic**-Auswahl. Sie listet die offenen Epics des Projekts und seiner Unterprojekte mit Farbe und
-Fortschritt, findet beim Tippen eines nach Titel oder Nummer und bietet ganz oben *Kein Epic*. Die
+Fortschritt, filtert sie beim Tippen nach Titel oder Nummer und bietet ganz oben *Kein Epic*. Die
 Auswahl fuellt *Uebergeordnetes Ticket* aus, Speichern, Rechte und Historie bleiben also wie
 gewohnt; wie dieses Feld braucht sie das Recht *Unteraufgaben verwalten*. Eine Unteraufgabe einer
 Story zeigt ihr Epic ohne Auswahl: Sie gehoert ueber die Story dazu, zum Verschieben das
