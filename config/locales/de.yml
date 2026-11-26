@@ -173,6 +173,7 @@ de:
   label_expert_agile_epic_progress: Fortschritt
   label_expert_agile_epic_progress_issues: "Erledigte Tickets: %{closed}/%{total}"
   label_expert_agile_epic_progress_points: "Erledigte Story Points: %{closed}/%{total}"
+  label_expert_agile_epic_new_issue: "%{tracker} hinzufügen"
   label_expert_agile_subtasks: Unteraufgaben
   label_expert_agile_subtasks_done: "Erledigte Unteraufgaben: %{closed}/%{total}"
   label_expert_agile_story_arrow: "↳"

@@ -58,7 +58,8 @@ module RedmineExpertAgile
       nil
     end
 
-    # Story points in the issue attribute table, and an epic's progress.
+    # Story points in the issue attribute table, and an epic's progress with
+    # a link to add an issue under it.
     def view_issues_show_details_bottom(context = {})
       issue = context[:issue]
       caller = context[:hook_caller]
@@ -69,7 +70,9 @@ module RedmineExpertAgile
       end
       if agile_issue?(issue) && RedmineExpertAgile::Epics.epic?(issue)
         out << caller.send(:render, :partial => 'issues/expert_agile_epic_progress',
-                                    :locals => { :progress => RedmineExpertAgile::Epics.progress([issue])[issue.id] })
+                                    :locals => { :epic => issue,
+                                                 :progress => RedmineExpertAgile::Epics.progress([issue])[issue.id],
+                                                 :new_tracker => RedmineExpertAgile::Epics.new_issue_tracker(issue) })
       end
       out
     end

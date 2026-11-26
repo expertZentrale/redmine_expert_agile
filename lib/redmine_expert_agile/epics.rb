@@ -64,6 +64,23 @@ module RedmineExpertAgile
              .where(:project_id => project.self_and_descendants.select(:id))
       end
 
+      # The tracker a new issue under an epic starts with: the first of the
+      # epic's project, in Redmine's order, that is no epic tracker, that the
+      # user may add issues with, and that keeps the parent task field. Nil
+      # where there is none, or where the user may not add issues or set a
+      # parent task there, since the parent would then be dropped.
+      #
+      # Redmine's own "add subtask" link starts with the parent's tracker,
+      # which on an epic is another epic.
+      def new_issue_tracker(epic, user = User.current)
+        project = epic.project
+        return nil unless user.allowed_to?(:add_issues, project) && user.allowed_to?(:manage_subtasks, project)
+
+        Issue.allowed_target_trackers(project, user)
+             .where.not(:id => tracker_ids)
+             .detect { |tracker| !tracker.disabled_core_fields.include?('parent_issue_id') }
+      end
+
       # {epic_id => progress} for every given epic, in one query.
       #
       # Counts everything below the epic except epics — stories, their

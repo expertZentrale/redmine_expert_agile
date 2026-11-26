@@ -1,6 +1,8 @@
 <%# An epic's progress in its attribute table: everything below it, done.
     Markup of the board's progress bar, written out because the issue page
-    does not carry the board's helpers. %>
+    does not carry the board's helpers. Beside it, a link to add an issue
+    under the epic with a tracker that is no epic (Epics.new_issue_tracker);
+    like Redmine's own subtask link, it comes back to the epic. %>
 <div class="attribute expert-agile-epic-progress">
   <div class="label"><%= l(:label_expert_agile_epic_progress) %>:</div>
   <div class="value">
@@ -9,6 +11,14 @@
       <span class="ea-epic-progress-text"><%= progress.percent %> %</span>
     </span>
     <span class="expert-agile-epic-progress-detail"><%= progress.title %></span>
+    <% if new_tracker %>
+      <% label = l(:label_expert_agile_epic_new_issue, :tracker => new_tracker.name) %>
+      <%= link_to (respond_to?(:sprite_icon) ? sprite_icon('add', label) : label),
+                  new_project_issue_path(epic.project,
+                                         :issue => { :parent_issue_id => epic.id, :tracker_id => new_tracker.id },
+                                         :back_url => issue_path(epic)),
+                  :class => 'icon icon-add expert-agile-epic-new-issue' %>
+    <% end %>
   </div>
 </div>
 <% content_for :header_tags do %>

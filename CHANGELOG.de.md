@@ -20,6 +20,12 @@ Release-Workflow die Release-Notes. Diese Datei ist die deutsche Spiegelung.
   Speichern, Rechte (*Unteraufgaben verwalten*) und Historie bleiben also Redmines. Eine
   Unteraufgabe einer Story zeigt ihr Epic ohne Auswahl, weil sie ueber die Story dazugehoert; ein
   Epic bekommt keine Auswahl. Keine Migration, keine Einstellung.
+- **Ticket unter einem Epic von dessen Seite aus anlegen.** Neben dem Fortschritt eines Epics
+  oeffnet *Story hinzufuegen* (nach dem Tracker benannt) das Ticketformular mit dem Epic als
+  uebergeordnetem Ticket und dem ersten Tracker des Projekts, der kein Epic-Tracker ist und mit dem
+  man Tickets anlegen darf; Redmines eigenes *Hinzufuegen* bei *Untergeordnete Tickets* beginnt mit
+  dem Tracker des Epics. Danach geht es zurueck zum Epic. Sichtbar fuer alle, die Tickets anlegen
+  und Unteraufgaben verwalten duerfen.
 
 ## [0.13.0] - 2026-11-25
 
